@@ -624,27 +624,14 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                           borderRadius: BorderRadius.circular(23),
                           onTap: showActivationDialog,
                           child: Center(
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Text(
-                                  "Unlock & Start 30-Day Plan",
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const Positioned(
-                                  right: 18,
-                                  child: Icon(
-                                    Icons.offline_bolt_rounded,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                ),
-                              ],
+                            child: Text(
+                              "Unlock & Start 30-Day Plan",
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ),

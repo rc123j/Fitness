@@ -272,27 +272,14 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                           );
                         },
                         child: Center(
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Text(
-                                "Continue",
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              const Positioned(
-                                right: 16,
-                                child: Icon(
-                                  Icons.arrow_forward_rounded,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ),
-                            ],
+                          child: Text(
+                            "Continue",
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
                       ),
