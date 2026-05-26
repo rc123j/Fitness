@@ -1,0 +1,543 @@
+Diet, Nutrition & Sports Supplementation
+Platform — Complete Updated Product
+Documentation
+Project Vision
+Build a premium AI-driven Diet, Nutrition, Fitness, and Sports Supplementation ecosystem focused on:
+• Personalized health transformation
+• Monthly adaptive diet planning
+• Smart nutrition recommendations
+• Real-time progress tracking
+• Family wellness management
+• Gamification and retention
+• Community engagement
+• Expert consultations
+The platform should emotionally motivate users while simplifying diet adherence and long-term
+consistency.
+The experience should feel like:
+• MyFitnessPal
+• HealthifyMe
+• Fitbit
+• Cult Fit
+But:
+• More personalized
+• More premium
+• More community-driven
+• More gamified
+• More retention-focused
+
+Technology Stack
+Mobile Application
+• Flutter
+• GetX
+
+1
+
+• get_storage
+• get_cli
+
+Backend
+• Node.js
+• Express.js
+• Sequelize ORM
+• MySQL
+
+Admin Panel
+• Flutter Responsive Admin Panel
+
+Third Party Services
+• OneSignal Push Notifications
+• Agora Video SDK
+• Razorpay
+• Stripe
+• AWS S3 / Cloudinary
+• Firebase Analytics
+• Firebase Crashlytics
+
+Core Product Flow
+1. User installs app
+2. Registers/login
+3. Completes health onboarding
+4. Generates screening report
+5. Purchases personalized plan
+6. Starts plan whenever convenient
+7. Plan becomes active for 30 days from activation
+8. User follows meals and reminders
+9. Tracks progress daily
+10. Receives rewards and gamification points
+11. Re-checks weight after 30 days
+12. New adaptive plan generated according to progress
+13. Automatic expert consultation triggered if no progress observed
+
+2
+
+Important Business Logic
+Personalized Plan Activation System
+Flow
+• Diet plans are NOT auto-started immediately after purchase.
+• User can start the generated plan anytime according to their convenience.
+• Once the user taps: "Start My Plan" the 30-day duration begins.
+
+Plan Validity
+• Every generated plan remains active for 30 days only.
+• Timer should be visible on dashboard.
+• Countdown indicator:
+• Days left
+• Completion percentage
+
+Plan Renewal
+• After 30 days:
+• User must check updated weight
+• User must update progress data
+• New plan gets generated dynamically according to progress
+
+Pricing Model (Updated)
+Remove Traditional Membership Plans
+Do NOT use:
+• Monthly subscription
+• Quarterly subscription
+• Yearly subscription
+Instead use:
+
+Per Plan Pricing Model
+Example
+• One personalized 30-day plan = ₹X
+
+3
+
+Benefits
+• Easier onboarding
+• More transparent pricing
+• Better family expansion model
+• Better retention logic
+
+Family Module Business Logic
+Family Add-On System
+Users can:
+• Add wife
+• Husband
+• Parents
+• Children
+• Siblings
+Each member gets:
+• Separate assessment
+• Separate diet plan
+• Separate reminders
+• Separate progress tracking
+
+Discount Logic
+Example:
+• Primary member plan = ₹X
+• Additional family member = discounted price
+Benefits:
+• Encourages multi-user onboarding
+• Improves retention
+• Increases lifetime value
+
+4
+
+Monthly Progress Evaluation System
+Mandatory Progress Check
+At the end of every 30-day cycle:
+• User MUST update:
+• Current weight
+• Waist inches
+• Progress photos (optional)
+System compares:
+• Old vs new weight
+• Inches lost/gained
+• BMI changes
+• Fat loss estimate
+
+Achievement Celebration System
+Show emotional motivational messages.
+Examples:
+
+Weight Loss
+"Hurray! You lost 2 kg of body fat!"
+
+Inch Loss
+"Amazing! You reduced 2 inches from your waist."
+
+Consistency
+"You completed 92% of your meal schedule this month!"
+
+Streaks
+"You're on a 21-day nutrition streak!"
+
+5
+
+Use:
+• Confetti animations
+• Reward coins
+• Achievement badges
+• Progress graphs
+
+Smart Retention & Consultation Logic
+No Progress Detection
+If after 30 days:
+• Weight remains unchanged OR
+• Progress extremely low
+Then:
+
+Automatically:
+• Book consultation slot suggestion
+• Notify user
+• Escalate to expert dashboard
+
+User Notification Example
+"We value your money and the hard work you put in to earn it. We don't want your efforts to go waste. We
+have scheduled a free consultation with our health expert so we can guide you personally and improve your
+results."
+
+Consultation Features
+• One-to-one expert guidance
+• Free review session
+• Personalized corrections
+• Plan optimization
+This becomes a major trust-building feature.
+
+6
+
+Adaptive Diet Engine
+Monthly Dynamic Plan Generation
+Every month:
+• Plans should change dynamically.
+• Meal structure should adapt according to:
+• User progress
+• Weight changes
+• Goal completion
+• Compliance score
+• Food preferences
+
+Example
+Month 1:
+• Basic calorie deficit
+Month 2:
+• Increased protein
+• Different meal combinations
+• Modified calories
+Month 3:
+• Advanced optimization
+• Plateau handling
+This avoids:
+• Diet boredom
+• User drop-off
+• Repetitive meals
+
+Social Room Module
+Community Engagement System
+Create a dedicated section:
+
+7
+
+Social Room
+Users can:
+• Share success stories
+• Upload transformation photos
+• Post achievements
+• Share diet journey
+• Motivate others
+
+Social Room Features
+Post Types
+• Transformation story
+• Weight loss achievement
+• Workout update
+• Meal prep photo
+• Motivation post
+
+Interactions
+Users can:
+• Like posts
+• Comment
+• Share posts
+• Follow users
+
+Social Sharing
+User can share their achievement externally:
+• WhatsApp
+• Instagram
+• Facebook
+• X (Twitter)
+• Email
+
+8
+
+Viral Growth Strategy
+Every shared achievement should contain:
+• User transformation summary
+• App branding
+• Download CTA
+Example: "I lost 5 kg using FitFuel AI Nutrition App!"
+This creates organic growth.
+
+9
+
+Main Mobile Application Modules
+Splash Screen
+Authentication
+User Onboarding
+Health Assessment
+Screening Report
+Smart Meal Planner
+Supplement Recommendation
+Smart Reminder System
+Progress Tracking
+Gamification
+Wallet & Rewards
+Family Management
+Consultation Booking
+Video Calling
+Notifications
+Health Tips
+Social Room
+Reports & Sharing
+Profile & Settings
+
+10
+
+Health Assessment Engine
+Generate:
+• BMI
+• BMR
+• IBW
+• %IBW
+• TDEE
+Classify:
+• Underweight
+• Normal
+• Overweight
+• Obese
+Generate:
+• Color coded report
+• Suggestions
+• Graphs
+• Goal recommendation
+
+Smart Meal Planner
+Generate:
+• Breakfast
+• Mid meal
+• Lunch
+• Evening snack
+• Dinner
+• Water intake
+Every item contains:
+• Food name
+• Calories
+• Protein
+• Carbs
+• Fat
+• Fiber
+• Quantity
+• Timing
+
+11
+
+Features:
+• Replace food
+• Skip food
+• Edit quantity
+• Auto nutrition recalculation
+• Save favorites
+
+Supplement Recommendation Engine
+Suggest according to:
+• Goal
+• Diet type
+• Workout intensity
+• Deficiency
+Examples:
+• Whey protein
+• Creatine
+• Fish oil
+• Multivitamin
+• Electrolytes
+
+Smart Reminder Engine
+Examples: "Hey Rakesh, consume 2 egg whites now."
+Reminder types:
+• Meal reminders
+• Water reminders
+• Supplement reminders
+• Weight check reminders
+• Progress upload reminders
+Features:
+• Mark completed
+• Snooze
+• Auto repeat
+
+12
+
+Gamification System
+Features:
+• Daily streaks
+• XP points
+• Reward wallet
+• Achievement badges
+• Meal completion score
+• Leaderboards
+Wallet redemption:
+• Plan discounts
+• Consultation discounts
+
+Progress Tracking
+Track:
+• Weight
+• Inches
+• BMI history
+• Compliance
+• Water intake
+• Meal adherence
+• Streak history
+Charts:
+• Weekly
+• Monthly
+• Yearly
+
+Consultation System
+Users can:
+• Book appointments
+• Join video consultation
+• Pay consultation fees
+• Receive expert advice
+
+13
+
+Experts can:
+• Accept/reject slots
+• Add notes
+• Modify plan recommendations
+Use:
+• Agora SDK
+
+Social Room Screens
+Feed Screen
+• Trending stories
+• Recent achievements
+• Transformation highlights
+
+Create Post Screen
+• Upload images
+• Add caption
+• Share achievement
+
+User Profile Social Tab
+• User posts
+• Likes
+• Followers
+
+14
+
+Admin Panel Modules
+Dashboard Analytics
+User Management
+Family Management
+Meal Plan Management
+Formula Configuration
+Supplement Management
+Reminder Engine
+Consultation Management
+Reward Configuration
+Social Room Moderation
+Push Notification Management
+Reports & Analytics
+
+Admin Analytics
+Track:
+• Active users
+• Active plans
+• Renewal percentage
+• User retention
+• Weight loss achievements
+• Most successful plans
+• Revenue analytics
+• Family plan conversions
+• Social engagement analytics
+
+15
+
+Backend Requirements
+• REST APIs
+• JWT Authentication
+• Refresh Tokens
+• RBAC
+• Swagger APIs
+• Cron jobs
+• Notification queue
+• Reminder scheduler
+• Formula engine
+• Dynamic recommendation engine
+• Social room APIs
+
+Database Modules
+• users
+• family_members
+• meal_plans
+• active_plans
+• plan_history
+• food_items
+• supplements
+• rewards
+• wallets
+• reminders
+• consultations
+• appointments
+• social_posts
+• social_likes
+• social_comments
+• notifications
+• progress_logs
+• transactions
+• formula_configurations
+
+UX Design Philosophy
+The application should:
+• Emotionally motivate users
+• Build long-term consistency
+
+16
+
+• Reward discipline
+• Reduce diet frustration
+• Increase retention
+• Encourage community participation
+The UX should feel:
+• Premium
+• Motivational
+• Scientific
+• Human
+• Easy to use
+
+Recommended Future Features
+AI Nutrition Coach
+Barcode Scanner
+Wearable Integration
+AI Food Image Recognition
+Marketplace
+Smart Grocery Suggestions
+Recipe Generator
+AI Chat Assistant
+
+Final Product Goal
+Create a scalable fitness-tech SaaS platform where:
+• Users stay consistent
+• Users see measurable transformation
+• Users trust the platform
+• Users invite family members
+• Users share success stories publicly
+
+17
+
+• Experts can guide users effectively
+• Retention naturally increases through personalization and community
+The core strength of the platform should become:
+• Personalized adaptive nutrition
+• Emotional engagement
+• Community motivation
+• Progress visibility
+• Smart retention automation
+
+18
+
+
