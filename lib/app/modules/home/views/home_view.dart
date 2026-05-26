@@ -182,45 +182,33 @@ class HomeView extends GetView<HomeController> {
                   const SizedBox(height: 28),
 
                   /// 6. PROGRESS & STREAK SECTION
-                  Row(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      /// LEFT: YOUR PROGRESS (Flex 11)
-                      Expanded(
-                        flex: 11,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            sectionTitle("YOUR PROGRESS", "View All"),
-                            const SizedBox(height: 14),
-                            buildWeightProgressCard(),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(child: buildInchesLostCard()),
-                                const SizedBox(width: 12),
-                                Expanded(child: buildConsistencyCard()),
-                              ],
-                            ),
-                          ],
-                        ),
+                      sectionTitle("YOUR PROGRESS", "View All"),
+                      const SizedBox(height: 14),
+                      buildWeightProgressCard(),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(child: buildInchesLostCard()),
+                          const SizedBox(width: 12),
+                          Expanded(child: buildConsistencyCard()),
+                        ],
                       ),
-                      const SizedBox(width: 16),
+                    ],
+                  ),
 
-                      /// RIGHT: STREAK & REWARDS (Flex 9)
-                      Expanded(
-                        flex: 9,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            sectionTitle("STREAK", "View All"),
-                            const SizedBox(height: 14),
-                            buildStreakAndRewardsCard(),
-                            const SizedBox(height: 12),
-                            buildBadgesCard(),
-                          ],
-                        ),
-                      ),
+                  const SizedBox(height: 28),
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      sectionTitle("STREAK", "View All"),
+                      const SizedBox(height: 14),
+                      buildStreakAndRewardsCard(),
+                      const SizedBox(height: 12),
+                      buildBadgesCard(),
                     ],
                   ),
 
