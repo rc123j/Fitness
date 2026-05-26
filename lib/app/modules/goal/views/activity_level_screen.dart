@@ -30,14 +30,16 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
   final List<Map<String, dynamic>> activityLevels = [
     {
       "title": "Sedentary",
-      "desc": "Little to no regular physical activity. Desk job, reading or sitting.",
+      "desc":
+          "Little to no regular physical activity. Desk job, reading or sitting.",
       "multiplier": 1.2,
       "icon": Icons.airline_seat_recline_normal_rounded,
       "color": const Color(0xffFF5F6D),
     },
     {
       "title": "Lightly Active",
-      "desc": "Light exercise or sports 1-3 days per week. Light walking, gardening.",
+      "desc":
+          "Light exercise or sports 1-3 days per week. Light walking, gardening.",
       "multiplier": 1.375,
       "icon": Icons.directions_walk_rounded,
       "color": const Color(0xffFF7A00),
@@ -51,14 +53,16 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
     },
     {
       "title": "Very Active",
-      "desc": "Hard exercise, high-intensity training, or sports 6-7 days per week.",
+      "desc":
+          "Hard exercise, high-intensity training, or sports 6-7 days per week.",
       "multiplier": 1.725,
       "icon": Icons.fitness_center_rounded,
       "color": const Color(0xff7B61FF),
     },
     {
       "title": "Extra Active",
-      "desc": "Extremely hard daily training/sports & physical job (e.g. athlete, construction).",
+      "desc":
+          "Extremely hard daily training/sports & physical job (e.g. athlete, construction).",
       "multiplier": 1.9,
       "icon": Icons.bolt_rounded,
       "color": const Color(0xff00E5FF),
@@ -188,14 +192,15 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                             fontSize: 32,
                             fontWeight: FontWeight.w900,
                             foreground: Paint()
-                              ..shader = const LinearGradient(
-                                colors: [
-                                  Color(0xffFF7A00),
-                                  Color(0xffC026D3),
-                                ],
-                              ).createShader(
-                                const Rect.fromLTWH(0.0, 0.0, 200.0, 50.0),
-                              ),
+                              ..shader =
+                                  const LinearGradient(
+                                    colors: [
+                                      Color(0xffFF7A00),
+                                      Color(0xffC026D3),
+                                    ],
+                                  ).createShader(
+                                    const Rect.fromLTWH(0.0, 0.0, 200.0, 50.0),
+                                  ),
                           ),
                         ),
                       ],
@@ -254,15 +259,17 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                         borderRadius: BorderRadius.circular(24),
                         onTap: () {
                           final selectedLevel = activityLevels[selectedIndex];
-                          Get.to(() => ScreeningReportScreen(
-                            goalTitle: widget.goalTitle,
-                            gender: widget.gender,
-                            age: widget.age,
-                            height: widget.height,
-                            weight: widget.weight,
-                            activityLevelName: selectedLevel["title"],
-                            activityMultiplier: selectedLevel["multiplier"],
-                          ));
+                          Get.to(
+                            () => ScreeningReportScreen(
+                              goalTitle: widget.goalTitle,
+                              gender: widget.gender,
+                              age: widget.age,
+                              height: widget.height,
+                              weight: widget.weight,
+                              activityLevelName: selectedLevel["title"],
+                              activityMultiplier: selectedLevel["multiplier"],
+                            ),
+                          );
                         },
                         child: Center(
                           child: Stack(
@@ -354,7 +361,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
         ),
         child: Container(
           margin: const EdgeInsets.all(1.5),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 26),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18.5),
             color: const Color(0xff090918),
@@ -405,7 +412,10 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5,
+                            vertical: 1.5,
+                          ),
                           decoration: BoxDecoration(
                             color: themeColor.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(6),
