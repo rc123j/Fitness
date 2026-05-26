@@ -263,7 +263,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                             color: Colors.white.withOpacity(0.03),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.05),
+                              color: Colors.white.withOpacity(0.12),
                               width: 0.8,
                             ),
                           ),
@@ -432,6 +432,10 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
         curve: Curves.easeInOut,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.12),
+            width: 0.8,
+          ),
           gradient: isSelected
               ? const LinearGradient(
                   begin: Alignment.topLeft,
@@ -548,6 +552,10 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
         curve: Curves.easeInOut,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.12),
+            width: 0.8,
+          ),
           gradient: isSelected
               ? const LinearGradient(
                   begin: Alignment.topLeft,

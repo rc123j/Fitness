@@ -341,6 +341,10 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
         curve: Curves.easeInOut,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.12),
+            width: 0.8,
+          ),
           gradient: isSelected
               ? const LinearGradient(
                   begin: Alignment.topLeft,

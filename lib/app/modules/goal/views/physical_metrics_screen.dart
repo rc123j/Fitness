@@ -371,7 +371,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
               : null,
           color: isSelected ? null : Colors.white.withOpacity(0.03),
           border: Border.all(
-            color: isSelected ? activeColor.withOpacity(0.8) : Colors.white.withOpacity(0.05),
+            color: isSelected ? activeColor.withOpacity(0.8) : Colors.white.withOpacity(0.12),
             width: 1.2,
           ),
           boxShadow: isSelected
@@ -451,7 +451,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
             color: Colors.white.withOpacity(0.03),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withOpacity(0.12),
               width: 0.8,
             ),
           ),
