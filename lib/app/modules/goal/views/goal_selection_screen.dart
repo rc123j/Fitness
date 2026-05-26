@@ -94,11 +94,10 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
 
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                     /// 1. TOP PROGRESS BAR & SKIP
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -158,7 +157,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
 
                     /// 2. TITLE
                     Column(
@@ -202,7 +201,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 6),
                           Text(
                             "Choose your primary fitness goal and let our AI build your plan accordingly.",
                             style: GoogleFonts.inter(
@@ -214,7 +213,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                         ],
                       ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
 
                     /// 3. SECTION HEADER
                     Text(
@@ -227,7 +226,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
 
                     /// 4. GOAL CARDS GRID LAYOUT
                     Row(
@@ -237,7 +236,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                         Expanded(child: buildGoalCard(1)),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(child: buildGoalCard(2)),
@@ -245,10 +244,10 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                         Expanded(child: buildGoalCard(3)),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     buildHorizontalGoalCard(4),
 
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 10),
 
                     /// 5. AI PERSONALIZATION INFO CARD
                     ClipRRect(
@@ -257,8 +256,8 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
+                            horizontal: 18,
+                            vertical: 16,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.03),
@@ -271,32 +270,53 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                           child: Row(
                             children: [
                               Container(
-                                height: 38,
-                                width: 38,
+                                height: 48,
+                                width: 48,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  gradient: const LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      Color(0xff7B61FF),
-                                      Color(0xffFF00E5),
-                                    ],
+                                  borderRadius: BorderRadius.circular(14),
+                                  color: const Color(0xff090918),
+                                  border: Border.all(
+                                    color: const Color(0xff7B61FF).withOpacity(0.35),
+                                    width: 1.2,
                                   ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xff7B61FF).withOpacity(0.25),
+                                      blurRadius: 10,
+                                      spreadRadius: 1,
+                                    ),
+                                  ],
                                 ),
-                                child: const Icon(
-                                  Icons.memory_rounded,
-                                  color: Colors.white,
-                                  size: 20,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Opacity(
+                                      opacity: 0.4,
+                                      child: const Icon(
+                                        Icons.memory_rounded,
+                                        color: Color(0xffFF00E5),
+                                        size: 32,
+                                      ),
+                                    ),
+                                    Text(
+                                      "AI",
+                                      style: GoogleFonts.outfit(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(width: 14),
+                              const SizedBox(width: 16),
                               Expanded(
                                 child: Text(
                                   "Our AI will personalize your diet, workouts and recommendations based on your goal.",
                                   style: GoogleFonts.inter(
                                     color: Colors.white.withOpacity(0.75),
-                                    fontSize: 11,
+                                    fontSize: 12,
                                     height: 1.45,
                                   ),
                                 ),
@@ -307,7 +327,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 14),
+                    const Spacer(),
 
                     /// 6. CONTINUE BUTTON
                     Container(
@@ -369,15 +389,14 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                   ],
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
   }
 
   Widget buildProgress(bool active) {
@@ -420,7 +439,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                   colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
                 )
               : null,
-          color: isSelected ? null : Colors.white.withOpacity(0.03),
+          color: isSelected ? null : Colors.white.withOpacity(0.05),
           boxShadow: isSelected
               ? [
                   BoxShadow(
@@ -432,10 +451,10 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
               : [],
         ),
         child: Container(
-          margin: const EdgeInsets.all(1.2),
-          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.all(1.5),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18.8),
+            borderRadius: BorderRadius.circular(18.5),
             color: const Color(0xff090918),
           ),
           child: Column(
@@ -446,8 +465,8 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                 children: [
                   // Icon Backdrop Glow
                   Container(
-                    height: 44,
-                    width: 44,
+                    height: 48,
+                    width: 48,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
@@ -467,15 +486,15 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                     child: Icon(
                       goal["icon"] as IconData,
                       color: themeColor,
-                      size: 22,
+                      size: 24,
                     ),
                   ),
 
                   // Checkmark Badge
                   if (isSelected)
                     Container(
-                      height: 16,
-                      width: 16,
+                      height: 18,
+                      width: 18,
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.white,
@@ -483,26 +502,26 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                       child: const Icon(
                         Icons.check_rounded,
                         color: Colors.black,
-                        size: 11,
+                        size: 13,
                       ),
                     ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               Text(
                 goal["title"] as String,
                 style: GoogleFonts.outfit(
                   color: Colors.white,
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 goal["subtitle"] as String,
                 style: GoogleFonts.inter(
                   color: Colors.white.withOpacity(0.60),
-                  fontSize: 11,
+                  fontSize: 12,
                   height: 1.35,
                 ),
               ),
@@ -536,7 +555,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                   colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
                 )
               : null,
-          color: isSelected ? null : Colors.white.withOpacity(0.03),
+          color: isSelected ? null : Colors.white.withOpacity(0.05),
           boxShadow: isSelected
               ? [
                   BoxShadow(
@@ -548,18 +567,18 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
               : [],
         ),
         child: Container(
-          margin: const EdgeInsets.all(1.2),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          margin: const EdgeInsets.all(1.5),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18.8),
+            borderRadius: BorderRadius.circular(18.5),
             color: const Color(0xff090918),
           ),
           child: Row(
             children: [
               // Icon Backdrop Glow
               Container(
-                height: 44,
-                width: 44,
+                height: 48,
+                width: 48,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
@@ -579,10 +598,10 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                 child: Icon(
                   goal["icon"] as IconData,
                   color: themeColor,
-                  size: 22,
+                  size: 24,
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 16),
 
               Expanded(
                 child: Column(
@@ -592,16 +611,16 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                       goal["title"] as String,
                       style: GoogleFonts.outfit(
                         color: Colors.white,
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       goal["subtitle"] as String,
                       style: GoogleFonts.inter(
                         color: Colors.white.withOpacity(0.60),
-                        fontSize: 11,
+                        fontSize: 12,
                         height: 1.35,
                       ),
                     ),
@@ -612,8 +631,8 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
               // Checkmark Badge
               if (isSelected)
                 Container(
-                  height: 16,
-                  width: 16,
+                  height: 18,
+                  width: 18,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.white,
@@ -621,7 +640,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                   child: const Icon(
                     Icons.check_rounded,
                     color: Colors.black,
-                    size: 11,
+                    size: 13,
                   ),
                 ),
             ],

@@ -166,7 +166,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 14),
 
                   /// 2. TITLE & TEXT
                   RichText(
@@ -211,19 +211,20 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 14),
 
                   /// 3. ACTIVITY LEVELS LIST
-                  Expanded(
-                    child: ListView.separated(
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: activityLevels.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 10),
-                      itemBuilder: (context, index) => buildActivityCard(index),
-                    ),
-                  ),
+                  buildActivityCard(0),
+                  const SizedBox(height: 8),
+                  buildActivityCard(1),
+                  const SizedBox(height: 8),
+                  buildActivityCard(2),
+                  const SizedBox(height: 8),
+                  buildActivityCard(3),
+                  const SizedBox(height: 8),
+                  buildActivityCard(4),
 
-                  const SizedBox(height: 16),
+                  const Spacer(),
 
                   /// 4. CONTINUE BUTTON
                   Container(
@@ -340,11 +341,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                   colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
                 )
               : null,
-          color: isSelected ? null : Colors.white.withOpacity(0.03),
-          border: Border.all(
-            color: isSelected ? const Color(0xffFF00E5).withOpacity(0.8) : Colors.white.withOpacity(0.05),
-            width: 1.0,
-          ),
+          color: isSelected ? null : Colors.white.withOpacity(0.05),
           boxShadow: isSelected
               ? [
                   BoxShadow(
@@ -356,18 +353,18 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
               : [],
         ),
         child: Container(
-          margin: const EdgeInsets.all(1.2),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          margin: const EdgeInsets.all(1.5),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18.8),
+            borderRadius: BorderRadius.circular(18.5),
             color: const Color(0xff090918),
           ),
           child: Row(
             children: [
               // Icon Backdrop Glow
               Container(
-                height: 42,
-                width: 42,
+                height: 38,
+                width: 38,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
@@ -387,10 +384,10 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                 child: Icon(
                   activity["icon"] as IconData,
                   color: themeColor,
-                  size: 20,
+                  size: 18,
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
 
               Expanded(
                 child: Column(
@@ -402,13 +399,13 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                           activity["title"] as String,
                           style: GoogleFonts.outfit(
                             color: Colors.white,
-                            fontSize: 14,
+                            fontSize: 13.5,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                           decoration: BoxDecoration(
                             color: themeColor.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(6),
@@ -417,20 +414,20 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                             "x${activity["multiplier"]}",
                             style: GoogleFonts.outfit(
                               color: themeColor,
-                              fontSize: 10,
+                              fontSize: 9.5,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       activity["desc"] as String,
                       style: GoogleFonts.inter(
                         color: Colors.white.withOpacity(0.55),
-                        fontSize: 10.5,
-                        height: 1.35,
+                        fontSize: 10,
+                        height: 1.25,
                       ),
                     ),
                   ],
@@ -440,8 +437,8 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
               // Checkmark Badge
               if (isSelected)
                 Container(
-                  height: 18,
-                  width: 18,
+                  height: 16,
+                  width: 16,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.white,
@@ -449,7 +446,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                   child: const Icon(
                     Icons.check_rounded,
                     color: Colors.black,
-                    size: 12,
+                    size: 11,
                   ),
                 ),
             ],

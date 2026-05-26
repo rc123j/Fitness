@@ -291,16 +291,14 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
           ),
 
           SafeArea(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 10,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                     /// 1. TOP PROGRESS BAR & BACK BUTTON
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -353,7 +351,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 12),
 
                     /// 2. TITLE & TEXT
                     Text.rich(
@@ -404,7 +402,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 10),
 
                     /// 3. DYNAMIC METRIC GAUGE (Circular Visual)
                     Center(
@@ -413,8 +411,8 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                         children: [
                           // Glow backdrop
                           Container(
-                            height: 140,
-                            width: 140,
+                            height: 110,
+                            width: 110,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: bmiColor.withOpacity(0.03),
@@ -422,8 +420,8 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                           ),
                           // Custom semi-transparent ring
                           SizedBox(
-                            height: 130,
-                            width: 130,
+                            height: 100,
+                            width: 100,
                             child: CircularProgressIndicator(
                               value: (bmi / 40.0).clamp(0.0, 1.0),
                               strokeWidth: 8,
@@ -439,7 +437,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                 "YOUR BMI",
                                 style: GoogleFonts.outfit(
                                   color: Colors.white.withOpacity(0.5),
-                                  fontSize: 10,
+                                  fontSize: 8,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.0,
                                 ),
@@ -448,14 +446,14 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                 bmi.toStringAsFixed(1),
                                 style: GoogleFonts.outfit(
                                   color: Colors.white,
-                                  fontSize: 32,
+                                  fontSize: 26,
                                   fontWeight: FontWeight.w900,
                                 ),
                               ),
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,
-                                  vertical: 3,
+                                  vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
                                   color: bmiColor.withOpacity(0.15),
@@ -469,7 +467,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                   bmiClassification,
                                   style: GoogleFonts.outfit(
                                     color: bmiColor,
-                                    fontSize: 10,
+                                    fontSize: 8.5,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -480,7 +478,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 12),
 
                     /// 4. METRIC CARD GRID (BMR, IBW, TDEE, %IBW) - Built using Row/Expanded for absolute bulletproof rendering layout
                     Row(
@@ -506,7 +504,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(
@@ -531,7 +529,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
 
                     /// 5. AI PERSONALIZED SUGGESTIONS BOX
                     ClipRRect(
@@ -541,7 +539,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
-                            vertical: 16,
+                            vertical: 10,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.03),
@@ -586,7 +584,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 6),
                               buildRichMarkdownText(getAISuggestionText()),
                             ],
                           ),
@@ -594,14 +592,14 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 36),
+                    const Spacer(),
 
                     /// 6. START PLAN / CTA BUTTON
                     Container(
-                      height: 52,
+                      height: 46,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(26),
+                        borderRadius: BorderRadius.circular(23),
                         gradient: const LinearGradient(
                           colors: [
                             Color(0xffB100FF),
@@ -621,7 +619,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(26),
+                          borderRadius: BorderRadius.circular(23),
                           onTap: showActivationDialog,
                           child: Center(
                             child: Stack(
@@ -651,12 +649,11 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                   ],
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -691,8 +688,8 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Container(
-          height: 100, // Fixed height to guarantee no overflowing
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          height: 76, // Fixed height to guarantee no overflowing
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.02),
             borderRadius: BorderRadius.circular(16),
@@ -708,21 +705,21 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
               Row(
                 children: [
                   Container(
-                    height: 26,
-                    width: 26,
+                    height: 22,
+                    width: 22,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: color.withOpacity(0.1),
                     ),
-                    child: Icon(icon, color: color, size: 14),
+                    child: Icon(icon, color: color, size: 12),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       title,
                       style: GoogleFonts.outfit(
                         color: Colors.white.withOpacity(0.5),
-                        fontSize: 10,
+                        fontSize: 9,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.5,
                       ),
@@ -730,23 +727,23 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Text(
                 value,
                 style: GoogleFonts.outfit(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 1),
               Text(
                 desc,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.inter(
                   color: Colors.white.withOpacity(0.4),
-                  fontSize: 9,
+                  fontSize: 8,
                 ),
               ),
             ],

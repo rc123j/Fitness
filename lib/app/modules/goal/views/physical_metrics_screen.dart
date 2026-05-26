@@ -68,13 +68,11 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
           ),
 
           SafeArea(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                     /// 1. TOP PROGRESS BAR & BACK BUTTON
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -127,7 +125,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 18),
 
                     /// 2. TITLE & TEXT
                     RichText(
@@ -162,7 +160,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 14),
                     Text(
                       "We use these parameters to compute your BMI, BMR, ideal weight, and personalized metabolic insights.",
                       style: GoogleFonts.inter(
@@ -172,7 +170,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 14),
 
                     /// 3. GENDER SELECTION
                     Text(
@@ -184,7 +182,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(
@@ -205,7 +203,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 14),
 
                     /// 4. SLIDERS: AGE, HEIGHT, WEIGHT
                     buildMetricSlider(
@@ -222,7 +220,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                       },
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
 
                     buildMetricSlider(
                       title: "HEIGHT",
@@ -238,7 +236,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                       },
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
 
                     buildMetricSlider(
                       title: "WEIGHT",
@@ -254,7 +252,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                       },
                     ),
 
-                    const SizedBox(height: 36),
+                    const Spacer(),
 
                     /// 5. CONTINUE BUTTON
                     Container(
@@ -318,12 +316,11 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                   ],
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -362,7 +359,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeInOut,
-        height: 96,
+        height: 80,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           gradient: isSelected
@@ -449,7 +446,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.03),
             borderRadius: BorderRadius.circular(20),
