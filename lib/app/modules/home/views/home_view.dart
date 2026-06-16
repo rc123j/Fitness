@@ -162,7 +162,10 @@ class HomeView extends GetView<HomeController> {
                   const SizedBox(height: 28),
 
                   /// 4. TODAY'S MEAL PLAN
-                  sectionTitle("TODAY'S MEAL PLAN", "View Full Plan"),
+                  GestureDetector(
+                    onTap: () => Get.toNamed('/meal-plan'),
+                    child: sectionTitle("TODAY'S MEAL PLAN", "View Full Plan"),
+                  ),
 
                   const SizedBox(height: 16),
 
@@ -185,9 +188,15 @@ class HomeView extends GetView<HomeController> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      sectionTitle("YOUR PROGRESS", "View All"),
+                      GestureDetector(
+                        onTap: () => Get.toNamed('/progress'),
+                        child: sectionTitle("YOUR PROGRESS", "View All"),
+                      ),
                       const SizedBox(height: 14),
-                      buildWeightProgressCard(),
+                      GestureDetector(
+                        onTap: () => Get.toNamed('/progress'),
+                        child: buildWeightProgressCard(),
+                      ),
                       const SizedBox(height: 12),
                       Row(
                         children: [
@@ -236,49 +245,52 @@ class HomeView extends GetView<HomeController> {
     return Row(
       children: [
         /// PROFILE IMAGE WITH NEON CIRCULAR RING
-        Container(
-          height: 60,
-          width: 60,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: const Color(0xffFF00E5).withOpacity(0.75),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xffFF00E5).withOpacity(0.20),
-                blurRadius: 10,
-                spreadRadius: 1,
+        GestureDetector(
+          onTap: () => Get.toNamed('/profile'),
+          child: Container(
+            height: 60,
+            width: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xffFF00E5).withOpacity(0.75),
+                width: 1.5,
               ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(30),
-              child: Image.network(
-                "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150",
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Image.asset(
-                    "assets/images/athlete.png",
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Color(0xffB100FF), Color(0xffFF7A00)],
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xffFF00E5).withOpacity(0.20),
+                  blurRadius: 10,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: Image.network(
+                  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200", // consistent with profile image
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      "assets/images/athlete.png",
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xffB100FF), Color(0xffFF7A00)],
+                            ),
                           ),
-                        ),
-                        child: const Icon(
-                          Icons.person_rounded,
-                          color: Colors.white,
-                        ),
-                      );
-                    },
-                  );
-                },
+                          child: const Icon(
+                            Icons.person_rounded,
+                            color: Colors.white,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
           ),
@@ -316,48 +328,51 @@ class HomeView extends GetView<HomeController> {
         Row(
           children: [
             /// STREAK BADGE CARD
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.03),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xffFF7A00).withOpacity(0.12),
-                  width: 1,
+            GestureDetector(
+              onTap: () => Get.toNamed('/rewards-hub'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.03),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xffFF7A00).withOpacity(0.12),
+                    width: 1,
+                  ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.local_fire_department_rounded,
-                    color: Color(0xffFF7A00),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 6),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "12",
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          height: 1.0,
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.local_fire_department_rounded,
+                      color: Color(0xffFF7A00),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 6),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "12",
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            height: 1.0,
+                          ),
                         ),
-                      ),
-                      Text(
-                        "Day Streak",
-                        style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.55),
-                          fontSize: 9,
-                          height: 1.1,
+                        Text(
+                          "Day Streak",
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.55),
+                            fontSize: 9,
+                            height: 1.1,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -1342,59 +1357,62 @@ class HomeView extends GetView<HomeController> {
   /// INCHES LOST SMALL CARD
   Widget buildInchesLostCard() {
     Color themeColor = const Color(0xff00FF87);
-    return Container(
-      height: 94,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: const Color(0xff0B0817).withOpacity(0.60),
-        border: Border.all(color: themeColor.withOpacity(0.20), width: 1.0),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            themeColor.withOpacity(0.05),
-            const Color(0xff0B0817).withOpacity(0.40),
-          ],
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Inches Lost",
-            style: GoogleFonts.inter(
-              color: Colors.white.withOpacity(0.50),
-              fontSize: 10,
-            ),
-          ),
-          const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "2.1 in",
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: themeColor.withOpacity(0.12),
-                ),
-                child: Icon(
-                  Icons.straighten_rounded,
-                  color: themeColor,
-                  size: 14,
-                ),
-              ),
+    return GestureDetector(
+      onTap: () => Get.toNamed('/progress-photos'),
+      child: Container(
+        height: 94,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: const Color(0xff0B0817).withOpacity(0.60),
+          border: Border.all(color: themeColor.withOpacity(0.20), width: 1.0),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              themeColor.withOpacity(0.05),
+              const Color(0xff0B0817).withOpacity(0.40),
             ],
           ),
-        ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Inches Lost",
+              style: GoogleFonts.inter(
+                color: Colors.white.withOpacity(0.50),
+                fontSize: 10,
+              ),
+            ),
+            const Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "2.1 in",
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: themeColor.withOpacity(0.12),
+                  ),
+                  child: Icon(
+                    Icons.straighten_rounded,
+                    color: themeColor,
+                    size: 14,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1807,34 +1825,38 @@ class HomeView extends GetView<HomeController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          navItem(Icons.home_filled, "Dashboard", true),
-          navItem(Icons.restaurant_rounded, "Meals", false),
+          navItem(Icons.home_filled, "Dashboard", true, onTap: () {}),
+          navItem(Icons.restaurant_rounded, "Meals", false, onTap: () => Get.toNamed('/meal-plan')),
           const SizedBox(width: 40), // Spacer for FAB
-          navItem(Icons.groups_rounded, "Community", false),
-          navItem(Icons.person_rounded, "Profile", false),
+          navItem(Icons.groups_rounded, "Experts", false, onTap: () => Get.toNamed('/booking')),
+          navItem(Icons.card_giftcard_rounded, "Rewards", false, onTap: () => Get.toNamed('/rewards-hub')),
         ],
       ),
     );
   }
 
-  Widget navItem(IconData icon, String label, bool active) {
+  Widget navItem(IconData icon, String label, bool active, {VoidCallback? onTap}) {
     Color activeColor = const Color(0xffFF00E5);
     Color inactiveColor = Colors.white.withOpacity(0.40);
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, color: active ? activeColor : inactiveColor, size: 22),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: GoogleFonts.outfit(
-            color: active ? activeColor : inactiveColor,
-            fontSize: 10,
-            fontWeight: active ? FontWeight.bold : FontWeight.normal,
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: active ? activeColor : inactiveColor, size: 22),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: GoogleFonts.outfit(
+              color: active ? activeColor : inactiveColor,
+              fontSize: 10,
+              fontWeight: active ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

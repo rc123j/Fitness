@@ -8,6 +8,14 @@ abstract class Routes {
   static const LOGIN = _Paths.LOGIN;
   static const REGISTER = _Paths.REGISTER;
   static const GOAL_SELECTION = _Paths.GOAL_SELECTION;
+  static const MEAL_PLAN = _Paths.MEAL_PLAN;
+  static const MEAL_DETAIL = _Paths.MEAL_DETAIL;
+  static const PROGRESS = _Paths.PROGRESS;
+  static const PROGRESS_PHOTOS = _Paths.PROGRESS_PHOTOS;
+  static const REWARDS_HUB = _Paths.REWARDS_HUB;
+  static const BOOKING = _Paths.BOOKING;
+  static const PROFILE = _Paths.PROFILE;
+  static const SETTINGS = _Paths.SETTINGS;
 }
 
 abstract class _Paths {
@@ -17,4 +25,12 @@ abstract class _Paths {
   static const LOGIN = '/login';
   static const REGISTER = '/register';
   static const GOAL_SELECTION = '/goal-selection';
+  static const MEAL_PLAN = '/meal-plan';
+  static const MEAL_DETAIL = '/meal-detail';
+  static const PROGRESS = '/progress';
+  static const PROGRESS_PHOTOS = '/progress-photos';
+  static const REWARDS_HUB = '/rewards-hub';
+  static const BOOKING = '/booking';
+  static const PROFILE = '/profile';
+  static const SETTINGS = '/settings';
 }
