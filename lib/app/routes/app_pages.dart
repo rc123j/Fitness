@@ -22,6 +22,19 @@ import '../modules/booking/views/booking_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/profile/views/settings_view.dart';
+import '../modules/supplements/bindings/supplement_binding.dart';
+import '../modules/supplements/views/supplement_view.dart';
+import '../modules/family/bindings/family_binding.dart';
+import '../modules/family/views/family_view.dart';
+import '../modules/social/bindings/social_binding.dart';
+import '../modules/social/views/social_feed_view.dart';
+import '../modules/social/views/create_post_view.dart';
+import '../modules/reminders/bindings/reminder_binding.dart';
+import '../modules/reminders/views/reminder_view.dart';
+import '../modules/notifications/bindings/notification_binding.dart';
+import '../modules/notifications/views/notification_view.dart';
+import '../modules/health_tips/bindings/health_tips_binding.dart';
+import '../modules/health_tips/views/health_tips_view.dart';
 
 part 'app_routes.dart';
 
@@ -94,6 +107,41 @@ class AppPages {
       name: _Paths.SETTINGS,
       page: () => const SettingsView(),
       binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: _Paths.SUPPLEMENTS,
+      page: () => const SupplementView(),
+      binding: SupplementBinding(),
+    ),
+    GetPage(
+      name: _Paths.FAMILY,
+      page: () => const FamilyView(),
+      binding: FamilyBinding(),
+    ),
+    GetPage(
+      name: _Paths.SOCIAL_FEED,
+      page: () => const SocialFeedView(),
+      binding: SocialBinding(),
+    ),
+    GetPage(
+      name: _Paths.CREATE_POST,
+      page: () => const CreatePostView(),
+      binding: SocialBinding(),
+    ),
+    GetPage(
+      name: _Paths.REMINDERS,
+      page: () => const ReminderView(),
+      binding: ReminderBinding(),
+    ),
+    GetPage(
+      name: _Paths.NOTIFICATIONS,
+      page: () => const NotificationView(),
+      binding: NotificationBinding(),
+    ),
+    GetPage(
+      name: _Paths.HEALTH_TIPS,
+      page: () => const HealthTipsView(),
+      binding: HealthTipsBinding(),
     ),
   ];
 }

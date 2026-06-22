@@ -364,7 +364,7 @@ class SettingsView extends GetView<ProfileController> {
             icon: Icons.access_time_rounded,
             title: "Reminders",
             subtitle: "Set workout, meal & water reminders",
-            onTap: () {},
+            onTap: () => Get.toNamed('/reminders'),
           ),
           buildDivider(),
 

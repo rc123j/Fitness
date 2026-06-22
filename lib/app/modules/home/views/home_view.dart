@@ -379,9 +379,12 @@ class HomeView extends GetView<HomeController> {
             const SizedBox(width: 8),
 
             /// NOTIFICATION ICON
-            buildTopActionButton(
-              icon: Icons.notifications_none_rounded,
-              showDot: true,
+            GestureDetector(
+              onTap: () => Get.toNamed('/notifications'),
+              child: buildTopActionButton(
+                icon: Icons.notifications_none_rounded,
+                showDot: true,
+              ),
             ),
 
             const SizedBox(width: 8),
@@ -1736,36 +1739,216 @@ class HomeView extends GetView<HomeController> {
         final action = actions[index];
         Color color = action["color"] as Color;
 
-        return Column(
-          children: [
-            /// Circular colorful glow container
-            Container(
-              height: 48,
-              width: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xff0B0817),
-                border: Border.all(color: color.withOpacity(0.18), width: 1),
-                gradient: RadialGradient(
-                  colors: [color.withOpacity(0.08), Colors.transparent],
+        return GestureDetector(
+          onTap: () {
+            final title = action["title"] as String;
+            if (title.contains("Progress")) {
+              Get.toNamed('/progress');
+            } else if (title.contains("Expert")) {
+              Get.toNamed('/booking');
+            } else if (title.contains("Supplements")) {
+              Get.toNamed('/supplements');
+            } else if (title.contains("Social")) {
+              Get.toNamed('/social-feed');
+            } else if (title.contains("Family")) {
+              Get.toNamed('/family');
+            } else if (title.contains("More")) {
+              showMoreActionsSheet(context);
+            }
+          },
+          child: Column(
+            children: [
+              /// Circular colorful glow container
+              Container(
+                height: 48,
+                width: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xff0B0817),
+                  border: Border.all(color: color.withOpacity(0.18), width: 1),
+                  gradient: RadialGradient(
+                    colors: [color.withOpacity(0.08), Colors.transparent],
+                  ),
+                ),
+                child: Icon(action["icon"] as IconData, color: color, size: 20),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                action["title"] as String,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: Colors.white.withOpacity(0.70),
+                  fontSize: 9,
+                  fontWeight: FontWeight.w500,
+                  height: 1.2,
                 ),
               ),
-              child: Icon(action["icon"] as IconData, color: color, size: 20),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              action["title"] as String,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                color: Colors.white.withOpacity(0.70),
-                fontSize: 9,
-                fontWeight: FontWeight.w500,
-                height: 1.2,
-              ),
-            ),
-          ],
+            ],
+          ),
         );
       },
+    );
+  }
+
+  void showMoreActionsSheet(BuildContext context) {
+    final extraActions = [
+      {
+        "title": "Health Insights",
+        "subtitle": "Science-backed health tips",
+        "icon": Icons.lightbulb_rounded,
+        "color": const Color(0xff00E5FF),
+        "route": '/health-tips',
+      },
+      {
+        "title": "Video Consultation",
+        "subtitle": "Live expert consultation",
+        "icon": Icons.video_call_rounded,
+        "color": const Color(0xffFF00E5),
+        "route": '/video-call',
+      },
+      {
+        "title": "Smart Reminders",
+        "subtitle": "Workout, meal & water alarms",
+        "icon": Icons.alarm_rounded,
+        "color": const Color(0xffFF7A00),
+        "route": '/reminders',
+      },
+    ];
+
+    Get.bottomSheet(
+      Container(
+        decoration: BoxDecoration(
+          color: const Color(0xff090414),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(28),
+            topRight: Radius.circular(28),
+          ),
+          border: Border.all(color: Colors.white.withOpacity(0.05), width: 1.0),
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(28),
+            topRight: Radius.circular(28),
+          ),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Padding(
+              padding: const EdgeInsets.all(22.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      height: 4,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    "More Quick Actions",
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Explore other features and utilities",
+                    style: GoogleFonts.inter(
+                      color: Colors.white.withOpacity(0.40),
+                      fontSize: 10,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: extraActions.length,
+                    itemBuilder: (context, idx) {
+                      final act = extraActions[idx];
+                      final icon = act["icon"] as IconData;
+                      final color = act["color"] as Color;
+                      final route = act["route"] as String;
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.01),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.white.withOpacity(0.04)),
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () {
+                              Get.back();
+                              Get.toNamed(route);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(14.0),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: color.withOpacity(0.08),
+                                      border: Border.all(color: color.withOpacity(0.20)),
+                                    ),
+                                    child: Icon(icon, color: color, size: 18),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          act["title"] as String,
+                                          style: GoogleFonts.outfit(
+                                            color: Colors.white,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          act["subtitle"] as String,
+                                          style: GoogleFonts.inter(
+                                            color: Colors.white.withOpacity(0.40),
+                                            fontSize: 9.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    color: Colors.white.withOpacity(0.20),
+                                    size: 11,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      isScrollControlled: true,
     );
   }
 

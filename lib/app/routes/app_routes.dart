@@ -16,6 +16,14 @@ abstract class Routes {
   static const BOOKING = _Paths.BOOKING;
   static const PROFILE = _Paths.PROFILE;
   static const SETTINGS = _Paths.SETTINGS;
+  static const SUPPLEMENTS = _Paths.SUPPLEMENTS;
+  static const FAMILY = _Paths.FAMILY;
+  static const SOCIAL_FEED = _Paths.SOCIAL_FEED;
+  static const CREATE_POST = _Paths.CREATE_POST;
+  static const REMINDERS = _Paths.REMINDERS;
+  static const NOTIFICATIONS = _Paths.NOTIFICATIONS;
+  static const HEALTH_TIPS = _Paths.HEALTH_TIPS;
+  static const VIDEO_CALL = _Paths.VIDEO_CALL;
 }
 
 abstract class _Paths {
@@ -33,4 +41,12 @@ abstract class _Paths {
   static const BOOKING = '/booking';
   static const PROFILE = '/profile';
   static const SETTINGS = '/settings';
+  static const SUPPLEMENTS = '/supplements';
+  static const FAMILY = '/family';
+  static const SOCIAL_FEED = '/social-feed';
+  static const CREATE_POST = '/create-post';
+  static const REMINDERS = '/reminders';
+  static const NOTIFICATIONS = '/notifications';
+  static const HEALTH_TIPS = '/health-tips';
+  static const VIDEO_CALL = '/video-call';
 }
