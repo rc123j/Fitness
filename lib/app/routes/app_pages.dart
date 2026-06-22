@@ -35,6 +35,8 @@ import '../modules/notifications/bindings/notification_binding.dart';
 import '../modules/notifications/views/notification_view.dart';
 import '../modules/health_tips/bindings/health_tips_binding.dart';
 import '../modules/health_tips/views/health_tips_view.dart';
+import '../modules/video_call/bindings/video_call_binding.dart';
+import '../modules/video_call/views/video_call_view.dart';
 
 part 'app_routes.dart';
 
@@ -142,6 +144,11 @@ class AppPages {
       name: _Paths.HEALTH_TIPS,
       page: () => const HealthTipsView(),
       binding: HealthTipsBinding(),
+    ),
+    GetPage(
+      name: _Paths.VIDEO_CALL,
+      page: () => const VideoCallView(),
+      binding: VideoCallBinding(),
     ),
   ];
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class VideoCallController extends GetxController {
   // Call controls states
