@@ -96,9 +96,6 @@ class ProfileView extends GetView<ProfileController> {
                     ),
                   ),
                 ),
-
-                /// Bottom Navigation Bar
-                buildBottomNav(),
               ],
             ),
           ),
@@ -865,60 +862,7 @@ class ProfileView extends GetView<ProfileController> {
         ),
       ),
     );
-  }
-
-  /// ----------------------------------------------------
-  /// BOTTOM NAVIGATION BAR
-  /// ----------------------------------------------------
-  Widget buildBottomNav() {
-    return Container(
-      height: 70,
-      decoration: BoxDecoration(
-        color: const Color(0xff090414),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-        border: Border.all(color: Colors.white.withOpacity(0.04), width: 1),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          navItem(Icons.home_outlined, "Home", false, onTap: () => Get.offNamed('/home')),
-          navItem(Icons.restaurant_rounded, "Meal Plan", false, onTap: () => Get.offNamed('/meal-plan')),
-          navItem(Icons.bar_chart_rounded, "Progress", false, onTap: () => Get.offNamed('/progress')),
-          navItem(Icons.groups_rounded, "Experts", false, onTap: () => Get.offNamed('/booking')),
-          navItem(Icons.person_rounded, "Profile", true, onTap: () {}),
-        ],
-      ),
-    );
-  }
-
-  Widget navItem(IconData icon, String label, bool active, {VoidCallback? onTap}) {
-    Color activeColor = const Color(0xffB100FF);
-    Color inactiveColor = Colors.white.withOpacity(0.40);
-
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: active ? activeColor : inactiveColor, size: 22),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: GoogleFonts.outfit(
-              color: active ? activeColor : inactiveColor,
-              fontSize: 9,
-              fontWeight: active ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+  }}
 
 /// ----------------------------------------------------
 /// AVATAR GLOW PAINTER

@@ -11,27 +11,6 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xff06010F),
-      bottomNavigationBar: buildBottomNav(),
-      floatingActionButton: Container(
-        height: 70,
-        width: 70,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: const LinearGradient(
-            colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xffFF00E5).withOpacity(0.45),
-              blurRadius: 20,
-              spreadRadius: 1,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 38),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: Stack(
         children: [
           /// BACKGROUND NEON GLOW BLOBS

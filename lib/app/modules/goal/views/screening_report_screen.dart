@@ -218,7 +218,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(22),
                     onTap: () {
-                      Get.offAllNamed('/home');
+                      Get.offAllNamed('/main-navigation');
                     },
                     child: Center(
                       child: Text(

@@ -106,9 +106,35 @@ class VideoCallView extends GetView<VideoCallController> {
                 }),
               ),
 
-            /// 3. TOP META PANEL (Status, Name, Role, Call Timer)
+            /// 3. BACK BUTTON (Top-left overlay)
             Positioned(
-              top: 50,
+              top: 52,
+              left: 20,
+              child: GestureDetector(
+                onTap: () => Get.back(),
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.40),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.12),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+              ),
+            ),
+
+            /// 4. TOP META PANEL (Status, Name, Role, Call Timer)
+            Positioned(
+              top: 106,
               left: 20,
               right: 20,
               child: buildTopMetaPanel(),

@@ -260,7 +260,7 @@ class CreatePostView extends GetView<SocialController> {
         itemCount: controller.badgesList.length,
         itemBuilder: (context, index) {
           final badge = controller.badgesList[index];
-          final badgeColor = Color(int.parse(badge["color"]!));
+          final badgeColor = Color(int.parse(badge["color"]!.replaceAll('0x', ''), radix: 16));
 
           return Obx(() {
             final isActive = controller.selectedBadgeIndex.value == index;

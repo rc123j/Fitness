@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/supplement_controller.dart';
+import '../../../widgets/premium_layout_components.dart';
 
 class SupplementView extends GetView<SupplementController> {
   const SupplementView({super.key});
@@ -100,9 +101,6 @@ class SupplementView extends GetView<SupplementController> {
                     ),
                   ),
                 ),
-
-                /// BOTTOM NAVIGATION MENU
-                buildBottomNav(),
               ],
             ),
           ),
@@ -115,70 +113,21 @@ class SupplementView extends GetView<SupplementController> {
   /// HEADER WIDGET
   /// ----------------------------------------------------
   Widget buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      child: Row(
-        children: [
-          /// Back Button
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.03),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
-                  width: 0.8,
-                ),
-              ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
-            ),
+    return PremiumAppBar(
+      title: "Smart Supplements",
+      subtitle: "Goal-driven nutrition recommendations",
+      trailing: Container(
+        height: 40,
+        width: 40,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.03),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.08),
+            width: 0.8,
           ),
-          const SizedBox(width: 14),
-
-          /// Title
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Smart Supplements",
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  "Goal-driven nutrition recommendations",
-                  style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.50),
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          /// Header Cart Icon
-          Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.03),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.08),
-                width: 0.8,
-              ),
-            ),
-            child: const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 18),
-          ),
-        ],
+        ),
+        child: const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 18),
       ),
     );
   }
@@ -678,55 +627,4 @@ class SupplementView extends GetView<SupplementController> {
     );
   }
 
-  /// ----------------------------------------------------
-  /// BOTTOM NAVIGATION BAR
-  /// ----------------------------------------------------
-  Widget buildBottomNav() {
-    return Container(
-      height: 70,
-      decoration: BoxDecoration(
-        color: const Color(0xff090414),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-        border: Border.all(color: Colors.white.withOpacity(0.04), width: 1),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          navItem(Icons.home_outlined, "Home", false, onTap: () => Get.offNamed('/home')),
-          navItem(Icons.restaurant_rounded, "Meal Plan", false, onTap: () => Get.offNamed('/meal-plan')),
-          navItem(Icons.bar_chart_rounded, "Progress", false, onTap: () => Get.offNamed('/progress')),
-          navItem(Icons.groups_rounded, "Experts", false, onTap: () => Get.offNamed('/booking')),
-          navItem(Icons.person_outline_rounded, "Profile", false, onTap: () => Get.offNamed('/profile')),
-        ],
-      ),
-    );
-  }
-
-  Widget navItem(IconData icon, String label, bool active, {VoidCallback? onTap}) {
-    Color activeColor = const Color(0xffFF00E5);
-    Color inactiveColor = Colors.white.withOpacity(0.40);
-
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: active ? activeColor : inactiveColor, size: 22),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: GoogleFonts.outfit(
-              color: active ? activeColor : inactiveColor,
-              fontSize: 9,
-              fontWeight: active ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

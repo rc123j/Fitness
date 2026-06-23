@@ -129,7 +129,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                         // Skip Button
                         GestureDetector(
                           onTap: () {
-                            Get.offAllNamed('/home');
+                            Get.offAllNamed('/main-navigation');
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(

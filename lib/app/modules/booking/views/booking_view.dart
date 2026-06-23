@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/booking_controller.dart';
+import '../../../widgets/premium_layout_components.dart';
 
 class BookingView extends GetView<BookingController> {
   const BookingView({super.key});
@@ -108,9 +109,6 @@ class BookingView extends GetView<BookingController> {
                     ),
                   ),
                 ),
-
-                /// BOTTOM NAVIGATION MENU
-                buildBottomNav(),
               ],
             ),
           ),
@@ -123,70 +121,21 @@ class BookingView extends GetView<BookingController> {
   /// HEADER WIDGET
   /// ----------------------------------------------------
   Widget buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      child: Row(
-        children: [
-          /// Back Button
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.03),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
-                  width: 0.8,
-                ),
-              ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
-            ),
+    return PremiumAppBar(
+      title: "Experts & Booking",
+      subtitle: "Find expert guidance. Book. Get results.",
+      trailing: Container(
+        height: 40,
+        width: 40,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.03),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.08),
+            width: 0.8,
           ),
-          const SizedBox(width: 14),
-
-          /// Titles
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Experts & Booking",
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  "Find expert guidance. Book. Get results.",
-                  style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.50),
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          /// Actions Calendar
-          Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.03),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.08),
-                width: 0.8,
-              ),
-            ),
-            child: const Icon(Icons.calendar_today_rounded, color: Colors.white, size: 16),
-          ),
-        ],
+        ),
+        child: const Icon(Icons.calendar_today_rounded, color: Colors.white, size: 16),
       ),
     );
   }
@@ -1219,57 +1168,6 @@ class BookingView extends GetView<BookingController> {
     );
   }
 
-  /// ----------------------------------------------------
-  /// BOTTOM NAVIGATION BAR
-  /// ----------------------------------------------------
-  Widget buildBottomNav() {
-    return Container(
-      height: 70,
-      decoration: BoxDecoration(
-        color: const Color(0xff090414),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-        border: Border.all(color: Colors.white.withOpacity(0.04), width: 1),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          navItem(Icons.home_outlined, "Home", false, onTap: () => Get.offNamed('/home')),
-          navItem(Icons.restaurant_rounded, "Meal Plan", false, onTap: () => Get.offNamed('/meal-plan')),
-          navItem(Icons.bar_chart_rounded, "Progress", false, onTap: () => Get.offNamed('/progress')),
-          navItem(Icons.groups_rounded, "Experts", true, onTap: () {}),
-          navItem(Icons.person_rounded, "Profile", false, onTap: () => Get.offNamed('/profile')),
-        ],
-      ),
-    );
-  }
-
-  Widget navItem(IconData icon, String label, bool active, {VoidCallback? onTap}) {
-    Color activeColor = const Color(0xffB100FF);
-    Color inactiveColor = Colors.white.withOpacity(0.40);
-
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: active ? activeColor : inactiveColor, size: 22),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: GoogleFonts.outfit(
-              color: active ? activeColor : inactiveColor,
-              fontSize: 10,
-              fontWeight: active ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 /// ----------------------------------------------------

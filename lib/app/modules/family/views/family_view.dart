@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/family_controller.dart';
+import '../../../widgets/premium_layout_components.dart';
 
 class FamilyView extends GetView<FamilyController> {
   const FamilyView({super.key});
@@ -109,9 +110,6 @@ class FamilyView extends GetView<FamilyController> {
                     ),
                   ),
                 ),
-
-                /// BOTTOM NAVIGATION
-                buildBottomNav(),
               ],
             ),
           ),
@@ -124,84 +122,35 @@ class FamilyView extends GetView<FamilyController> {
   /// HEADER WIDGET
   /// ----------------------------------------------------
   Widget buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      child: Row(
-        children: [
-          /// Back button
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.03),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
-                  width: 0.8,
+    return PremiumAppBar(
+      title: "Family Hub",
+      subtitle: "Manage family plans & goals",
+      trailing: GestureDetector(
+        onTap: () => showAddMemberSheet(context),
+        child: Container(
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xffFF00E5).withOpacity(0.25), width: 1),
+            color: const Color(0xffFF00E5).withOpacity(0.04),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.add_rounded, color: Color(0xffFF00E5), size: 16),
+              const SizedBox(width: 4),
+              Text(
+                "Add",
+                style: GoogleFonts.outfit(
+                  color: const Color(0xffFF00E5),
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
-            ),
+            ],
           ),
-          const SizedBox(width: 14),
-
-          /// Titles
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Family Hub",
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  "Manage family plans & goals",
-                  style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.50),
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          /// Add Member Quick button
-          GestureDetector(
-            onTap: () => showAddMemberSheet(context),
-            child: Container(
-              height: 40,
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xffFF00E5).withOpacity(0.25), width: 1),
-                color: const Color(0xffFF00E5).withOpacity(0.04),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.add_rounded, color: Color(0xffFF00E5), size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    "Add",
-                    style: GoogleFonts.outfit(
-                      color: const Color(0xffFF00E5),
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -1086,57 +1035,6 @@ class FamilyView extends GetView<FamilyController> {
     );
   }
 
-  /// ----------------------------------------------------
-  /// BOTTOM NAVIGATION BAR
-  /// ----------------------------------------------------
-  Widget buildBottomNav() {
-    return Container(
-      height: 70,
-      decoration: BoxDecoration(
-        color: const Color(0xff090414),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-        border: Border.all(color: Colors.white.withOpacity(0.04), width: 1),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          navItem(Icons.home_outlined, "Home", false, onTap: () => Get.offNamed('/home')),
-          navItem(Icons.restaurant_rounded, "Meal Plan", false, onTap: () => Get.offNamed('/meal-plan')),
-          navItem(Icons.bar_chart_rounded, "Progress", false, onTap: () => Get.offNamed('/progress')),
-          navItem(Icons.groups_rounded, "Experts", false, onTap: () => Get.offNamed('/booking')),
-          navItem(Icons.person_outline_rounded, "Profile", false, onTap: () => Get.offNamed('/profile')),
-        ],
-      ),
-    );
-  }
-
-  Widget navItem(IconData icon, String label, bool active, {VoidCallback? onTap}) {
-    Color activeColor = const Color(0xff00A3FF);
-    Color inactiveColor = Colors.white.withOpacity(0.40);
-
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: active ? activeColor : inactiveColor, size: 22),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: GoogleFonts.outfit(
-              color: active ? activeColor : inactiveColor,
-              fontSize: 9,
-              fontWeight: active ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 /// ----------------------------------------------------

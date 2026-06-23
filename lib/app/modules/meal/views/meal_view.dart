@@ -76,34 +76,8 @@ class MealView extends GetView<MealController> {
                         buildMealsTimeline(),
                         const SizedBox(height: 16),
 
-                        /// BOTTOM METRIC CARDS ROW
                         buildBottomRow(),
                         const SizedBox(height: 20),
-
-                        /// EXPAND/COLLAPSE ARROW AT BOTTOM
-                        Center(
-                          child: GestureDetector(
-                            onTap: () => Get.back(),
-                            child: Container(
-                              height: 36,
-                              width: 36,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.03),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.08),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
                       ],
                     ),
                   ),
@@ -125,27 +99,10 @@ class MealView extends GetView<MealController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          /// Back button
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.03),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
-                  width: 0.8,
-                ),
-              ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
-            ),
-          ),
-
           /// Title & Subtitle Dropdown
           Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 "Meal Plan",
