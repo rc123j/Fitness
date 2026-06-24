@@ -147,7 +147,11 @@ class ProgressView extends GetView<ProgressController> {
                 width: 0.8,
               ),
             ),
-            child: const Icon(Icons.calendar_today_rounded, color: Colors.white, size: 16),
+            child: const Icon(
+              Icons.calendar_today_rounded,
+              color: Colors.white,
+              size: 16,
+            ),
           ),
           const SizedBox(width: 10),
           Container(
@@ -161,7 +165,11 @@ class ProgressView extends GetView<ProgressController> {
                 width: 0.8,
               ),
             ),
-            child: const Icon(Icons.more_horiz_rounded, color: Colors.white, size: 18),
+            child: const Icon(
+              Icons.more_horiz_rounded,
+              color: Colors.white,
+              size: 18,
+            ),
           ),
         ],
       ),
@@ -179,128 +187,165 @@ class ProgressView extends GetView<ProgressController> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           color: const Color(0xff0B0817).withOpacity(0.55),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.04),
-            width: 1.0,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          children: [
-            /// Beautiful Mountain Nebula Backdrop Painting
-            Positioned.fill(
-              child: CustomPaint(
-                painter: MountainNebulaPainter(),
+          child: Stack(
+            children: [
+              /// A. Background Athlete Image
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/images/athlete.png',
+                  fit: BoxFit.cover,
+                  alignment: const Alignment(0.7, -0.3),
+                ),
               ),
-            ),
 
-            /// Text Details & Progress
-            Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Overall Progress",
-                    style: GoogleFonts.outfit(
-                      color: const Color(0xffFF00E5),
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+              /// B. Black Gradient Overlay to fade out the left side for text readability
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        const Color(0xff0B0817),
+                        const Color(0xff0B0817).withOpacity(0.85),
+                        const Color(0xff0B0817).withOpacity(0.35),
+                        const Color(0xff0B0817).withOpacity(0.15),
+                      ],
+                      stops: const [0.0, 0.45, 0.8, 1.0],
                     ),
                   ),
+                ),
+              ),
 
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      RichText(
-                        text: TextSpan(
+              /// C. Radial Ambient Neon Glow on the right edge
+              Positioned(
+                right: -40,
+                top: -40,
+                child: Container(
+                  width: 140,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        const Color(0xffFF00E5).withOpacity(0.30),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              /// Text Details & Progress
+              Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Overall Progress",
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xffFF00E5),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "72",
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white,
+                                  fontSize: 44,
+                                  fontWeight: FontWeight.bold,
+                                  height: 0.9,
+                                ),
+                              ),
+                              TextSpan(
+                                text: "%",
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          "You're doing great! 🎉",
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.85),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    /// Linear Progress Bar
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Stack(
                           children: [
-                            TextSpan(
-                              text: "72",
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 44,
-                                fontWeight: FontWeight.bold,
-                                height: 0.9,
+                            Container(
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(3),
                               ),
                             ),
-                            TextSpan(
-                              text: "%",
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                            FractionallySizedBox(
+                              widthFactor: 0.72,
+                              child: Container(
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xffB100FF),
+                                      Color(0xffFF00E5),
+                                      Color(0xffFF7A00),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        "You're doing great! 🎉",
-                        style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.85),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  /// Linear Progress Bar
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Stack(
-                        children: [
-                          Container(
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(3),
-                            ),
+                        const SizedBox(height: 6),
+                        Text(
+                          "Keep going! 28% left to your goal.",
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.45),
+                            fontSize: 9,
                           ),
-                          FractionallySizedBox(
-                            widthFactor: 0.72,
-                            child: Container(
-                              height: 6,
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xffB100FF),
-                                    Color(0xffFF00E5),
-                                    Color(0xffFF7A00),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        "Keep going! 28% left to your goal.",
-                        style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.45),
-                          fontSize: 9,
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   /// ----------------------------------------------------
   /// 2. TIMEFRAME SELECTOR ROW
@@ -344,9 +389,13 @@ class ProgressView extends GetView<ProgressController> {
                   child: Text(
                     time,
                     style: GoogleFonts.outfit(
-                      color: isActive ? Colors.white : Colors.white.withOpacity(0.40),
+                      color: isActive
+                          ? Colors.white
+                          : Colors.white.withOpacity(0.40),
                       fontSize: 10,
-                      fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isActive
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                 ),
@@ -435,17 +484,19 @@ class ProgressView extends GetView<ProgressController> {
   }) {
     bool isDown = change < 0;
     String sign = isDown ? "↓" : "↑";
-    String changeText = "$sign ${change.abs().toStringAsFixed(1)} ${unit == '%' ? '%' : unit.isEmpty ? '' : 'kg'}";
+    String changeText =
+        "$sign ${change.abs().toStringAsFixed(1)} ${unit == '%'
+            ? '%'
+            : unit.isEmpty
+            ? ''
+            : 'kg'}";
 
     return Container(
       height: 122,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.03),
-          width: 0.8,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.03), width: 0.8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -504,7 +555,10 @@ class ProgressView extends GetView<ProgressController> {
 
           /// Change Trend
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 3.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10.0,
+              vertical: 3.0,
+            ),
             child: Text(
               changeText,
               style: GoogleFonts.inter(
@@ -537,10 +591,7 @@ class ProgressView extends GetView<ProgressController> {
                 bottomRight: Radius.circular(16),
               ),
               child: CustomPaint(
-                painter: SparklinePainter(
-                  points: points,
-                  color: accentColor,
-                ),
+                painter: SparklinePainter(points: points, color: accentColor),
               ),
             ),
           ),
@@ -558,10 +609,7 @@ class ProgressView extends GetView<ProgressController> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.0,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
       ),
       child: Column(
         children: [
@@ -580,7 +628,10 @@ class ProgressView extends GetView<ProgressController> {
 
               /// Dropdown Select
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
@@ -614,13 +665,11 @@ class ProgressView extends GetView<ProgressController> {
 
           /// Chart Graphic
           Obx(() {
-            final data = controller.weightTrendData;
+            final data = controller.weightTrendData.toList();
             return SizedBox(
               height: 180,
               width: double.infinity,
-              child: CustomPaint(
-                painter: WeightTrendPainter(data: data),
-              ),
+              child: CustomPaint(painter: WeightTrendPainter(data: data)),
             );
           }),
         ],
@@ -637,10 +686,7 @@ class ProgressView extends GetView<ProgressController> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.0,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -681,7 +727,10 @@ class ProgressView extends GetView<ProgressController> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Divider(color: Colors.white.withOpacity(0.04), height: 0.8),
+                      child: Divider(
+                        color: Colors.white.withOpacity(0.04),
+                        height: 0.8,
+                      ),
                     ),
                     buildCompositionLegendRow(
                       color: const Color(0xffFF7A00),
@@ -692,7 +741,10 @@ class ProgressView extends GetView<ProgressController> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Divider(color: Colors.white.withOpacity(0.04), height: 0.8),
+                      child: Divider(
+                        color: Colors.white.withOpacity(0.04),
+                        height: 0.8,
+                      ),
                     ),
                     buildCompositionLegendRow(
                       color: const Color(0xffFF00E5),
@@ -723,10 +775,7 @@ class ProgressView extends GetView<ProgressController> {
         Container(
           height: 6,
           width: 6,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color,
-          ),
+          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -810,14 +859,16 @@ class ProgressView extends GetView<ProgressController> {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Obx(() => Text(
-                            "${controller.achievementsCount.value}",
-                            style: GoogleFonts.outfit(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )),
+                      Obx(
+                        () => Text(
+                          "${controller.achievementsCount.value}",
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                       Text(
                         "Badges Earned",
                         style: GoogleFonts.inter(
@@ -885,21 +936,25 @@ class ProgressView extends GetView<ProgressController> {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Obx(() => Text(
-                            "${controller.overallProgress.value}%",
-                            style: GoogleFonts.outfit(
-                              color: const Color(0xffFF7A00),
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )),
-                      Obx(() => Text(
-                            "Goal: ${controller.goalWeight.value.toInt()} kg",
-                            style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.40),
-                              fontSize: 8,
-                            ),
-                          )),
+                      Obx(
+                        () => Text(
+                          "${controller.overallProgress.value}%",
+                          style: GoogleFonts.outfit(
+                            color: const Color(0xffFF7A00),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Obx(
+                        () => Text(
+                          "Goal: ${controller.goalWeight.value.toInt()} kg",
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.40),
+                            fontSize: 8,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -916,7 +971,6 @@ class ProgressView extends GetView<ProgressController> {
       ],
     );
   }
-
 }
 
 /// ----------------------------------------------------
@@ -947,7 +1001,11 @@ class MountainNebulaPainter extends CustomPainter {
     canvas.drawCircle(Offset(w * 0.15, h * 0.22), 1.0, starPaint);
     canvas.drawCircle(Offset(w * 0.32, h * 0.18), 1.2, starPaint);
     canvas.drawCircle(Offset(w * 0.45, h * 0.35), 0.8, starPaint);
-    canvas.drawCircle(Offset(w * 0.72, h * 0.12), 1.5, starPaint..color = Colors.white.withOpacity(0.25));
+    canvas.drawCircle(
+      Offset(w * 0.72, h * 0.12),
+      1.5,
+      starPaint..color = Colors.white.withOpacity(0.25),
+    );
     canvas.drawCircle(Offset(w * 0.88, h * 0.28), 1.0, starPaint);
     canvas.drawCircle(Offset(w * 0.62, h * 0.45), 0.7, starPaint);
 
@@ -960,10 +1018,7 @@ class MountainNebulaPainter extends CustomPainter {
 
     Paint mountainPaint = Paint()
       ..shader = const LinearGradient(
-        colors: [
-          Color(0xff120826),
-          Color(0xff06010F),
-        ],
+        colors: [Color(0xff120826), Color(0xff06010F)],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ).createShader(Rect.fromLTRB(w * 0.4, h * 0.5, w * 0.9, h));
@@ -975,7 +1030,13 @@ class MountainNebulaPainter extends CustomPainter {
     double px = w * 0.64;
     double py = h * 0.52;
     canvas.drawCircle(Offset(px, py - 4), 1.2, humanPaint); // Head
-    canvas.drawLine(Offset(px, py - 3), Offset(px, py), Paint()..color = Colors.white.withOpacity(0.50)..strokeWidth = 1.0); // Body
+    canvas.drawLine(
+      Offset(px, py - 3),
+      Offset(px, py),
+      Paint()
+        ..color = Colors.white.withOpacity(0.50)
+        ..strokeWidth = 1.0,
+    ); // Body
 
     /// D. Draw Glowing Circular Arrow Ring (Far Right side)
     double cx = w * 0.82;
@@ -1011,18 +1072,22 @@ class MountainNebulaPainter extends CustomPainter {
     canvas.drawCircle(Offset(cx, cy), r, ringPaint);
 
     // Inner background
-    canvas.drawCircle(Offset(cx, cy), r - 1.5, Paint()..color = const Color(0xff090414).withOpacity(0.85));
+    canvas.drawCircle(
+      Offset(cx, cy),
+      r - 1.5,
+      Paint()..color = const Color(0xff090414).withOpacity(0.85),
+    );
 
     // Trending up icon drawn inside
     TextPainter textPainter = TextPainter(
-      text: const TextSpan(
-        text: "📈",
-        style: TextStyle(fontSize: 16),
-      ),
+      text: const TextSpan(text: "📈", style: TextStyle(fontSize: 16)),
       textDirection: TextDirection.ltr,
     );
     textPainter.layout();
-    textPainter.paint(canvas, Offset(cx - textPainter.width / 2, cy - textPainter.height / 2));
+    textPainter.paint(
+      canvas,
+      Offset(cx - textPainter.width / 2, cy - textPainter.height / 2),
+    );
   }
 
   @override
@@ -1068,12 +1133,12 @@ class SparklinePainter extends CustomPainter {
         double prevX = (i - 1) * stepX;
         double prevNormalized = (points[i - 1] - minVal) / valRange;
         double prevY = h - (prevNormalized * (h - 8)) - 4;
-        
+
         double controlX1 = prevX + (stepX / 2);
         double controlY1 = prevY;
         double controlX2 = prevX + (stepX / 2);
         double controlY2 = y;
-        
+
         linePath.cubicTo(controlX1, controlY1, controlX2, controlY2, x, y);
         fillPath.cubicTo(controlX1, controlY1, controlX2, controlY2, x, y);
       }
@@ -1107,10 +1172,7 @@ class SparklinePainter extends CustomPainter {
     /// Paint Fill
     Paint fillPaint = Paint()
       ..shader = LinearGradient(
-        colors: [
-          color.withOpacity(0.12),
-          color.withOpacity(0.0),
-        ],
+        colors: [color.withOpacity(0.12), color.withOpacity(0.0)],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ).createShader(Rect.fromLTWH(0, 0, w, h));
@@ -1142,7 +1204,9 @@ class WeightTrendPainter extends CustomPainter {
     double chartWidth = w - labelWidth;
     double chartHeight = h - labelHeight;
 
-    List<double> weights = data.map((e) => (e["weight"] as num).toDouble()).toList();
+    List<double> weights = data
+        .map((e) => (e["weight"] as num).toDouble())
+        .toList();
     double minWeight = 63.0; // Y axis bottom range
     double maxWeight = 75.0; // Y axis top range
     double weightRange = maxWeight - minWeight;
@@ -1269,7 +1333,10 @@ class WeightTrendPainter extends CustomPainter {
           ),
           textDirection: TextDirection.ltr,
         )..layout();
-        valPainter.paint(canvas, Offset(p.dx - (valPainter.width / 2), p.dy - 16));
+        valPainter.paint(
+          canvas,
+          Offset(p.dx - (valPainter.width / 2), p.dy - 16),
+        );
       }
 
       // Draw X axis Label (Date)
@@ -1281,7 +1348,9 @@ class WeightTrendPainter extends CustomPainter {
                 ? const Color(0xffFF00E5)
                 : Colors.white.withOpacity(0.40),
             fontSize: 8,
-            fontWeight: i == points.length - 1 ? FontWeight.bold : FontWeight.normal,
+            fontWeight: i == points.length - 1
+                ? FontWeight.bold
+                : FontWeight.normal,
           ),
         ),
         textDirection: TextDirection.ltr,
@@ -1303,8 +1372,11 @@ class WeightTrendPainter extends CustomPainter {
       tooltipH,
     );
 
-    RRect tooltipRRect = RRect.fromRectAndRadius(tooltipRect, const Radius.circular(8));
-    
+    RRect tooltipRRect = RRect.fromRectAndRadius(
+      tooltipRect,
+      const Radius.circular(8),
+    );
+
     // Draw Box Shadow Glow - concentric rounded rects (safe)
     for (double i = 1; i <= 3; i++) {
       canvas.drawRRect(
@@ -1354,7 +1426,7 @@ class WeightTrendPainter extends CustomPainter {
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
     )..layout(minWidth: 0, maxWidth: tooltipW);
-    
+
     tooltipPainter.paint(
       canvas,
       Offset(

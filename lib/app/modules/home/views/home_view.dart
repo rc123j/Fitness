@@ -310,7 +310,10 @@ class HomeView extends GetView<HomeController> {
             GestureDetector(
               onTap: () => Get.toNamed('/rewards-hub'),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.03),
                   borderRadius: BorderRadius.circular(16),
@@ -415,129 +418,124 @@ class HomeView extends GetView<HomeController> {
   /// ----------------------------------------------------
   Widget buildActivePlanCard() {
     return Container(
+      height: 154,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: const Color(0xff0B0817).withOpacity(0.65),
-        border: Border.all(
-          color: const Color(0xffFF00E5).withOpacity(0.20),
-          width: 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xffFF00E5).withOpacity(0.08),
-            blurRadius: 15,
-            spreadRadius: 1,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: const Color(0xff0B0817).withOpacity(0.55),
+        border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  const Color(0xffB100FF).withOpacity(0.10),
-                  const Color(0xffFF7A00).withOpacity(0.04),
-                  const Color(0xff0B0817).withOpacity(0.40),
-                ],
+          child: Stack(
+            children: [
+              /// Premium Custom Painted Vector BG (Option A)
+              Positioned.fill(
+                child: CustomPaint(painter: ActivePlanBgPainter()),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                /// Left portion: Fat Loss Plan
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "ACTIVE PLAN",
-                        style: GoogleFonts.outfit(
-                          color: const Color(0xffB100FF).withOpacity(0.9),
-                          fontSize: 11,
-                          letterSpacing: 2.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        "Fat Loss Plan",
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 24),
 
-                /// Right portion: Plan Progress
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
+              /// Text Details & Progress
+              Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Plan Progress",
-                      style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.60),
-                        fontSize: 11,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "24%",
+                      "ACTIVE PLAN",
                       style: GoogleFonts.outfit(
-                        color: const Color(0xffFF5F6D),
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900,
-                        height: 1.0,
+                        color: const Color(0xffFF00E5),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2.0,
                       ),
                     ),
-                    const SizedBox(height: 8),
 
-                    /// Slim progress bar
-                    SizedBox(
-                      width: 100,
-                      height: 6,
-                      child: Stack(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.white.withOpacity(0.08),
-                            ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Fat Loss Plan",
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 26,
+                            fontWeight: FontWeight.w900,
                           ),
-                          FractionallySizedBox(
-                            alignment: Alignment.centerLeft,
-                            widthFactor: 0.24,
-                            child: Container(
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          "Keep up the great pace! ⚡",
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.85),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    /// Linear Progress Bar
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Stack(
+                          children: [
+                            Container(
+                              height: 6,
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xffFF7A00),
-                                    Color(0xffFF5F6D),
-                                  ],
+                                color: Colors.white.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                            ),
+                            FractionallySizedBox(
+                              widthFactor: 0.24,
+                              child: Container(
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xffB100FF),
+                                      Color(0xffFF00E5),
+                                      Color(0xffFF7A00),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(3),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Plan Progress: 24%",
+                              style: GoogleFonts.inter(
+                                color: Colors.white.withOpacity(0.45),
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              "76% left to your goal",
+                              style: GoogleFonts.inter(
+                                color: Colors.white.withOpacity(0.45),
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1860,7 +1858,9 @@ class HomeView extends GetView<HomeController> {
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.01),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withOpacity(0.04)),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.04),
+                          ),
                         ),
                         child: Material(
                           color: Colors.transparent,
@@ -1879,14 +1879,17 @@ class HomeView extends GetView<HomeController> {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color: color.withOpacity(0.08),
-                                      border: Border.all(color: color.withOpacity(0.20)),
+                                      border: Border.all(
+                                        color: color.withOpacity(0.20),
+                                      ),
                                     ),
                                     child: Icon(icon, color: color, size: 18),
                                   ),
                                   const SizedBox(width: 14),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           act["title"] as String,
@@ -1900,7 +1903,9 @@ class HomeView extends GetView<HomeController> {
                                         Text(
                                           act["subtitle"] as String,
                                           style: GoogleFonts.inter(
-                                            color: Colors.white.withOpacity(0.40),
+                                            color: Colors.white.withOpacity(
+                                              0.40,
+                                            ),
                                             fontSize: 9.5,
                                           ),
                                         ),
@@ -1988,16 +1993,36 @@ class HomeView extends GetView<HomeController> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           navItem(Icons.home_filled, "Dashboard", true, onTap: () {}),
-          navItem(Icons.restaurant_rounded, "Meals", false, onTap: () => Get.toNamed('/meal-plan')),
+          navItem(
+            Icons.restaurant_rounded,
+            "Meals",
+            false,
+            onTap: () => Get.toNamed('/meal-plan'),
+          ),
           const SizedBox(width: 40), // Spacer for FAB
-          navItem(Icons.groups_rounded, "Experts", false, onTap: () => Get.toNamed('/booking')),
-          navItem(Icons.card_giftcard_rounded, "Rewards", false, onTap: () => Get.toNamed('/rewards-hub')),
+          navItem(
+            Icons.groups_rounded,
+            "Experts",
+            false,
+            onTap: () => Get.toNamed('/booking'),
+          ),
+          navItem(
+            Icons.card_giftcard_rounded,
+            "Rewards",
+            false,
+            onTap: () => Get.toNamed('/rewards-hub'),
+          ),
         ],
       ),
     );
   }
 
-  Widget navItem(IconData icon, String label, bool active, {VoidCallback? onTap}) {
+  Widget navItem(
+    IconData icon,
+    String label,
+    bool active, {
+    VoidCallback? onTap,
+  }) {
     Color activeColor = const Color(0xffFF00E5);
     Color inactiveColor = Colors.white.withOpacity(0.40);
 
@@ -2313,6 +2338,122 @@ class ProgressLineChartPainter extends CustomPainter {
       ..color = Colors.white
       ..style = PaintingStyle.fill;
     canvas.drawCircle(lastPoint, 2.5, solidPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class ActivePlanBgPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    double w = size.width;
+    double h = size.height;
+
+    /// A. Draw Purple/Pink Nebula Radial Gradients
+    Paint nebulaPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xffFF00E5).withOpacity(0.18),
+          const Color(0xffB100FF).withOpacity(0.04),
+          Colors.transparent,
+        ],
+        center: Alignment.centerRight,
+      ).createShader(Rect.fromLTRB(w * 0.4, -h * 0.2, w * 1.2, h * 1.2));
+    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), nebulaPaint);
+
+    /// B. Draw Stars/Dots
+    Paint starPaint = Paint()..color = Colors.white.withOpacity(0.15);
+    canvas.drawCircle(Offset(w * 0.15, h * 0.22), 1.0, starPaint);
+    canvas.drawCircle(Offset(w * 0.32, h * 0.18), 1.2, starPaint);
+    canvas.drawCircle(Offset(w * 0.45, h * 0.35), 0.8, starPaint);
+    canvas.drawCircle(
+      Offset(w * 0.72, h * 0.12),
+      1.5,
+      starPaint..color = Colors.white.withOpacity(0.25),
+    );
+    canvas.drawCircle(Offset(w * 0.88, h * 0.28), 1.0, starPaint);
+    canvas.drawCircle(Offset(w * 0.62, h * 0.45), 0.7, starPaint);
+
+    /// C. Draw Mountain Silhouette (right aligned bottom)
+    Path mountain = Path();
+    mountain.moveTo(w * 0.42, h);
+    mountain.lineTo(w * 0.64, h * 0.52); // Peak
+    mountain.lineTo(w * 0.86, h);
+    mountain.close();
+
+    Paint mountainPaint = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xff120826), Color(0xff06010F)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ).createShader(Rect.fromLTRB(w * 0.4, h * 0.5, w * 0.9, h));
+
+    canvas.drawPath(mountain, mountainPaint);
+
+    /// Draw a tiny human silhouette on peak
+    Paint humanPaint = Paint()..color = Colors.white.withOpacity(0.50);
+    double px = w * 0.64;
+    double py = h * 0.52;
+    canvas.drawCircle(Offset(px, py - 4), 1.2, humanPaint); // Head
+    canvas.drawLine(
+      Offset(px, py - 3),
+      Offset(px, py),
+      Paint()
+        ..color = Colors.white.withOpacity(0.50)
+        ..strokeWidth = 1.0,
+    ); // Body
+
+    /// D. Draw Glowing Circular Target/Streak Ring (Far Right side)
+    double cx = w * 0.82;
+    double cy = h * 0.40;
+    double r = 32.0;
+
+    // Glowing border ring
+    Paint ringPaint = Paint()
+      ..shader = const LinearGradient(
+        colors: [
+          Color(0xffB100FF),
+          Color(0xffFF00E5),
+          Color(0xffFF7A00),
+          Color(0xffB100FF),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: r))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.5;
+
+    // Outer glow - concentric circles (safe)
+    for (double i = 1; i <= 3; i++) {
+      canvas.drawCircle(
+        Offset(cx, cy),
+        r,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3.5 + (i * 2.0)
+          ..color = const Color(0xffB100FF).withOpacity(0.12 / i),
+      );
+    }
+    canvas.drawCircle(Offset(cx, cy), r, ringPaint);
+
+    // Inner background
+    canvas.drawCircle(
+      Offset(cx, cy),
+      r - 1.5,
+      Paint()..color = const Color(0xff090414).withOpacity(0.85),
+    );
+
+    // Target emoji drawn inside (🎯 represent Active Plan goal)
+    TextPainter textPainter = TextPainter(
+      text: const TextSpan(text: "🎯", style: TextStyle(fontSize: 16)),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(cx - textPainter.width / 2, cy - textPainter.height / 2),
+    );
   }
 
   @override

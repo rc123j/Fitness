@@ -196,176 +196,228 @@ class MealView extends GetView<MealController> {
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                /// Left Info & Progress
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+          child: Stack(
+            children: [
+              /// A. Background Health/Nutrition Image (Option B)
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/images/health_screen.png',
+                  fit: BoxFit.cover,
+                  alignment: const Alignment(0.8, 0.0),
+                ),
+              ),
+
+              /// B. Black Gradient Overlay to fade out the left side for text readability
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        const Color(0xff0B0817),
+                        const Color(0xff0B0817).withOpacity(0.85),
+                        const Color(0xff0B0817).withOpacity(0.35),
+                        const Color(0xff0B0817).withOpacity(0.15),
+                      ],
+                      stops: const [0.0, 0.45, 0.8, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+
+              /// C. Radial Ambient Neon Glow on the right edge
+              Positioned(
+                right: -40,
+                top: -40,
+                child: Container(
+                  width: 140,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        const Color(0xffFF00E5).withOpacity(0.30),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              /// Card Content Row
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  children: [
+                    /// Left Info & Progress
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.auto_awesome_rounded,
-                            color: Color(0xffFF00E5),
-                            size: 14,
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.auto_awesome_rounded,
+                                color: Color(0xffFF00E5),
+                                size: 14,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                "Today's Nutrition Journey",
+                                style: GoogleFonts.outfit(
+                                  color: const Color(0xffFF00E5),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            "Today's Nutrition Journey",
-                            style: GoogleFonts.outfit(
-                              color: const Color(0xffFF00E5),
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
+                          const SizedBox(height: 12),
+                          Obx(() => RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: "${controller.currentCalories.value} ",
+                                      style: GoogleFonts.outfit(
+                                        color: Colors.white,
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: "/ ${controller.targetCalories.value} kcal",
+                                      style: GoogleFonts.inter(
+                                        color: Colors.white.withOpacity(0.40),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                          const SizedBox(height: 12),
+
+                          /// Gradient Progress Bar
+                          Row(
+                            children: [
+                              Expanded(
+                                child: SizedBox(
+                                  height: 8,
+                                  child: Stack(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(10),
+                                          color: Colors.white.withOpacity(0.08),
+                                        ),
+                                      ),
+                                      FractionallySizedBox(
+                                        alignment: Alignment.centerLeft,
+                                        widthFactor: progressPercent,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(10),
+                                            gradient: const LinearGradient(
+                                              colors: [
+                                                Color(0xffB100FF),
+                                                Color(0xffFF00E5),
+                                                Color(0xffFF7A00),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                "${(progressPercent * 100).toInt()}%",
+                                style: GoogleFonts.outfit(
+                                  color: const Color(0xffFF7A00),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      Obx(() => RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "${controller.currentCalories.value} ",
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.white,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: "/ ${controller.targetCalories.value} kcal",
-                                  style: GoogleFonts.inter(
-                                    color: Colors.white.withOpacity(0.40),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )),
-                      const SizedBox(height: 12),
+                    ),
 
-                      /// Gradient Progress Bar
-                      Row(
-                        children: [
-                          Expanded(
-                            child: SizedBox(
-                              height: 8,
-                              child: Stack(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      color: Colors.white.withOpacity(0.08),
-                                    ),
-                                  ),
-                                  FractionallySizedBox(
-                                    alignment: Alignment.centerLeft,
-                                    widthFactor: progressPercent,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        gradient: const LinearGradient(
-                                          colors: [
-                                            Color(0xffB100FF),
-                                            Color(0xffFF00E5),
-                                            Color(0xffFF7A00),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                    const SizedBox(width: 18),
+
+                    /// Right glowing circular icon
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        /// Glowing backdrop circle
+                        Container(
+                          height: 60,
+                          width: 60,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xffFF00E5).withOpacity(0.35),
+                                blurRadius: 18,
+                                spreadRadius: 2,
+                              ),
+                              BoxShadow(
+                                color: const Color(0xffFF7A00).withOpacity(0.20),
+                                blurRadius: 22,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        /// Outer double gradient circle ring
+                        Container(
+                          height: 64,
+                          width: 64,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: const Color(0xffFF00E5).withOpacity(0.5),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Container(
+                            margin: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: const Color(0xffFF7A00).withOpacity(0.3),
+                                width: 1.0,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Text(
-                            "${(progressPercent * 100).toInt()}%",
-                            style: GoogleFonts.outfit(
-                              color: const Color(0xffFF7A00),
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(width: 18),
-
-                /// Right glowing circular icon
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    /// Glowing backdrop circle
-                    Container(
-                      height: 60,
-                      width: 60,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xffFF00E5).withOpacity(0.35),
-                            blurRadius: 18,
-                            spreadRadius: 2,
-                          ),
-                          BoxShadow(
-                            color: const Color(0xffFF7A00).withOpacity(0.20),
-                            blurRadius: 22,
-                            spreadRadius: 1,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    /// Outer double gradient circle ring
-                    Container(
-                      height: 64,
-                      width: 64,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xffFF00E5).withOpacity(0.5),
-                          width: 1.5,
                         ),
-                      ),
-                      child: Container(
-                        margin: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: const Color(0xffFF7A00).withOpacity(0.3),
-                            width: 1.0,
+
+                        /// Inside Fork/Knife icon
+                        Container(
+                          height: 50,
+                          width: 50,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xff090414),
+                          ),
+                          child: const Icon(
+                            Icons.restaurant_rounded,
+                            color: Color(0xffFF00E5),
+                            size: 20,
                           ),
                         ),
-                      ),
-                    ),
-
-                    /// Inside Fork/Knife icon
-                    Container(
-                      height: 50,
-                      width: 50,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xff090414),
-                      ),
-                      child: const Icon(
-                        Icons.restaurant_rounded,
-                        color: Color(0xffFF00E5),
-                        size: 20,
-                      ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
