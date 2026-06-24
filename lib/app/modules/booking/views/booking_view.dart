@@ -130,12 +130,13 @@ class BookingView extends GetView<BookingController> {
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.03),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.08),
-            width: 0.8,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.08), width: 0.8),
         ),
-        child: const Icon(Icons.calendar_today_rounded, color: Colors.white, size: 16),
+        child: const Icon(
+          Icons.calendar_today_rounded,
+          color: Colors.white,
+          size: 16,
+        ),
       ),
     );
   }
@@ -161,7 +162,11 @@ class BookingView extends GetView<BookingController> {
             padding: const EdgeInsets.symmetric(horizontal: 14),
             child: Row(
               children: [
-                Icon(Icons.search_rounded, color: Colors.white.withOpacity(0.40), size: 18),
+                Icon(
+                  Icons.search_rounded,
+                  color: Colors.white.withOpacity(0.40),
+                  size: 18,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: TextField(
@@ -207,7 +212,11 @@ class BookingView extends GetView<BookingController> {
                 ),
               ),
               const SizedBox(width: 6),
-              Icon(Icons.tune_rounded, color: Colors.white.withOpacity(0.75), size: 14),
+              Icon(
+                Icons.tune_rounded,
+                color: Colors.white.withOpacity(0.75),
+                size: 14,
+              ),
             ],
           ),
         ),
@@ -246,7 +255,9 @@ class BookingView extends GetView<BookingController> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: isActive ? const Color(0xffB100FF) : Colors.white.withOpacity(0.06),
+                              color: isActive
+                                  ? const Color(0xffB100FF)
+                                  : Colors.white.withOpacity(0.06),
                               width: isActive ? 1.8 : 0.8,
                             ),
                           ),
@@ -272,7 +283,10 @@ class BookingView extends GetView<BookingController> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: const Color(0xff00FF87),
-                              border: Border.all(color: const Color(0xff06010F), width: 1.5),
+                              border: Border.all(
+                                color: const Color(0xff06010F),
+                                width: 1.5,
+                              ),
                             ),
                           ),
                         ),
@@ -284,7 +298,9 @@ class BookingView extends GetView<BookingController> {
                     Text(
                       expert["name"]!.split(" ")[0],
                       style: GoogleFonts.outfit(
-                        color: isActive ? Colors.white : Colors.white.withOpacity(0.55),
+                        color: isActive
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.55),
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
@@ -295,7 +311,9 @@ class BookingView extends GetView<BookingController> {
                     Text(
                       expert["role"]!,
                       style: GoogleFonts.inter(
-                        color: isActive ? const Color(0xffB100FF) : Colors.white.withOpacity(0.30),
+                        color: isActive
+                            ? const Color(0xffB100FF)
+                            : Colors.white.withOpacity(0.30),
                         fontSize: 7,
                       ),
                     ),
@@ -318,10 +336,7 @@ class BookingView extends GetView<BookingController> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.0,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
@@ -330,32 +345,34 @@ class BookingView extends GetView<BookingController> {
 
           return Stack(
             children: [
-              /// Left Graphic glowing circular ring (with Expert Image inside)
+              /// Circular Avatar with Glowing Ring (Option A / Premium)
               Positioned(
-                left: -15,
+                left: 14,
                 top: 0,
                 bottom: 0,
                 child: Center(
-                  child: CustomPaint(
-                    size: const Size(160, 160),
-                    painter: ExpertBackdropPainter(),
-                  ),
-                ),
-              ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      /// Glowing border ring painter
+                      CustomPaint(
+                        size: const Size(116, 116),
+                        painter: ExpertBackdropPainter(),
+                      ),
 
-              /// Image
-              Positioned(
-                left: 10,
-                top: 25,
-                bottom: 20,
-                child: SizedBox(
-                  width: 110,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.network(
-                      expert["image"]!,
-                      fit: BoxFit.cover,
-                    ),
+                      /// Circular Expert Image fitting perfectly inside the ring
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(48),
+                        child: SizedBox(
+                          width: 96,
+                          height: 96,
+                          child: Image.network(
+                            expert["image"]!,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -375,14 +392,21 @@ class BookingView extends GetView<BookingController> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
                             color: const Color(0xffB100FF).withOpacity(0.12),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.verified_user_rounded, color: Color(0xffB100FF), size: 10),
+                              const Icon(
+                                Icons.verified_user_rounded,
+                                color: Color(0xffB100FF),
+                                size: 10,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 "Verified Expert",
@@ -397,7 +421,11 @@ class BookingView extends GetView<BookingController> {
                         ),
                         Row(
                           children: [
-                            const Icon(Icons.star_rounded, color: Color(0xffFFD700), size: 12),
+                            const Icon(
+                              Icons.star_rounded,
+                              color: Color(0xffFFD700),
+                              size: 12,
+                            ),
                             const SizedBox(width: 3),
                             Text(
                               "${expert["rating"]} (${expert["reviewsCount"]} reviews)",
@@ -427,7 +455,11 @@ class BookingView extends GetView<BookingController> {
                               ),
                             ),
                             const SizedBox(width: 5),
-                            const Icon(Icons.verified_rounded, color: Color(0xffFF00E5), size: 14),
+                            const Icon(
+                              Icons.verified_rounded,
+                              color: Color(0xffFF00E5),
+                              size: 14,
+                            ),
                           ],
                         ),
                         const SizedBox(height: 2),
@@ -446,13 +478,27 @@ class BookingView extends GetView<BookingController> {
                     Row(
                       children: [
                         /// Experience
-                        buildStatBadge(Icons.emoji_events_rounded, expert["experience"]!, "Experience"),
+                        buildStatBadge(
+                          Icons.emoji_events_rounded,
+                          expert["experience"]!,
+                          "Experience",
+                        ),
                         const SizedBox(width: 10),
+
                         /// Clients
-                        buildStatBadge(Icons.people_rounded, expert["clients"]!, "Helped"),
+                        buildStatBadge(
+                          Icons.people_rounded,
+                          expert["clients"]!,
+                          "Helped",
+                        ),
                         const SizedBox(width: 10),
+
                         /// Location
-                        buildStatBadge(Icons.location_on_rounded, expert["location"]!.split(",")[0], "Online"),
+                        buildStatBadge(
+                          Icons.location_on_rounded,
+                          expert["location"]!.split(",")[0],
+                          "Online",
+                        ),
                       ],
                     ),
 
@@ -475,7 +521,8 @@ class BookingView extends GetView<BookingController> {
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
                         children: (expert["tags"] as List<String>).map((tag) {
-                          Color activeColor = tag.contains("Weight") || tag.contains("Recomp")
+                          Color activeColor =
+                              tag.contains("Weight") || tag.contains("Recomp")
                               ? const Color(0xffFF7A00)
                               : const Color(0xffB100FF);
                           return Container(
@@ -484,7 +531,10 @@ class BookingView extends GetView<BookingController> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(6),
                               color: activeColor.withOpacity(0.05),
-                              border: Border.all(color: activeColor.withOpacity(0.20), width: 0.8),
+                              border: Border.all(
+                                color: activeColor.withOpacity(0.20),
+                                width: 0.8,
+                              ),
                             ),
                             child: Center(
                               child: Text(
@@ -550,10 +600,7 @@ class BookingView extends GetView<BookingController> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.0,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
       ),
       child: Obx(() {
         final active = controller.activeTab.value;
@@ -581,9 +628,13 @@ class BookingView extends GetView<BookingController> {
                     child: Text(
                       tab,
                       style: GoogleFonts.outfit(
-                        color: isActive ? Colors.white : Colors.white.withOpacity(0.40),
+                        color: isActive
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.40),
                         fontSize: 11,
-                        fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: isActive
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                     ),
                   ),
@@ -645,7 +696,11 @@ class BookingView extends GetView<BookingController> {
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
                     child: Row(
                       children: [
-                        const Icon(Icons.verified_user_outlined, color: Color(0xffFF00E5), size: 12),
+                        const Icon(
+                          Icons.verified_user_outlined,
+                          color: Color(0xffFF00E5),
+                          size: 12,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           cred,
@@ -680,10 +735,7 @@ class BookingView extends GetView<BookingController> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.03),
-          width: 0.8,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.03), width: 0.8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -713,7 +765,9 @@ class BookingView extends GetView<BookingController> {
 
           /// List of items
           Column(
-            children: (expert["services"] as List<Map<String, dynamic>>).map((srv) {
+            children: (expert["services"] as List<Map<String, dynamic>>).map((
+              srv,
+            ) {
               IconData icon = Icons.videocam_rounded;
               Color clr = const Color(0xffB100FF);
 
@@ -809,7 +863,12 @@ class BookingView extends GetView<BookingController> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(rev["image"]!, height: 32, width: 32, fit: BoxFit.cover),
+                child: Image.network(
+                  rev["image"]!,
+                  height: 32,
+                  width: 32,
+                  fit: BoxFit.cover,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -829,7 +888,11 @@ class BookingView extends GetView<BookingController> {
                         ),
                         Row(
                           children: List.generate(5, (index) {
-                            return const Icon(Icons.star_rounded, color: Color(0xffFFD700), size: 10);
+                            return const Icon(
+                              Icons.star_rounded,
+                              color: Color(0xffFFD700),
+                              size: 10,
+                            );
                           }),
                         ),
                       ],
@@ -905,8 +968,12 @@ class BookingView extends GetView<BookingController> {
               final item = controller.dates[index];
               return Obx(() {
                 final isActive = index == controller.selectedDateIndex.value;
-                Color borderClr = isActive ? const Color(0xffB100FF) : Colors.white.withOpacity(0.04);
-                Color fillClr = isActive ? const Color(0xffB100FF).withOpacity(0.08) : Colors.white.withOpacity(0.01);
+                Color borderClr = isActive
+                    ? const Color(0xffB100FF)
+                    : Colors.white.withOpacity(0.04);
+                Color fillClr = isActive
+                    ? const Color(0xffB100FF).withOpacity(0.08)
+                    : Colors.white.withOpacity(0.01);
 
                 return GestureDetector(
                   onTap: () => controller.selectedDateIndex.value = index,
@@ -917,7 +984,10 @@ class BookingView extends GetView<BookingController> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
                       color: fillClr,
-                      border: Border.all(color: borderClr, width: isActive ? 1.5 : 0.8),
+                      border: Border.all(
+                        color: borderClr,
+                        width: isActive ? 1.5 : 0.8,
+                      ),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -940,7 +1010,9 @@ class BookingView extends GetView<BookingController> {
                         Text(
                           item["slots"]!,
                           style: GoogleFonts.inter(
-                            color: isActive ? const Color(0xffB100FF) : Colors.white.withOpacity(0.30),
+                            color: isActive
+                                ? const Color(0xffB100FF)
+                                : Colors.white.withOpacity(0.30),
                             fontSize: 7,
                             fontWeight: FontWeight.bold,
                           ),
@@ -965,9 +1037,14 @@ class BookingView extends GetView<BookingController> {
             itemBuilder: (context, index) {
               final slot = controller.timeSlots[index];
               return Obx(() {
-                final isActive = index == controller.selectedTimeSlotIndex.value;
-                Color borderClr = isActive ? const Color(0xffB100FF) : Colors.white.withOpacity(0.04);
-                Color fillClr = isActive ? const Color(0xffB100FF).withOpacity(0.08) : Colors.white.withOpacity(0.01);
+                final isActive =
+                    index == controller.selectedTimeSlotIndex.value;
+                Color borderClr = isActive
+                    ? const Color(0xffB100FF)
+                    : Colors.white.withOpacity(0.04);
+                Color fillClr = isActive
+                    ? const Color(0xffB100FF).withOpacity(0.08)
+                    : Colors.white.withOpacity(0.01);
 
                 return GestureDetector(
                   onTap: () => controller.selectedTimeSlotIndex.value = index,
@@ -977,13 +1054,18 @@ class BookingView extends GetView<BookingController> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       color: fillClr,
-                      border: Border.all(color: borderClr, width: isActive ? 1.5 : 0.8),
+                      border: Border.all(
+                        color: borderClr,
+                        width: isActive ? 1.5 : 0.8,
+                      ),
                     ),
                     child: Center(
                       child: Text(
                         slot,
                         style: GoogleFonts.outfit(
-                          color: isActive ? Colors.white : Colors.white.withOpacity(0.50),
+                          color: isActive
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.50),
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
@@ -1009,10 +1091,7 @@ class BookingView extends GetView<BookingController> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
               gradient: const LinearGradient(
-                colors: [
-                  Color(0xffFF00E5),
-                  Color(0xffFF7A00),
-                ],
+                colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
               ),
             ),
             child: Material(
@@ -1044,7 +1123,11 @@ class BookingView extends GetView<BookingController> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Icon(Icons.videocam_rounded, color: Colors.white, size: 16),
+                          const Icon(
+                            Icons.videocam_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
                         ],
                       ),
                     ],
@@ -1116,7 +1199,12 @@ class BookingView extends GetView<BookingController> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.network(rev["image"]!, height: 32, width: 32, fit: BoxFit.cover),
+                        child: Image.network(
+                          rev["image"]!,
+                          height: 32,
+                          width: 32,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -1136,7 +1224,11 @@ class BookingView extends GetView<BookingController> {
                                 ),
                                 Row(
                                   children: List.generate(5, (index) {
-                                    return const Icon(Icons.star_rounded, color: Color(0xffFFD700), size: 8);
+                                    return const Icon(
+                                      Icons.star_rounded,
+                                      color: Color(0xffFFD700),
+                                      size: 8,
+                                    );
                                   }),
                                 ),
                               ],
@@ -1167,7 +1259,6 @@ class BookingView extends GetView<BookingController> {
       ],
     );
   }
-
 }
 
 /// ----------------------------------------------------
@@ -1177,7 +1268,7 @@ class ExpertBackdropPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     double strokeWidth = 3.5;
-    double radius = size.width / 2.3;
+    double radius = size.width / 2 - strokeWidth;
     Offset center = Offset(size.width / 2, size.height / 2);
 
     // Glowing border ring - LinearGradient (safe)
