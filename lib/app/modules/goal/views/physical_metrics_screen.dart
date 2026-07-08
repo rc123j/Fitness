@@ -6,10 +6,12 @@ import 'activity_level_screen.dart';
 
 class PhysicalMetricsScreen extends StatefulWidget {
   final String goalTitle;
+  final int goalId;
 
   const PhysicalMetricsScreen({
     super.key,
     required this.goalTitle,
+    required this.goalId,
   });
 
   @override
@@ -283,6 +285,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                           onTap: () {
                             Get.to(() => ActivityLevelScreen(
                               goalTitle: widget.goalTitle,
+                              goalId: widget.goalId,
                               gender: selectedGender,
                               age: age.toInt(),
                               height: height.toInt(),

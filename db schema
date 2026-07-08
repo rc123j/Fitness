@@ -1,0 +1,514 @@
+# NutriSmart Pro - Database Schema Design (Phase 1)
+
+This updated schema has been simplified by deferring the family module, payments/transactions, and specific video-calling integrations to a later stage. It maintains maximum robustness, data integrity, and adheres to strict SQL and database design industry standards.
+
+## Database Overview
+- **Total Tables**: 41
+- **Database Engine**: MySQL (fully compatible with Sequelize ORM)
+- **Relationships**: Normalized up to 3NF, using strict foreign key constraints, indexing for performance-critical columns, and soft-delete support where applicable.
+
+---
+
+## Proposed Database Schema
+
+### 1. Authentication & Core User Profile
+
+Defines user credentials, roles, and basic physical assessment profiles.
+
+```mermaid
+erDiagram
+    roles ||--o{ users : "has role"
+    users ||--|| members : "has profile"
+    activity_levels ||--o{ members : "defines BMR factor"
+    goals ||--o{ members : "defines target"
+```
+
+#### 1. `roles` (Master Table)
+*Stores authorization roles.*
+- `id` (BIGINT, PK, Auto Increment)
+- `name` (VARCHAR(50), UNIQUE, NOT NULL) — e.g., 'ADMIN', 'CONSULTANT', 'MEMBER'
+- `description` (TEXT, NULL)
+
+#### 2. `users` (Auth Credentials)
+*Handles user authentication, credentials, and token management.*
+- `id` (BIGINT, PK, Auto Increment)
+- `role_id` (BIGINT, FK -> `roles.id`, NOT NULL)
+- `first_name` (VARCHAR(100), NOT NULL)
+- `last_name` (VARCHAR(100), NOT NULL)
+- `email` (VARCHAR(150), UNIQUE, NOT NULL, Index)
+- `password_hash` (VARCHAR(255), NOT NULL)
+- `phone` (VARCHAR(20), NULL, Index)
+- `status` (ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED'), DEFAULT 'ACTIVE')
+- `refresh_token` (VARCHAR(255), NULL)
+- `last_login_at` (DATETIME, NULL)
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+- `updated_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
+
+#### 3. `members` (Member Profile)
+*Tracks the primary physical attributes and profile settings of the member.*
+- `id` (BIGINT, PK, Auto Increment)
+- `user_id` (BIGINT, FK -> `users.id` [1:1 relationship], UNIQUE, NOT NULL)
+- `consultant_id` (BIGINT, FK -> `users.id` [N:1 relationship], NULL) — Assigned health expert
+- `member_code` (VARCHAR(30), UNIQUE, NOT NULL, Index) — Public lookup code
+- `gender` (ENUM('MALE', 'FEMALE', 'OTHER'), NOT NULL)
+- `dob` (DATE, NOT NULL) — Date of Birth
+- `height_cm` (DECIMAL(5,2), NOT NULL)
+- `weight_kg` (DECIMAL(5,2), NOT NULL) — Initial starting weight
+- `activity_level_id` (BIGINT, FK -> `activity_levels.id`, NOT NULL)
+- `goal_id` (BIGINT, FK -> `goals.id`, NOT NULL)
+- `status` (ENUM('ACTIVE', 'INACTIVE'), DEFAULT 'ACTIVE')
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+- `updated_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
+
+#### 4. `activity_levels` (Master Table)
+*Lookup table for BMR calculation multipliers.*
+- `id` (BIGINT, PK, Auto Increment)
+- `title` (VARCHAR(100), NOT NULL) — e.g., 'Sedentary', 'Lightly Active', 'Moderately Active', 'Very Active'
+- `factor` (DECIMAL(3,2), NOT NULL) — e.g., 1.20, 1.37, 1.55, 1.72, 1.90
+
+#### 5. `goals` (Master Table)
+*Lookup table for health goals.*
+- `id` (BIGINT, PK, Auto Increment)
+- `goal_name` (VARCHAR(100), UNIQUE, NOT NULL) — e.g., 'Fat Loss', 'Muscle Gain', 'Healthy Lifestyle', 'Plateau Breaker'
+
+---
+
+### 2. Onboarding Medical Profiles & Metrics
+
+Stores clinical context, metabolic conditions, and calculated assessment formulas.
+
+```mermaid
+erDiagram
+    members ||--o{ member_medical_conditions : maps
+    medical_conditions ||--o{ member_medical_conditions : maps
+    members ||--o{ member_symptoms : maps
+    symptoms ||--o{ member_symptoms : maps
+    members ||--o{ member_taste_preferences : maps
+    taste_preferences ||--o{ member_taste_preferences : maps
+```
+
+#### 6. `medical_conditions` (Master Table)
+*Lookup list of medical problems.*
+- `id` (BIGINT, PK, Auto Increment)
+- `condition_name` (VARCHAR(100), UNIQUE, NOT NULL) — e.g., 'Diabetes', 'Hypertension', 'Thyroid', 'PCOS'
+
+#### 7. `member_medical_conditions` (Many-to-Many Bridge)
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `condition_id` (BIGINT, FK -> `medical_conditions.id`, NOT NULL)
+
+#### 8. `symptoms` (Master Table)
+*Lookup list of current physical complaints.*
+- `id` (BIGINT, PK, Auto Increment)
+- `symptom_name` (VARCHAR(100), UNIQUE, NOT NULL) — e.g., 'Fatigue', 'Bloating', 'Hair Loss', 'Insomnia'
+
+#### 9. `member_symptoms` (Many-to-Many Bridge)
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `symptom_id` (BIGINT, FK -> `symptoms.id`, NOT NULL)
+
+#### 10. `taste_preferences` (Master Table)
+*Lookup list of dietary styles.*
+- `id` (BIGINT, PK, Auto Increment)
+- `name` (VARCHAR(100), UNIQUE, NOT NULL) — e.g., 'Vegetarian', 'Vegan', 'Keto', 'Eggitarian', 'No Seafood'
+
+#### 11. `member_taste_preferences` (Many-to-Many Bridge)
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `taste_preference_id` (BIGINT, FK -> `taste_preferences.id`, NOT NULL)
+
+#### 12. `member_metrics` (Calculated Diagnostics Log)
+*Stores calculated metrics for assessment. New rows are inserted upon re-check.*
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `bmi` (DECIMAL(5,2), NOT NULL) — Body Mass Index
+- `bmr` (DECIMAL(8,2), NOT NULL) — Basal Metabolic Rate
+- `tdee` (DECIMAL(8,2), NOT NULL) — Total Daily Energy Expenditure
+- `ibw` (DECIMAL(5,2), NOT NULL) — Ideal Body Weight (kg)
+- `ibw_percentage` (DECIMAL(5,2), NOT NULL) — Deviation from ideal weight
+- `weight_difference` (DECIMAL(6,2), NOT NULL) — Current weight vs. target weight
+- `dtcr` (DECIMAL(8,2), NOT NULL) — Daily Target Calorie Range
+- `calorie_target` (DECIMAL(8,2), NOT NULL) — Specific intake goal
+- `protein_target_g` (DECIMAL(6,2), NOT NULL) — Target protein grams
+- `carbs_target_g` (DECIMAL(6,2), NOT NULL) — Target carbohydrate grams
+- `fat_target_g` (DECIMAL(6,2), NOT NULL) — Target fat grams
+- `fiber_target_g` (DECIMAL(6,2), NOT NULL) — Target fiber grams
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+
+#### 13. `progress_logs` (Ongoing Tracker)
+*Records weight and waist changes over time, for progress charts.*
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `logged_date` (DATE, NOT NULL, Index)
+- `weight_kg` (DECIMAL(5,2), NOT NULL)
+- `waist_inches` (DECIMAL(4,2), NOT NULL)
+- `photo_url` (VARCHAR(255), NULL)
+- `notes` (TEXT, NULL)
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+
+---
+
+### 3. Food Database & Diet Plans
+
+Manages the core ingredients registry, exclusions, and structured 30-day templates.
+
+```mermaid
+erDiagram
+    food_categories ||--o{ food_items : categorizes
+    diet_plans ||--o{ diet_plan_meals : has
+    diet_plan_meals ||--o{ diet_plan_foods : lists
+    food_items ||--o{ diet_plan_foods : uses
+```
+
+#### 14. `food_categories` (Master Table)
+*Grouping foods.*
+- `id` (BIGINT, PK, Auto Increment)
+- `name` (VARCHAR(100), UNIQUE, NOT NULL) — e.g., 'Dairy', 'Vegetables', 'Grains', 'Poultry'
+
+#### 15. `food_items` (Ingredients Inventory)
+*Nutrition facts per standard serving.*
+- `id` (BIGINT, PK, Auto Increment)
+- `category_id` (BIGINT, FK -> `food_categories.id`, NOT NULL)
+- `food_name` (VARCHAR(150), NOT NULL)
+- `serving_size` (DECIMAL(8,2), NOT NULL) — Numeric quantity
+- `serving_unit` (VARCHAR(20), NOT NULL) — e.g., 'g', 'ml', 'piece', 'cup'
+- `calories` (DECIMAL(8,2), NOT NULL)
+- `protein` (DECIMAL(8,2), NOT NULL) — grams
+- `carbs` (DECIMAL(8,2), NOT NULL) — grams
+- `fat` (DECIMAL(8,2), NOT NULL) — grams
+- `fiber` (DECIMAL(8,2), NOT NULL) — grams
+- `is_vegetarian` (BOOLEAN, DEFAULT TRUE)
+- `is_vegan` (BOOLEAN, DEFAULT FALSE)
+- `created_at` (DATETIME, DEFAULT CURRENT_TIMESTAMP)
+
+#### 16. `food_medical_exclusions` (Exclusion Mappings)
+*Safety rules to filter foods from plans.*
+- `id` (BIGINT, PK, Auto Increment)
+- `food_id` (BIGINT, FK -> `food_items.id` ON DELETE CASCADE, NOT NULL)
+- `condition_id` (BIGINT, FK -> `medical_conditions.id` ON DELETE CASCADE, NOT NULL)
+- `reason` (TEXT, NULL)
+
+#### 17. `diet_plans` (Plan Shell)
+*Aggregates recommended intake allocations.*
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `metric_id` (BIGINT, FK -> `member_metrics.id`, NOT NULL) — Diagnostic snapshot
+- `target_calories` (DECIMAL(8,2), NOT NULL)
+- `generation_type` (ENUM('AI', 'MANUAL'), DEFAULT 'AI')
+- `status` (ENUM('DRAFT', 'ACTIVE', 'COMPLETED', 'ARCHIVED'), DEFAULT 'DRAFT')
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+- `updated_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
+
+#### 18. `meals` (Master Table)
+*Defines schedule divisions.*
+- `id` (BIGINT, PK, Auto Increment)
+- `name` (VARCHAR(50), UNIQUE, NOT NULL) — e.g., 'Breakfast', 'Mid Meal', 'Lunch', 'Evening Snack', 'Dinner'
+
+#### 19. `diet_plan_meals` (Calorie Allocations)
+*Maps meals within a diet plan.*
+- `id` (BIGINT, PK, Auto Increment)
+- `diet_plan_id` (BIGINT, FK -> `diet_plans.id` ON DELETE CASCADE, NOT NULL)
+- `meal_id` (BIGINT, FK -> `meals.id`, NOT NULL)
+- `target_calories` (DECIMAL(8,2), NOT NULL)
+
+#### 20. `diet_plan_foods` (Specific Meal Items)
+*Defines exact foods assigned to a meal slot.*
+- `id` (BIGINT, PK, Auto Increment)
+- `diet_plan_meal_id` (BIGINT, FK -> `diet_plan_meals.id` ON DELETE CASCADE, NOT NULL)
+- `food_id` (BIGINT, FK -> `food_items.id`, NOT NULL)
+- `quantity` (DECIMAL(8,2), NOT NULL) — Multiple of serving size
+- `calories` (DECIMAL(8,2), NOT NULL) — Scaled macros
+- `protein` (DECIMAL(8,2), NOT NULL)
+- `carbs` (DECIMAL(8,2), NOT NULL)
+- `fat` (DECIMAL(8,2), NOT NULL)
+- `fiber` (DECIMAL(8,2), NOT NULL)
+- `notes` (TEXT, NULL)
+
+---
+
+### 4. Plan Activation, Daily Tracking & Logs
+
+Tracks dynamic countdowns, daily water/food eating compliance, replaces, skips, and favorites.
+
+```mermaid
+erDiagram
+    diet_plans ||--o{ diet_plan_activations : starts
+    diet_plan_activations ||--o{ daily_meal_logs : aggregates
+    members ||--o{ daily_water_logs : counts
+```
+
+#### 21. `diet_plan_activations` (Start My Plan System)
+*Implements the manual "Start My Plan" logic.*
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `diet_plan_id` (BIGINT, FK -> `diet_plans.id`, NOT NULL)
+- `status` (ENUM('WAITING', 'ACTIVE', 'COMPLETED', 'CANCELLED'), DEFAULT 'WAITING')
+- `activated_at` (DATETIME, NULL) — Set when user clicks "Start My Plan"
+- `expires_at` (DATETIME, NULL) — Calculated as `activated_at` + 30 days
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+
+#### 22. `daily_meal_logs` (Compliance Tracker)
+*Records actual intake compared to plans.*
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `diet_plan_activation_id` (BIGINT, FK -> `diet_plan_activations.id`, NOT NULL)
+- `logged_date` (DATE, NOT NULL, Index)
+- `meal_id` (BIGINT, FK -> `meals.id`, NOT NULL)
+- `diet_plan_food_id` (BIGINT, FK -> `diet_plan_foods.id` ON DELETE SET NULL, NULL) — Target prescription
+- `food_id` (BIGINT, FK -> `food_items.id`, NOT NULL) — Food eaten
+- `quantity_consumed` (DECIMAL(8,2), NOT NULL)
+- `calories_consumed` (DECIMAL(8,2), NOT NULL)
+- `protein_consumed` (DECIMAL(8,2), NOT NULL)
+- `carbs_consumed` (DECIMAL(8,2), NOT NULL)
+- `fat_consumed` (DECIMAL(8,2), NOT NULL)
+- `fiber_consumed` (DECIMAL(8,2), NOT NULL)
+- `status` (ENUM('CONSUMED', 'SKIPPED', 'REPLACED'), NOT NULL, DEFAULT 'CONSUMED')
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+
+#### 23. `daily_water_logs` (Hydration Tracker)
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `logged_date` (DATE, NOT NULL, Index)
+- `amount_ml` (INT, NOT NULL) — Total water log sum
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+- `updated_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
+
+#### 24. `member_favorite_foods` (Saved Favorites)
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `food_id` (BIGINT, FK -> `food_items.id` ON DELETE CASCADE, NOT NULL)
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+
+---
+
+### 5. Supplement Recommendations & Logs
+
+Catalog of sports and wellness supplements, recommended dosages, and daily compliance tracking.
+
+#### 25. `supplements` (Master Catalog)
+*Catalog of supplement products.*
+- `id` (BIGINT, PK, Auto Increment)
+- `name` (VARCHAR(150), UNIQUE, NOT NULL) — e.g., 'Whey Protein Isolate', 'Creatine Monohydrate', 'Omega-3 Fish Oil'
+- `description` (TEXT, NULL)
+- `serving_size` (VARCHAR(50), NOT NULL) — e.g., '1 scoop (30g)', '2 capsules'
+- `benefits` (TEXT, NULL)
+
+#### 26. `diet_plan_supplements` (Recommendations Mappings)
+*Links recommended supplements to a diet plan.*
+- `id` (BIGINT, PK, Auto Increment)
+- `diet_plan_id` (BIGINT, FK -> `diet_plans.id` ON DELETE CASCADE, NOT NULL)
+- `supplement_id` (BIGINT, FK -> `supplements.id`, NOT NULL)
+- `dosage` (VARCHAR(50), NOT NULL) — e.g., '1 serving', '2 caps'
+- `timing` (ENUM('MORNING', 'AFTERNOON', 'EVENING', 'PRE_WORKOUT', 'POST_WORKOUT', 'BEFORE_BED'), NOT NULL)
+- `frequency` (VARCHAR(50), NOT NULL) — e.g., 'Daily', 'Only on Workout Days'
+- `notes` (TEXT, NULL)
+
+#### 27. `daily_supplement_logs` (Supplement Compliance)
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `supplement_id` (BIGINT, FK -> `supplements.id`, NOT NULL)
+- `logged_date` (DATE, NOT NULL, Index)
+- `status` (ENUM('TAKEN', 'SKIPPED'), DEFAULT 'TAKEN')
+- `logged_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+
+---
+
+### 6. Gamification System
+
+Supports XP points, streaks, wallets, leaderboard stats, and badges.
+
+```mermaid
+erDiagram
+    members ||--|| gamification_wallets : has
+    gamification_wallets ||--o{ gamification_transactions : details
+    members ||--o{ member_badges : unlocks
+    badges ||--o{ member_badges : unlocks
+```
+
+#### 28. `gamification_wallets` (XP & Streaks Registry)
+*Tracks streaks, levels, and reward balances.*
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, UNIQUE, NOT NULL)
+- `fit_points` (INT, NOT NULL, DEFAULT 0) — Redeemable reward points
+- `lifetime_earned_points` (INT, NOT NULL, DEFAULT 0)
+- `current_xp` (INT, NOT NULL, DEFAULT 0) — Rank level progression XP
+- `current_level` (VARCHAR(50), NOT NULL, DEFAULT 'Bronze')
+- `current_streak` (INT, NOT NULL, DEFAULT 0) — Consecutive meal adherence days
+- `longest_streak` (INT, NOT NULL, DEFAULT 0)
+- `last_streak_update` (DATE, NULL)
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+- `updated_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
+
+#### 29. `gamification_transactions` (Ledger)
+*Double-entry point transaction ledger.*
+- `id` (BIGINT, PK, Auto Increment)
+- `wallet_id` (BIGINT, FK -> `gamification_wallets.id` ON DELETE CASCADE, NOT NULL)
+- `points` (INT, NOT NULL) — Positive for earnings, negative for redemptions
+- `action_type` (ENUM('DAILY_CHECKIN', 'MEAL_LOGGED', 'WORKOUT_LOGGED', 'GOAL_ACHIEVED', 'REFERRAL', 'REDEMPTION'), NOT NULL)
+- `description` (TEXT, NULL)
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+
+#### 30. `badges` (Master Badges Catalog)
+- `id` (BIGINT, PK, Auto Increment)
+- `title` (VARCHAR(100), UNIQUE, NOT NULL)
+- `description` (TEXT, NOT NULL)
+- `icon_url` (VARCHAR(255), NOT NULL)
+- `points_required` (INT, NOT NULL, DEFAULT 0)
+- `created_at` (DATETIME, DEFAULT CURRENT_TIMESTAMP)
+
+#### 31. `member_badges` (Unlocked Badges)
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `badge_id` (BIGINT, FK -> `badges.id`, NOT NULL)
+- `unlocked_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+
+---
+
+### 7. Reminder Engine
+
+Controls push notification scheduling parameters for meal slots, supplements, and weigh-ins.
+
+#### 32. `reminders` (Reminder Settings)
+*Configs user schedules.*
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `reminder_type` (ENUM('MEAL', 'WATER', 'SUPPLEMENT', 'WEIGHT_CHECK', 'PROGRESS_UPLOAD'), NOT NULL)
+- `title` (VARCHAR(150), NOT NULL)
+- `message` (TEXT, NOT NULL)
+- `scheduled_time` (TIME, NOT NULL) — e.g. 08:30:00
+- `is_active` (BOOLEAN, DEFAULT TRUE)
+- `recurrence` (ENUM('DAILY', 'WEEKLY', 'WORKOUT_DAYS'), DEFAULT 'DAILY')
+- `diet_plan_meal_id` (BIGINT, FK -> `diet_plan_meals.id` ON DELETE CASCADE, NULL)
+- `supplement_id` (BIGINT, FK -> `supplements.id` ON DELETE CASCADE, NULL)
+- `created_at` (DATETIME, DEFAULT CURRENT_TIMESTAMP)
+- `updated_at` (DATETIME, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
+
+#### 33. `reminder_logs` (Compliance Ledger)
+*Tracks reminder actions.*
+- `id` (BIGINT, PK, Auto Increment)
+- `reminder_id` (BIGINT, FK -> `reminders.id` ON DELETE CASCADE, NOT NULL)
+- `logged_date` (DATE, NOT NULL, Index)
+- `status` (ENUM('COMPLETED', 'SNOOZED', 'MISSED'), NOT NULL)
+- `actioned_at` (DATETIME, NULL)
+
+---
+
+### 8. Expert Consultations (Calendar Scheduler)
+
+Tracks doctor/expert slot assignments and call bookings (video specific elements deferred to phase 2).
+
+```mermaid
+erDiagram
+    users ||--o{ consultant_slots : has_slots
+    members ||--o{ consultation_appointments : books
+    consultant_slots ||--|| consultation_appointments : occupies
+```
+
+#### 34. `consultant_slots` (Calendar Slots)
+*Consultant availability configuration.*
+- `id` (BIGINT, PK, Auto Increment)
+- `consultant_id` (BIGINT, FK -> `users.id` ON DELETE CASCADE, NOT NULL) — Must check user has 'CONSULTANT' role
+- `start_time` (DATETIME, NOT NULL, Index)
+- `end_time` (DATETIME, NOT NULL)
+- `status` (ENUM('AVAILABLE', 'BOOKED', 'BLOCKED'), DEFAULT 'AVAILABLE')
+- `created_at` (DATETIME, DEFAULT CURRENT_TIMESTAMP)
+- `updated_at` (DATETIME, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
+
+#### 35. `consultation_appointments` (Consultation Bookings)
+*Tracks bookings between members and experts.*
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `consultant_id` (BIGINT, FK -> `users.id`, NOT NULL)
+- `slot_id` (BIGINT, FK -> `consultant_slots.id`, NOT NULL, UNIQUE)
+- `status` (ENUM('PENDING', 'APPROVED', 'REJECTED', 'COMPLETED', 'CANCELLED'), DEFAULT 'PENDING')
+- `notes` (TEXT, NULL) — Details supplied by member on booking
+- `expert_notes` (TEXT, NULL) — Diagnosis written by consultant
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+- `updated_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
+
+---
+
+### 9. Social Room Module
+
+Handles forum feeds, transformation story uploads, likes, and comments.
+
+```mermaid
+erDiagram
+    members ||--o{ social_posts : publishes
+    social_posts ||--o{ social_likes : receives
+    social_posts ||--o{ social_comments : receives
+```
+
+#### 36. `social_posts` (Post Feeds)
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `post_type` (ENUM('TRANSFORMATION', 'ACHIEVEMENT', 'MEAL_PREP', 'WORKOUT', 'MOTIVATION'), NOT NULL)
+- `caption` (TEXT, NOT NULL)
+- `image_url` (VARCHAR(255), NULL)
+- `badge_id` (BIGINT, FK -> `badges.id` ON DELETE SET NULL, NULL) — Optional linked achievement
+- `likes_count` (INT, DEFAULT 0)
+- `comments_count` (INT, DEFAULT 0)
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+- `updated_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
+
+#### 37. `social_likes` (Feed Likes)
+- `id` (BIGINT, PK, Auto Increment)
+- `post_id` (BIGINT, FK -> `social_posts.id` ON DELETE CASCADE, NOT NULL)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+- UNIQUE INDEX `post_member_like_idx` (`post_id`, `member_id`) — Prevents duplicate likes
+
+#### 38. `social_comments` (Post Threaded Comments)
+- `id` (BIGINT, PK, Auto Increment)
+- `post_id` (BIGINT, FK -> `social_posts.id` ON DELETE CASCADE, NOT NULL)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `parent_comment_id` (BIGINT, FK -> `social_comments.id` ON DELETE CASCADE, NULL) — For nested replies
+- `comment_text` (TEXT, NOT NULL)
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+- `updated_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
+
+#### 39. `member_connections` (Follow Relationships)
+- `id` (BIGINT, PK, Auto Increment)
+- `follower_member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `following_member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `created_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+- UNIQUE INDEX `follower_following_idx` (`follower_member_id`, `following_member_id`)
+
+---
+
+### 10. System Configurations & Alerts
+
+Stores core backend formula multipliers and notification logs.
+
+#### 40. `notifications` (Push History)
+- `id` (BIGINT, PK, Auto Increment)
+- `member_id` (BIGINT, FK -> `members.id` ON DELETE CASCADE, NOT NULL)
+- `title` (VARCHAR(150), NOT NULL)
+- `body` (TEXT, NOT NULL)
+- `type` (ENUM('SYSTEM', 'REMINDER', 'SOCIAL', 'CONSULTATION'), NOT NULL)
+- `is_read` (BOOLEAN, DEFAULT FALSE)
+- `sent_at` (DATETIME, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+
+#### 41. `formula_configurations` (Metadata Variables)
+*Stores calculation variables for Mifflin-St Jeor or Harris-Benedict formulas to allow on-the-fly tuning via the Admin Panel.*
+- `id` (BIGINT, PK, Auto Increment)
+- `formula_name` (VARCHAR(100), NOT NULL) — e.g. 'Mifflin-St Jeor'
+- `gender` (ENUM('MALE', 'FEMALE', 'OTHER'), NOT NULL)
+- `constant_a` (DECIMAL(8,4), NOT NULL)
+- `weight_multiplier` (DECIMAL(8,4), NOT NULL)
+- `height_multiplier` (DECIMAL(8,4), NOT NULL)
+- `age_multiplier` (DECIMAL(8,4), NOT NULL)
+- `is_active` (BOOLEAN, DEFAULT TRUE)
+- `created_at` (DATETIME, DEFAULT CURRENT_TIMESTAMP)
+- `updated_at` (DATETIME, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
+
+---
+
+## Verification Plan
+
+### Database Validation
+1. Compile the script structure and execute a mock DDL validation checking for circular dependencies.
+2. Verify cascading delete behavior:
+   - When a `user` is deleted, `members` and credentials are Cascaded.
+   - Core log records (`daily_meal_logs`, `reminder_logs`) are Cascade deleted.
+3. Validate unique composite indices on followers (`follower_member_id` & `following_member_id`) and post likes (`post_id` & `member_id`) to ensure database consistency.

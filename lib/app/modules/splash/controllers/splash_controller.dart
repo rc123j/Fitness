@@ -1,23 +1,26 @@
 import 'package:get/get.dart';
+import '../../../services/auth_service.dart';
 
 class SplashController extends GetxController {
-  //TODO: Implement SplashController
-
-  final count = 0.obs;
-  @override
-  void onInit() {
-    super.onInit();
-  }
+  final _authService = Get.find<AuthService>();
 
   @override
   void onReady() {
     super.onReady();
+    _navigate();
   }
 
-  @override
-  void onClose() {
-    super.onClose();
-  }
+  Future<void> _navigate() async {
+    await Future.delayed(const Duration(seconds: 2));
 
-  void increment() => count.value++;
+    if (_authService.isLoggedIn) {
+      if (_authService.isOnboardingDone) {
+        Get.offAllNamed('/main-navigation');
+      } else {
+        Get.offAllNamed('/goal-selection');
+      }
+    } else {
+      Get.offAllNamed('/login');
+    }
+  }
 }

@@ -259,10 +259,40 @@ class LoginView extends GetView<LoginController> {
 
                     const SizedBox(height: 34),
 
+                    // ERROR MESSAGE
+                    Obx(() {
+                      final msg = controller.errorMessage.value;
+                      if (msg == null) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xffFF3B30).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xffFF3B30).withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline, color: Color(0xffFF3B30), size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  msg,
+                                  style: GoogleFonts.inter(color: const Color(0xffFF3B30), fontSize: 13),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+
                     // EMAIL FIELD
                     buildField(
                       hint: 'Email Address',
                       icon: Icons.person_outline_rounded,
+                      controller: controller.emailController,
                     ),
 
                     const SizedBox(height: 16),
@@ -272,6 +302,7 @@ class LoginView extends GetView<LoginController> {
                       hint: 'Password',
                       icon: Icons.lock_outline_rounded,
                       suffix: Icons.visibility_outlined,
+                      controller: controller.passwordController,
                     ),
 
                     const SizedBox(height: 16),
@@ -298,53 +329,61 @@ class LoginView extends GetView<LoginController> {
                     const SizedBox(height: 28),
 
                     // LOGIN CAPSULE BUTTON
-                    Container(
-                      height: 64,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(32),
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xffB000FF), // Neon purple
-                            Color(0xffFF5E00), // Neon orange
+                    Obx(
+                      () => Container(
+                        height: 64,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(32),
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xffB000FF),
+                              Color(0xffFF5E00),
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xffB000FF).withOpacity(0.4),
+                              blurRadius: 20,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 4),
+                            ),
                           ],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xffB000FF).withOpacity(0.4),
-                            blurRadius: 20,
-                            spreadRadius: 1,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(32),
-                          onTap: () {
-                            // Navigate to Goal Selection onboarding flow on successful login
-                            Get.offAllNamed('/goal-selection');
-                          },
-                          child: Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Log In',
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                const Icon(
-                                  Icons.arrow_forward_rounded,
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
-                              ],
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(32),
+                            onTap: controller.isLoading.value ? null : () => controller.login(),
+                            child: Center(
+                              child: controller.isLoading.value
+                                  ? const SizedBox(
+                                      height: 26,
+                                      width: 26,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Log In',
+                                          style: GoogleFonts.outfit(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        const Icon(
+                                          Icons.arrow_forward_rounded,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                      ],
+                                    ),
                             ),
                           ),
                         ),
@@ -467,6 +506,7 @@ class LoginView extends GetView<LoginController> {
     required String hint,
     required IconData icon,
     IconData? suffix,
+    TextEditingController? controller,
   }) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
@@ -495,6 +535,7 @@ class LoginView extends GetView<LoginController> {
               const SizedBox(width: 14),
               Expanded(
                 child: TextField(
+                  controller: controller,
                   style: GoogleFonts.inter(color: Colors.white, fontSize: 15),
                   obscureText: hint.toLowerCase().contains('password'),
                   decoration: InputDecoration(

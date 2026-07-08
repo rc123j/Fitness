@@ -6,6 +6,7 @@ import 'screening_report_screen.dart';
 
 class ActivityLevelScreen extends StatefulWidget {
   final String goalTitle;
+  final int goalId;
   final String gender;
   final int age;
   final int height;
@@ -14,6 +15,7 @@ class ActivityLevelScreen extends StatefulWidget {
   const ActivityLevelScreen({
     super.key,
     required this.goalTitle,
+    required this.goalId,
     required this.gender,
     required this.age,
     required this.height,
@@ -29,6 +31,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
 
   final List<Map<String, dynamic>> activityLevels = [
     {
+      "id": 1,
       "title": "Sedentary",
       "desc":
           "Little to no regular physical activity. Desk job, reading or sitting.",
@@ -37,6 +40,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
       "color": const Color(0xffFF5F6D),
     },
     {
+      "id": 2,
       "title": "Lightly Active",
       "desc":
           "Light exercise or sports 1-3 days per week. Light walking, gardening.",
@@ -45,6 +49,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
       "color": const Color(0xffFF7A00),
     },
     {
+      "id": 3,
       "title": "Moderately Active",
       "desc": "Moderate workout, gym sessions, or sports 3-5 days per week.",
       "multiplier": 1.55,
@@ -52,6 +57,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
       "color": const Color(0xffC026D3),
     },
     {
+      "id": 4,
       "title": "Very Active",
       "desc":
           "Hard exercise, high-intensity training, or sports 6-7 days per week.",
@@ -60,6 +66,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
       "color": const Color(0xff7B61FF),
     },
     {
+      "id": 5,
       "title": "Extra Active",
       "desc":
           "Extremely hard daily training/sports & physical job (e.g. athlete, construction).",
@@ -262,12 +269,13 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                           Get.to(
                             () => ScreeningReportScreen(
                               goalTitle: widget.goalTitle,
+                              goalId: widget.goalId,
                               gender: widget.gender,
                               age: widget.age,
                               height: widget.height,
                               weight: widget.weight,
+                              activityLevelId: selectedLevel["id"] as int,
                               activityLevelName: selectedLevel["title"],
-                              activityMultiplier: selectedLevel["multiplier"],
                             ),
                           );
                         },

@@ -16,30 +16,35 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
 
   final List<Map<String, dynamic>> goals = [
     {
+      "id": 1,
       "title": "Weight Loss",
       "subtitle": "Burn fat and lose weight\nin a healthy way.",
       "icon": Icons.local_fire_department_rounded,
       "color": const Color(0xffFF5F6D),
     },
     {
+      "id": 2,
       "title": "Muscle Gain",
       "subtitle": "Build lean muscle and\nincrease strength.",
       "icon": Icons.fitness_center_rounded,
       "color": const Color(0xffFF7A00),
     },
     {
+      "id": 3,
       "title": "Fitness",
       "subtitle": "Improve overall fitness\nand daily energy.",
       "icon": Icons.directions_run_rounded,
       "color": const Color(0xffC026D3),
     },
     {
+      "id": 3,
       "title": "Athletic Performance",
       "subtitle": "Enhance endurance, speed\nand performance.",
       "icon": Icons.bolt_rounded,
       "color": const Color(0xffFF7A00),
     },
     {
+      "id": 3,
       "title": "Nutrition Focus",
       "subtitle": "Build better eating habits and improve overall health.",
       "icon": Icons.restaurant_menu_rounded,
@@ -359,6 +364,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                             final selectedGoal = goals[selectedIndex];
                             Get.to(() => PhysicalMetricsScreen(
                               goalTitle: selectedGoal["title"] as String,
+                              goalId: selectedGoal["id"] as int,
                             ));
                           },
                         child: Center(

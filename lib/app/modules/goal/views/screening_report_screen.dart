@@ -1,26 +1,32 @@
 import 'dart:ui';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import '../../../services/api_client.dart';
+import '../../../services/api_endpoints.dart';
+import '../../../services/auth_service.dart';
 
 class ScreeningReportScreen extends StatefulWidget {
   final String goalTitle;
+  final int goalId;
   final String gender;
   final int age;
   final int height;
   final double weight;
+  final int activityLevelId;
   final String activityLevelName;
-  final double activityMultiplier;
 
   const ScreeningReportScreen({
     super.key,
     required this.goalTitle,
+    required this.goalId,
     required this.gender,
     required this.age,
     required this.height,
     required this.weight,
+    required this.activityLevelId,
     required this.activityLevelName,
-    required this.activityMultiplier,
   });
 
   @override
@@ -28,6 +34,12 @@ class ScreeningReportScreen extends StatefulWidget {
 }
 
 class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
+  final _apiClient = Get.find<ApiClient>();
+  final _authService = Get.find<AuthService>();
+  bool _isLoading = false;
+  String? _error;
+  String? _memberCode;
+
   // Pre-initialize with safe defaults to prevent LateInitializationError during hot reloads
   double bmi = 22.0;
   double bmr = 1500.0;
@@ -109,7 +121,27 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
     }
 
     // 5. TDEE
-    tdee = bmr * widget.activityMultiplier;
+    double activityMultiplier;
+    switch (widget.activityLevelId) {
+      case 1:
+        activityMultiplier = 1.2;
+        break;
+      case 2:
+        activityMultiplier = 1.375;
+        break;
+      case 3:
+        activityMultiplier = 1.55;
+        break;
+      case 4:
+        activityMultiplier = 1.725;
+        break;
+      case 5:
+        activityMultiplier = 1.9;
+        break;
+      default:
+        activityMultiplier = 1.2;
+    }
+    tdee = bmr * activityMultiplier;
     if (tdee.isNaN || tdee.isInfinite || tdee <= 0) {
       tdee = bmr * 1.2;
     }
@@ -129,6 +161,62 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
       targetCalories = tdee.toInt();
       return "To maintain peak fitness and daily energy, your AI target daily intake is **$targetCalories kcal**. Since your lifestyle is **${widget.activityLevelName}**, your adaptive plan will prioritize whole foods, healthy fats, and a balanced macronutrient ratio to optimize metabolic flexibility, cardiovascular strength, and cognitive performance.";
     }
+  }
+
+  void _submitOnboarding() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final dob = _calculateDob(widget.age);
+
+      final response = await _apiClient.post(
+        ApiEndpoints.onboarding,
+        data: {
+          'gender': widget.gender.toUpperCase(),
+          'dob': dob,
+          'height_cm': widget.height.toDouble(),
+          'weight_kg': widget.weight,
+          'activity_level_id': widget.activityLevelId,
+          'goal_id': widget.goalId,
+        },
+      );
+
+      final data = response.data;
+      _authService.setOnboardingDone(true);
+
+      if (!mounted) return;
+
+      setState(() {
+        _memberCode = data['member_code'];
+      });
+
+      showActivationDialog();
+    } on DioException catch (e) {
+      setState(() {
+        _error =
+            e.response?.data?['message'] ??
+            'Onboarding failed. Please try again.';
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Connection error. Please check your network.';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  String _calculateDob(int age) {
+    final now = DateTime.now();
+    final year = now.year - age;
+    return '${year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
   }
 
   void showActivationDialog() {
@@ -195,7 +283,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                "Once active, your 30-day countdown timer will be displayed on your main dashboard.",
+                "Member Code: ${_memberCode ?? ''}",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   color: const Color(0xffFF00E5).withOpacity(0.85),
@@ -292,357 +380,381 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
 
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 10,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                    /// 1. TOP PROGRESS BAR & BACK BUTTON
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Back Arrow
-                        GestureDetector(
-                          onTap: () => Get.back(),
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.04),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.08),
-                                width: 0.8,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back_rounded,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ),
-                        ),
-
-                        // Step Indicator
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              "STEP 4 OF 4",
-                              style: GoogleFonts.outfit(
-                                color: const Color(0xffFF00E5).withOpacity(0.9),
-                                fontSize: 11,
-                                letterSpacing: 1.5,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                buildProgress(true),
-                                buildProgress(true),
-                                buildProgress(true),
-                                buildProgress(true),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    /// 2. TITLE & TEXT
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "Your Health\nAssessment ",
-                            style: GoogleFonts.outfit(
-                              height: 1.1,
-                              color: Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          TextSpan(
-                            text: "Report",
-                            style: GoogleFonts.outfit(
-                              height: 1.1,
-                              fontSize: 32,
-                              fontWeight: FontWeight.w900,
-                              foreground: Paint()
-                                ..shader =
-                                    const LinearGradient(
-                                      colors: [
-                                        Color(0xffFF00E5),
-                                        Color(0xff00E5FF),
-                                      ],
-                                    ).createShader(
-                                      const Rect.fromLTWH(
-                                        0.0,
-                                        0.0,
-                                        200.0,
-                                        50.0,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Our AI health engine has processed your parameters to establish your metabolic blueprint.",
-                      style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.60),
-                        fontSize: 12,
-                        height: 1.45,
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    /// 3. DYNAMIC METRIC GAUGE (Circular Visual)
-                    Center(
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Glow backdrop
-                          Container(
-                            height: 140,
-                            width: 140,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: bmiColor.withOpacity(0.03),
-                            ),
-                          ),
-                          // Custom semi-transparent ring
-                          SizedBox(
-                            height: 130,
-                            width: 130,
-                            child: CircularProgressIndicator(
-                              value: (bmi / 40.0).clamp(0.0, 1.0),
-                              strokeWidth: 10,
-                              backgroundColor: Colors.white.withOpacity(0.05),
-                              color: bmiColor,
-                            ),
-                          ),
-                          // Inside text details
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "YOUR BMI",
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white.withOpacity(0.5),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                bmi.toStringAsFixed(1),
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: bmiColor.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: bmiColor.withOpacity(0.3),
-                                    width: 0.8,
-                                  ),
-                                ),
-                                child: Text(
-                                  bmiClassification,
-                                  style: GoogleFonts.outfit(
-                                    color: bmiColor,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    /// 4. METRIC CARD GRID (BMR, IBW, TDEE, %IBW) - Built using Row/Expanded for absolute bulletproof rendering layout
-                    Row(
-                      children: [
-                        Expanded(
-                          child: buildMetricReportCard(
-                            title: "BMR",
-                            value: "${bmr.toInt()} kcal",
-                            desc: "Basal Metabolic Rate",
-                            icon: Icons.local_fire_department_rounded,
-                            color: const Color(0xffFF5F6D),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: buildMetricReportCard(
-                            title: "IDEAL WEIGHT",
-                            value: "${ibw.toStringAsFixed(1)} kg",
-                            desc: "Devine Formula IBW",
-                            icon: Icons.scale_rounded,
-                            color: const Color(0xff7B61FF),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: buildMetricReportCard(
-                            title: "DAILY TDEE",
-                            value: "${tdee.toInt()} kcal",
-                            desc: "Active Energy Needs",
-                            icon: Icons.offline_bolt_rounded,
-                            color: const Color(0xff00E5FF),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: buildMetricReportCard(
-                            title: "WEIGHT RATIO",
-                            value: "${pctIbw.toInt()}%",
-                            desc: "Actual / Ideal Weight",
-                            icon: Icons.analytics_rounded,
-                            color: const Color(0xffFF7A00),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    /// 5. AI PERSONALIZED SUGGESTIONS BOX
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  /// 1. TOP PROGRESS BAR & BACK BUTTON
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Back Arrow
+                      GestureDetector(
+                        onTap: () => Get.back(),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.03),
-                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white.withOpacity(0.04),
+                            shape: BoxShape.circle,
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.12),
+                              color: Colors.white.withOpacity(0.08),
                               width: 0.8,
                             ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    height: 30,
-                                    width: 30,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Color(0xffFF00E5),
-                                          Color(0xff7B61FF),
-                                        ],
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.auto_awesome_rounded,
-                                      color: Colors.white,
-                                      size: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    "AI RECOMMENDATION",
-                                    style: GoogleFonts.outfit(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1.0,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              buildRichMarkdownText(getAISuggestionText()),
-                            ],
+                          child: const Icon(
+                            Icons.arrow_back_rounded,
+                            color: Colors.white,
+                            size: 18,
                           ),
                         ),
                       ),
-                    ),
 
-                    const Spacer(),
-
-                    /// 6. START PLAN / CTA BUTTON
-                    Container(
-                      height: 46,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(23),
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xffB100FF),
-                            Color(0xffFF5F6D),
-                            Color(0xffFF7A00),
-                          ],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xffB100FF).withOpacity(0.35),
-                            blurRadius: 12,
-                            spreadRadius: 1,
-                            offset: const Offset(0, 3),
+                      // Step Indicator
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            "STEP 4 OF 4",
+                            style: GoogleFonts.outfit(
+                              color: const Color(0xffFF00E5).withOpacity(0.9),
+                              fontSize: 11,
+                              letterSpacing: 1.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              buildProgress(true),
+                              buildProgress(true),
+                              buildProgress(true),
+                              buildProgress(true),
+                            ],
                           ),
                         ],
                       ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(23),
-                          onTap: showActivationDialog,
-                          child: Center(
-                            child: Text(
-                              "Unlock & Start 30-Day Plan",
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  /// 2. TITLE & TEXT
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "Your Health\nAssessment ",
+                          style: GoogleFonts.outfit(
+                            height: 1.1,
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        TextSpan(
+                          text: "Report",
+                          style: GoogleFonts.outfit(
+                            height: 1.1,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            foreground: Paint()
+                              ..shader =
+                                  const LinearGradient(
+                                    colors: [
+                                      Color(0xffFF00E5),
+                                      Color(0xff00E5FF),
+                                    ],
+                                  ).createShader(
+                                    const Rect.fromLTWH(0.0, 0.0, 200.0, 50.0),
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Our AI health engine has processed your parameters to establish your metabolic blueprint.",
+                    style: GoogleFonts.inter(
+                      color: Colors.white.withOpacity(0.60),
+                      fontSize: 12,
+                      height: 1.45,
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  /// 3. DYNAMIC METRIC GAUGE (Circular Visual)
+                  Center(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Glow backdrop
+                        Container(
+                          height: 140,
+                          width: 140,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: bmiColor.withOpacity(0.03),
+                          ),
+                        ),
+                        // Custom semi-transparent ring
+                        SizedBox(
+                          height: 130,
+                          width: 130,
+                          child: CircularProgressIndicator(
+                            value: (bmi / 40.0).clamp(0.0, 1.0),
+                            strokeWidth: 10,
+                            backgroundColor: Colors.white.withOpacity(0.05),
+                            color: bmiColor,
+                          ),
+                        ),
+                        // Inside text details
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "YOUR BMI",
                               style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
+                                color: Colors.white.withOpacity(0.5),
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.2,
                               ),
                             ),
+                            const SizedBox(height: 4),
+                            Text(
+                              bmi.toStringAsFixed(1),
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 32,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: bmiColor.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: bmiColor.withOpacity(0.3),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Text(
+                                bmiClassification,
+                                style: GoogleFonts.outfit(
+                                  color: bmiColor,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  /// 4. METRIC CARD GRID (BMR, IBW, TDEE, %IBW) - Built using Row/Expanded for absolute bulletproof rendering layout
+                  Row(
+                    children: [
+                      Expanded(
+                        child: buildMetricReportCard(
+                          title: "BMR",
+                          value: "${bmr.toInt()} kcal",
+                          desc: "Basal Metabolic Rate",
+                          icon: Icons.local_fire_department_rounded,
+                          color: const Color(0xffFF5F6D),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: buildMetricReportCard(
+                          title: "IDEAL WEIGHT",
+                          value: "${ibw.toStringAsFixed(1)} kg",
+                          desc: "Devine Formula IBW",
+                          icon: Icons.scale_rounded,
+                          color: const Color(0xff7B61FF),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: buildMetricReportCard(
+                          title: "DAILY TDEE",
+                          value: "${tdee.toInt()} kcal",
+                          desc: "Active Energy Needs",
+                          icon: Icons.offline_bolt_rounded,
+                          color: const Color(0xff00E5FF),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: buildMetricReportCard(
+                          title: "WEIGHT RATIO",
+                          value: "${pctIbw.toInt()}%",
+                          desc: "Actual / Ideal Weight",
+                          icon: Icons.analytics_rounded,
+                          color: const Color(0xffFF7A00),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  /// 5. AI PERSONALIZED SUGGESTIONS BOX
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.03),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.12),
+                            width: 0.8,
                           ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  height: 30,
+                                  width: 30,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xffFF00E5),
+                                        Color(0xff7B61FF),
+                                      ],
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.auto_awesome_rounded,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  "AI RECOMMENDATION",
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            buildRichMarkdownText(getAISuggestionText()),
+                          ],
                         ),
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 10),
+                  const Spacer(),
+
+                  if (_error != null) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xffFF3B30).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        _error!,
+                        style: GoogleFonts.inter(
+                          color: const Color(0xffFF3B30),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
                   ],
-                ),
+
+                  const SizedBox(height: 12),
+
+                  /// 6. START PLAN / CTA BUTTON
+                  Container(
+                    height: 46,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(23),
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xffB100FF),
+                          Color(0xffFF5F6D),
+                          Color(0xffFF7A00),
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xffB100FF).withOpacity(0.35),
+                          blurRadius: 12,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(23),
+                        onTap: _isLoading ? null : _submitOnboarding,
+                        child: Center(
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 22,
+                                  width: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  "Unlock & Start 30-Day Plan",
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+                ],
               ),
             ),
+          ),
         ],
       ),
     );

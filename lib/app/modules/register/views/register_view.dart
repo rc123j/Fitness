@@ -247,10 +247,40 @@ class RegisterView extends GetView<RegisterController> {
 
                     const SizedBox(height: 32),
 
+                    // ERROR MESSAGE
+                    Obx(() {
+                      final msg = controller.errorMessage.value;
+                      if (msg == null) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xffFF3B30).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xffFF3B30).withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline, color: Color(0xffFF3B30), size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  msg,
+                                  style: GoogleFonts.inter(color: Color(0xffFF3B30), fontSize: 13),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+
                     // INPUTS (Clean Glassmorphic Input Fields)
                     buildField(
                       hint: 'Full Name',
                       icon: Icons.person_outline_rounded,
+                      controller: controller.nameController,
                     ),
 
                     const SizedBox(height: 12),
@@ -258,6 +288,7 @@ class RegisterView extends GetView<RegisterController> {
                     buildField(
                       hint: 'Email Address',
                       icon: Icons.mail_outline_rounded,
+                      controller: controller.emailController,
                     ),
 
                     const SizedBox(height: 12),
@@ -269,6 +300,7 @@ class RegisterView extends GetView<RegisterController> {
                         isPassword: true,
                         obscure: controller.obscurePassword.value,
                         onSuffixTap: controller.togglePasswordVisibility,
+                        controller: controller.passwordController,
                       ),
                     ),
 
@@ -281,6 +313,7 @@ class RegisterView extends GetView<RegisterController> {
                         isPassword: true,
                         obscure: controller.obscureConfirmPassword.value,
                         onSuffixTap: controller.toggleConfirmPasswordVisibility,
+                        controller: controller.confirmPasswordController,
                       ),
                     ),
 
@@ -364,54 +397,63 @@ class RegisterView extends GetView<RegisterController> {
                     const SizedBox(height: 36),
 
                     // ACTION CAPSULE BUTTON
-                    Container(
-                      height: 56,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(28),
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xffB100FF),
-                            Color(0xffFF5F6D),
-                            Color(0xffFF7A00),
+                    Obx(
+                      () => Container(
+                        height: 56,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(28),
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xffB100FF),
+                              Color(0xffFF5F6D),
+                              Color(0xffFF7A00),
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xffB100FF).withOpacity(0.35),
+                              blurRadius: 15,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 3),
+                            ),
                           ],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xffB100FF).withOpacity(0.35),
-                            blurRadius: 15,
-                            spreadRadius: 1,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(28),
-                          onTap: () {
-                            Get.offAllNamed('/goal-selection');
-                          },
-                          child: Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Create Account',
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                const Icon(
-                                  Icons.arrow_forward_rounded,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ],
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(28),
+                            onTap: controller.isLoading.value ? null : () => controller.register(),
+                            child: Center(
+                              child: controller.isLoading.value
+                                  ? const SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Create Account',
+                                          style: GoogleFonts.outfit(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        const Icon(
+                                          Icons.arrow_forward_rounded,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ],
+                                    ),
                             ),
                           ),
                         ),
@@ -546,6 +588,7 @@ class RegisterView extends GetView<RegisterController> {
     bool isPassword = false,
     bool obscure = false,
     VoidCallback? onSuffixTap,
+    TextEditingController? controller,
   }) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
@@ -574,6 +617,7 @@ class RegisterView extends GetView<RegisterController> {
               const SizedBox(width: 12),
               Expanded(
                 child: TextField(
+                  controller: controller,
                   obscureText: obscure,
                   style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
                   decoration: InputDecoration(
