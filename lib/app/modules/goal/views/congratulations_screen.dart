@@ -22,17 +22,17 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
   void initState() {
     super.initState();
 
-    // 1. Initialize Confetti Particles
-    for (int i = 0; i < 70; i++) {
+    // Initialize Confetti Particles — subtle, fewer, smaller
+    for (int i = 0; i < 30; i++) {
       _particles.add(ConfettiParticle(
         x: _random.nextDouble(),
-        y: -_random.nextDouble() * 0.5,
-        size: _random.nextDouble() * 8 + 6,
+        y: -_random.nextDouble() * 0.8,
+        size: _random.nextDouble() * 5 + 3,
         color: _getRandomColor(),
-        speedY: _random.nextDouble() * 3 + 2,
-        speedX: _random.nextDouble() * 2 - 1,
+        speedY: _random.nextDouble() * 1.5 + 1.0,
+        speedX: _random.nextDouble() * 0.8 - 0.4,
         rotation: _random.nextDouble() * 2 * math.pi,
-        rotationSpeed: _random.nextDouble() * 4 - 2,
+        rotationSpeed: _random.nextDouble() * 2 - 1,
       ));
     }
 
@@ -42,20 +42,15 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
     )..addListener(() {
         setState(() {
           for (var p in _particles) {
-            p.y += p.speedY * 0.005;
-            p.x += p.speedX * 0.002;
-            p.rotation += p.rotationSpeed * 0.01;
-
-            // Reset particle to top if it goes off screen
-            if (p.y > 1.1) {
-              p.y = -0.1;
-              p.x = _random.nextDouble();
-            }
+            p.y += p.speedY * 0.004;
+            p.x += p.speedX * 0.001;
+            p.rotation += p.rotationSpeed * 0.008;
           }
         });
       });
 
-    _confettiController.repeat();
+    // Play once for 4 seconds then stop
+    _confettiController.forward();
   }
 
   Color _getRandomColor() {
@@ -68,6 +63,20 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
       const Color(0xffFFCC00), // Yellow
     ];
     return colors[_random.nextInt(colors.length)];
+  }
+
+  String _formatMemberCode(String code) {
+    if (code.isEmpty) return "MEM - 0000 - 0000";
+    String clean = code.replaceAll('-', '');
+    if (clean.length > 3) {
+      String prefix = clean.substring(0, 3);
+      String rest = clean.substring(3);
+      if (rest.length > 4) {
+        return "$prefix - ${rest.substring(0, 4)} - ${rest.substring(4)}";
+      }
+      return "$prefix - $rest";
+    }
+    return code;
   }
 
   @override
@@ -119,20 +128,21 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
           SafeArea(
             child: Column(
               children: [
-                const SizedBox(height: 20),
+                // Top Spacer
+                const Spacer(),
 
                 // ── CONGRATULATIONS ICON HEADER
                 Stack(
                   alignment: Alignment.center,
                   children: [
                     Container(
-                      height: 84, width: 84,
+                      height: 88, width: 88,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: const Color(0xffFF00E5).withOpacity(0.1),
+                        color: const Color(0xffFF00E5).withOpacity(0.08),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xffFF00E5).withOpacity(0.3),
+                            color: const Color(0xffFF00E5).withOpacity(0.25),
                             blurRadius: 30,
                             spreadRadius: 3,
                           ),
@@ -141,7 +151,7 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
                     ),
                     TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0.0, end: 1.0),
-                      duration: const Duration(milliseconds: 800),
+                      duration: const Duration(milliseconds: 1000),
                       curve: Curves.elasticOut,
                       builder: (context, value, child) {
                         return Transform.scale(
@@ -149,7 +159,7 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
                           child: const Icon(
                             Icons.celebration_rounded,
                             color: Color(0xffFF7A00),
-                            size: 46,
+                            size: 48,
                           ),
                         );
                       },
@@ -157,101 +167,185 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
                   ],
                 ),
 
-                const SizedBox(height: 18),
+                const SizedBox(height: 20),
 
-                // Title
+                // Subtitle
                 Text(
                   "CONGRATULATIONS!",
                   style: GoogleFonts.outfit(
                     color: const Color(0xffFF00E5).withOpacity(0.95),
-                    fontSize: 12, letterSpacing: 2.0, fontWeight: FontWeight.w900,
+                    fontSize: 12, letterSpacing: 2.5, fontWeight: FontWeight.w900,
                   ),
                 ),
                 const SizedBox(height: 6),
+
+                // Main Message
                 Text(
                   "Plan Activated Successfully",
                   style: GoogleFonts.outfit(
-                    color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.white.withOpacity(0.08), width: 0.8),
-                  ),
-                  child: Text(
-                    "MEMBER CODE: ${widget.memberCode}",
-                    style: GoogleFonts.outfit(
-                      color: const Color(0xff00E5FF),
-                      fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.5,
-                    ),
+                    color: Colors.white,
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 28),
 
-                // Benefits Header
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "HERE IS WHAT'S UNLOCKED FOR YOU:",
-                      style: GoogleFonts.outfit(
-                        color: Colors.white.withOpacity(0.4),
-                        fontSize: 10, letterSpacing: 1.2, fontWeight: FontWeight.bold,
+                // ── SINGLE ULTRA-PREMIUM MEMBERSHIP PASS CARD
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: const Duration(milliseconds: 1000),
+                  curve: Curves.easeOutBack,
+                  builder: (context, value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 24),
+                        width: double.infinity,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.12),
+                            width: 1.0,
+                          ),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.white.withOpacity(0.06),
+                              Colors.white.withOpacity(0.01),
+                            ],
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(23),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                            child: Padding(
+                              padding: const EdgeInsets.all(22),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Top row: Brand & EMV Chip
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "FITFUEL HEALTH PASS",
+                                        style: GoogleFonts.outfit(
+                                          color: Colors.white.withOpacity(0.75),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1.5,
+                                        ),
+                                      ),
+                                      // Glowing Gold EMV Chip
+                                      Container(
+                                        height: 26,
+                                        width: 34,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(6),
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              const Color(0xffFFCC00).withOpacity(0.8),
+                                              const Color(0xffFF7A00).withOpacity(0.8),
+                                            ],
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xffFFCC00).withOpacity(0.2),
+                                              blurRadius: 8,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Spacer(),
+                                  // Middle row: Member Code (Credit Card Style)
+                                  Text(
+                                    _formatMemberCode(widget.memberCode),
+                                    style: GoogleFonts.outfit(
+                                      color: Colors.white,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 2.5,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  // Bottom row: Status & Features snapshot
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "STATUS",
+                                            style: GoogleFonts.outfit(
+                                              color: Colors.white.withOpacity(0.4),
+                                              fontSize: 9,
+                                              letterSpacing: 1.0,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 3),
+                                          Row(
+                                            children: [
+                                              Container(
+                                                height: 6,
+                                                width: 6,
+                                                decoration: const BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Color(0xff34C759),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                "ACTIVE",
+                                                style: GoogleFonts.outfit(
+                                                  color: const Color(0xff34C759),
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  letterSpacing: 0.5,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(10),
+                                          color: const Color(0xffFF00E5).withOpacity(0.12),
+                                        ),
+                                        child: Text(
+                                          "30-DAY PLAN",
+                                          style: GoogleFonts.outfit(
+                                            color: const Color(0xffFF00E5),
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                // Scrollable List of Premium Benefits
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      children: [
-                        _buildBenefitCard(
-                          title: "Personalized Daily Diet Plan",
-                          desc: "A fully custom 5-meal daily schedule tailored to your Veg/Non-Veg type, macros, and medical exclusions.",
-                          icon: Icons.restaurant_rounded,
-                          color: const Color(0xffFF5F6D),
-                        ),
-                        _buildBenefitCard(
-                          title: "AI Hydration & Intake Reminders",
-                          desc: "Smart hourly notifications keeping you fully accountable and on track with water, meals, and supplements.",
-                          icon: Icons.water_drop_rounded,
-                          color: const Color(0xff00E5FF),
-                        ),
-                        _buildBenefitCard(
-                          title: "Adaptive 30-Day Checkpoints",
-                          desc: "At the end of each cycle, your metrics re-evaluate to automatically adjust and progress your nutrition plan.",
-                          icon: Icons.refresh_rounded,
-                          color: const Color(0xffFF7A00),
-                        ),
-                        _buildBenefitCard(
-                          title: "Streaks, XP & Level Rewards",
-                          desc: "Log daily meals to maintain streaks, earn fit points, level up, and unlock exclusive community badges.",
-                          icon: Icons.workspace_premium_rounded,
-                          color: const Color(0xffC026D3),
-                        ),
-                        _buildBenefitCard(
-                          title: "Expert Video Consultation",
-                          desc: "Free 1-on-1 scheduled sessions with certified nutritionists if you face plateauing or require customized corrections.",
-                          icon: Icons.videocam_rounded,
-                          color: const Color(0xff7B61FF),
-                        ),
-                      ],
-                    ),
-                  ),
+                    );
+                  },
                 ),
 
-                // Let's Go Button
+                // Bottom Spacer
+                const Spacer(flex: 2),
+
+                // Let's Go Button (Floats at bottom)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
                   child: Container(
@@ -296,63 +390,6 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBenefitCard({
-    required String title,
-    required String desc,
-    required IconData icon,
-    required Color color,
-  }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.03),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withOpacity(0.08), width: 0.8),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 40, width: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: color.withOpacity(0.12),
-                ),
-                child: Icon(icon, color: color, size: 20),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.outfit(
-                        color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      desc,
-                      style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.55), fontSize: 11.5, height: 1.4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

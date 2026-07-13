@@ -217,12 +217,21 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
         transition: Transition.cupertino,
       );
     } on DioException catch (e) {
+      debugPrint('===== ONBOARDING DIO ERROR =====');
+      debugPrint('Status: ${e.response?.statusCode}');
+      debugPrint('Data: ${e.response?.data}');
+      debugPrint('Message: ${e.message}');
+      debugPrint('=================================');
       setState(() {
         _error =
             e.response?.data?['message'] ??
-            'Onboarding failed. Please try again.';
+            'Onboarding failed (${e.response?.statusCode ?? "timeout"}). Please try again.';
       });
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('===== ONBOARDING GENERIC ERROR =====');
+      debugPrint('$e');
+      debugPrint('$stack');
+      debugPrint('=====================================');
       setState(() {
         _error = 'Connection error. Please check your network.';
       });
