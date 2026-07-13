@@ -53,8 +53,8 @@ class ApiClient extends GetxService {
     try {
       final response = await Dio(BaseOptions(
         baseUrl: ApiEndpoints.baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
+        connectTimeout: const Duration(seconds: 8),
+        receiveTimeout: const Duration(seconds: 8),
       )).post(
         ApiEndpoints.refresh,
         data: {'refreshToken': refreshToken},
@@ -64,9 +64,10 @@ class ApiClient extends GetxService {
         _authService.updateAccessToken(response.data['accessToken']);
         return true;
       }
+    } on DioException catch (_) {
+      return false;
     } catch (_) {}
 
-    _authService.logout();
     return false;
   }
 

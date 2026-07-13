@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
 import '../../../services/auth_service.dart';
+import 'congratulations_screen.dart';
 
 class ScreeningReportScreen extends StatefulWidget {
   final String goalTitle;
@@ -16,6 +17,13 @@ class ScreeningReportScreen extends StatefulWidget {
   final double weight;
   final int activityLevelId;
   final String activityLevelName;
+  // New: dietary & health profile fields
+  final List<int> tastePreferenceIds;
+  final String dietLabel;
+  final List<String> foodExclusions;
+  final List<int> medicalConditionIds;
+  final List<int> symptomIds;
+  final List<String> customConditions;
 
   const ScreeningReportScreen({
     super.key,
@@ -27,6 +35,12 @@ class ScreeningReportScreen extends StatefulWidget {
     required this.weight,
     required this.activityLevelId,
     required this.activityLevelName,
+    required this.tastePreferenceIds,
+    required this.dietLabel,
+    required this.foodExclusions,
+    required this.medicalConditionIds,
+    required this.symptomIds,
+    required this.customConditions,
   });
 
   @override
@@ -181,6 +195,11 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
           'weight_kg': widget.weight,
           'activity_level_id': widget.activityLevelId,
           'goal_id': widget.goalId,
+          'taste_preference_ids': widget.tastePreferenceIds,
+          'medical_condition_ids': widget.medicalConditionIds,
+          'symptom_ids': widget.symptomIds,
+          'food_exclusions': widget.foodExclusions,
+          'custom_medical_conditions': widget.customConditions,
         },
       );
 
@@ -193,7 +212,10 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
         _memberCode = data['member_code'];
       });
 
-      showActivationDialog();
+      Get.off(
+        () => CongratulationsScreen(memberCode: _memberCode ?? ''),
+        transition: Transition.cupertino,
+      );
     } on DioException catch (e) {
       setState(() {
         _error =
@@ -414,7 +436,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            "STEP 4 OF 4",
+                            "STEP 6 OF 6",
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5).withOpacity(0.9),
                               fontSize: 11,
@@ -429,6 +451,8 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                               buildProgress(true),
                               buildProgress(true),
                               buildProgress(true),
+                              buildProgress(true),
+                              buildProgress(true),
                             ],
                           ),
                         ],
@@ -438,243 +462,247 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
 
                   const SizedBox(height: 12),
 
-                  /// 2. TITLE & TEXT
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "Your Health\nAssessment ",
-                          style: GoogleFonts.outfit(
-                            height: 1.1,
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        TextSpan(
-                          text: "Report",
-                          style: GoogleFonts.outfit(
-                            height: 1.1,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
-                            foreground: Paint()
-                              ..shader =
-                                  const LinearGradient(
-                                    colors: [
-                                      Color(0xffFF00E5),
-                                      Color(0xff00E5FF),
-                                    ],
-                                  ).createShader(
-                                    const Rect.fromLTWH(0.0, 0.0, 200.0, 50.0),
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Our AI health engine has processed your parameters to establish your metabolic blueprint.",
-                    style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.60),
-                      fontSize: 12,
-                      height: 1.45,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  /// 3. DYNAMIC METRIC GAUGE (Circular Visual)
-                  Center(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Glow backdrop
-                        Container(
-                          height: 140,
-                          width: 140,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: bmiColor.withOpacity(0.03),
-                          ),
-                        ),
-                        // Custom semi-transparent ring
-                        SizedBox(
-                          height: 130,
-                          width: 130,
-                          child: CircularProgressIndicator(
-                            value: (bmi / 40.0).clamp(0.0, 1.0),
-                            strokeWidth: 10,
-                            backgroundColor: Colors.white.withOpacity(0.05),
-                            color: bmiColor,
-                          ),
-                        ),
-                        // Inside text details
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "YOUR BMI",
-                              style: GoogleFonts.outfit(
-                                color: Colors.white.withOpacity(0.5),
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              bmi.toStringAsFixed(1),
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 32,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: bmiColor.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: bmiColor.withOpacity(0.3),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: Text(
-                                bmiClassification,
-                                style: GoogleFonts.outfit(
-                                  color: bmiColor,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  /// 4. METRIC CARD GRID (BMR, IBW, TDEE, %IBW) - Built using Row/Expanded for absolute bulletproof rendering layout
-                  Row(
-                    children: [
-                      Expanded(
-                        child: buildMetricReportCard(
-                          title: "BMR",
-                          value: "${bmr.toInt()} kcal",
-                          desc: "Basal Metabolic Rate",
-                          icon: Icons.local_fire_department_rounded,
-                          color: const Color(0xffFF5F6D),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: buildMetricReportCard(
-                          title: "IDEAL WEIGHT",
-                          value: "${ibw.toStringAsFixed(1)} kg",
-                          desc: "Devine Formula IBW",
-                          icon: Icons.scale_rounded,
-                          color: const Color(0xff7B61FF),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: buildMetricReportCard(
-                          title: "DAILY TDEE",
-                          value: "${tdee.toInt()} kcal",
-                          desc: "Active Energy Needs",
-                          icon: Icons.offline_bolt_rounded,
-                          color: const Color(0xff00E5FF),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: buildMetricReportCard(
-                          title: "WEIGHT RATIO",
-                          value: "${pctIbw.toInt()}%",
-                          desc: "Actual / Ideal Weight",
-                          icon: Icons.analytics_rounded,
-                          color: const Color(0xffFF7A00),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  /// 5. AI PERSONALIZED SUGGESTIONS BOX
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.03),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.12),
-                            width: 0.8,
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          /// 2. TITLE & TEXT
+                          Text.rich(
+                            TextSpan(
                               children: [
-                                Container(
-                                  height: 30,
-                                  width: 30,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        Color(0xffFF00E5),
-                                        Color(0xff7B61FF),
-                                      ],
-                                    ),
-                                  ),
-                                  child: const Icon(
-                                    Icons.auto_awesome_rounded,
+                                TextSpan(
+                                  text: "Your Health\nAssessment ",
+                                  style: GoogleFonts.outfit(
+                                    height: 1.1,
                                     color: Colors.white,
-                                    size: 16,
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w900,
                                   ),
                                 ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  "AI RECOMMENDATION",
+                                TextSpan(
+                                  text: "Report",
                                   style: GoogleFonts.outfit(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.0,
+                                    height: 1.1,
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w900,
+                                    foreground: Paint()
+                                      ..shader = const LinearGradient(
+                                        colors: [
+                                          Color(0xffFF00E5),
+                                          Color(0xff00E5FF),
+                                        ],
+                                      ).createShader(
+                                        const Rect.fromLTWH(0.0, 0.0, 200.0, 50.0),
+                                      ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 6),
-                            buildRichMarkdownText(getAISuggestionText()),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Our AI health engine has processed your parameters to establish your metabolic blueprint.",
+                            style: GoogleFonts.inter(
+                              color: Colors.white.withOpacity(0.60),
+                              fontSize: 12,
+                              height: 1.45,
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          /// 3. DYNAMIC METRIC GAUGE (Circular Visual)
+                          Center(
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Glow backdrop
+                                Container(
+                                  height: 140,
+                                  width: 140,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: bmiColor.withOpacity(0.04),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: bmiColor.withOpacity(0.12),
+                                        blurRadius: 30,
+                                        spreadRadius: 2,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Outer Ring
+                                SizedBox(
+                                  height: 120,
+                                  width: 120,
+                                  child: CircularProgressIndicator(
+                                    value: bmi / 40.0 > 1.0 ? 1.0 : bmi / 40.0,
+                                    strokeWidth: 4.5,
+                                    backgroundColor: Colors.white.withOpacity(0.04),
+                                    valueColor: AlwaysStoppedAnimation<Color>(bmiColor),
+                                  ),
+                                ),
+                                // Inner Ring
+                                SizedBox(
+                                  height: 104,
+                                  width: 104,
+                                  child: CircularProgressIndicator(
+                                    value: pctIbw / 200.0 > 1.0 ? 1.0 : pctIbw / 200.0,
+                                    strokeWidth: 1.5,
+                                    backgroundColor: Colors.white.withOpacity(0.02),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      const Color(0xffFF7A00).withOpacity(0.35),
+                                    ),
+                                  ),
+                                ),
+                                // Value Text
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      bmi.toStringAsFixed(1),
+                                      style: GoogleFonts.outfit(
+                                        color: Colors.white,
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      "BMI",
+                                      style: GoogleFonts.outfit(
+                                        color: Colors.white.withOpacity(0.40),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          /// 4. DETAILED REPORT CARDS GRID
+                          Row(
+                            children: [
+                              Expanded(
+                                child: buildMetricReportCard(
+                                  title: "BMR",
+                                  value: "${bmr.toInt()} kcal",
+                                  desc: "Basal Metabolic Rate",
+                                  icon: Icons.local_fire_department_rounded,
+                                  color: const Color(0xffFF5F6D),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: buildMetricReportCard(
+                                  title: "IDEAL WEIGHT",
+                                  value: "${ibw.toStringAsFixed(1)} kg",
+                                  desc: "Devine Formula IBW",
+                                  icon: Icons.scale_rounded,
+                                  color: const Color(0xff7B61FF),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: buildMetricReportCard(
+                                  title: "DAILY TDEE",
+                                  value: "${tdee.toInt()} kcal",
+                                  desc: "Active Energy Needs",
+                                  icon: Icons.offline_bolt_rounded,
+                                  color: const Color(0xff00E5FF),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: buildMetricReportCard(
+                                  title: "WEIGHT RATIO",
+                                  value: "${pctIbw.toInt()}%",
+                                  desc: "Actual / Ideal Weight",
+                                  icon: Icons.analytics_rounded,
+                                  color: const Color(0xffFF7A00),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          /// 5. AI PERSONALIZED SUGGESTIONS BOX
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.03),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.12),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          height: 30,
+                                          width: 30,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(10),
+                                            gradient: const LinearGradient(
+                                              colors: [
+                                                Color(0xffFF00E5),
+                                                Color(0xff7B61FF),
+                                              ],
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.auto_awesome_rounded,
+                                            color: Colors.white,
+                                            size: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          "AI RECOMMENDATION",
+                                          style: GoogleFonts.outfit(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 1.0,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                    buildRichMarkdownText(getAISuggestionText()),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
                       ),
                     ),
                   ),
-
-                  const Spacer(),
 
                   if (_error != null) ...[
                     const SizedBox(height: 12),

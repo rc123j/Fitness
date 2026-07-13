@@ -1,8 +1,7 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import 'screening_report_screen.dart';
+import 'dietary_preferences_screen.dart';
 
 class ActivityLevelScreen extends StatefulWidget {
   final String goalTitle;
@@ -155,7 +154,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            "STEP 3 OF 4",
+                            "STEP 3 OF 6",
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5).withOpacity(0.9),
                               fontSize: 11,
@@ -169,6 +168,8 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                               buildProgress(true),
                               buildProgress(true),
                               buildProgress(true),
+                              buildProgress(false),
+                              buildProgress(false),
                               buildProgress(false),
                             ],
                           ),
@@ -267,7 +268,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                         onTap: () {
                           final selectedLevel = activityLevels[selectedIndex];
                           Get.to(
-                            () => ScreeningReportScreen(
+                            () => DietaryPreferencesScreen(
                               goalTitle: widget.goalTitle,
                               goalId: widget.goalId,
                               gender: widget.gender,

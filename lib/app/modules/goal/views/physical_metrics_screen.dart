@@ -104,24 +104,26 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(
-                              "STEP 2 OF 4",
-                              style: GoogleFonts.outfit(
-                                color: const Color(0xffFF00E5).withOpacity(0.9),
-                                fontSize: 11,
-                                letterSpacing: 1.5,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                buildProgress(true),
-                                buildProgress(true),
-                                buildProgress(false),
-                                buildProgress(false),
-                              ],
-                            ),
+                             Text(
+                               "STEP 2 OF 6",
+                               style: GoogleFonts.outfit(
+                                 color: const Color(0xffFF00E5).withOpacity(0.9),
+                                 fontSize: 11,
+                                 letterSpacing: 1.5,
+                                 fontWeight: FontWeight.w700,
+                               ),
+                             ),
+                             const SizedBox(height: 6),
+                             Row(
+                               children: [
+                                 buildProgress(true),
+                                 buildProgress(true),
+                                 buildProgress(false),
+                                 buildProgress(false),
+                                 buildProgress(false),
+                                 buildProgress(false),
+                               ],
+                             ),
                           ],
                         ),
                       ],

@@ -44,19 +44,17 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
       "icon": Icons.bolt_rounded,
       "color": const Color(0xffFF7A00),
     },
-    {
-      "id": 3,
-      "title": "Nutrition Focus",
-      "subtitle": "Build better eating habits and improve overall health.",
-      "icon": Icons.restaurant_menu_rounded,
-      "color": const Color(0xffFF5F6D),
-    },
+    // {
+    //   "id": 3,
+    //   "title": "Nutrition Focus",
+    //   "subtitle": "Build better eating habits and improve overall health.",
+    //   "icon": Icons.restaurant_menu_rounded,
+    //   "color": const Color(0xffFF5F6D),
+    // },
   ];
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       backgroundColor: const Color(0xff050510),
       body: Stack(
@@ -99,70 +97,77 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
           ),
 
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                    /// 1. TOP PROGRESS BAR & SKIP
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "STEP 1 OF 4",
-                              style: GoogleFonts.outfit(
-                                color: const Color(0xffFF00E5).withOpacity(0.9),
-                                fontSize: 11,
-                                letterSpacing: 1.5,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                buildProgress(true),
-                                buildProgress(false),
-                                buildProgress(false),
-                                buildProgress(false),
-                              ],
-                            ),
-                          ],
-                        ),
-
-                        // Logout Button (instead of Skip)
-                        GestureDetector(
-                          onTap: () {
-                            Get.find<AuthService>().logout();
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.04),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.08),
-                                width: 0.8,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.logout_rounded,
-                              color: Colors.white,
-                              size: 16,
+            child: Column(
+              children: [
+                /// 1. TOP PROGRESS BAR & LOGOUT (Non-scrollable)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "STEP 1 OF 6",
+                            style: GoogleFonts.outfit(
+                              color: const Color(0xffFF00E5).withOpacity(0.9),
+                              fontSize: 11,
+                              letterSpacing: 1.5,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              buildProgress(true),
+                              buildProgress(false),
+                              buildProgress(false),
+                              buildProgress(false),
+                              buildProgress(false),
+                              buildProgress(false),
+                            ],
+                          ),
+                        ],
+                      ),
+
+                      // Logout Button
+                      GestureDetector(
+                        onTap: () {
+                          Get.find<AuthService>().logout();
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.04),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.08),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.logout_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
+                ),
 
-                    const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
-                    /// 2. TITLE
-                    Column(
+                /// 2. MIDDLE SCROLLABLE CONTENT
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        /// TITLE & TEXT
                         RichText(
                           text: TextSpan(
                             children: [
@@ -194,177 +199,172 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                                             0.0,
                                             200.0,
                                             50.0,
+                                          ),
                                         ),
-                                      ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            "Choose your primary fitness goal and let our AI build your plan accordingly.",
-                            style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.60),
-                              fontSize: 12,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                    const SizedBox(height: 10),
-
-                    /// 3. SECTION HEADER
-                    Text(
-                      "SELECT YOUR GOAL",
-                      style: GoogleFonts.outfit(
-                        color: const Color(0xffFF00E5).withOpacity(0.85),
-                        fontSize: 11,
-                        letterSpacing: 1.5,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-
-                    const SizedBox(height: 6),
-
-                    /// 4. GOAL CARDS GRID LAYOUT
-                    Row(
-                      children: [
-                        Expanded(child: buildGoalCard(0)),
-                        const SizedBox(width: 12),
-                        Expanded(child: buildGoalCard(1)),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(child: buildGoalCard(2)),
-                        const SizedBox(width: 12),
-                        Expanded(child: buildGoalCard(3)),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    buildHorizontalGoalCard(4),
-
-                    const SizedBox(height: 10),
-
-                    /// 5. AI PERSONALIZATION INFO CARD
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 18,
-                            vertical: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.03),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.12),
-                              width: 0.8,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                height: 48,
-                                width: 48,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(14),
-                                  color: const Color(0xff090918),
-                                  border: Border.all(
-                                    color: const Color(0xff7B61FF).withOpacity(0.35),
-                                    width: 1.2,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(0xff7B61FF).withOpacity(0.25),
-                                      blurRadius: 10,
-                                      spreadRadius: 1,
-                                    ),
-                                  ],
-                                ),
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    Opacity(
-                                      opacity: 0.4,
-                                      child: const Icon(
-                                        Icons.memory_rounded,
-                                        color: Color(0xffFF00E5),
-                                        size: 32,
-                                      ),
-                                    ),
-                                    Text(
-                                      "AI",
-                                      style: GoogleFonts.outfit(
-                                        color: Colors.white,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Text(
-                                  "Our AI will personalize your diet, workouts and recommendations based on your goal.",
-                                  style: GoogleFonts.inter(
-                                    color: Colors.white.withOpacity(0.75),
-                                    fontSize: 12,
-                                    height: 1.45,
-                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    ),
-
-                    const Spacer(),
-
-                    /// 6. CONTINUE BUTTON
-                    Container(
-                      height: 48,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xffB100FF),
-                            Color(0xffFF5F6D),
-                            Color(0xffFF7A00),
-                          ],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xffB100FF).withOpacity(0.30),
-                            blurRadius: 10,
-                            spreadRadius: 1,
-                            offset: const Offset(0, 2),
+                        const SizedBox(height: 6),
+                        Text(
+                          "Choose your primary fitness goal and let our AI build your plan accordingly.",
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.60),
+                            fontSize: 12,
+                            height: 1.4,
                           ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        /// SECTION HEADER
+                        Text(
+                          "SELECT YOUR GOAL",
+                          style: GoogleFonts.outfit(
+                            color: const Color(0xffFF00E5).withOpacity(0.85),
+                            fontSize: 11,
+                            letterSpacing: 1.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        /// UNIFORM DYNAMIC GOAL CARDS LIST (All same size & layout)
+                        ...List.generate(goals.length, (index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: buildHorizontalGoalCard(index),
+                          );
+                        }),
+
+                        const SizedBox(height: 8),
+
+                        /// AI PERSONALIZATION INFO CARD
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 16,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.03),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.12),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    height: 48,
+                                    width: 48,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(14),
+                                      color: const Color(0xff090918),
+                                      border: Border.all(
+                                        color: const Color(
+                                          0xff7B61FF,
+                                        ).withOpacity(0.35),
+                                        width: 1.2,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(
+                                            0xff7B61FF,
+                                          ).withOpacity(0.25),
+                                          blurRadius: 10,
+                                          spreadRadius: 1,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Opacity(
+                                          opacity: 0.4,
+                                          child: const Icon(
+                                            Icons.memory_rounded,
+                                            color: Color(0xffFF00E5),
+                                            size: 32,
+                                          ),
+                                        ),
+                                        Text(
+                                          "AI",
+                                          style: GoogleFonts.outfit(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Text(
+                                      "Our AI will personalize your diet, workouts and recommendations based on your goal.",
+                                      style: GoogleFonts.inter(
+                                        color: Colors.white.withOpacity(0.75),
+                                        fontSize: 12,
+                                        height: 1.45,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                ),
+
+                /// 3. CONTINUE BUTTON (Non-scrollable, floating at bottom)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                  child: Container(
+                    height: 48,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xffB100FF),
+                          Color(0xffFF5F6D),
+                          Color(0xffFF7A00),
                         ],
                       ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(24),
-                          onTap: () {
-                            final selectedGoal = goals[selectedIndex];
-                            Get.to(
-                              () => PhysicalMetricsScreen(
-                                goalTitle: selectedGoal["title"] as String,
-                                goalId: selectedGoal["id"] as int,
-                              ),
-                              transition: Transition.cupertino,
-                            );
-                          },
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xffB100FF).withOpacity(0.30),
+                          blurRadius: 10,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(24),
+                        onTap: () {
+                          final selectedGoal = goals[selectedIndex];
+                          Get.to(
+                            () => PhysicalMetricsScreen(
+                              goalTitle: selectedGoal["title"] as String,
+                              goalId: selectedGoal["id"] as int,
+                            ),
+                            transition: Transition.cupertino,
+                          );
+                        },
                         child: Center(
                           child: Text(
                             "Continue",
@@ -376,18 +376,16 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                             ),
                           ),
                         ),
-                        ),
                       ),
                     ),
-
-                    const SizedBox(height: 10),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
   }
 
   Widget buildProgress(bool active) {
@@ -423,10 +421,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
         curve: Curves.easeInOut,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.12),
-            width: 0.8,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.12), width: 0.8),
           gradient: isSelected
               ? const LinearGradient(
                   begin: Alignment.topLeft,
@@ -543,10 +538,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
         curve: Curves.easeInOut,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.12),
-            width: 0.8,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.12), width: 0.8),
           gradient: isSelected
               ? const LinearGradient(
                   begin: Alignment.topLeft,
