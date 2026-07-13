@@ -277,6 +277,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                               activityLevelId: selectedLevel["id"] as int,
                               activityLevelName: selectedLevel["title"],
                             ),
+                            transition: Transition.cupertino,
                           );
                         },
                         child: Center(

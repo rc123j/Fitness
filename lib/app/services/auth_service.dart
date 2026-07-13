@@ -25,12 +25,14 @@ class AuthService extends GetxService {
     required int userId,
     required String email,
     required String role,
+    bool isOnboarded = false,
   }) {
     _storage.write(_accessTokenKey, accessToken);
     _storage.write(_refreshTokenKey, refreshToken);
     _storage.write(_userIdKey, userId);
     _storage.write(_userEmailKey, email);
     _storage.write(_userRoleKey, role);
+    _storage.write(_onboardingDoneKey, isOnboarded);
   }
 
   void updateAccessToken(String token) {
@@ -47,6 +49,7 @@ class AuthService extends GetxService {
     await _storage.remove(_userIdKey);
     await _storage.remove(_userEmailKey);
     await _storage.remove(_userRoleKey);
+    await _storage.remove(_onboardingDoneKey);
   }
 
   Future<void> logout() async {

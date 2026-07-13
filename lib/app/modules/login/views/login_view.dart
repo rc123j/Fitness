@@ -105,7 +105,9 @@ class LoginView extends GetView<LoginController> {
           // 5. SCROLLABLE FRONT LAYER (Keyboard friendly!)
           SafeArea(
             child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
+              physics: MediaQuery.of(context).viewInsets.bottom > 0
+                  ? const BouncingScrollPhysics()
+                  : const NeverScrollableScrollPhysics(),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
@@ -288,22 +290,53 @@ class LoginView extends GetView<LoginController> {
                       );
                     }),
 
+                    // SUCCESS MESSAGE (plain widget, not reactive — no crash risk)
+                    if (controller.successMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xff34C759).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xff34C759).withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.check_circle_outline_rounded, color: Color(0xff34C759), size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  controller.successMessage!,
+                                  style: GoogleFonts.inter(color: const Color(0xff34C759), fontSize: 13),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
                     // EMAIL FIELD
-                    buildField(
+                    PremiumTextField(
                       hint: 'Email Address',
                       icon: Icons.person_outline_rounded,
                       controller: controller.emailController,
+                      keyboardType: TextInputType.emailAddress,
                     ),
 
                     const SizedBox(height: 16),
 
                     // PASSWORD FIELD
-                    buildField(
+                    Obx(() => PremiumTextField(
                       hint: 'Password',
                       icon: Icons.lock_outline_rounded,
-                      suffix: Icons.visibility_outlined,
+                      suffix: controller.obscurePassword.value
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      obscureText: controller.obscurePassword.value,
+                      onSuffixTap: () => controller.togglePasswordVisibility(),
                       controller: controller.passwordController,
-                    ),
+                    )),
 
                     const SizedBox(height: 16),
 
@@ -502,61 +535,6 @@ class LoginView extends GetView<LoginController> {
     );
   }
 
-  Widget buildField({
-    required String hint,
-    required IconData icon,
-    IconData? suffix,
-    TextEditingController? controller,
-  }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          height: 64,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: Colors.black.withOpacity(0.24),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.06),
-              width: 0.8,
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                color: const Color(
-                  0xFFB066FF,
-                ).withOpacity(0.85), // Soft neon lavender
-                size: 22,
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  style: GoogleFonts.inter(color: Colors.white, fontSize: 15),
-                  obscureText: hint.toLowerCase().contains('password'),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: hint,
-                    hintStyle: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.40),
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              ),
-              if (suffix != null)
-                Icon(suffix, color: Colors.white.withOpacity(0.45), size: 22),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget socialButton({required String title, required Widget logoWidget}) {
     return Container(
       height: 56,
@@ -589,6 +567,108 @@ class LoginView extends GetView<LoginController> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class PremiumTextField extends StatefulWidget {
+  final String hint;
+  final IconData icon;
+  final IconData? suffix;
+  final bool obscureText;
+  final VoidCallback? onSuffixTap;
+  final TextEditingController? controller;
+  final TextInputType? keyboardType;
+
+  const PremiumTextField({
+    super.key,
+    required this.hint,
+    required this.icon,
+    this.suffix,
+    this.obscureText = false,
+    this.onSuffixTap,
+    this.controller,
+    this.keyboardType,
+  });
+
+  @override
+  State<PremiumTextField> createState() => _PremiumTextFieldState();
+}
+
+class _PremiumTextFieldState extends State<PremiumTextField> {
+  bool _isFocused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final highlightColor = const Color(0xffFF00E5); // Glowing neon magenta
+
+    return Focus(
+      onFocusChange: (hasFocus) {
+        setState(() {
+          _isFocused = hasFocus;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: 58,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: _isFocused
+              ? Colors.black.withOpacity(0.4)
+              : Colors.white.withOpacity(0.06),
+          border: Border.all(
+            color: _isFocused
+                ? highlightColor
+                : Colors.white.withOpacity(0.12),
+            width: _isFocused ? 1.5 : 0.8,
+          ),
+          boxShadow: _isFocused
+              ? [
+                  BoxShadow(
+                    color: highlightColor.withOpacity(0.12),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                  )
+                ]
+              : [],
+        ),
+        child: Row(
+          children: [
+            Icon(
+              widget.icon,
+              color: _isFocused ? highlightColor : Colors.white.withOpacity(0.40),
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                controller: widget.controller,
+                style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+                obscureText: widget.obscureText,
+                keyboardType: widget.keyboardType,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: widget.hint,
+                  hintStyle: GoogleFonts.inter(
+                    color: Colors.white.withOpacity(0.35),
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+            if (widget.suffix != null)
+              GestureDetector(
+                onTap: widget.onSuffixTap,
+                child: Icon(
+                  widget.suffix,
+                  color: _isFocused ? highlightColor : Colors.white.withOpacity(0.45),
+                  size: 20,
+                ),
+              ),
+          ],
         ),
       ),
     );

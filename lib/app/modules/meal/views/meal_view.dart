@@ -181,7 +181,10 @@ class MealView extends GetView<MealController> {
   /// 2. NUTRITION JOURNEY CARD
   /// ----------------------------------------------------
   Widget buildNutritionJourneyCard() {
-    double progressPercent = 0.72; // matching the 72% text
+    return Obx(() {
+      double progressPercent = controller.targetCalories.value > 0
+          ? (controller.currentCalories.value / controller.targetCalories.value).clamp(0.0, 1.0)
+          : 0.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -422,121 +425,128 @@ class MealView extends GetView<MealController> {
         ),
       ),
     );
+    });
   }
 
   /// ----------------------------------------------------
   /// 3. DAILY TARGET CARD (WITH CUSTOM PAINT DONUT)
   /// ----------------------------------------------------
   Widget buildDailyTargetCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.0,
+    return Obx(() {
+      final double progress = controller.targetCalories.value > 0
+          ? (controller.currentCalories.value / controller.targetCalories.value).clamp(0.0, 1.0)
+          : 0.0;
+
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: const Color(0xff0B0817).withOpacity(0.55),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.04),
+            width: 1.0,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// Target Header
-          Row(
-            children: [
-              const Icon(
-                Icons.track_changes_rounded,
-                color: Color(0xffFF00E5),
-                size: 16,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                "Daily Target",
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// Target Header
+            Row(
+              children: [
+                const Icon(
+                  Icons.track_changes_rounded,
+                  color: Color(0xffFF00E5),
+                  size: 16,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
+                const SizedBox(width: 8),
+                Text(
+                  "Daily Target",
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
 
-          /// Macros row + Donut circle
-          Row(
-            children: [
-              /// Left 4 macro metrics in a 2x2 grid (represented as 2 columns of 2 items)
-              Expanded(
-                child: Row(
-                  children: [
-                    /// Column 1: Calories & Carbs
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          buildMacroItem(
-                            icon: Icons.local_fire_department_rounded,
-                            iconColor: const Color(0xffFF7A00),
-                            value: "2,300",
-                            unit: "kcal",
-                          ),
-                          const SizedBox(height: 16),
-                          buildMacroItem(
-                            icon: Icons.grass_rounded,
-                            iconColor: const Color(0xffB100FF),
-                            value: "210g",
-                            unit: "Carbs",
-                          ),
-                        ],
+            /// Macros row + Donut circle
+            Row(
+              children: [
+                /// Left 4 macro metrics in a 2x2 grid (represented as 2 columns of 2 items)
+                Expanded(
+                  child: Row(
+                    children: [
+                      /// Column 1: Calories & Carbs
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            buildMacroItem(
+                              icon: Icons.local_fire_department_rounded,
+                              iconColor: const Color(0xffFF7A00),
+                              value: controller.targetCalories.value.toString(),
+                              unit: "kcal",
+                            ),
+                            const SizedBox(height: 16),
+                            buildMacroItem(
+                              icon: Icons.grass_rounded,
+                              iconColor: const Color(0xffB100FF),
+                              value: "${controller.targetCarbs.value}g",
+                              unit: "Carbs",
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
+                      const SizedBox(width: 8),
 
-                    /// Column 2: Protein & Fat
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          buildMacroItem(
-                            icon: Icons.fitness_center_rounded,
-                            iconColor: const Color(0xff00FF87),
-                            value: "145g",
-                            unit: "Protein",
-                          ),
-                          const SizedBox(height: 16),
-                          buildMacroItem(
-                            icon: Icons.water_drop_rounded,
-                            iconColor: const Color(0xff00A3FF),
-                            value: "65g",
-                            unit: "Fat",
-                          ),
-                        ],
+                      /// Column 2: Protein & Fat
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            buildMacroItem(
+                              icon: Icons.fitness_center_rounded,
+                              iconColor: const Color(0xff00FF87),
+                              value: "${controller.targetProtein.value}g",
+                              unit: "Protein",
+                            ),
+                            const SizedBox(height: 16),
+                            buildMacroItem(
+                              icon: Icons.water_drop_rounded,
+                              iconColor: const Color(0xff00A3FF),
+                              value: "${controller.targetFat.value}g",
+                              unit: "Fat",
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
 
-              const SizedBox(width: 10),
+                const SizedBox(width: 10),
 
-              /// Right: Donut Progress Ring
-              CustomPaint(
-                size: const Size(86, 86),
-                painter: DonutProgressPainter(
-                  progress: 0.72,
-                  gradientColors: [
-                    const Color(0xffB100FF),
-                    const Color(0xffFF00E5),
-                    const Color(0xffFF7A00),
-                    const Color(0xff00A3FF),
-                  ],
+                /// Right: Donut Progress Ring
+                CustomPaint(
+                  size: const Size(86, 86),
+                  painter: DonutProgressPainter(
+                    progress: progress,
+                    gradientColors: [
+                      const Color(0xffB100FF),
+                      const Color(0xffFF00E5),
+                      const Color(0xffFF7A00),
+                      const Color(0xff00A3FF),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+              ],
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget buildMacroItem({
@@ -581,91 +591,83 @@ class MealView extends GetView<MealController> {
   /// 4. MEALS TIMELINE SECTION
   /// ----------------------------------------------------
   Widget buildMealsTimeline() {
-    return Column(
-      children: [
-        /// 1. Breakfast (Completed State)
-        buildTimelineRow(
-          dotColor: const Color(0xff00FF87),
-          state: TimelineState.completed,
-          isFirst: true,
-          isLast: false,
-          child: buildMealCard(
-            title: "Breakfast",
-            desc: "Oats with Fruits & Nuts",
-            details: "450 kcal  •  22P  •  60C  •  12F",
-            icon: Icons.emoji_food_beverage_rounded,
-            iconColor: const Color(0xff00FF87),
-            badgeText: "Completed",
-            badgeColor: const Color(0xff00FF87),
-            onTap: () => Get.toNamed('/meal-detail'),
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.all(24.0),
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xffFF00E5)),
+            ),
           ),
-        ),
+        );
+      }
 
-        /// 2. Lunch (Active State)
-        buildTimelineRow(
-          dotColor: const Color(0xffFF7A00),
-          state: TimelineState.active,
-          isFirst: false,
-          isLast: false,
-          child: buildMealCard(
-            title: "Lunch",
-            desc: "Grilled Chicken Bowl",
-            details: "550 kcal  •  40P  •  60C  •  15F",
-            icon: Icons.lunch_dining_rounded,
-            iconColor: const Color(0xffFF7A00),
-            timeText: "12:30 PM",
-            timeColor: const Color(0xffFF7A00),
-            hasActions: true,
-            onTap: () => Get.toNamed('/meal-detail'),
+      if (controller.mealTimeline.isEmpty) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xff0B0817).withOpacity(0.55),
+            border: Border.all(color: Colors.white.withOpacity(0.04)),
           ),
-        ),
-
-        /// 3. AI Suggestion (Nested inside timeline)
-        buildTimelineRow(
-          dotColor: const Color(0xffB100FF),
-          state: TimelineState.suggestion,
-          isFirst: false,
-          isLast: false,
-          child: buildAISuggestionCard(),
-        ),
-
-        /// 4. Snacks (Upcoming State)
-        buildTimelineRow(
-          dotColor: const Color(0xffB100FF),
-          state: TimelineState.upcoming,
-          isFirst: false,
-          isLast: false,
-          child: buildMealCard(
-            title: "Snacks",
-            desc: "Greek Yogurt with Berries",
-            details: "200 kcal  •  15P  •  20C  •  5F",
-            icon: Icons.local_drink_rounded,
-            iconColor: const Color(0xffB100FF),
-            timeText: "4:00 PM",
-            timeColor: const Color(0xffB100FF),
-            onTap: () => Get.toNamed('/meal-detail'),
+          child: Center(
+            child: Text(
+              "No active meal plans found.\nPlease complete Onboarding first.",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(color: Colors.white.withOpacity(0.6), fontSize: 13),
+            ),
           ),
-        ),
+        );
+      }
 
-        /// 5. Dinner (Upcoming State)
-        buildTimelineRow(
-          dotColor: Colors.white.withOpacity(0.15),
-          state: TimelineState.upcomingGrey,
-          isFirst: false,
-          isLast: true,
-          child: buildMealCard(
-            title: "Dinner",
-            desc: "Paneer Curry, Roti, Veggies",
-            details: "450 kcal  •  25P  •  50C  •  12F",
-            icon: Icons.soup_kitchen_rounded,
-            iconColor: const Color(0xffFF7A00),
-            timeText: "8:00 PM",
-            timeColor: const Color(0xffFF7A00),
-            onTap: () => Get.toNamed('/meal-detail'),
-          ),
-        ),
-      ],
-    );
+      return Column(
+        children: List.generate(controller.mealTimeline.length, (index) {
+          final meal = controller.mealTimeline[index];
+          final isFirst = index == 0;
+          final isLast = index == controller.mealTimeline.length - 1;
+
+          IconData icon = Icons.restaurant_rounded;
+          Color iconColor = const Color(0xffFF7A00);
+          
+          if (meal['title'] == 'Breakfast') {
+            icon = Icons.emoji_food_beverage_rounded;
+            iconColor = const Color(0xff00FF87);
+          } else if (meal['title'] == 'Lunch') {
+            icon = Icons.lunch_dining_rounded;
+            iconColor = const Color(0xffFF7A00);
+          } else if (meal['title'] == 'Dinner') {
+            icon = Icons.soup_kitchen_rounded;
+            iconColor = const Color(0xffFF3E3E);
+          } else if (meal['title'] == 'Evening Snack' || meal['title'] == 'Snacks' || meal['title'] == 'Mid Meal') {
+            icon = Icons.local_drink_rounded;
+            iconColor = const Color(0xffB100FF);
+          }
+
+          return buildTimelineRow(
+            dotColor: iconColor,
+            state: TimelineState.active,
+            isFirst: isFirst,
+            isLast: isLast,
+            child: buildMealCard(
+              title: meal['title'],
+              desc: meal['desc'],
+              details: meal['details'],
+              icon: icon,
+              iconColor: iconColor,
+              timeText: "Daily target",
+              timeColor: iconColor.withOpacity(0.7),
+              hasActions: true,
+              mealId: meal['id'],
+              foods: meal['foods'],
+              onTap: () {
+                // Click opens detail
+              },
+            ),
+          );
+        }),
+      );
+    });
   }
 
   /// Timeline custom connector layout
@@ -752,6 +754,8 @@ class MealView extends GetView<MealController> {
     String? timeText,
     Color? timeColor,
     bool hasActions = false,
+    int? mealId,
+    List? foods,
     VoidCallback? onTap,
   }) {
     return GestureDetector(
@@ -890,22 +894,41 @@ class MealView extends GetView<MealController> {
                 if (hasActions)
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xffB100FF).withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: const Color(0xffB100FF).withOpacity(0.20),
-                            width: 0.8,
+                      GestureDetector(
+                        onTap: () async {
+                          if (mealId != null && foods != null) {
+                            final success = await controller.consumeMeal(mealId, foods);
+                            if (success) {
+                              Get.snackbar(
+                                "Meal Logged 🍽️",
+                                "Logged $title to today's consumption summary.",
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
+                                colorText: Colors.white,
+                                borderColor: const Color(0xff00FF87).withOpacity(0.3),
+                                borderWidth: 1,
+                                margin: const EdgeInsets.all(16),
+                              );
+                            }
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xff00FF87).withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: const Color(0xff00FF87).withOpacity(0.20),
+                              width: 0.8,
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          "View Meal",
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                          child: Text(
+                            "Log Meal",
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),

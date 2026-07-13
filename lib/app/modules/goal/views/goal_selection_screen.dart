@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import '../../../services/auth_service.dart';
 import 'physical_metrics_screen.dart';
 
 class GoalSelectionScreen extends StatefulWidget {
@@ -131,31 +132,25 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                           ],
                         ),
 
-                        // Skip Button
+                        // Logout Button (instead of Skip)
                         GestureDetector(
                           onTap: () {
-                            Get.offAllNamed('/main-navigation');
+                            Get.find<AuthService>().logout();
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
+                            padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.04),
-                              borderRadius: BorderRadius.circular(14),
+                              shape: BoxShape.circle,
                               border: Border.all(
                                 color: Colors.white.withOpacity(0.08),
                                 width: 0.8,
                               ),
                             ),
-                            child: Text(
-                              "Skip",
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: const Icon(
+                              Icons.logout_rounded,
+                              color: Colors.white,
+                              size: 16,
                             ),
                           ),
                         ),
@@ -362,10 +357,13 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                           borderRadius: BorderRadius.circular(24),
                           onTap: () {
                             final selectedGoal = goals[selectedIndex];
-                            Get.to(() => PhysicalMetricsScreen(
-                              goalTitle: selectedGoal["title"] as String,
-                              goalId: selectedGoal["id"] as int,
-                            ));
+                            Get.to(
+                              () => PhysicalMetricsScreen(
+                                goalTitle: selectedGoal["title"] as String,
+                                goalId: selectedGoal["id"] as int,
+                              ),
+                              transition: Transition.cupertino,
+                            );
                           },
                         child: Center(
                           child: Text(

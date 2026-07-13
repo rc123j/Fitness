@@ -283,14 +283,17 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                         child: InkWell(
                           borderRadius: BorderRadius.circular(24),
                           onTap: () {
-                            Get.to(() => ActivityLevelScreen(
-                              goalTitle: widget.goalTitle,
-                              goalId: widget.goalId,
-                              gender: selectedGender,
-                              age: age.toInt(),
-                              height: height.toInt(),
-                              weight: weight,
-                            ));
+                            Get.to(
+                              () => ActivityLevelScreen(
+                                goalTitle: widget.goalTitle,
+                                goalId: widget.goalId,
+                                gender: selectedGender,
+                                age: age.toInt(),
+                                height: height.toInt(),
+                                weight: weight,
+                              ),
+                              transition: Transition.cupertino,
+                            );
                           },
                         child: Center(
                           child: Text(

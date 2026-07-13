@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
 import '../../../services/auth_service.dart';
@@ -77,21 +78,11 @@ class RegisterController extends GetxController {
         },
       );
 
-      final loginResponse = await _apiClient.post(
-        ApiEndpoints.login,
-        data: {'email': email, 'password': password},
-      );
+      // Write success flag to storage — LoginController reads and clears it on init
+      GetStorage().write('_reg_success_msg', 'Account created! Please log in to continue.');
 
-      final data = loginResponse.data;
-      _authService.saveSession(
-        accessToken: data['accessToken'],
-        refreshToken: data['refreshToken'],
-        userId: data['user']['id'],
-        email: data['user']['email'],
-        role: data['user']['role'],
-      );
-
-      Get.offAllNamed('/goal-selection');
+      // Simple navigation — no arguments, no timing dependency
+      Get.offAllNamed('/login');
     } on DioException catch (e) {
       final msg = e.response?.data?['message'] ?? 'Registration failed. Please try again.';
       errorMessage.value = msg;

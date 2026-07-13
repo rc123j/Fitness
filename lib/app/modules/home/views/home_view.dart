@@ -89,54 +89,99 @@ class HomeView extends GetView<HomeController> {
 
                   const SizedBox(height: 24),
 
-                  /// 3. STATS GRID ROW 1
-                  Row(
-                    children: [
-                      Expanded(
-                        child: buildStatCard(
-                          title: "Calories",
-                          value: "1,240",
-                          sub: "/ 2,000 kcal",
-                          icon: Icons.local_fire_department_rounded,
-                          color: const Color(0xffFF7A00),
-                          progress: 1240 / 2000,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: buildWaterCard(current: 2.1, target: 3.0),
-                      ),
-                    ],
-                  ),
+                  /// 3. STATS GRID ROW 1 & 2 (Reactive)
+                  Obx(() {
+                    final double calProgress = controller.targetCalories.value > 0
+                        ? (controller.currentCalories.value / controller.targetCalories.value).clamp(0.0, 1.0)
+                        : 0.0;
+                    final double stepProgress = controller.targetSteps.value > 0
+                        ? (controller.currentSteps.value / controller.targetSteps.value).clamp(0.0, 1.0)
+                        : 0.0;
 
-                  const SizedBox(height: 14),
-
-                  /// STATS GRID ROW 2
-                  Row(
-                    children: [
-                      Expanded(
-                        child: buildStatCard(
-                          title: "Steps",
-                          value: "7,842",
-                          sub: "/ 10,000",
-                          icon: Icons.directions_walk_rounded,
-                          color: const Color(0xff00FF87),
-                          progress: 7842 / 10000,
+                    return Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: buildStatCard(
+                                title: "Calories",
+                                value: controller.currentCalories.value.toString(),
+                                sub: "/ ${controller.targetCalories.value} kcal",
+                                icon: Icons.local_fire_department_rounded,
+                                color: const Color(0xffFF7A00),
+                                progress: calProgress,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  controller.addWater(0.25);
+                                  Get.snackbar(
+                                    "Water Logged 💧",
+                                    "Successfully added +250ml to your daily intake.",
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
+                                    colorText: Colors.white,
+                                    borderColor: const Color(0xff00A3FF).withOpacity(0.3),
+                                    borderWidth: 1,
+                                    margin: const EdgeInsets.all(16),
+                                  );
+                                },
+                                child: buildWaterCard(
+                                  current: controller.currentWater.value,
+                                  target: controller.targetWater.value,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: buildStatCard(
-                          title: "Compliance",
-                          value: "92%",
-                          sub: "Today",
-                          icon: Icons.track_changes_rounded,
-                          color: const Color(0xffB100FF),
-                          progress: 0.92,
+                        const SizedBox(height: 14),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  controller.addSteps(1000);
+                                  Get.snackbar(
+                                    "Steps Tracked 👟",
+                                    "Successfully logged +1000 steps walked.",
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
+                                    colorText: Colors.white,
+                                    borderColor: const Color(0xff00FF87).withOpacity(0.3),
+                                    borderWidth: 1,
+                                    margin: const EdgeInsets.all(16),
+                                  );
+                                },
+                                child: buildStatCard(
+                                  title: "Steps",
+                                  value: controller.currentSteps.value.toString(),
+                                  sub: "/ ${controller.targetSteps.value}",
+                                  icon: Icons.directions_walk_rounded,
+                                  color: const Color(0xff00FF87),
+                                  progress: stepProgress,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: buildStatCard(
+                                title: "Weight",
+                                value: "${controller.currentWeight.value.toStringAsFixed(1)} kg",
+                                sub: controller.weightDifference.value >= 0
+                                    ? "+${controller.weightDifference.value.toStringAsFixed(1)} kg"
+                                    : "${controller.weightDifference.value.toStringAsFixed(1)} kg",
+                                icon: Icons.monitor_weight_rounded,
+                                color: const Color(0xffB100FF),
+                                progress: 0.8, // decorative progress bar
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    );
+                  }),
 
                   const SizedBox(height: 28),
 
