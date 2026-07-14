@@ -83,7 +83,11 @@ class LoginController extends GetxController {
         if (data is Map) {
           msg = data['message'] ?? msg;
         } else if (data is String) {
-          msg = data;
+          if (data.trim().startsWith('<')) {
+            msg = 'Server returned an invalid response (HTML Error).';
+          } else {
+            msg = data;
+          }
         }
       } else {
         msg = 'Connection error: ${e.message ?? e.type.toString()}';

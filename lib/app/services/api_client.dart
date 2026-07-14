@@ -14,7 +14,10 @@ class ApiClient extends GetxService {
       baseUrl: ApiEndpoints.baseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 15),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'bypass-tunnel-reminder': 'true',
+      },
     ));
 
     _dio.interceptors.add(InterceptorsWrapper(
@@ -55,6 +58,10 @@ class ApiClient extends GetxService {
         baseUrl: ApiEndpoints.baseUrl,
         connectTimeout: const Duration(seconds: 8),
         receiveTimeout: const Duration(seconds: 8),
+        headers: {
+          'Content-Type': 'application/json',
+          'bypass-tunnel-reminder': 'true',
+        },
       )).post(
         ApiEndpoints.refresh,
         data: {'refreshToken': refreshToken},
