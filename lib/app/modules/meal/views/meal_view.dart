@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/meal_controller.dart';
+import '../../../widgets/rocket_launch_overlay.dart';
 
 class MealView extends GetView<MealController> {
   const MealView({super.key});
@@ -73,7 +74,7 @@ class MealView extends GetView<MealController> {
                         const SizedBox(height: 16),
 
                         /// TIMELINE OF MEALS
-                        buildMealsTimeline(),
+                        buildMealsTimeline(context),
                         const SizedBox(height: 16),
 
                         buildBottomRow(),
@@ -630,7 +631,7 @@ class MealView extends GetView<MealController> {
   /// ----------------------------------------------------
   /// 4. MEALS TIMELINE SECTION
   /// ----------------------------------------------------
-  Widget buildMealsTimeline() {
+  Widget buildMealsTimeline(BuildContext context) {
     return Obx(() {
       if (controller.isLoading.value) {
         return const Center(
@@ -711,6 +712,7 @@ class MealView extends GetView<MealController> {
             isFirst: isFirst,
             isLast: isLast,
             child: buildMealCard(
+              context: context,
               title: meal['title'],
               desc: meal['desc'],
               details: meal['details'],
@@ -809,6 +811,7 @@ class MealView extends GetView<MealController> {
 
   /// General Meal Card UI
   Widget buildMealCard({
+    required BuildContext context,
     required String title,
     required String desc,
     required String details,
@@ -827,350 +830,416 @@ class MealView extends GetView<MealController> {
     List? foods,
     VoidCallback? onTap,
   }) {
+    // 1. Dynamically compute total macros for premium detailed visualization
+    double totalCalories = 0.0;
+    double totalProtein = 0.0;
+    double totalCarbs = 0.0;
+    double totalFat = 0.0;
+    double totalFiber = 0.0;
+
+    if (foods != null) {
+      for (var f in foods) {
+        if (f == null) continue;
+        totalCalories += double.tryParse(f['calories']?.toString() ?? '0') ?? 0;
+        totalProtein += double.tryParse(f['protein']?.toString() ?? '0') ?? 0;
+        totalCarbs += double.tryParse(f['carbs']?.toString() ?? '0') ?? 0;
+        totalFat += double.tryParse(f['fat']?.toString() ?? '0') ?? 0;
+        totalFiber += double.tryParse(f['fiber']?.toString() ?? '0') ?? 0;
+      }
+    }
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.0,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14.0),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                /// Glowing Icon Container
-                Container(
-                  height: 44,
-                  width: 44,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xff090414),
-                    border: Border.all(
-                      color: iconColor.withOpacity(0.25),
-                      width: 1.0,
-                    ),
-                  ),
-                  child: Icon(icon, color: iconColor, size: 18),
-                ),
-                const SizedBox(width: 12),
-
-                /// Title & Description
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        desc,
-                        style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.70),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                /// Status badges / Time
-                if (isCompleted)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xff00FF87).withOpacity(0.10),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Completed",
-                          style: GoogleFonts.inter(
-                            color: const Color(0xff00FF87),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.check_circle_outline_rounded, color: Color(0xff00FF87), size: 10),
-                      ],
-                    ),
-                  )
-                else if (isPast)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xffFF3B30).withOpacity(0.10),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Absent",
-                          style: GoogleFonts.inter(
-                            color: const Color(0xffFF3B30),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.cancel_outlined, color: Color(0xffFF3B30), size: 10),
-                      ],
-                    ),
-                  )
-                else if (isFuture)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.04),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Upcoming",
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(0.40),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.lock_clock_outlined, color: Colors.white.withOpacity(0.40), size: 10),
-                      ],
-                    ),
-                  )
-                else if (badgeText != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: badgeColor!.withOpacity(0.10),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          badgeText,
-                          style: GoogleFonts.inter(
-                            color: badgeColor,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.check_circle_outline_rounded, color: badgeColor, size: 10),
-                      ],
-                    ),
-                  )
-                else if (timeText != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.02),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.05),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          timeText,
-                          style: GoogleFonts.inter(
-                            color: timeColor,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.access_time_rounded, color: timeColor, size: 10),
-                      ],
-                    ),
-                  ),
-
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  color: Colors.white.withOpacity(0.20),
-                  size: 13,
-                ),
-              ],
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xff120D2C).withOpacity(0.85),
+              const Color(0xff090416).withOpacity(0.95),
+            ],
+          ),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.06),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: iconColor.withOpacity(0.03),
+              blurRadius: 20,
+              spreadRadius: 2,
             ),
-
-            /// Dynamic Individual Foods Listing under Description
-            if (foods != null && foods.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Divider(color: Colors.white.withOpacity(0.06), height: 1),
-              const SizedBox(height: 8),
-              Column(
-                children: foods.map((f) {
-                  final foodDetails = f['food_details'] ?? {};
-                  final String foodName = foodDetails['food_name'] ?? 'Food Item';
-                  
-                  final double cal = double.tryParse(f['calories']?.toString() ?? '0.0') ?? 0.0;
-                  final double prot = double.tryParse(f['protein']?.toString() ?? '0.0') ?? 0.0;
-                  final double carb = double.tryParse(f['carbs']?.toString() ?? '0.0') ?? 0.0;
-                  final double fatVal = double.tryParse(f['fat']?.toString() ?? '0.0') ?? 0.0;
-                  final double fibVal = double.tryParse(f['fiber']?.toString() ?? '0.0') ?? 0.0;
-                  
-                  final qty = f['quantity'] ?? '1 serving';
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // HEADER ROW (Rounded Icon, Title, Status badge)
+              Row(
+                children: [
+                  Container(
+                    height: 48,
+                    width: 48,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      color: const Color(0xff090414),
+                      border: Border.all(
+                        color: iconColor.withOpacity(0.20),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Icon(icon, color: iconColor, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                foodName,
-                                style: GoogleFonts.inter(
-                                  color: Colors.white.withOpacity(0.85),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                "Serving Size: $qty • ${cal.toInt()} kcal",
-                                style: GoogleFonts.inter(
-                                  color: Colors.white.withOpacity(0.40),
-                                  fontSize: 10.5,
-                                ),
-                              ),
-                            ],
+                        Text(
+                          title,
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
+                        const SizedBox(height: 3),
                         Text(
-                          "${prot.toInt()}P • ${carb.toInt()}C • ${fatVal.toInt()}F • ${fibVal.toInt()}Fi",
+                          desc,
                           style: GoogleFonts.inter(
-                            color: const Color(0xff00FF87).withOpacity(0.85),
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.bold,
+                            color: Colors.white.withOpacity(0.60),
+                            fontSize: 12,
                           ),
                         ),
                       ],
                     ),
-                  );
-                }).toList(),
-              ),
-            ],
-
-            /// Sub metrics footer
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  details,
-                  style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.40),
-                    fontSize: 10,
                   ),
-                ),
 
-                /// Buttons for Active card
-                if (hasActions)
-                  isCompleted
-                      ? Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xff00FF87).withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: const Color(0xff00FF87).withOpacity(0.15),
-                              width: 0.8,
+                  // Badges
+                  if (isCompleted)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xff00FF87).withOpacity(0.10),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Completed",
+                            style: GoogleFonts.inter(
+                              color: const Color(0xff00FF87),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "Completed",
-                                style: GoogleFonts.outfit(
-                                  color: const Color(0xff00FF87),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(Icons.check_rounded, color: Color(0xff00FF87), size: 10),
-                            ],
+                          const SizedBox(width: 4),
+                          const Icon(Icons.check_circle_outline_rounded, color: Color(0xff00FF87), size: 10),
+                        ],
+                      ),
+                    )
+                  else if (isPast)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xffFF3B30).withOpacity(0.10),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Absent",
+                            style: GoogleFonts.inter(
+                              color: const Color(0xffFF3B30),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        )
-                      : (isPast || isFuture)
-                          ? const SizedBox.shrink()
-                          : Row(
+                          const SizedBox(width: 4),
+                          const Icon(Icons.cancel_outlined, color: Color(0xffFF3B30), size: 10),
+                        ],
+                      ),
+                    )
+                  else if (isFuture)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.04),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Upcoming",
+                            style: GoogleFonts.inter(
+                              color: Colors.white.withOpacity(0.40),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(Icons.lock_clock_outlined, color: Colors.white.withOpacity(0.40), size: 10),
+                        ],
+                      ),
+                    )
+                  else if (timeText != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.02),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.05),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            timeText,
+                            style: GoogleFonts.inter(
+                              color: timeColor,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(Icons.access_time_rounded, color: timeColor, size: 10),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+
+              // INDIVIDUAL FOOD ITEMS (Clean, non-repetitive layout)
+              if (foods != null && foods.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                Divider(color: Colors.white.withOpacity(0.06), height: 1),
+                const SizedBox(height: 10),
+                Column(
+                  children: foods.map((f) {
+                    final foodDetails = f['food_details'] ?? {};
+                    final String foodName = foodDetails['food_name'] ?? 'Food Item';
+                    final double cal = double.tryParse(f['calories']?.toString() ?? '0.0') ?? 0.0;
+                    final qty = f['quantity'] ?? '1 serving';
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                GestureDetector(
-                                  onTap: () async {
-                                    if (mealId != null && mealTypeId != null) {
-                                      final success = await controller.markMealAsCompleted(mealId, mealTypeId);
-                                      if (success) {
-                                        Get.snackbar(
-                                          "Meal Completed! 🍽️",
-                                          "Logged $title to today's summary.",
-                                          snackPosition: SnackPosition.BOTTOM,
-                                          backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
-                                          colorText: Colors.white,
-                                          borderColor: const Color(0xff00FF87).withOpacity(0.3),
-                                          borderWidth: 1,
-                                          margin: const EdgeInsets.all(16),
-                                        );
-                                      }
-                                    }
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xff00FF87).withOpacity(0.12),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: const Color(0xff00FF87).withOpacity(0.20),
-                                        width: 0.8,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      "Mark as Done",
-                                      style: GoogleFonts.outfit(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                Text(
+                                  foodName,
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white.withOpacity(0.90),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  "Qty: $qty",
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white.withOpacity(0.40),
+                                    fontSize: 11,
                                   ),
                                 ),
                               ],
                             ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.03),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              "${cal.toInt()} kcal",
+                              style: GoogleFonts.inter(
+                                color: const Color(0xffFF7A00).withOpacity(0.9),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
               ],
-            ),
-          ],
+
+              // MACROS TARGET SUMMARY GRID
+              const SizedBox(height: 14),
+              Divider(color: Colors.white.withOpacity(0.06), height: 1),
+              const SizedBox(height: 12),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: [
+                    _buildCardMacroChip("Calories", "${totalCalories.toInt()} kcal", const Color(0xffFF7A00)),
+                    const SizedBox(width: 8),
+                    _buildCardMacroChip("Protein", "${totalProtein.toInt()}g", const Color(0xff00FF87)),
+                    const SizedBox(width: 8),
+                    _buildCardMacroChip("Carbs", "${totalCarbs.toInt()}g", const Color(0xff00E5FF)),
+                    const SizedBox(width: 8),
+                    _buildCardMacroChip("Fat", "${totalFat.toInt()}g", const Color(0xffFF00D4)),
+                  ],
+                ),
+              ),
+
+              // ACTIONS FOOTER (Full width premium layout)
+              if (hasActions) ...[
+                const SizedBox(height: 14),
+                Divider(color: Colors.white.withOpacity(0.06), height: 1),
+                const SizedBox(height: 12),
+                isCompleted
+                    ? Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xff00FF87).withOpacity(0.06),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: const Color(0xff00FF87).withOpacity(0.15),
+                                  width: 1.0,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Completed Successfully",
+                                    style: GoogleFonts.outfit(
+                                      color: const Color(0xff00FF87),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  const Icon(Icons.check_circle_rounded, color: Color(0xff00FF87), size: 14),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            flex: 2,
+                            child: GestureDetector(
+                              onTap: () async {
+                                if (mealId != null && mealTypeId != null) {
+                                  final success = await controller.unmarkMealAsCompleted(mealId, mealTypeId);
+                                  if (success) {
+                                    Get.snackbar(
+                                      "Meal Unmarked ↩️",
+                                      "Removed $title from today's summary.",
+                                      snackPosition: SnackPosition.BOTTOM,
+                                      backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
+                                      colorText: Colors.white,
+                                      borderColor: const Color(0xffFF3B30).withOpacity(0.3),
+                                      borderWidth: 1,
+                                      margin: const EdgeInsets.all(16),
+                                    );
+                                  }
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xffFF3B30).withOpacity(0.10),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0xffFF3B30).withOpacity(0.18),
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Undo Log",
+                                      style: GoogleFonts.outfit(
+                                        color: const Color(0xffFF3B30),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    const Icon(Icons.undo_rounded, color: Color(0xffFF3B30), size: 13),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : (isPast || isFuture)
+                        ? const SizedBox.shrink()
+                        : GestureDetector(
+                            onTap: () async {
+                              if (mealId != null && mealTypeId != null) {
+                                final success = await controller.markMealAsCompleted(mealId, mealTypeId);
+                                if (success) {
+                                  RocketLaunchOverlay.show(context, mealTitle: title);
+                                }
+                              }
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xffFF00D4), Color(0xffB100FF)],
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xffFF00D4).withOpacity(0.20),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Mark Meal as Completed",
+                                    style: GoogleFonts.outfit(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 14),
+                                ],
+                              ),
+                            ),
+                          ),
+              ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   /// AI Suggestion timeline card
   Widget buildAISuggestionCard() {
@@ -1276,6 +1345,55 @@ class MealView extends GetView<MealController> {
           fontSize: 9,
           fontWeight: FontWeight.w600,
         ),
+      ),
+    );
+  }
+
+  Widget _buildCardMacroChip(String label, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.12), width: 0.8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 5,
+            height: 5,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label.toUpperCase(),
+                style: GoogleFonts.inter(
+                  color: Colors.white.withOpacity(0.35),
+                  fontSize: 7.5,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.3,
+                ),
+              ),
+              const SizedBox(height: 1),
+              Text(
+                value,
+                style: GoogleFonts.outfit(
+                  color: color,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

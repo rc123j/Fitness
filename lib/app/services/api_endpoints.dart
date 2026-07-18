@@ -21,6 +21,7 @@ class ApiEndpoints {
   static const String logMeal = '/api/diet-plans/logs';
   static const String todayNutritionLog = '/api/diet-plans/logs/today';
   static const String markMealComplete = '/api/diet-plans/meal-complete';
+  static const String unmarkMealComplete = '/api/diet-plans/meal-uncomplete';
 
   // Progress, Steps & Hydration
   static const String logWater = '/api/progress/water';

@@ -49,8 +49,8 @@ class MealController extends GetxController {
     fetchCalorieHistory();
   }
 
-  Future<void> fetchMealData() async {
-    isLoading.value = true;
+  Future<void> fetchMealData({bool silent = false}) async {
+    if (!silent) isLoading.value = true;
     try {
       final queryParam = selectedQueryDate.value.isNotEmpty ? "?date=${selectedQueryDate.value}" : "";
       
@@ -200,8 +200,27 @@ class MealController extends GetxController {
         data: {'diet_plan_meal_id': dietPlanMealId},
       );
       completedMealIds.add(mealId);
-      await fetchMealData(); // Reload stats and refresh consumed macros
-      await fetchCalorieHistory(); // Reload history stats & graph data
+      await fetchMealData(silent: true); // silent refresh — no spinner
+      await fetchCalorieHistory();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> unmarkMealAsCompleted(int dietPlanMealId, int mealId) async {
+    try {
+      final dateParam = selectedQueryDate.value.isNotEmpty ? selectedQueryDate.value : null;
+      await _apiClient.post(
+        ApiEndpoints.unmarkMealComplete,
+        data: {
+          'diet_plan_meal_id': dietPlanMealId,
+          if (dateParam != null) 'date': dateParam,
+        },
+      );
+      completedMealIds.remove(mealId);
+      await fetchMealData(silent: true); // silent refresh — no spinner
+      await fetchCalorieHistory();
       return true;
     } catch (e) {
       return false;
