@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -87,6 +88,16 @@ class HomeView extends GetView<HomeController> {
                   /// 2. ACTIVE PLAN CARD (Glassmorphic)
                   buildActivePlanCard(),
 
+                  const SizedBox(height: 16),
+
+                  /// HONEST RESULTS PROMISE CARD
+                  buildHonestResultsCard(),
+
+                  const SizedBox(height: 16),
+
+                  /// TODAY'S MEAL PROGRESS CARD
+                  buildMealProgressCard(),
+
                   const SizedBox(height: 24),
 
                   /// 3. STATS GRID ROW 1 & 2 (Reactive)
@@ -103,13 +114,16 @@ class HomeView extends GetView<HomeController> {
                         Row(
                           children: [
                             Expanded(
-                              child: buildStatCard(
-                                title: "Calories",
-                                value: controller.currentCalories.value.toString(),
-                                sub: "/ ${controller.targetCalories.value} kcal",
-                                icon: Icons.local_fire_department_rounded,
-                                color: const Color(0xffFF7A00),
-                                progress: calProgress,
+                              child: GestureDetector(
+                                onTap: () => Get.toNamed('/calorie-history'),
+                                child: buildStatCard(
+                                  title: "Calories",
+                                  value: controller.currentCalories.value.toString(),
+                                  sub: "/ ${controller.targetCalories.value} kcal",
+                                  icon: Icons.local_fire_department_rounded,
+                                  color: const Color(0xffFF7A00),
+                                  progress: calProgress,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 14),
@@ -327,14 +341,18 @@ class HomeView extends GetView<HomeController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Hey, Arjun!",
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Obx(() {
+                final String fullName = controller.userName.value;
+                final String firstName = fullName.isNotEmpty ? fullName.split(' ')[0] : 'Member';
+                return Text(
+                  "Hey, $firstName!",
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              }),
               const SizedBox(height: 4),
               // Text(
               //   "You’re doing amazing today!\nKeep going, results are coming.",
@@ -379,15 +397,15 @@ class HomeView extends GetView<HomeController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          "12",
+                        Obx(() => Text(
+                          "${controller.currentStreak.value}",
                           style: GoogleFonts.outfit(
                             color: Colors.white,
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
                             height: 1.0,
                           ),
-                        ),
+                        )),
                         Text(
                           "Day Streak",
                           style: GoogleFonts.inter(
@@ -462,120 +480,336 @@ class HomeView extends GetView<HomeController> {
   /// ACTIVE PLAN CARD WIDGET
   /// ----------------------------------------------------
   Widget buildActivePlanCard() {
+    return Obx(() {
+      final double progress = (controller.planDayNumber.value / 30.0).clamp(0.0, 1.0);
+
+      return Container(
+        height: 154,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: const Color(0xff0B0817).withOpacity(0.55),
+          border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            child: Stack(
+              children: [
+                /// Premium Custom Painted Vector BG (Option A)
+                Positioned.fill(
+                  child: CustomPaint(painter: ActivePlanBgPainter()),
+                ),
+
+                /// Text Details & Progress
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "ACTIVE PLAN",
+                        style: GoogleFonts.outfit(
+                          color: const Color(0xffFF00E5),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2.0,
+                        ),
+                      ),
+
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            controller.planName.value.isNotEmpty ? controller.planName.value : "Fat Loss Plan",
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 26,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            "Keep up the great pace! ⚡",
+                            style: GoogleFonts.inter(
+                              color: Colors.white.withOpacity(0.85),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      /// Linear Progress Bar
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Stack(
+                            children: [
+                              Container(
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
+                              ),
+                              FractionallySizedBox(
+                                alignment: Alignment.centerLeft,
+                                widthFactor: progress,
+                                child: Container(
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xffB100FF),
+                                        Color(0xffFF00E5),
+                                        Color(0xffFF7A00),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Plan Progress: Day ${controller.planDayNumber.value} of 30",
+                                style: GoogleFonts.inter(
+                                  color: Colors.white.withOpacity(0.45),
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                "${controller.planDaysRemaining.value} days remaining",
+                                style: GoogleFonts.inter(
+                                  color: Colors.white.withOpacity(0.45),
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  /// ----------------------------------------------------
+  /// HONEST RESULTS PROMISE CARD
+  /// ----------------------------------------------------
+  Widget buildHonestResultsCard() {
     return Container(
-      height: 154,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
+        color: const Color(0xff051911).withOpacity(0.40), // Subtle emerald health tint
+        border: Border.all(
+          color: const Color(0xff00FF87).withOpacity(0.18),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xff00FF87).withOpacity(0.02),
+            blurRadius: 10,
+            spreadRadius: 1,
+          ),
+        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Stack(
-            children: [
-              /// Premium Custom Painted Vector BG (Option A)
-              Positioned.fill(
-                child: CustomPaint(painter: ActivePlanBgPainter()),
-              ),
-
-              /// Text Details & Progress
-              Padding(
-                padding: const EdgeInsets.all(18.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Padding(
+            padding: const EdgeInsets.all(18.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Text(
-                      "ACTIVE PLAN",
-                      style: GoogleFonts.outfit(
-                        color: const Color(0xffFF00E5),
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2.0,
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xff00FF87).withOpacity(0.12),
+                      ),
+                      child: const Icon(
+                        Icons.verified_user_rounded,
+                        color: Color(0xff00FF87),
+                        size: 16,
                       ),
                     ),
-
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Fat Loss Plan",
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 26,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          "Keep up the great pace! ⚡",
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(0.85),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+                    const SizedBox(width: 8),
+                    Text(
+                      "Our Science-Backed Promise",
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xff00FF87),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "Real results take time & consistency.",
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.inter(
+                      color: Colors.white.withOpacity(0.70),
+                      fontSize: 12,
+                      height: 1.4,
+                    ),
+                    children: [
+                      const TextSpan(text: "Follow this customized meal plan consistently for 30 days and we assure you a safe, healthy weight change of "),
+                      TextSpan(
+                        text: "5 to 7 kg",
+                        style: GoogleFonts.outfit(
+                          color: const Color(0xff00FF87),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const TextSpan(text: ". No crash dieting, just home-cooked Indian meals matching your body profile."),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    buildTrustBadge("Science-Based", Icons.science_rounded),
+                    buildTrustBadge("Indian-Friendly", Icons.home_rounded),
+                    buildTrustBadge("No False Claims", Icons.fact_check_rounded),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-                    /// Linear Progress Bar
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Stack(
-                          children: [
-                            Container(
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.08),
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                            ),
-                            FractionallySizedBox(
-                              widthFactor: 0.24,
-                              child: Container(
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xffB100FF),
-                                      Color(0xffFF00E5),
-                                      Color(0xffFF7A00),
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(3),
-                                ),
-                              ),
-                            ),
-                          ],
+  Widget buildTrustBadge(String label, IconData icon) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: Colors.white.withOpacity(0.40), size: 12),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            color: Colors.white.withOpacity(0.50),
+            fontSize: 9,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// ----------------------------------------------------
+  /// MEAL PROGRESS BAR CARD
+  /// ----------------------------------------------------
+  Widget buildMealProgressCard() {
+    return Obx(() {
+      final double progress = controller.totalMealsToday.value > 0
+          ? (controller.mealsCompletedToday.value / controller.totalMealsToday.value).clamp(0.0, 1.0)
+          : 0.0;
+
+      return GestureDetector(
+        onTap: () => Get.toNamed('/meal-plan'),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xff0B0817).withOpacity(0.55),
+            border: Border.all(
+              color: const Color(0xffB100FF).withOpacity(0.15),
+              width: 1.0,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.restaurant_menu_rounded,
+                        color: Color(0xffB100FF),
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Today's Meals",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Plan Progress: 24%",
-                              style: GoogleFonts.inter(
-                                color: Colors.white.withOpacity(0.45),
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            Text(
-                              "76% left to your goal",
-                              style: GoogleFonts.inter(
-                                color: Colors.white.withOpacity(0.45),
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                      ),
+                    ],
+                  ),
+                  Text(
+                    "${controller.mealsCompletedToday.value} / ${controller.totalMealsToday.value} Completed",
+                    style: GoogleFonts.inter(
+                      color: const Color(0xffB100FF),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 6,
+                child: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                    FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: progress,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xffB100FF),
+                              Color(0xffFF00E5),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(3),
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
@@ -583,8 +817,8 @@ class HomeView extends GetView<HomeController> {
             ],
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   /// ----------------------------------------------------
@@ -834,225 +1068,206 @@ class HomeView extends GetView<HomeController> {
   /// MEAL PLAN TIMELINE WIDGETS
   /// ----------------------------------------------------
   Widget buildMealPlanTimeline() {
-    final List<Map<String, dynamic>> meals = [
-      {
-        "title": "Breakfast",
-        "desc": "Oats with Fruits & Nuts",
-        "kcal": "450 kcal",
-        "macros": "22P • 60C • 12F",
-        "tag": "Completed",
-        "color": const Color(0xff00FF87),
-        "icon": Icons.breakfast_dining_rounded,
-        "isFirst": true,
-        "isLast": false,
-      },
-      {
-        "title": "Lunch",
-        "desc": "Grilled Chicken, Rice, Salad",
-        "kcal": "550 kcal",
-        "macros": "40P • 60C • 15F",
-        "tag": "Upcoming",
-        "color": const Color(0xffFF7A00),
-        "icon": Icons.restaurant_rounded,
-        "isFirst": false,
-        "isLast": false,
-      },
-      {
-        "title": "Snacks",
-        "desc": "Greek Yogurt with Berries",
-        "kcal": "200 kcal",
-        "macros": "15P • 20C • 5F",
-        "tag": "4:00 PM",
-        "color": const Color(0xffB100FF),
-        "icon": Icons.local_cafe_rounded,
-        "isFirst": false,
-        "isLast": false,
-      },
-      {
-        "title": "Dinner",
-        "desc": "Paneer Curry, Roti, Veggies",
-        "kcal": "450 kcal",
-        "macros": "25P • 50C • 12F",
-        "tag": "8:00 PM",
-        "color": const Color(0xffFF3B30),
-        "icon": Icons.dining_rounded,
-        "isFirst": false,
-        "isLast": true,
-      },
-    ];
+    return Obx(() {
+      if (controller.homeMeals.isEmpty) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xff0B0817).withOpacity(0.55),
+            border: Border.all(color: Colors.white.withOpacity(0.04)),
+          ),
+          child: Center(
+            child: Text(
+              "No active meal plans found.",
+              style: GoogleFonts.inter(color: Colors.white.withOpacity(0.6), fontSize: 13),
+            ),
+          ),
+        );
+      }
 
-    return Column(
-      children: List.generate(meals.length, (index) {
-        final meal = meals[index];
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// Vertical timeline custom drawn
-            SizedBox(
-              width: 24,
-              height: 106,
-              child: CustomPaint(
-                painter: TimelineNodePainter(
-                  isFirst: meal["isFirst"] as bool,
-                  isLast: meal["isLast"] as bool,
-                  color: meal["color"] as Color,
-                  isActive:
-                      meal["tag"] == "Completed" || meal["tag"] == "Upcoming",
+      return Column(
+        children: List.generate(controller.homeMeals.length, (index) {
+          final meal = controller.homeMeals[index];
+          final bool isFirst = index == 0;
+          final bool isLast = index == controller.homeMeals.length - 1;
+          final color = meal["color"] as Color;
+          final icon = meal["icon"] as IconData;
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// Vertical timeline custom drawn
+              SizedBox(
+                width: 24,
+                height: 106,
+                child: CustomPaint(
+                  painter: TimelineNodePainter(
+                    isFirst: isFirst,
+                    isLast: isLast,
+                    color: color,
+                    isActive: meal["tag"] == "Completed",
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
+              const SizedBox(width: 8),
 
-            /// Meal card itself
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(22),
-                  color: const Color(0xff0B0817).withOpacity(0.50),
-                  border: Border.all(
-                    color: (meal["color"] as Color).withOpacity(0.22),
-                    width: 1.0,
-                  ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      (meal["color"] as Color).withOpacity(0.06),
-                      const Color(0xff0B0817).withOpacity(0.40),
-                    ],
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    /// Circle Gradient Icon Left
-                    Container(
-                      height: 52,
-                      width: 52,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            (meal["color"] as Color).withOpacity(0.25),
-                            (meal["color"] as Color).withOpacity(0.05),
-                          ],
-                        ),
-                        border: Border.all(
-                          color: (meal["color"] as Color).withOpacity(0.35),
-                          width: 0.8,
-                        ),
+              /// Meal card itself
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => Get.toNamed('/meal-plan'),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(22),
+                      color: const Color(0xff0B0817).withOpacity(0.50),
+                      border: Border.all(
+                        color: color.withOpacity(0.22),
+                        width: 1.0,
                       ),
-                      child: Icon(
-                        meal["icon"] as IconData,
-                        color: meal["color"] as Color,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-
-                    /// Middle texts
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            meal["title"] as String,
-                            style: GoogleFonts.outfit(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            meal["desc"] as String,
-                            style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.70),
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            meal["macros"] as String,
-                            style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.35),
-                              fontSize: 10,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          color.withOpacity(0.06),
+                          const Color(0xff0B0817).withOpacity(0.40),
                         ],
                       ),
                     ),
-
-                    /// Right side info and badge
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    child: Row(
                       children: [
-                        Text(
-                          meal["kcal"] as String,
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-
-                        /// Status Capsule Badge
+                        /// Circle Gradient Icon Left
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
+                          height: 52,
+                          width: 52,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: (meal["color"] as Color).withOpacity(0.12),
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                color.withOpacity(0.25),
+                                color.withOpacity(0.05),
+                              ],
+                            ),
                             border: Border.all(
-                              color: (meal["color"] as Color).withOpacity(0.20),
-                              width: 0.6,
+                              color: color.withOpacity(0.35),
+                              width: 0.8,
                             ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                          child: Icon(
+                            icon,
+                            color: color,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+
+                        /// Middle texts
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(
-                                meal["tag"] == "Completed"
-                                    ? Icons.check_circle_outline_rounded
-                                    : Icons.access_time_rounded,
-                                size: 10,
-                                color: meal["color"] as Color,
-                              ),
-                              const SizedBox(width: 4),
                               Text(
-                                meal["tag"] as String,
+                                meal["title"] as String,
                                 style: GoogleFonts.outfit(
-                                  color: meal["color"] as Color,
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                meal["desc"] as String,
+                                style: GoogleFonts.inter(
+                                  color: Colors.white.withOpacity(0.70),
+                                  fontSize: 12,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                meal["macros"] as String,
+                                style: GoogleFonts.inter(
+                                  color: Colors.white.withOpacity(0.35),
+                                  fontSize: 10,
+                                  letterSpacing: 0.5,
                                 ),
                               ),
                             ],
                           ),
                         ),
+
+                        /// Right side info and badge
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              meal["kcal"] as String,
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+
+                            /// Status Capsule Badge
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: color.withOpacity(0.12),
+                                border: Border.all(
+                                  color: color.withOpacity(0.20),
+                                  width: 0.6,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    meal["tag"] == "Completed"
+                                        ? Icons.check_circle_outline_rounded
+                                        : Icons.access_time_rounded,
+                                    size: 10,
+                                    color: color,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    meal["tag"] as String,
+                                    style: GoogleFonts.outfit(
+                                      color: color,
+                                      fontSize: 8.5,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          color: Colors.white.withOpacity(0.35),
+                          size: 18,
+                        ),
                       ],
                     ),
-                    const SizedBox(width: 6),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: Colors.white.withOpacity(0.35),
-                      size: 18,
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        );
-      }),
-    );
+            ],
+          );
+        }),
+      );
+    });
   }
 
   /// ----------------------------------------------------
@@ -1271,102 +1486,105 @@ class HomeView extends GetView<HomeController> {
   /// YOUR PROGRESS: WEIGHT LINE CHART CARD
   /// ----------------------------------------------------
   Widget buildWeightProgressCard() {
-    return Container(
-      height: 180,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: const Color(0xff0B0817).withOpacity(0.60),
-        border: Border.all(
-          color: const Color(0xffFF00E5).withOpacity(0.20),
-          width: 1.0,
-        ),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color(0xffFF00E5).withOpacity(0.06),
-            const Color(0xff0B0817).withOpacity(0.40),
+    return Obx(() {
+      final double currentW = controller.currentWeight.value;
+      final double diffW = controller.weightDifference.value;
+      final String diffText = diffW >= 0 ? "↑ ${diffW.toStringAsFixed(1)} kg" : "↓ ${diffW.abs().toStringAsFixed(1)} kg";
+      final Color diffColor = diffW <= 0 ? const Color(0xff00FF87) : const Color(0xffFF3B30);
+
+      final List<double> weights = controller.weightHistoryLogs.map((log) => (log['weight'] as num).toDouble()).toList();
+      final List<String> labels = controller.weightHistoryLogs.map((log) => log['date'] as String).toList();
+
+      return Container(
+        height: 180,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: const Color(0xff0B0817).withOpacity(0.60),
+          border: Border.all(
+            color: const Color(0xffFF00E5).withOpacity(0.20),
+            width: 1.0,
+          ),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xffFF00E5).withOpacity(0.06),
+              const Color(0xff0B0817).withOpacity(0.40),
+            ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xffFF00E5).withOpacity(0.03),
+              blurRadius: 10,
+              spreadRadius: 1,
+            ),
           ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xffFF00E5).withOpacity(0.03),
-            blurRadius: 10,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Weight",
-                    style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.50),
-                      fontSize: 10,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Weight Progress",
+                      style: GoogleFonts.inter(
+                        color: Colors.white.withOpacity(0.50),
+                        fontSize: 10,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 3),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        "72.4 kg",
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                    const SizedBox(height: 3),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          "${currentW.toStringAsFixed(1)} kg",
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        "↓ 1.2 kg",
-                        style: GoogleFonts.inter(
-                          color: const Color(0xff00FF87),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
+                        const SizedBox(width: 6),
+                        Text(
+                          diffText,
+                          style: GoogleFonts.inter(
+                            color: diffColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-
-          /// Real Line Chart Custom Painted
-          Expanded(
-            child: CustomPaint(
-              size: Size.infinite,
-              painter: ProgressLineChartPainter(),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
+            const SizedBox(height: 10),
 
-          const SizedBox(height: 6),
+            /// Real Line Chart Custom Painted
+            Expanded(
+              child: CustomPaint(
+                size: Size.infinite,
+                painter: ProgressLineChartPainter(weights: weights),
+              ),
+            ),
+            const SizedBox(height: 6),
 
-          /// X-Axis labels
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              xAxisLabel("14 Apr"),
-              xAxisLabel("28 Apr"),
-              xAxisLabel("12 May"),
-              xAxisLabel("Today"),
-            ],
-          ),
-        ],
-      ),
-    );
+            /// X-Axis labels
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: labels.map((label) => xAxisLabel(label)).toList(),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget xAxisLabel(String label) {
@@ -2304,6 +2522,10 @@ class NeonBottlePainter extends CustomPainter {
 
 /// 4. Custom painter for a glowing weight line chart
 class ProgressLineChartPainter extends CustomPainter {
+  final List<double> weights;
+
+  ProgressLineChartPainter({required this.weights});
+
   @override
   void paint(Canvas canvas, Size size) {
     final gridPaint = Paint()
@@ -2316,12 +2538,22 @@ class ProgressLineChartPainter extends CustomPainter {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
     }
 
-    final points = [
-      Offset(size.width * 0.05, size.height * 0.2),
-      Offset(size.width * 0.36, size.height * 0.45),
-      Offset(size.width * 0.68, size.height * 0.6),
-      Offset(size.width * 0.95, size.height * 0.75),
-    ];
+    if (weights.isEmpty) return;
+
+    double minVal = weights.reduce(min);
+    double maxVal = weights.reduce(max);
+    double valRange = maxVal - minVal;
+    if (valRange == 0) valRange = 1.0;
+
+    double stepX = size.width / (weights.length - 1 == 0 ? 1 : weights.length - 1);
+    final points = <Offset>[];
+
+    for (int i = 0; i < weights.length; i++) {
+      double x = i * stepX;
+      double normalized = (weights[i] - minVal) / valRange;
+      double y = size.height * 0.80 - (normalized * size.height * 0.65);
+      points.add(Offset(x, y));
+    }
 
     // Compute bezier curve path
     final path = Path();
@@ -2386,7 +2618,7 @@ class ProgressLineChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
 class ActivePlanBgPainter extends CustomPainter {

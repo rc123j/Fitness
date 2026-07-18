@@ -41,6 +41,10 @@ class ApiClient extends GetxService {
               return;
             } catch (_) {}
           }
+          // Refresh also failed — user is truly unauthorized (deleted / expired).
+          // Clear local session and force back to login from anywhere in the app.
+          await _authService.clearSession();
+          Get.offAllNamed('/login');
         }
         handler.next(error);
       },

@@ -20,6 +20,7 @@ class ApiEndpoints {
   static const String currentDietPlan = '/api/diet-plans/current';
   static const String logMeal = '/api/diet-plans/logs';
   static const String todayNutritionLog = '/api/diet-plans/logs/today';
+  static const String markMealComplete = '/api/diet-plans/meal-complete';
 
   // Progress, Steps & Hydration
   static const String logWater = '/api/progress/water';
@@ -27,4 +28,5 @@ class ApiEndpoints {
   static const String progressLog = '/api/progress';
   static const String logSteps = '/api/progress/steps';
   static const String logWeight = '/api/progress/weight';
+  static const String calorieHistory = '/api/diet-plans/logs/history';
 }

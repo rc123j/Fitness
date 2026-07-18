@@ -115,7 +115,10 @@ class MealView extends GetView<MealController> {
               const SizedBox(height: 2),
               Obx(() => GestureDetector(
                     onTap: () {
-                      // Mock changing date
+                      if (controller.selectedQueryDate.value.isNotEmpty) {
+                        controller.selectedQueryDate.value = "";
+                        controller.fetchMealData();
+                      }
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -130,7 +133,9 @@ class MealView extends GetView<MealController> {
                         ),
                         const SizedBox(width: 4),
                         Icon(
-                          Icons.keyboard_arrow_down_rounded,
+                          controller.selectedQueryDate.value.isNotEmpty
+                              ? Icons.close_rounded
+                              : Icons.keyboard_arrow_down_rounded,
                           color: const Color(0xffFF00E5).withOpacity(0.85),
                           size: 14,
                         ),
@@ -143,18 +148,50 @@ class MealView extends GetView<MealController> {
           /// Calendar & Options button
           Row(
             children: [
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.03),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.08),
-                    width: 0.8,
+              GestureDetector(
+                onTap: () async {
+                  final DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: controller.selectedQueryDate.value.isNotEmpty
+                        ? DateTime.parse(controller.selectedQueryDate.value)
+                        : DateTime.now(),
+                    firstDate: DateTime.now().subtract(const Duration(days: 30)),
+                    lastDate: DateTime.now().add(const Duration(days: 30)),
+                    builder: (context, child) {
+                      return Theme(
+                        data: Theme.of(context).copyWith(
+                          colorScheme: const ColorScheme.dark(
+                            primary: Color(0xffFF00E5),
+                            onPrimary: Colors.black,
+                            surface: Color(0xff0B0817),
+                            onSurface: Colors.white,
+                          ),
+                          dialogBackgroundColor: const Color(0xff06010F),
+                        ),
+                        child: child!,
+                      );
+                    },
+                  );
+                  if (picked != null) {
+                    final monthStr = picked.month.toString().padLeft(2, '0');
+                    final dayStr = picked.day.toString().padLeft(2, '0');
+                    controller.selectedQueryDate.value = "${picked.year}-$monthStr-$dayStr";
+                    controller.fetchMealData();
+                  }
+                },
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.03),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.08),
+                      width: 0.8,
+                    ),
                   ),
+                  child: const Icon(Icons.calendar_month_outlined, color: Colors.white, size: 18),
                 ),
-                child: const Icon(Icons.calendar_month_outlined, color: Colors.white, size: 18),
               ),
               const SizedBox(width: 8),
               Container(
@@ -186,8 +223,10 @@ class MealView extends GetView<MealController> {
           ? (controller.currentCalories.value / controller.targetCalories.value).clamp(0.0, 1.0)
           : 0.0;
 
-    return Container(
-      decoration: BoxDecoration(
+    return GestureDetector(
+      onTap: () => Get.toNamed('/calorie-history'),
+      child: Container(
+        decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         color: const Color(0xff0B0817).withOpacity(0.55),
         border: Border.all(
@@ -424,6 +463,7 @@ class MealView extends GetView<MealController> {
           ),
         ),
       ),
+    ),
     );
     });
   }
@@ -621,6 +661,17 @@ class MealView extends GetView<MealController> {
         );
       }
 
+      final bool isPast = controller.selectedQueryDate.value.isNotEmpty
+          ? DateTime.parse(controller.selectedQueryDate.value).isBefore(
+              DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
+            )
+          : false;
+      final bool isFuture = controller.selectedQueryDate.value.isNotEmpty
+          ? DateTime.parse(controller.selectedQueryDate.value).isAfter(
+              DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
+            )
+          : false;
+
       return Column(
         children: List.generate(controller.mealTimeline.length, (index) {
           final meal = controller.mealTimeline[index];
@@ -644,9 +695,19 @@ class MealView extends GetView<MealController> {
             iconColor = const Color(0xffB100FF);
           }
 
+          final int mealTypeId = meal['meal_id'] ?? 0;
+          final bool isCompleted = controller.completedMealIds.contains(mealTypeId);
+
+          var timelineState = TimelineState.active;
+          if (isCompleted) {
+            timelineState = TimelineState.completed;
+          } else if (isPast || isFuture) {
+            timelineState = TimelineState.upcomingGrey;
+          }
+
           return buildTimelineRow(
             dotColor: iconColor,
-            state: TimelineState.active,
+            state: timelineState,
             isFirst: isFirst,
             isLast: isLast,
             child: buildMealCard(
@@ -655,10 +716,14 @@ class MealView extends GetView<MealController> {
               details: meal['details'],
               icon: icon,
               iconColor: iconColor,
-              timeText: "Daily target",
-              timeColor: iconColor.withOpacity(0.7),
+              timeText: isCompleted ? "Done" : (isPast ? "Missed" : "Daily target"),
+              timeColor: isCompleted ? const Color(0xff00FF87) : (isPast ? const Color(0xffFF3E3E) : iconColor.withOpacity(0.7)),
               hasActions: true,
               mealId: meal['id'],
+              mealTypeId: mealTypeId,
+              isCompleted: isCompleted,
+              isPast: isPast,
+              isFuture: isFuture,
               foods: meal['foods'],
               onTap: () {
                 // Click opens detail
@@ -755,6 +820,10 @@ class MealView extends GetView<MealController> {
     Color? timeColor,
     bool hasActions = false,
     int? mealId,
+    int? mealTypeId,
+    bool isCompleted = false,
+    bool isPast = false,
+    bool isFuture = false,
     List? foods,
     VoidCallback? onTap,
   }) {
@@ -817,7 +886,76 @@ class MealView extends GetView<MealController> {
                 ),
 
                 /// Status badges / Time
-                if (badgeText != null)
+                if (isCompleted)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xff00FF87).withOpacity(0.10),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Completed",
+                          style: GoogleFonts.inter(
+                            color: const Color(0xff00FF87),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.check_circle_outline_rounded, color: Color(0xff00FF87), size: 10),
+                      ],
+                    ),
+                  )
+                else if (isPast)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffFF3B30).withOpacity(0.10),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Absent",
+                          style: GoogleFonts.inter(
+                            color: const Color(0xffFF3B30),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.cancel_outlined, color: Color(0xffFF3B30), size: 10),
+                      ],
+                    ),
+                  )
+                else if (isFuture)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.04),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Upcoming",
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.40),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.lock_clock_outlined, color: Colors.white.withOpacity(0.40), size: 10),
+                      ],
+                    ),
+                  )
+                else if (badgeText != null)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
@@ -839,8 +977,8 @@ class MealView extends GetView<MealController> {
                         Icon(Icons.check_circle_outline_rounded, color: badgeColor, size: 10),
                       ],
                     ),
-                  ),
-                if (timeText != null)
+                  )
+                else if (timeText != null)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
@@ -877,6 +1015,68 @@ class MealView extends GetView<MealController> {
               ],
             ),
 
+            /// Dynamic Individual Foods Listing under Description
+            if (foods != null && foods.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Divider(color: Colors.white.withOpacity(0.06), height: 1),
+              const SizedBox(height: 8),
+              Column(
+                children: foods.map((f) {
+                  final foodDetails = f['food_details'] ?? {};
+                  final String foodName = foodDetails['food_name'] ?? 'Food Item';
+                  
+                  final double cal = double.tryParse(f['calories']?.toString() ?? '0.0') ?? 0.0;
+                  final double prot = double.tryParse(f['protein']?.toString() ?? '0.0') ?? 0.0;
+                  final double carb = double.tryParse(f['carbs']?.toString() ?? '0.0') ?? 0.0;
+                  final double fatVal = double.tryParse(f['fat']?.toString() ?? '0.0') ?? 0.0;
+                  final double fibVal = double.tryParse(f['fiber']?.toString() ?? '0.0') ?? 0.0;
+                  
+                  final qty = f['quantity'] ?? '1 serving';
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                foodName,
+                                style: GoogleFonts.inter(
+                                  color: Colors.white.withOpacity(0.85),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                "Serving Size: $qty • ${cal.toInt()} kcal",
+                                style: GoogleFonts.inter(
+                                  color: Colors.white.withOpacity(0.40),
+                                  fontSize: 10.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          "${prot.toInt()}P • ${carb.toInt()}C • ${fatVal.toInt()}F • ${fibVal.toInt()}Fi",
+                          style: GoogleFonts.inter(
+                            color: const Color(0xff00FF87).withOpacity(0.85),
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+
             /// Sub metrics footer
             const SizedBox(height: 10),
             Row(
@@ -892,68 +1092,77 @@ class MealView extends GetView<MealController> {
 
                 /// Buttons for Active card
                 if (hasActions)
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () async {
-                          if (mealId != null && foods != null) {
-                            final success = await controller.consumeMeal(mealId, foods);
-                            if (success) {
-                              Get.snackbar(
-                                "Meal Logged 🍽️",
-                                "Logged $title to today's consumption summary.",
-                                snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
-                                colorText: Colors.white,
-                                borderColor: const Color(0xff00FF87).withOpacity(0.3),
-                                borderWidth: 1,
-                                margin: const EdgeInsets.all(16),
-                              );
-                            }
-                          }
-                        },
-                        child: Container(
+                  isCompleted
+                      ? Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: const Color(0xff00FF87).withOpacity(0.12),
+                            color: const Color(0xff00FF87).withOpacity(0.08),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: const Color(0xff00FF87).withOpacity(0.20),
+                              color: const Color(0xff00FF87).withOpacity(0.15),
                               width: 0.8,
                             ),
                           ),
-                          child: Text(
-                            "Log Meal",
-                            style: GoogleFonts.outfit(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "Completed",
+                                style: GoogleFonts.outfit(
+                                  color: const Color(0xff00FF87),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(Icons.check_rounded, color: Color(0xff00FF87), size: 10),
+                            ],
+                          ),
+                        )
+                      : (isPast || isFuture)
+                          ? const SizedBox.shrink()
+                          : Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () async {
+                                    if (mealId != null && mealTypeId != null) {
+                                      final success = await controller.markMealAsCompleted(mealId, mealTypeId);
+                                      if (success) {
+                                        Get.snackbar(
+                                          "Meal Completed! 🍽️",
+                                          "Logged $title to today's summary.",
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
+                                          colorText: Colors.white,
+                                          borderColor: const Color(0xff00FF87).withOpacity(0.3),
+                                          borderWidth: 1,
+                                          margin: const EdgeInsets.all(16),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xff00FF87).withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: const Color(0xff00FF87).withOpacity(0.20),
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      "Mark as Done",
+                                      style: GoogleFonts.outfit(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.02),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: const Color(0xffFF7A00).withOpacity(0.35),
-                            width: 0.8,
-                          ),
-                        ),
-                        child: Text(
-                          "Replace",
-                          style: GoogleFonts.outfit(
-                            color: const Color(0xffFF7A00),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
               ],
             ),
           ],

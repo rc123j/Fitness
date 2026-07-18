@@ -25,6 +25,7 @@ abstract class Routes {
   static const HEALTH_TIPS = _Paths.HEALTH_TIPS;
   static const VIDEO_CALL = _Paths.VIDEO_CALL;
   static const MAIN_NAVIGATION = _Paths.MAIN_NAVIGATION;
+  static const CALORIE_HISTORY = _Paths.CALORIE_HISTORY;
 }
 
 abstract class _Paths {
@@ -51,4 +52,5 @@ abstract class _Paths {
   static const HEALTH_TIPS = '/health-tips';
   static const VIDEO_CALL = '/video-call';
   static const MAIN_NAVIGATION = '/main-navigation';
+  static const CALORIE_HISTORY = '/calorie-history';
 }
