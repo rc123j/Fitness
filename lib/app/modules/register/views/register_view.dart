@@ -126,7 +126,7 @@ class RegisterView extends GetView<RegisterController> {
                           },
                           blendMode: BlendMode.srcIn,
                           child: Text(
-                            'N',
+                            'F',
                             style: GoogleFonts.satisfy(
                               fontSize: 54,
                               fontWeight: FontWeight.bold,
@@ -145,21 +145,23 @@ class RegisterView extends GetView<RegisterController> {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: 'NUTRI',
+                            text: 'FITWITH\n',
                             style: GoogleFonts.outfit(
                               color: Colors.white,
-                              fontSize: 28,
+                              fontSize: 24,
                               fontWeight: FontWeight.w800,
-                              letterSpacing: 3,
+                              letterSpacing: 2,
+                              height: 1.15,
                             ),
                           ),
                           TextSpan(
-                            text: 'FIT',
+                            text: 'DEVELOPER',
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5),
-                              fontSize: 28,
+                              fontSize: 24,
                               fontWeight: FontWeight.w800,
-                              letterSpacing: 3,
+                              letterSpacing: 2,
+                              height: 1.15,
                             ),
                           ),
                         ],

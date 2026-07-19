@@ -30,6 +30,9 @@ class MealController extends GetxController {
   // Diet Plan Meals Timeline data
   final mealTimeline = <Map<String, dynamic>>[].obs;
   
+  // Track selected option (1, 2, 3, 4) for each meal slot (key is dietPlanMealId)
+  final selectedOptions = <int, int>{}.obs;
+  
   // Track current day in the 30-day rotation
   final currentDay = 1.obs;
   
@@ -193,11 +196,14 @@ class MealController extends GetxController {
     } catch (_) {}
   }
 
-  Future<bool> markMealAsCompleted(int dietPlanMealId, int mealId) async {
+  Future<bool> markMealAsCompleted(int dietPlanMealId, int mealId, {int selectedOption = 1}) async {
     try {
       await _apiClient.post(
         ApiEndpoints.markMealComplete,
-        data: {'diet_plan_meal_id': dietPlanMealId},
+        data: {
+          'diet_plan_meal_id': dietPlanMealId,
+          'selected_option': selectedOption,
+        },
       );
       completedMealIds.add(mealId);
       await fetchMealData(silent: true); // silent refresh — no spinner

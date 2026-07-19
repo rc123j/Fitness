@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -830,22 +831,79 @@ class MealView extends GetView<MealController> {
     List? foods,
     VoidCallback? onTap,
   }) {
-    // 1. Dynamically compute total macros for premium detailed visualization
+    // 1. Group foods by option (1, 2, 3, or 4) and parse option names + benefits
+    final Map<int, List<dynamic>> optionFoods = {1: [], 2: [], 3: [], 4: []};
+    final Map<int, String> optionNames = {
+      1: "Recommended Balanced",
+      2: "Veg Alternative",
+      3: "High Protein Boost",
+      4: "Light & Easy"
+    };
+    final Map<int, String> optionBenefits = {
+      1: "",
+      2: "",
+      3: "",
+      4: ""
+    };
+
+    if (foods != null) {
+      for (var f in foods) {
+        if (f == null) continue;
+        int opt = 1;
+        String optName = "";
+        String optBenefit = "";
+
+        final String? notesStr = f['notes']?.toString();
+        if (notesStr != null && notesStr.isNotEmpty) {
+          try {
+            final Map<String, dynamic> meta = jsonDecode(notesStr);
+            opt = int.tryParse(meta['option']?.toString() ?? '1') ?? 1;
+            optName = meta['option_name']?.toString() ?? "";
+            optBenefit = meta['benefit']?.toString() ?? "";
+          } catch (_) {
+            if (notesStr.contains("Option 2") || notesStr.toLowerCase().contains("veg")) {
+              opt = 2;
+            } else if (notesStr.contains("Option 3") || notesStr.toLowerCase().contains("protein")) {
+              opt = 3;
+            } else if (notesStr.contains("Option 4") || notesStr.toLowerCase().contains("light")) {
+              opt = 4;
+            }
+          }
+        }
+
+        if (opt < 1 || opt > 4) opt = 1;
+        optionFoods[opt]?.add(f);
+        if (optName.isNotEmpty) {
+          optionNames[opt] = optName;
+        }
+        if (optBenefit.isNotEmpty) {
+          optionBenefits[opt] = optBenefit;
+        }
+      }
+    }
+
+    // 2. Fetch current selection for this specific meal slot from controller state
+    final int currentSelectedOption = controller.selectedOptions[mealId ?? 0] ?? 1;
+
+    // Filter foods to display matching chosen option (or fallback to all if empty)
+    final List<dynamic> foodsToDisplay = (optionFoods[currentSelectedOption] ?? []).isNotEmpty
+        ? (optionFoods[currentSelectedOption] ?? [])
+        : (foods ?? []);
+
+    // 3. Dynamically compute total macros for selected option
     double totalCalories = 0.0;
     double totalProtein = 0.0;
     double totalCarbs = 0.0;
     double totalFat = 0.0;
     double totalFiber = 0.0;
 
-    if (foods != null) {
-      for (var f in foods) {
-        if (f == null) continue;
-        totalCalories += double.tryParse(f['calories']?.toString() ?? '0') ?? 0;
-        totalProtein += double.tryParse(f['protein']?.toString() ?? '0') ?? 0;
-        totalCarbs += double.tryParse(f['carbs']?.toString() ?? '0') ?? 0;
-        totalFat += double.tryParse(f['fat']?.toString() ?? '0') ?? 0;
-        totalFiber += double.tryParse(f['fiber']?.toString() ?? '0') ?? 0;
-      }
+    for (var f in foodsToDisplay) {
+      if (f == null) continue;
+      totalCalories += double.tryParse(f['calories']?.toString() ?? '0') ?? 0;
+      totalProtein += double.tryParse(f['protein']?.toString() ?? '0') ?? 0;
+      totalCarbs += double.tryParse(f['carbs']?.toString() ?? '0') ?? 0;
+      totalFat += double.tryParse(f['fat']?.toString() ?? '0') ?? 0;
+      totalFiber += double.tryParse(f['fiber']?.toString() ?? '0') ?? 0;
     }
 
     return GestureDetector(
@@ -1019,13 +1077,66 @@ class MealView extends GetView<MealController> {
                 ],
               ),
 
-              // INDIVIDUAL FOOD ITEMS (Clean, non-repetitive layout)
-              if (foods != null && foods.isNotEmpty) ...[
+              // OPTION SWAP CHIPS (Only show if multiple options available)
+              if (foods != null && foods.isNotEmpty && !isCompleted && !isPast && !isFuture) ...[
+                const SizedBox(height: 14),
+                Divider(color: Colors.white.withOpacity(0.06), height: 1),
+                const SizedBox(height: 12),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    children: List.generate(4, (index) {
+                      final optNum = index + 1;
+                      final isSelected = currentSelectedOption == optNum;
+                      final name = optionNames[optNum] ?? "Option $optNum";
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            if (mealId != null) {
+                              controller.selectedOptions[mealId] = optNum;
+                            }
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? iconColor.withOpacity(0.12)
+                                  : Colors.white.withOpacity(0.02),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isSelected
+                                    ? iconColor.withOpacity(0.4)
+                                    : Colors.white.withOpacity(0.05),
+                                width: 1.0,
+                              ),
+                            ),
+                            child: Text(
+                              name,
+                              style: GoogleFonts.outfit(
+                                color: isSelected ? Colors.white : Colors.white.withOpacity(0.4),
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              ],
+
+              // INDIVIDUAL FOOD ITEMS (Filtered per currently selected Option)
+              if (foodsToDisplay.isNotEmpty) ...[
                 const SizedBox(height: 14),
                 Divider(color: Colors.white.withOpacity(0.06), height: 1),
                 const SizedBox(height: 10),
                 Column(
-                  children: foods.map((f) {
+                  children: foodsToDisplay.map((f) {
                     final foodDetails = f['food_details'] ?? {};
                     final String foodName = foodDetails['food_name'] ?? 'Food Item';
                     final double cal = double.tryParse(f['calories']?.toString() ?? '0.0') ?? 0.0;
@@ -1079,6 +1190,52 @@ class MealView extends GetView<MealController> {
                     );
                   }).toList(),
                 ),
+              ],
+
+              // CLINICIAN MEDICAL TIP BOX (Personalized disease insight)
+              if (!isCompleted && !isPast && !isFuture) ...[
+                (() {
+                  final benefit = optionBenefits[currentSelectedOption] ?? "";
+                  if (benefit.isEmpty) return const SizedBox.shrink();
+
+                  return Column(
+                    children: [
+                      const SizedBox(height: 14),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xffB100FF).withOpacity(0.04),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xffB100FF).withOpacity(0.12),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.psychology_rounded,
+                              color: Color(0xffB100FF),
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                "💡 Clinician Tip: $benefit",
+                                style: GoogleFonts.inter(
+                                  color: Colors.white.withOpacity(0.70),
+                                  fontSize: 11,
+                                  height: 1.45,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                })(),
               ],
 
               // MACROS TARGET SUMMARY GRID
@@ -1194,7 +1351,11 @@ class MealView extends GetView<MealController> {
                         : GestureDetector(
                             onTap: () async {
                               if (mealId != null && mealTypeId != null) {
-                                final success = await controller.markMealAsCompleted(mealId, mealTypeId);
+                                final success = await controller.markMealAsCompleted(
+                                  mealId,
+                                  mealTypeId,
+                                  selectedOption: currentSelectedOption,
+                                );
                                 if (success) {
                                   RocketLaunchOverlay.show(context, mealTitle: title);
                                 }

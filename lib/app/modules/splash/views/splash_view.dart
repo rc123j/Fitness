@@ -178,7 +178,7 @@ class _SplashViewState extends State<SplashView>
                               },
                               blendMode: BlendMode.srcIn,
                               child: Text(
-                                'N',
+                                'F',
                                 style: GoogleFonts.satisfy(
                                   fontSize: 98,
                                   fontWeight: FontWeight.bold,
@@ -191,24 +191,27 @@ class _SplashViewState extends State<SplashView>
                         ),
                         const SizedBox(height: 8),
                         RichText(
+                          textAlign: TextAlign.center,
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: 'NUTRI',
+                                text: 'FITWITH\n',
                                 style: GoogleFonts.outfit(
-                                  fontSize: 34,
+                                  fontSize: 30,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 2,
                                   color: Colors.white,
+                                  height: 1.15,
                                 ),
                               ),
                               TextSpan(
-                                text: 'FIT',
+                                text: 'DEVELOPER',
                                 style: GoogleFonts.outfit(
-                                  fontSize: 34,
+                                  fontSize: 30,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 2,
                                   color: const Color(0xFF8F39FF),
+                                  height: 1.15,
                                 ),
                               ),
                             ],
