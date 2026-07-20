@@ -235,14 +235,6 @@ class HomeView extends GetView<HomeController> {
                         onTap: () => Get.toNamed('/progress'),
                         child: buildWeightProgressCard(),
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(child: buildInchesLostCard()),
-                          const SizedBox(width: 12),
-                          Expanded(child: buildConsistencyCard()),
-                        ],
-                      ),
                     ],
                   ),
 

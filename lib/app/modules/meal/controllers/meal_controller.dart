@@ -105,8 +105,8 @@ class MealController extends GetxController {
             }
 
             timelineTemp.add({
-              "id": meal['id'], // diet_plan_meal_id
-              "meal_id": meal['meal_id'] ?? 1, // meal_type ID
+              "id": int.tryParse(meal['id']?.toString() ?? '') ?? 0, // diet_plan_meal_id
+              "meal_id": int.tryParse(meal['meal_id']?.toString() ?? '') ?? 1, // meal_type ID
               "title": mealTypeName,
               "desc": foodDesc.isNotEmpty ? foodDesc : "No foods assigned",
               "details": "${calories.toInt()} kcal  •  ${protein.toInt()}P  •  ${carbs.toInt()}C  •  ${fat.toInt()}F",
@@ -150,7 +150,10 @@ class MealController extends GetxController {
           final List loggedIds = nutData['logged_meal_ids'] ?? [];
           completedMealIds.clear();
           for (var id in loggedIds) {
-            completedMealIds.add(id as int);
+            final parsedId = int.tryParse(id?.toString() ?? '');
+            if (parsedId != null) {
+              completedMealIds.add(parsedId);
+            }
           }
         }
       } catch (e) {

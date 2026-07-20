@@ -78,14 +78,15 @@ class HomeController extends GetxController {
       } catch (_) {}
 
       // 3. Fetch today's calorie / macronutrient aggregates & completed meals count
-      List loggedIds = [];
+      List<int> loggedIds = [];
       try {
         final nutRes = await _apiClient.get(ApiEndpoints.todayNutritionLog);
         final nutData = nutRes.data;
         currentCalories.value = (nutData['consumed']?['calories'] as num?)?.toInt() ?? 0;
         targetCalories.value = (nutData['targets']?['calories'] as num?)?.toInt() ?? 2000;
         
-        loggedIds = nutData['logged_meal_ids'] ?? [];
+        final List rawLogged = nutData['logged_meal_ids'] ?? [];
+        loggedIds = rawLogged.map((id) => int.tryParse(id?.toString() ?? '')).whereType<int>().toList();
         mealsCompletedToday.value = loggedIds.length;
       } catch (_) {}
 
@@ -109,7 +110,7 @@ class HomeController extends GetxController {
           fat += double.tryParse(f['fat']?.toString() ?? '0') ?? 0;
         }
 
-        final int mealId = meal['meal_id'] ?? 1;
+        final int mealId = int.tryParse(meal['meal_id']?.toString() ?? '') ?? 1;
         final bool isCompleted = loggedIds.contains(mealId);
 
         // Icon and color mapping per meal type

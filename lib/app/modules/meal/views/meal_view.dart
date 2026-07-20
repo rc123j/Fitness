@@ -882,521 +882,519 @@ class MealView extends GetView<MealController> {
       }
     }
 
-    // 2. Fetch current selection for this specific meal slot from controller state
     final int currentSelectedOption = controller.selectedOptions[mealId ?? 0] ?? 1;
 
-    // Filter foods to display matching chosen option (or fallback to all if empty)
-    final List<dynamic> foodsToDisplay = (optionFoods[currentSelectedOption] ?? []).isNotEmpty
-        ? (optionFoods[currentSelectedOption] ?? [])
-        : (foods ?? []);
-
-    // 3. Dynamically compute total macros for selected option
-    double totalCalories = 0.0;
-    double totalProtein = 0.0;
-    double totalCarbs = 0.0;
-    double totalFat = 0.0;
-    double totalFiber = 0.0;
-
-    for (var f in foodsToDisplay) {
-      if (f == null) continue;
-      totalCalories += double.tryParse(f['calories']?.toString() ?? '0') ?? 0;
-      totalProtein += double.tryParse(f['protein']?.toString() ?? '0') ?? 0;
-      totalCarbs += double.tryParse(f['carbs']?.toString() ?? '0') ?? 0;
-      totalFat += double.tryParse(f['fat']?.toString() ?? '0') ?? 0;
-      totalFiber += double.tryParse(f['fiber']?.toString() ?? '0') ?? 0;
+    // Helper to calculate total macros for a specific food option list
+    Map<String, double> getMacros(List<dynamic> list) {
+      double calories = 0.0;
+      double protein = 0.0;
+      double carbs = 0.0;
+      double fat = 0.0;
+      return {
+        'calories': list.fold(0.0, (sum, f) => sum + (double.tryParse(f['calories']?.toString() ?? '0') ?? 0)),
+        'protein': list.fold(0.0, (sum, f) => sum + (double.tryParse(f['protein']?.toString() ?? '0') ?? 0)),
+        'carbs': list.fold(0.0, (sum, f) => sum + (double.tryParse(f['carbs']?.toString() ?? '0') ?? 0)),
+        'fat': list.fold(0.0, (sum, f) => sum + (double.tryParse(f['fat']?.toString() ?? '0') ?? 0)),
+      };
     }
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xff120D2C).withOpacity(0.85),
-              const Color(0xff090416).withOpacity(0.95),
-            ],
-          ),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.06),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: iconColor.withOpacity(0.03),
-              blurRadius: 20,
-              spreadRadius: 2,
-            ),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xff120D2C).withOpacity(0.85),
+            const Color(0xff090416).withOpacity(0.95),
           ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // HEADER ROW (Rounded Icon, Title, Status badge)
-              Row(
-                children: [
-                  Container(
-                    height: 48,
-                    width: 48,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      color: const Color(0xff090414),
-                      border: Border.all(
-                        color: iconColor.withOpacity(0.20),
-                        width: 1.2,
-                      ),
-                    ),
-                    child: Icon(icon, color: iconColor, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          desc,
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(0.60),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
+        border: Border.all(
+          color: Colors.white.withOpacity(0.06),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: iconColor.withOpacity(0.03),
+            blurRadius: 20,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // HEADER ROW (Icon, Title, completion status badge)
+            Row(
+              children: [
+                Container(
+                  height: 48,
+                  width: 48,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    color: const Color(0xff090414),
+                    border: Border.all(
+                      color: iconColor.withOpacity(0.20),
+                      width: 1.2,
                     ),
                   ),
-
-                  // Badges
-                  if (isCompleted)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: const Color(0xff00FF87).withOpacity(0.10),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "Completed",
-                            style: GoogleFonts.inter(
-                              color: const Color(0xff00FF87),
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(Icons.check_circle_outline_rounded, color: Color(0xff00FF87), size: 10),
-                        ],
-                      ),
-                    )
-                  else if (isPast)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: const Color(0xffFF3B30).withOpacity(0.10),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "Absent",
-                            style: GoogleFonts.inter(
-                              color: const Color(0xffFF3B30),
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(Icons.cancel_outlined, color: Color(0xffFF3B30), size: 10),
-                        ],
-                      ),
-                    )
-                  else if (isFuture)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.04),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "Upcoming",
-                            style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.40),
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(Icons.lock_clock_outlined, color: Colors.white.withOpacity(0.40), size: 10),
-                        ],
-                      ),
-                    )
-                  else if (timeText != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.02),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.05),
-                          width: 0.8,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            timeText,
-                            style: GoogleFonts.inter(
-                              color: timeColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(Icons.access_time_rounded, color: timeColor, size: 10),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-
-              // OPTION SWAP CHIPS (Only show if multiple options available)
-              if (foods != null && foods.isNotEmpty && !isCompleted && !isPast && !isFuture) ...[
-                const SizedBox(height: 14),
-                Divider(color: Colors.white.withOpacity(0.06), height: 1),
-                const SizedBox(height: 12),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: Row(
-                    children: List.generate(4, (index) {
-                      final optNum = index + 1;
-                      final isSelected = currentSelectedOption == optNum;
-                      final name = optionNames[optNum] ?? "Option $optNum";
-
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            if (mealId != null) {
-                              controller.selectedOptions[mealId] = optNum;
-                            }
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? iconColor.withOpacity(0.12)
-                                  : Colors.white.withOpacity(0.02),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: isSelected
-                                    ? iconColor.withOpacity(0.4)
-                                    : Colors.white.withOpacity(0.05),
-                                width: 1.0,
-                              ),
-                            ),
-                            child: Text(
-                              name,
-                              style: GoogleFonts.outfit(
-                                color: isSelected ? Colors.white : Colors.white.withOpacity(0.4),
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
+                  child: Icon(icon, color: iconColor, size: 20),
                 ),
-              ],
-
-              // INDIVIDUAL FOOD ITEMS (Filtered per currently selected Option)
-              if (foodsToDisplay.isNotEmpty) ...[
-                const SizedBox(height: 14),
-                Divider(color: Colors.white.withOpacity(0.06), height: 1),
-                const SizedBox(height: 10),
-                Column(
-                  children: foodsToDisplay.map((f) {
-                    final foodDetails = f['food_details'] ?? {};
-                    final String foodName = foodDetails['food_name'] ?? 'Food Item';
-                    final double cal = double.tryParse(f['calories']?.toString() ?? '0.0') ?? 0.0;
-                    final qty = f['quantity'] ?? '1 serving';
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  foodName,
-                                  style: GoogleFonts.inter(
-                                    color: Colors.white.withOpacity(0.90),
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  "Qty: $qty",
-                                  style: GoogleFonts.inter(
-                                    color: Colors.white.withOpacity(0.40),
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.03),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              "${cal.toInt()} kcal",
-                              style: GoogleFonts.inter(
-                                color: const Color(0xffFF7A00).withOpacity(0.9),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-
-              // CLINICIAN MEDICAL TIP BOX (Personalized disease insight)
-              if (!isCompleted && !isPast && !isFuture) ...[
-                (() {
-                  final benefit = optionBenefits[currentSelectedOption] ?? "";
-                  if (benefit.isEmpty) return const SizedBox.shrink();
-
-                  return Column(
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 14),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xffB100FF).withOpacity(0.04),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: const Color(0xffB100FF).withOpacity(0.12),
-                            width: 0.8,
-                          ),
+                      Text(
+                        title,
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.psychology_rounded,
-                              color: Color(0xffB100FF),
-                              size: 16,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                "💡 Clinician Tip: $benefit",
-                                style: GoogleFonts.inter(
-                                  color: Colors.white.withOpacity(0.70),
-                                  fontSize: 11,
-                                  height: 1.45,
-                                ),
-                              ),
-                            ),
-                          ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        desc,
+                        style: GoogleFonts.inter(
+                          color: Colors.white.withOpacity(0.60),
+                          fontSize: 12,
                         ),
                       ),
                     ],
-                  );
-                })(),
-              ],
+                  ),
+                ),
 
-              // MACROS TARGET SUMMARY GRID
+                // Status Badge
+                if (isCompleted)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xff00FF87).withOpacity(0.10),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Completed",
+                          style: GoogleFonts.inter(
+                            color: const Color(0xff00FF87),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.check_circle_outline_rounded, color: Color(0xff00FF87), size: 10),
+                      ],
+                    ),
+                  )
+                else if (isPast)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffFF3B30).withOpacity(0.10),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Absent",
+                          style: GoogleFonts.inter(
+                            color: const Color(0xffFF3B30),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.cancel_outlined, color: Color(0xffFF3B30), size: 10),
+                      ],
+                    ),
+                  )
+                else if (isFuture)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.04),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Upcoming",
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.40),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.lock_clock_outlined, color: Colors.white.withOpacity(0.40), size: 10),
+                      ],
+                    ),
+                  )
+                else if (timeText != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.02),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.05),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          timeText,
+                          style: GoogleFonts.inter(
+                            color: timeColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.access_time_rounded, color: timeColor, size: 10),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+
+            // CONDITIONAL CONTENT (Pending / Past or Future / Completed)
+            if (isCompleted) ...[
+              // COMPLETED VIEW: Just show logged option
               const SizedBox(height: 14),
               Divider(color: Colors.white.withOpacity(0.06), height: 1),
-              const SizedBox(height: 12),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                child: Row(
-                  children: [
-                    _buildCardMacroChip("Calories", "${totalCalories.toInt()} kcal", const Color(0xffFF7A00)),
-                    const SizedBox(width: 8),
-                    _buildCardMacroChip("Protein", "${totalProtein.toInt()}g", const Color(0xff00FF87)),
-                    const SizedBox(width: 8),
-                    _buildCardMacroChip("Carbs", "${totalCarbs.toInt()}g", const Color(0xff00E5FF)),
-                    const SizedBox(width: 8),
-                    _buildCardMacroChip("Fat", "${totalFat.toInt()}g", const Color(0xffFF00D4)),
-                  ],
+              const SizedBox(height: 14),
+              Text(
+                "Logged: ${optionNames[currentSelectedOption] ?? 'Option $currentSelectedOption'}",
+                style: GoogleFonts.outfit(
+                  color: const Color(0xff00FF87),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-
-              // ACTIONS FOOTER (Full width premium layout)
+              const SizedBox(height: 10),
+              // Foods list
+              Column(
+                children: (optionFoods[currentSelectedOption] ?? []).map<Widget>((f) {
+                  final foodDetails = f['food_details'] ?? {};
+                  final String foodName = foodDetails['food_name'] ?? 'Food Item';
+                  final double cal = double.tryParse(f['calories']?.toString() ?? '0.0') ?? 0.0;
+                  final qty = f['quantity'] ?? '1 serving';
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            "$foodName (Qty: $qty)",
+                            style: GoogleFonts.inter(color: Colors.white.withOpacity(0.9), fontSize: 13),
+                          ),
+                        ),
+                        Text(
+                          "${cal.toInt()} kcal",
+                          style: GoogleFonts.inter(color: const Color(0xffFF7A00), fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 14),
+              // Macros
+              (() {
+                final macros = getMacros(optionFoods[currentSelectedOption] ?? []);
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildCardMacroChip("Calories", "${macros['calories']!.toInt()} kcal", const Color(0xffFF7A00)),
+                      const SizedBox(width: 8),
+                      _buildCardMacroChip("Protein", "${macros['protein']!.toInt()}g", const Color(0xff00FF87)),
+                      const SizedBox(width: 8),
+                      _buildCardMacroChip("Carbs", "${macros['carbs']!.toInt()}g", const Color(0xff00E5FF)),
+                      const SizedBox(width: 8),
+                      _buildCardMacroChip("Fat", "${macros['fat']!.toInt()}g", const Color(0xffFF00D4)),
+                    ],
+                  ),
+                );
+              })(),
+              // Undo log action
               if (hasActions) ...[
                 const SizedBox(height: 14),
                 Divider(color: Colors.white.withOpacity(0.06), height: 1),
                 const SizedBox(height: 12),
-                isCompleted
-                    ? Row(
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xff00FF87).withOpacity(0.06),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: const Color(0xff00FF87).withOpacity(0.15),
-                                  width: 1.0,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "Completed Successfully",
-                                    style: GoogleFonts.outfit(
-                                      color: const Color(0xff00FF87),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  const Icon(Icons.check_circle_rounded, color: Color(0xff00FF87), size: 14),
-                                ],
-                              ),
+                GestureDetector(
+                  onTap: () async {
+                    if (mealId != null && mealTypeId != null) {
+                      final success = await controller.unmarkMealAsCompleted(mealId, mealTypeId);
+                      if (success) {
+                        Get.snackbar(
+                          "Meal Unmarked ↩️",
+                          "Removed $title from today's summary.",
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
+                          colorText: Colors.white,
+                          borderColor: const Color(0xffFF3B30).withOpacity(0.3),
+                          borderWidth: 1,
+                          margin: const EdgeInsets.all(16),
+                        );
+                      }
+                    }
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffFF3B30).withOpacity(0.10),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xffFF3B30).withOpacity(0.18),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Undo Log",
+                          style: GoogleFonts.outfit(
+                            color: const Color(0xffFF3B30),
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.undo_rounded, color: Color(0xffFF3B30), size: 13),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ] else if (isPast || isFuture) ...[
+              // PAST OR FUTURE VIEW: Just show default Option 1
+              const SizedBox(height: 14),
+              Divider(color: Colors.white.withOpacity(0.06), height: 1),
+              const SizedBox(height: 10),
+              Column(
+                children: (optionFoods[1] ?? []).map<Widget>((f) {
+                  final foodDetails = f['food_details'] ?? {};
+                  final String foodName = foodDetails['food_name'] ?? 'Food Item';
+                  final double cal = double.tryParse(f['calories']?.toString() ?? '0.0') ?? 0.0;
+                  final qty = f['quantity'] ?? '1 serving';
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            "$foodName (Qty: $qty)",
+                            style: GoogleFonts.inter(color: Colors.white.withOpacity(0.4), fontSize: 13),
+                          ),
+                        ),
+                        Text(
+                          "${cal.toInt()} kcal",
+                          style: GoogleFonts.inter(color: Colors.white.withOpacity(0.3), fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ] else ...[
+              // PENDING VIEW: List all 4 options stacked beautifully
+              const SizedBox(height: 14),
+              Divider(color: Colors.white.withOpacity(0.06), height: 1),
+              const SizedBox(height: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: (() {
+                  final List<Widget> widgets = [];
+                  int renderedCount = 0;
+
+                  for (int optNum = 1; optNum <= 4; optNum++) {
+                    final optionFoodsList = optionFoods[optNum] ?? [];
+                    if (optionFoodsList.isEmpty) continue;
+
+                    final List<String> foodStrings = optionFoodsList.map((f) {
+                      final foodDetails = f['food_details'] ?? {};
+                      final String foodName = foodDetails['food_name'] ?? 'Food Item';
+                      final qty = f['quantity'] ?? '1 serving';
+                      return "$foodName ($qty)";
+                    }).toList();
+
+                    final String foodsText = foodStrings.join(" + ");
+                    final String altSuffix = optNum > 1 ? " (${optionNames[optNum] ?? 'Alternative'})" : "";
+
+                    if (renderedCount > 0) {
+                      widgets.add(
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Text(
+                            "or",
+                            style: GoogleFonts.outfit(
+                              color: const Color(0xffFF00E5).withOpacity(0.60),
+                              fontSize: 11,
+                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(width: 10),
+                        ),
+                      );
+                    }
+
+                    widgets.add(
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                          "$foodsText$altSuffix",
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.90),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    );
+
+                    renderedCount++;
+                  }
+
+                  return widgets;
+                })(),
+              ),
+
+              // CLINICIAN MEDICAL TIP BOX (From Option 1)
+              (() {
+                final benefit = optionBenefits[1] ?? "";
+                if (benefit.isEmpty) return const SizedBox.shrink();
+
+                return Column(
+                  children: [
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xffB100FF).withOpacity(0.04),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xffB100FF).withOpacity(0.12),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.psychology_rounded,
+                            color: Color(0xffB100FF),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
                           Expanded(
-                            flex: 2,
-                            child: GestureDetector(
-                              onTap: () async {
-                                if (mealId != null && mealTypeId != null) {
-                                  final success = await controller.unmarkMealAsCompleted(mealId, mealTypeId);
-                                  if (success) {
-                                    Get.snackbar(
-                                      "Meal Unmarked ↩️",
-                                      "Removed $title from today's summary.",
-                                      snackPosition: SnackPosition.BOTTOM,
-                                      backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
-                                      colorText: Colors.white,
-                                      borderColor: const Color(0xffFF3B30).withOpacity(0.3),
-                                      borderWidth: 1,
-                                      margin: const EdgeInsets.all(16),
-                                    );
-                                  }
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 10),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xffFF3B30).withOpacity(0.10),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: const Color(0xffFF3B30).withOpacity(0.18),
-                                    width: 1.0,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "Undo Log",
-                                      style: GoogleFonts.outfit(
-                                        color: const Color(0xffFF3B30),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    const Icon(Icons.undo_rounded, color: Color(0xffFF3B30), size: 13),
-                                  ],
-                                ),
+                            child: Text(
+                              "💡 Clinician Tip: $benefit",
+                              style: GoogleFonts.inter(
+                                color: Colors.white.withOpacity(0.70),
+                                fontSize: 11,
+                                height: 1.45,
                               ),
                             ),
                           ),
                         ],
-                      )
-                    : (isPast || isFuture)
-                        ? const SizedBox.shrink()
-                        : GestureDetector(
-                            onTap: () async {
-                              if (mealId != null && mealTypeId != null) {
-                                final success = await controller.markMealAsCompleted(
-                                  mealId,
-                                  mealTypeId,
-                                  selectedOption: currentSelectedOption,
-                                );
-                                if (success) {
-                                  RocketLaunchOverlay.show(context, mealTitle: title);
-                                }
-                              }
-                            },
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [Color(0xffFF00D4), Color(0xffB100FF)],
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xffFF00D4).withOpacity(0.20),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "Mark Meal as Completed",
-                                    style: GoogleFonts.outfit(
-                                      color: Colors.white,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 14),
-                                ],
-                              ),
-                            ),
+                      ),
+                    ),
+                  ],
+                );
+              })(),
+
+              // MACROS TARGET SUMMARY GRID (From Option 1)
+              const SizedBox(height: 14),
+              Divider(color: Colors.white.withOpacity(0.06), height: 1),
+              const SizedBox(height: 12),
+              (() {
+                final macros = getMacros(optionFoods[1] ?? (foods ?? []));
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    children: [
+                      _buildCardMacroChip("Calories", "${macros['calories']!.toInt()} kcal", const Color(0xffFF7A00)),
+                      const SizedBox(width: 8),
+                      _buildCardMacroChip("Protein", "${macros['protein']!.toInt()}g", const Color(0xff00FF87)),
+                      const SizedBox(width: 8),
+                      _buildCardMacroChip("Carbs", "${macros['carbs']!.toInt()}g", const Color(0xff00E5FF)),
+                      const SizedBox(width: 8),
+                      _buildCardMacroChip("Fat", "${macros['fat']!.toInt()}g", const Color(0xffFF00D4)),
+                    ],
+                  ),
+                );
+              })(),
+
+              // ACTIONS FOOTER (Single Complete button)
+              if (hasActions) ...[
+                const SizedBox(height: 14),
+                Divider(color: Colors.white.withOpacity(0.06), height: 1),
+                const SizedBox(height: 12),
+                GestureDetector(
+                  onTap: () async {
+                    if (mealId != null && mealTypeId != null) {
+                      final success = await controller.markMealAsCompleted(
+                        mealId,
+                        mealTypeId,
+                        selectedOption: 1,
+                      );
+                      if (success) {
+                        RocketLaunchOverlay.show(context, mealTitle: title);
+                      }
+                    }
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xffFF00D4), Color(0xffB100FF)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xffFF00D4).withOpacity(0.20),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Mark Meal as Completed",
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
                           ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 14),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ],
-          ),
+          ],
         ),
       ),
     );
@@ -1706,69 +1704,75 @@ class MealView extends GetView<MealController> {
                       ],
                     ),
                     const Spacer(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "Consumed",
-                              style: GoogleFonts.inter(
-                                color: Colors.white.withOpacity(0.40),
-                                fontSize: 10,
+                    Obx(() {
+                      final consumed = controller.currentCalories.value;
+                      final target = controller.targetCalories.value;
+                      final remaining = max(0, target - consumed);
+
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "Consumed",
+                                style: GoogleFonts.inter(
+                                  color: Colors.white.withOpacity(0.40),
+                                  fontSize: 10,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              "1,200",
-                              style: GoogleFonts.outfit(
-                                color: const Color(0xffB100FF),
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                              const SizedBox(height: 2),
+                              Text(
+                                consumed.toString(),
+                                style: GoogleFonts.outfit(
+                                  color: const Color(0xffB100FF),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            Text(
-                              "kcal",
-                              style: GoogleFonts.inter(
-                                color: Colors.white.withOpacity(0.40),
-                                fontSize: 9,
+                              Text(
+                                "kcal",
+                                style: GoogleFonts.inter(
+                                  color: Colors.white.withOpacity(0.40),
+                                  fontSize: 9,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "Remaining",
-                              style: GoogleFonts.inter(
-                                color: Colors.white.withOpacity(0.40),
-                                fontSize: 10,
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "Remaining",
+                                style: GoogleFonts.inter(
+                                  color: Colors.white.withOpacity(0.40),
+                                  fontSize: 10,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              "1,100",
-                              style: GoogleFonts.outfit(
-                                color: const Color(0xffFF7A00),
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                              const SizedBox(height: 2),
+                              Text(
+                                remaining.toString(),
+                                style: GoogleFonts.outfit(
+                                  color: const Color(0xffFF7A00),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            Text(
-                              "kcal",
-                              style: GoogleFonts.inter(
-                                color: Colors.white.withOpacity(0.40),
-                                fontSize: 9,
+                              Text(
+                                "kcal",
+                                style: GoogleFonts.inter(
+                                  color: Colors.white.withOpacity(0.40),
+                                  fontSize: 9,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                            ],
+                          ),
+                        ],
+                      );
+                    }),
                     const SizedBox(height: 20),
                   ],
                 ),
