@@ -101,49 +101,70 @@ class MealView extends GetView<MealController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          /// Title & Subtitle Dropdown
-          Column(
+          Row(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Meal Plan",
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTap: () => Get.back(),
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.03),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.08),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
                 ),
               ),
-              const SizedBox(height: 2),
-              Obx(() => GestureDetector(
-                    onTap: () {
-                      if (controller.selectedQueryDate.value.isNotEmpty) {
-                        controller.selectedQueryDate.value = "";
-                        controller.fetchMealData();
-                      }
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          controller.selectedDate.value,
-                          style: GoogleFonts.inter(
-                            color: const Color(0xffFF00E5).withOpacity(0.85),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          controller.selectedQueryDate.value.isNotEmpty
-                              ? Icons.close_rounded
-                              : Icons.keyboard_arrow_down_rounded,
-                          color: const Color(0xffFF00E5).withOpacity(0.85),
-                          size: 14,
-                        ),
-                      ],
+              const SizedBox(width: 12),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Meal Plan",
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                  )),
+                  ),
+                  const SizedBox(height: 2),
+                  Obx(() => GestureDetector(
+                        onTap: () {
+                          if (controller.selectedQueryDate.value.isNotEmpty) {
+                            controller.selectedQueryDate.value = "";
+                            controller.fetchMealData();
+                          }
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              controller.selectedDate.value,
+                              style: GoogleFonts.inter(
+                                color: const Color(0xffFF00E5).withOpacity(0.85),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              controller.selectedQueryDate.value.isNotEmpty
+                                  ? Icons.close_rounded
+                                  : Icons.keyboard_arrow_down_rounded,
+                              color: const Color(0xffFF00E5).withOpacity(0.85),
+                              size: 14,
+                            ),
+                          ],
+                        ),
+                      )),
+                ],
+              ),
             ],
           ),
 

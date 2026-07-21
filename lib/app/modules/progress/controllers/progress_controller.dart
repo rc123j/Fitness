@@ -1,6 +1,12 @@
 import 'package:get/get.dart';
+import '../../../services/api_client.dart';
+import '../../../services/api_endpoints.dart';
 
 class ProgressController extends GetxController {
+  final _apiClient = Get.find<ApiClient>();
+
+  final isLoading = false.obs;
+
   // Timeframe state: "7 Days", "30 Days", "3 Months", "1 Year", "All Time"
   final selectedTimeframe = "30 Days".obs;
 
@@ -47,6 +53,85 @@ class ProgressController extends GetxController {
 
   // Goal weight
   final goalWeight = 65.0.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchProgressData();
+  }
+
+  Future<void> fetchProgressData() async {
+    isLoading.value = true;
+    try {
+      // 1. Fetch weight and steps history logs
+      final response = await _apiClient.get(ApiEndpoints.progressLog);
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data;
+        weight.value = (data['current_weight'] as num?)?.toDouble() ?? weight.value;
+        weightChange.value = (data['weight_difference_kg'] as num?)?.toDouble() ?? weightChange.value;
+
+        final logsList = data['logs'] as List?;
+        if (logsList != null && logsList.isNotEmpty) {
+          final List<Map<String, dynamic>> trend = [];
+          for (var item in logsList) {
+            final double wt = (item['weight_kg'] as num?)?.toDouble() ?? 0.0;
+            final String dateStr = item['logged_date']?.toString() ?? "";
+            
+            // Format "2026-07-21" to "21 Jul"
+            String formattedDate = dateStr;
+            if (dateStr.length >= 10) {
+              try {
+                final date = DateTime.parse(dateStr);
+                final months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                formattedDate = "${date.day} ${months[date.month - 1]}";
+              } catch (_) {}
+            }
+            if (wt > 0) {
+              trend.add({"date": formattedDate, "weight": wt});
+            }
+          }
+          if (trend.isNotEmpty) {
+            weightTrendData.value = trend;
+          }
+        }
+      }
+    } catch (_) {
+      // Fallback gracefully on network failures
+    }
+
+    try {
+      // 2. Fetch body composition, BMI, and target weight from profile metrics
+      final profileRes = await _apiClient.get(ApiEndpoints.profile);
+      if (profileRes.statusCode == 200 && profileRes.data != null) {
+        final data = profileRes.data;
+        final profile = data['profile'];
+        final latestMetrics = data['latest_metrics'];
+
+        if (profile != null) {
+          weight.value = (profile['weight_kg'] as num?)?.toDouble() ?? weight.value;
+        }
+
+        if (latestMetrics != null) {
+          bmi.value = (latestMetrics['bmi'] as num?)?.toDouble() ?? bmi.value;
+          
+          final double fatPct = (latestMetrics['body_fat_pct'] as num?)?.toDouble() ?? 0.0;
+          final double musclePct = (latestMetrics['muscle_mass_pct'] as num?)?.toDouble() ?? 0.0;
+          
+          if (fatPct > 0) {
+            bodyFat.value = fatPct;
+            bodyFatKg.value = double.parse((weight.value * (fatPct / 100)).toStringAsFixed(1));
+          }
+          if (musclePct > 0) {
+            muscleMass.value = double.parse((weight.value * (musclePct / 100)).toStringAsFixed(1));
+            muscleMassKg.value = muscleMass.value;
+          }
+
+          otherKg.value = double.parse((weight.value - bodyFatKg.value - muscleMassKg.value).toStringAsFixed(1));
+        }
+      }
+    } catch (_) {}
+    isLoading.value = false;
+  }
 
   void changeTimeframe(String timeframe) {
     selectedTimeframe.value = timeframe;

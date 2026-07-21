@@ -701,63 +701,72 @@ class ProgressView extends GetView<ProgressController> {
           ),
           const SizedBox(height: 18),
 
-          Row(
-            children: [
-              /// Left: Custom Segmented Donut Chart
-              CustomPaint(
-                size: const Size(120, 120),
-                painter: BodyCompositionDonutPainter(
-                  musclePercent: 0.487,
-                  fatPercent: 0.187,
-                  otherPercent: 0.326,
-                ),
-              ),
-              const SizedBox(width: 20),
+          Obx(() {
+            final double currentWeight = controller.weight.value;
+            final double muscle = controller.muscleMass.value;
+            final double fatPct = controller.bodyFat.value;
+            
+            final double musclePct = (currentWeight > 0) ? (muscle / currentWeight) * 100 : 48.7;
+            final double otherPct = 100.0 - musclePct - fatPct;
 
-              /// Right: Legend Table
-              Expanded(
-                child: Column(
-                  children: [
-                    buildCompositionLegendRow(
-                      color: const Color(0xffB100FF),
-                      label: "Muscle Mass",
-                      weight: "32.6 kg",
-                      percentage: "48.7%",
-                      percentColor: const Color(0xffB100FF),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Divider(
-                        color: Colors.white.withOpacity(0.04),
-                        height: 0.8,
-                      ),
-                    ),
-                    buildCompositionLegendRow(
-                      color: const Color(0xffFF7A00),
-                      label: "Body Fat",
-                      weight: "18.7 kg",
-                      percentage: "18.7%",
-                      percentColor: const Color(0xffFF7A00),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Divider(
-                        color: Colors.white.withOpacity(0.04),
-                        height: 0.8,
-                      ),
-                    ),
-                    buildCompositionLegendRow(
-                      color: const Color(0xffFF00E5),
-                      label: "Other (Bone, Water, etc.)",
-                      weight: "16.1 kg",
-                      percentage: "32.6%",
-                      percentColor: const Color(0xffFF00E5),
-                    ),
-                  ],
+            return Row(
+              children: [
+                /// Left: Custom Segmented Donut Chart
+                CustomPaint(
+                  size: const Size(120, 120),
+                  painter: BodyCompositionDonutPainter(
+                    musclePercent: musclePct / 100.0,
+                    fatPercent: fatPct / 100.0,
+                    otherPercent: otherPct / 100.0,
+                  ),
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(width: 20),
+
+                /// Right: Legend Table
+                Expanded(
+                  child: Column(
+                    children: [
+                      buildCompositionLegendRow(
+                        color: const Color(0xffB100FF),
+                        label: "Muscle Mass",
+                        weight: "${controller.muscleMassKg.value.toStringAsFixed(1)} kg",
+                        percentage: "${musclePct.toStringAsFixed(1)}%",
+                        percentColor: const Color(0xffB100FF),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Divider(
+                          color: Colors.white.withOpacity(0.04),
+                          height: 0.8,
+                        ),
+                      ),
+                      buildCompositionLegendRow(
+                        color: const Color(0xffFF7A00),
+                        label: "Body Fat",
+                        weight: "${controller.bodyFatKg.value.toStringAsFixed(1)} kg",
+                        percentage: "${fatPct.toStringAsFixed(1)}%",
+                        percentColor: const Color(0xffFF7A00),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Divider(
+                          color: Colors.white.withOpacity(0.04),
+                          height: 0.8,
+                        ),
+                      ),
+                      buildCompositionLegendRow(
+                        color: const Color(0xffFF00E5),
+                        label: "Other (Bone, Water, etc.)",
+                        weight: "${controller.otherKg.value.toStringAsFixed(1)} kg",
+                        percentage: "${otherPct.toStringAsFixed(1)}%",
+                        percentColor: const Color(0xffFF00E5),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }),
         ],
       ),
     );
