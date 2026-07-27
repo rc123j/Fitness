@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/api_client.dart';
@@ -45,20 +46,25 @@ class SplashController extends GetxController {
       final response = await apiClient
           .get(ApiEndpoints.profile)
           .timeout(const Duration(seconds: 5));
-      return response.statusCode == 200;
-    } on Exception catch (e) {
-      final msg = e.toString().toLowerCase();
-      // If the server is simply unreachable (offline / wrong IP / server down),
-      // don't block the user — let them through and let the next real API call
-      // handle auth. Only hard 401/403 responses should force a logout.
-      if (msg.contains('timeout') ||
-          msg.contains('connection refused') ||
-          msg.contains('network') ||
-          msg.contains('socketexception')) {
-        return true; // Server unreachable ≠ invalid user, give benefit of doubt
+      if (response.statusCode == 200) {
+        // A 200 response confirms the user is authenticated and has a Member profile created (onboarding complete).
+        _authService.setOnboardingDone(true);
+        return true;
       }
-      // For 401 / 403 or other clear auth failures, invalidate.
-      return false;
+      return true;
+    } on DioException catch (e) {
+      final statusCode = e.response?.statusCode;
+      // Only 401 (Unauthorized) or 403 (Forbidden) indicate an invalid or expired token.
+      if (statusCode == 401 || statusCode == 403) {
+        return false;
+      }
+      // Status code 404 indicates the user is logged in, but has not completed onboarding yet
+      // (no Member profile row created in DB). We must return true to preserve their login session!
+      // Any other error (network timeouts, offline, connection refused, 500 errors) should NOT force a logout.
+      return true;
+    } catch (e) {
+      // For general timeout exceptions or any other unexpected errors, give the benefit of doubt and stay logged in.
+      return true;
     }
   }
 }

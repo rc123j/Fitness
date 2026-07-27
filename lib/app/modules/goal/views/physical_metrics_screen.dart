@@ -105,7 +105,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                              Text(
-                               "STEP 2 OF 6",
+                               "STEP 2 OF 7",
                                style: GoogleFonts.outfit(
                                  color: const Color(0xffFF00E5).withOpacity(0.9),
                                  fontSize: 11,
@@ -118,6 +118,7 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                                children: [
                                  buildProgress(true),
                                  buildProgress(true),
+                                 buildProgress(false),
                                  buildProgress(false),
                                  buildProgress(false),
                                  buildProgress(false),

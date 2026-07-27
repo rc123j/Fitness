@@ -75,6 +75,19 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
     },
   ];
 
+  double _getMultiplier(int id) {
+    final g = widget.gender.toLowerCase();
+    final isMale = g == 'male' || g == 'm';
+    switch (id) {
+      case 1: return 1.3;
+      case 2: return isMale ? 1.6 : 1.5;
+      case 3: return isMale ? 1.7 : 1.6;
+      case 4: return isMale ? 2.1 : 1.9;
+      case 5: return isMale ? 2.4 : 2.2;
+      default: return 1.3;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -154,7 +167,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            "STEP 3 OF 6",
+                            "STEP 3 OF 7",
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5).withOpacity(0.9),
                               fontSize: 11,
@@ -168,6 +181,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                               buildProgress(true),
                               buildProgress(true),
                               buildProgress(true),
+                              buildProgress(false),
                               buildProgress(false),
                               buildProgress(false),
                               buildProgress(false),
@@ -422,7 +436,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            "x${activity["multiplier"]}",
+                            "x${_getMultiplier(activity["id"] as int)}",
                             style: GoogleFonts.outfit(
                               color: themeColor,
                               fontSize: 9.5,

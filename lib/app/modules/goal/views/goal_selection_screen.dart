@@ -13,7 +13,8 @@ class GoalSelectionScreen extends StatefulWidget {
 }
 
 class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
-  int selectedIndex = 0;
+  String selectedGoalTitle = "Weight Loss";
+  bool isMuscleGainSelected = false;
 
   final List<Map<String, dynamic>> goals = [
     {
@@ -22,6 +23,13 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
       "subtitle": "Burn fat and lose weight\nin a healthy way.",
       "icon": Icons.local_fire_department_rounded,
       "color": const Color(0xffFF5F6D),
+    },
+    {
+      "id": 5,
+      "title": "Weight Gain",
+      "subtitle": "Gain healthy mass and\nincrease body weight.",
+      "icon": Icons.trending_up_rounded,
+      "color": const Color(0xff00E5FF),
     },
     {
       "id": 2,
@@ -38,20 +46,19 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
       "color": const Color(0xffC026D3),
     },
     {
-      "id": 3,
+      "id": 4,
       "title": "Athletic Performance",
       "subtitle": "Enhance endurance, speed\nand performance.",
       "icon": Icons.bolt_rounded,
       "color": const Color(0xffFF7A00),
     },
-    // {
-    //   "id": 3,
-    //   "title": "Nutrition Focus",
-    //   "subtitle": "Build better eating habits and improve overall health.",
-    //   "icon": Icons.restaurant_menu_rounded,
-    //   "color": const Color(0xffFF5F6D),
-    // },
   ];
+
+  List<Map<String, dynamic>> get categoryAGoals =>
+      goals.where((g) => g["title"] != "Muscle Gain").toList();
+
+  List<Map<String, dynamic>> get categoryBGoals =>
+      goals.where((g) => g["title"] == "Muscle Gain").toList();
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +116,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "STEP 1 OF 6",
+                            "STEP 1 OF 7",
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5).withOpacity(0.9),
                               fontSize: 11,
@@ -121,6 +128,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                           Row(
                             children: [
                               buildProgress(true),
+                              buildProgress(false),
                               buildProgress(false),
                               buildProgress(false),
                               buildProgress(false),
@@ -218,9 +226,9 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
 
                         const SizedBox(height: 16),
 
-                        /// SECTION HEADER
+                        /// CATEGORY A HEADER
                         Text(
-                          "SELECT YOUR GOAL",
+                          "CATEGORY A • GENERAL & WEIGHT GOALS",
                           style: GoogleFonts.outfit(
                             color: const Color(0xffFF00E5).withOpacity(0.85),
                             fontSize: 11,
@@ -230,11 +238,33 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                         ),
                         const SizedBox(height: 8),
 
-                        /// UNIFORM DYNAMIC GOAL CARDS LIST (All same size & layout)
-                        ...List.generate(goals.length, (index) {
+                        /// CATEGORY A DYNAMIC GOAL CARDS
+                        ...categoryAGoals.map((goal) {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
-                            child: buildHorizontalGoalCard(index),
+                            child: buildHorizontalGoalCard(goal, true),
+                          );
+                        }),
+
+                        const SizedBox(height: 12),
+
+                        /// CATEGORY B HEADER
+                        Text(
+                          "CATEGORY B • MUSCLE BUILDING (OPTIONAL ADD-ON)",
+                          style: GoogleFonts.outfit(
+                            color: const Color(0xffFF7A00).withOpacity(0.85),
+                            fontSize: 11,
+                            letterSpacing: 1.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        /// CATEGORY B DYNAMIC GOAL CARDS
+                        ...categoryBGoals.map((goal) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: buildHorizontalGoalCard(goal, false),
                           );
                         }),
 
@@ -356,10 +386,16 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(24),
                         onTap: () {
-                          final selectedGoal = goals[selectedIndex];
+                          final selectedGoal = goals.firstWhere(
+                            (g) => g["title"] == selectedGoalTitle,
+                            orElse: () => goals.first,
+                          );
+                          final String finalTitle = isMuscleGainSelected && selectedGoal["title"] != "Muscle Gain"
+                              ? "${selectedGoal["title"]} + Muscle Gain"
+                              : selectedGoal["title"] as String;
                           Get.to(
                             () => PhysicalMetricsScreen(
-                              goalTitle: selectedGoal["title"] as String,
+                              goalTitle: finalTitle,
                               goalId: selectedGoal["id"] as int,
                             ),
                             transition: Transition.cupertino,
@@ -405,15 +441,14 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
     );
   }
 
-  Widget buildGoalCard(int index) {
-    final goal = goals[index];
-    final isSelected = selectedIndex == index;
+  Widget buildGoalCard(Map<String, dynamic> goal) {
+    final isSelected = selectedGoalTitle == goal["title"];
     final themeColor = goal["color"] as Color;
 
     return GestureDetector(
       onTap: () {
         setState(() {
-          selectedIndex = index;
+          selectedGoalTitle = goal["title"] as String;
         });
       },
       child: AnimatedContainer(
@@ -522,15 +557,20 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
     );
   }
 
-  Widget buildHorizontalGoalCard(int index) {
-    final goal = goals[index];
-    final isSelected = selectedIndex == index;
+  Widget buildHorizontalGoalCard(Map<String, dynamic> goal, bool isCategoryA) {
+    final isSelected = isCategoryA
+        ? selectedGoalTitle == goal["title"]
+        : isMuscleGainSelected;
     final themeColor = goal["color"] as Color;
 
     return GestureDetector(
       onTap: () {
         setState(() {
-          selectedIndex = index;
+          if (isCategoryA) {
+            selectedGoalTitle = goal["title"] as String;
+          } else {
+            isMuscleGainSelected = !isMuscleGainSelected;
+          }
         });
       },
       child: AnimatedContainer(

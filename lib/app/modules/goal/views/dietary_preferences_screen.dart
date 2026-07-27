@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import '../../../services/auth_service.dart';
 import 'health_profile_screen.dart';
 
 class DietaryPreferencesScreen extends StatefulWidget {
@@ -216,7 +215,7 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('STEP 4 OF 6',
+                          Text('STEP 4 OF 7',
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5).withOpacity(0.9),
                               fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.w700,
@@ -227,20 +226,9 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
                             _buildProgress(true), _buildProgress(true),
                             _buildProgress(true), _buildProgress(true),
                             _buildProgress(false), _buildProgress(false),
+                            _buildProgress(false),
                           ]),
                         ],
-                      ),
-                      GestureDetector(
-                        onTap: () => Get.find<AuthService>().logout(),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.04),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white.withOpacity(0.08), width: 0.8),
-                          ),
-                          child: const Icon(Icons.logout_rounded, color: Colors.white, size: 16),
-                        ),
                       ),
                     ],
                   ),
@@ -489,8 +477,8 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
 
   Widget _buildProgress(bool active) {
     return Container(
-      margin: const EdgeInsets.only(right: 4),
-      height: 3, width: 28,
+      margin: const EdgeInsets.only(right: 6),
+      height: 3, width: 36,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(1.5),
         gradient: active ? const LinearGradient(

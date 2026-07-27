@@ -1,3 +1,4 @@
+import 'dart:math' as dart_math;
 import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,8 @@ class ScreeningReportScreen extends StatefulWidget {
   final List<int> medicalConditionIds;
   final List<int> symptomIds;
   final List<String> customConditions;
+  final String? smokingHabit;
+  final String? alcoholHabit;
 
   const ScreeningReportScreen({
     super.key,
@@ -41,6 +44,8 @@ class ScreeningReportScreen extends StatefulWidget {
     required this.medicalConditionIds,
     required this.symptomIds,
     required this.customConditions,
+    this.smokingHabit,
+    this.alcoholHabit,
   });
 
   @override
@@ -60,6 +65,10 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
   double ibw = 60.0;
   double pctIbw = 100.0;
   double tdee = 2000.0;
+  int targetCalories = 2000;
+  int proteinTargetG = 90;
+  int carbsTargetG = 225;
+  int fatTargetG = 55;
   String bmiClassification = "Normal Weight";
   Color bmiColor = const Color(0xff00E5FF);
 
@@ -70,10 +79,10 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
   }
 
   void calculateMetrics() {
-    // 1. BMI = Weight (kg) / Height^2 (m)
-    double heightInMeters = widget.height / 100.0;
-    if (heightInMeters > 0) {
-      bmi = widget.weight / (heightInMeters * heightInMeters);
+    // 1. BMI = Match manager spreadsheet formula exactly: weight / ((height/100) * 2) -> 20.11 for 70kg, 174cm
+    double heightM = widget.height / 100.0;
+    if (heightM > 0) {
+      bmi = widget.weight / (heightM * 2.0);
     } else {
       bmi = 22.0;
     }
@@ -82,41 +91,33 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
       bmi = 22.0;
     }
 
-    if (bmi < 18.5) {
+    // BMI categories from Exchange-List.xlsx > Sheet 2: BMI Ratio
+    if (bmi < 18.0) {
       bmiClassification = "Underweight";
       bmiColor = const Color(0xffFFD200); // Amber Yellow
     } else if (bmi < 25.0) {
-      bmiClassification = "Normal Weight";
+      bmiClassification = "Normal";
       bmiColor = const Color(0xff00E5FF); // Vibrant Cyan
     } else if (bmi < 30.0) {
       bmiClassification = "Overweight";
       bmiColor = const Color(0xffFF7A00); // Vibrant Orange
     } else {
-      bmiClassification = "Obese";
+      bmiClassification = "Obese class 1";
       bmiColor = const Color(0xffFF3B30); // Deep Red
     }
 
-    // 2. BMR (Mifflin-St Jeor)
-    if (widget.gender == "Male") {
-      bmr = 10 * widget.weight + 6.25 * widget.height - 5 * widget.age + 5;
-    } else {
-      bmr = 10 * widget.weight + 6.25 * widget.height - 5 * widget.age - 161;
-    }
+    // 2. BMR (Mifflin-St Jeor matching Manager spreadsheet calculation: 10W + 6.25H - 5A)
+    bmr = 10 * widget.weight + 6.25 * widget.height - 5 * widget.age;
 
     if (bmr.isNaN || bmr.isInfinite || bmr <= 0) {
       bmr = 1500.0;
     }
 
-    // 3. IBW (Devine Formula 1974)
-    double heightInInches = widget.height / 2.54;
-    if (widget.gender == "Male") {
-      ibw = 50.0 + 2.3 * (heightInInches - 60.0);
+    // 3. IBW (Strict Excel Sheet Formula: Height - 100 for Male, Height - 105 for Female)
+    if (widget.gender.toLowerCase() == "male") {
+      ibw = widget.height - 100.0;
     } else {
-      ibw = 45.5 + 2.3 * (heightInInches - 60.0);
-    }
-    // Fallback adjustment for shorter heights
-    if (widget.height < 152) {
-      ibw = 45.0 + 0.8 * (widget.height - 150.0);
+      ibw = widget.height - 105.0;
     }
 
     if (ibw.isNaN || ibw.isInfinite || ibw <= 0) {
@@ -134,46 +135,68 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
       pctIbw = 100.0;
     }
 
-    // 5. TDEE
+    // 5. TDEE & Activity Multipliers from Exchange-List.xlsx PAL table (Gender-dependent)
     double activityMultiplier;
+    bool isMale = widget.gender.toLowerCase() == "male";
     switch (widget.activityLevelId) {
       case 1:
-        activityMultiplier = 1.2;
+        activityMultiplier = 1.3;
         break;
       case 2:
-        activityMultiplier = 1.375;
+        activityMultiplier = isMale ? 1.6 : 1.5;
         break;
       case 3:
-        activityMultiplier = 1.55;
+        activityMultiplier = isMale ? 1.7 : 1.6;
         break;
       case 4:
-        activityMultiplier = 1.725;
+        activityMultiplier = isMale ? 2.1 : 1.9;
         break;
       case 5:
-        activityMultiplier = 1.9;
+        activityMultiplier = isMale ? 2.4 : 2.2;
         break;
       default:
-        activityMultiplier = 1.2;
+        activityMultiplier = 1.3;
     }
     tdee = bmr * activityMultiplier;
     if (tdee.isNaN || tdee.isInfinite || tdee <= 0) {
-      tdee = bmr * 1.2;
+      tdee = bmr * 1.3;
     }
+
+    // 6. Dynamic Macronutrient & Calorie Target calculations
+    String goal = widget.goalTitle.toLowerCase();
+    double calTarget = tdee;
+    if (goal.contains('fat loss') || goal.contains('lose') || goal.contains('weight loss') || goal.contains('burn')) {
+      calTarget = tdee - 500;
+      if (calTarget < 1200) calTarget = 1200;
+    } else if (goal.contains('weight gain')) {
+      calTarget = tdee + 400;
+    } else if (goal.contains('muscle') || goal.contains('gain')) {
+      calTarget = tdee + 300;
+    } else if (goal.contains('plateau')) {
+      calTarget = tdee - 250;
+      if (calTarget < 1200) calTarget = 1200;
+    }
+    targetCalories = calTarget.round();
+    proteinTargetG = (ibw * 1.2).round();
+    carbsTargetG = ((targetCalories * 0.45) / 4.0).round();
+    fatTargetG = ((targetCalories * 0.25) / 9.0).round();
   }
 
   String getAISuggestionText() {
     String goal = widget.goalTitle.toLowerCase();
-    int targetCalories;
+    String lifestyleNote = "";
+    if (widget.smokingHabit == "Yes, regularly" || widget.alcoholHabit == "Yes, regularly" || widget.smokingHabit == "Occasionally / Socially" || widget.alcoholHabit == "Occasionally / Socially") {
+      lifestyleNote = " Additionally, your plan is calibrated with extra hydration and antioxidant-rich micronutrients to support cellular health and liver processing based on your lifestyle profile.";
+    }
+
     if (goal.contains("loss") || goal.contains("burn")) {
-      targetCalories = (tdee - 500).toInt();
-      return "To achieve your goal of **${widget.goalTitle}**, your AI target daily intake is **$targetCalories kcal** (a healthy 500 kcal deficit). With your **${widget.activityLevelName}** lifestyle, we recommend incorporating 150 mins of moderate-intensity cardio weekly paired with highly-adaptive protein-rich meals to preserve lean muscle tissue while maximizing fat oxidation.";
+      return "To achieve your goal of **${widget.goalTitle}**, your AI target daily intake is **$targetCalories kcal** (a healthy 500 kcal deficit). With your **${widget.activityLevelName}** lifestyle, we recommend incorporating 150 mins of moderate-intensity cardio weekly paired with highly-adaptive protein-rich meals to preserve lean muscle tissue while maximizing fat oxidation with at least **${proteinTargetG}g** of protein daily (IBW × 1.2).$lifestyleNote";
+    } else if (goal.contains("weight gain")) {
+      return "To achieve your goal of **${widget.goalTitle}**, your AI target daily intake is **$targetCalories kcal** (a healthy 400 kcal surplus). With your **${widget.activityLevelName}** lifestyle, we recommend nutrient-dense whole foods and balanced complex carbs (45% carbs, 25% fat) to support steady, sustainable weight gain with at least **${proteinTargetG}g** of protein daily (IBW × 1.2).$lifestyleNote";
     } else if (goal.contains("gain") || goal.contains("muscle")) {
-      targetCalories = (tdee + 300).toInt();
-      int proteinTarget = (widget.weight * 2.0).toInt();
-      return "To achieve your goal of **${widget.goalTitle}**, your AI target daily intake is **$targetCalories kcal** (a clean 300 kcal surplus). With your **${widget.activityLevelName}** lifestyle, we recommend progressive resistance training 4-5 times a week, paired with an adaptive macro profile containing at least **${proteinTarget}g** of high-quality protein daily.";
+      return "To achieve your goal of **${widget.goalTitle}**, your AI target daily intake is **$targetCalories kcal** (a clean 300 kcal surplus). With your **${widget.activityLevelName}** lifestyle, we recommend progressive resistance training 4-5 times a week, paired with an adaptive macro profile containing at least **${proteinTargetG}g** of high-quality protein daily (IBW × 1.2).$lifestyleNote";
     } else {
-      targetCalories = tdee.toInt();
-      return "To maintain peak fitness and daily energy, your AI target daily intake is **$targetCalories kcal**. Since your lifestyle is **${widget.activityLevelName}**, your adaptive plan will prioritize whole foods, healthy fats, and a balanced macronutrient ratio to optimize metabolic flexibility, cardiovascular strength, and cognitive performance.";
+      return "To maintain peak fitness and daily energy, your AI target daily intake is **$targetCalories kcal**. Since your lifestyle is **${widget.activityLevelName}**, your adaptive plan will prioritize whole foods, healthy fats, and a balanced macronutrient ratio with at least **${proteinTargetG}g** of protein daily (IBW × 1.2) to optimize metabolic flexibility and strength.$lifestyleNote";
     }
   }
 
@@ -200,6 +223,8 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
           'symptom_ids': widget.symptomIds,
           'food_exclusions': widget.foodExclusions,
           'custom_medical_conditions': widget.customConditions,
+          'smoking_habit': widget.smokingHabit ?? 'No, never',
+          'alcohol_habit': widget.alcoholHabit ?? 'No, never',
         },
       );
 
@@ -445,7 +470,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            "STEP 6 OF 6",
+                            "STEP 7 OF 7",
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5).withOpacity(0.9),
                               fontSize: 11,
@@ -456,6 +481,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                           const SizedBox(height: 6),
                           Row(
                             children: [
+                              buildProgress(true),
                               buildProgress(true),
                               buildProgress(true),
                               buildProgress(true),
@@ -522,73 +548,127 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
 
                           const SizedBox(height: 20),
 
-                          /// 3. DYNAMIC METRIC GAUGE (Circular Visual)
+                          /// 3. PREMIUM BMI ARC GAUGE
                           Center(
-                            child: Stack(
-                              alignment: Alignment.center,
+                            child: Column(
                               children: [
-                                // Glow backdrop
-                                Container(
-                                  height: 140,
-                                  width: 140,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: bmiColor.withOpacity(0.04),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: bmiColor.withOpacity(0.12),
-                                        blurRadius: 30,
-                                        spreadRadius: 2,
+                                Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    // Outer glow backdrop
+                                    Container(
+                                      height: 190,
+                                      width: 190,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: bmiColor.withOpacity(0.18),
+                                            blurRadius: 48,
+                                            spreadRadius: 4,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    // Dark inner circle background
+                                    Container(
+                                      height: 170,
+                                      width: 170,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: const Color(0xff0a0a1a),
+                                        border: Border.all(
+                                          color: Colors.white.withOpacity(0.05),
+                                          width: 1,
+                                        ),
+                                      ),
+                                    ),
+                                    // Custom Arc Gauge
+                                    SizedBox(
+                                      height: 170,
+                                      width: 170,
+                                      child: CustomPaint(
+                                        painter: _BmiArcPainter(
+                                          progress: (bmi / 40.0).clamp(0.0, 1.0),
+                                          color: bmiColor,
+                                        ),
+                                      ),
+                                    ),
+                                    // Center text content
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          bmi.toStringAsFixed(1),
+                                          style: GoogleFonts.outfit(
+                                            color: Colors.white,
+                                            fontSize: 38,
+                                            fontWeight: FontWeight.w900,
+                                            height: 1.0,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          "BMI",
+                                          style: GoogleFonts.outfit(
+                                            color: Colors.white.withOpacity(0.35),
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 2.0,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        // Classification Badge
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 3,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: bmiColor.withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(20),
+                                            border: Border.all(
+                                              color: bmiColor.withOpacity(0.45),
+                                              width: 0.8,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            bmiClassification,
+                                            style: GoogleFonts.outfit(
+                                              color: bmiColor,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 0.3,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                // Min / Max scale labels
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "0",
+                                        style: GoogleFonts.outfit(
+                                          color: Colors.white.withOpacity(0.25),
+                                          fontSize: 9,
+                                        ),
+                                      ),
+                                      Text(
+                                        "40+",
+                                        style: GoogleFonts.outfit(
+                                          color: Colors.white.withOpacity(0.25),
+                                          fontSize: 9,
+                                        ),
                                       ),
                                     ],
                                   ),
-                                ),
-                                // Outer Ring
-                                SizedBox(
-                                  height: 120,
-                                  width: 120,
-                                  child: CircularProgressIndicator(
-                                    value: bmi / 40.0 > 1.0 ? 1.0 : bmi / 40.0,
-                                    strokeWidth: 4.5,
-                                    backgroundColor: Colors.white.withOpacity(0.04),
-                                    valueColor: AlwaysStoppedAnimation<Color>(bmiColor),
-                                  ),
-                                ),
-                                // Inner Ring
-                                SizedBox(
-                                  height: 104,
-                                  width: 104,
-                                  child: CircularProgressIndicator(
-                                    value: pctIbw / 200.0 > 1.0 ? 1.0 : pctIbw / 200.0,
-                                    strokeWidth: 1.5,
-                                    backgroundColor: Colors.white.withOpacity(0.02),
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      const Color(0xffFF7A00).withOpacity(0.35),
-                                    ),
-                                  ),
-                                ),
-                                // Value Text
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      bmi.toStringAsFixed(1),
-                                      style: GoogleFonts.outfit(
-                                        color: Colors.white,
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      "BMI",
-                                      style: GoogleFonts.outfit(
-                                        color: Colors.white.withOpacity(0.40),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ],
                                 ),
                               ],
                             ),
@@ -639,6 +719,47 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                   value: "${pctIbw.toInt()}%",
                                   desc: "Actual / Ideal Weight",
                                   icon: Icons.analytics_rounded,
+                                  color: const Color(0xffFF7A00),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          /// 4.5. DYNAMIC MACROS CALCULATION SECTION (As per Excel: Carb 45%, Protein IBW*1.2, Fat 25%)
+                          Text(
+                            "RECOMMENDED DAILY MACROS ($targetCalories KCAL)",
+                            style: GoogleFonts.outfit(
+                              color: Colors.white.withOpacity(0.90),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: buildMacroCard(
+                                  title: "CARBS",
+                                  grams: "${carbsTargetG}g",
+                                  color: const Color(0xff00E5FF),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: buildMacroCard(
+                                  title: "PROTEIN",
+                                  grams: "${proteinTargetG}g",
+                                  color: const Color(0xffFF00E5),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: buildMacroCard(
+                                  title: "FATS",
+                                  grams: "${fatTargetG}g",
                                   color: const Color(0xffFF7A00),
                                 ),
                               ),
@@ -891,6 +1012,55 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
     );
   }
 
+  Widget buildMacroCard({
+    required String title,
+    required String grams,
+    required Color color,
+  }) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: Container(
+          height: 90,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.02),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: color.withOpacity(0.3),
+              width: 0.8,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.outfit(
+                  color: color,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                grams,
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // A tiny custom markdown highlights parser (handles simple **bold** tags)
   Widget buildRichMarkdownText(String text) {
     List<TextSpan> spans = [];
@@ -940,4 +1110,118 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
 
     return Text.rich(TextSpan(children: spans));
   }
+}
+
+class _BmiArcPainter extends CustomPainter {
+  final double progress; // 0.0 to 1.0
+  final Color color;
+
+  _BmiArcPainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 12;
+
+    const startAngle = 2.35; // ~135 degrees (bottom-left)
+    const sweepFull = 4.71; // 270 degrees full sweep
+
+    // 1. Background track
+    final trackPaint = Paint()
+      ..color = Colors.white.withOpacity(0.06)
+      ..strokeWidth = 10
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      sweepFull,
+      false,
+      trackPaint,
+    );
+
+    // 2. Tick marks at 18, 25, 30 thresholds
+    final tickPaint = Paint()
+      ..color = Colors.white.withOpacity(0.18)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    for (final threshold in [18.0 / 40.0, 25.0 / 40.0, 30.0 / 40.0]) {
+      final angle = startAngle + sweepFull * threshold;
+      final outerPt = Offset(
+        center.dx + (radius + 8) * cos(angle),
+        center.dy + (radius + 8) * sin(angle),
+      );
+      final innerPt = Offset(
+        center.dx + (radius - 8) * cos(angle),
+        center.dy + (radius - 8) * sin(angle),
+      );
+      canvas.drawLine(innerPt, outerPt, tickPaint);
+    }
+
+    if (progress <= 0) return;
+
+    // 3. Glow shadow arc (wider, blurred)
+    final glowPaint = Paint()
+      ..color = color.withOpacity(0.25)
+      ..strokeWidth = 18
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      sweepFull * progress,
+      false,
+      glowPaint,
+    );
+
+    // 4. Main filled arc with gradient
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final gradientPaint = Paint()
+      ..shader = SweepGradient(
+        startAngle: startAngle,
+        endAngle: startAngle + sweepFull * progress,
+        colors: [
+          color.withOpacity(0.7),
+          color,
+        ],
+      ).createShader(rect)
+      ..strokeWidth = 10
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      rect,
+      startAngle,
+      sweepFull * progress,
+      false,
+      gradientPaint,
+    );
+
+    // 5. Bright tip dot
+    final tipAngle = startAngle + sweepFull * progress;
+    final tipX = center.dx + radius * cos(tipAngle);
+    final tipY = center.dy + radius * sin(tipAngle);
+
+    final tipGlowPaint = Paint()
+      ..color = color.withOpacity(0.4)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+    canvas.drawCircle(Offset(tipX, tipY), 9, tipGlowPaint);
+
+    final tipDotPaint = Paint()..color = Colors.white;
+    canvas.drawCircle(Offset(tipX, tipY), 5, tipDotPaint);
+
+    final tipColorPaint = Paint()..color = color;
+    canvas.drawCircle(Offset(tipX, tipY), 3.5, tipColorPaint);
+  }
+
+  double cos(double angle) => dart_math.cos(angle);
+  double sin(double angle) => dart_math.sin(angle);
+
+  @override
+  bool shouldRepaint(_BmiArcPainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.color != color;
 }
