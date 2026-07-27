@@ -6,7 +6,7 @@ class ApiEndpoints {
 
   static const String baseUrl = isProduction
       ? 'https://api.fitwithdeveloper.com'
-      : 'http://192.168.1.8:4017';
+      : 'http://localhost:4017';
 
   static const String login = '/api/auth/login';
   static const String register = '/api/auth/register';
