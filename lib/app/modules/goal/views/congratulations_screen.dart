@@ -24,33 +24,42 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
 
     // Initialize Confetti Particles — subtle, fewer, smaller
     for (int i = 0; i < 30; i++) {
-      _particles.add(ConfettiParticle(
-        x: _random.nextDouble(),
-        y: -_random.nextDouble() * 0.8,
-        size: _random.nextDouble() * 5 + 3,
-        color: _getRandomColor(),
-        speedY: _random.nextDouble() * 1.5 + 1.0,
-        speedX: _random.nextDouble() * 0.8 - 0.4,
-        rotation: _random.nextDouble() * 2 * math.pi,
-        rotationSpeed: _random.nextDouble() * 2 - 1,
-      ));
+      _particles.add(
+        ConfettiParticle(
+          x: _random.nextDouble(),
+          y: -_random.nextDouble() * 0.8,
+          size: _random.nextDouble() * 5 + 3,
+          color: _getRandomColor(),
+          speedY: _random.nextDouble() * 1.5 + 1.0,
+          speedX: _random.nextDouble() * 0.8 - 0.4,
+          rotation: _random.nextDouble() * 2 * math.pi,
+          rotationSpeed: _random.nextDouble() * 2 - 1,
+        ),
+      );
     }
 
-    _confettiController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    )..addListener(() {
-        setState(() {
-          for (var p in _particles) {
-            p.y += p.speedY * 0.004;
-            p.x += p.speedX * 0.001;
-            p.rotation += p.rotationSpeed * 0.008;
-          }
-        });
-      });
+    _confettiController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 4))
+          ..addListener(() {
+            setState(() {
+              for (var p in _particles) {
+                p.y += p.speedY * 0.004;
+                p.x += p.speedX * 0.001;
+                p.rotation += p.rotationSpeed * 0.008;
 
-    // Play once for 4 seconds then stop
-    _confettiController.forward();
+                // Loop particles back to the top when they fall off the screen
+                if (p.y > 1.1) {
+                  p.y = -0.1;
+                  p.x = _random.nextDouble();
+                  p.speedY = _random.nextDouble() * 1.5 + 1.0;
+                  p.speedX = _random.nextDouble() * 0.8 - 0.4;
+                }
+              }
+            });
+          });
+
+    // Play continuously until the user navigates forward
+    _confettiController.repeat();
   }
 
   Color _getRandomColor() {
@@ -93,28 +102,36 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
         children: [
           // Background Glows
           Positioned(
-            top: -100, right: -100,
+            top: -100,
+            right: -100,
             child: Container(
-              height: 320, width: 320,
+              height: 320,
+              width: 320,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: RadialGradient(colors: [
-                  const Color(0xffFF00E5).withOpacity(0.15),
-                  Colors.transparent,
-                ]),
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xffFF00E5).withOpacity(0.15),
+                    Colors.transparent,
+                  ],
+                ),
               ),
             ),
           ),
           Positioned(
-            bottom: -80, left: -80,
+            bottom: -80,
+            left: -80,
             child: Container(
-              height: 280, width: 280,
+              height: 280,
+              width: 280,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: RadialGradient(colors: [
-                  const Color(0xffFF7A00).withOpacity(0.12),
-                  Colors.transparent,
-                ]),
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xffFF7A00).withOpacity(0.12),
+                    Colors.transparent,
+                  ],
+                ),
               ),
             ),
           ),
@@ -136,7 +153,8 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
                   alignment: Alignment.center,
                   children: [
                     Container(
-                      height: 88, width: 88,
+                      height: 88,
+                      width: 88,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: const Color(0xffFF00E5).withOpacity(0.08),
@@ -174,7 +192,9 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
                   "CONGRATULATIONS!",
                   style: GoogleFonts.outfit(
                     color: const Color(0xffFF00E5).withOpacity(0.95),
-                    fontSize: 12, letterSpacing: 2.5, fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    letterSpacing: 2.5,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -229,7 +249,8 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
                                 children: [
                                   // Top row: Brand & EMV Chip
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         "FITFUEL HEALTH PASS",
@@ -245,16 +266,24 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
                                         height: 26,
                                         width: 34,
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(6),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
                                           gradient: LinearGradient(
                                             colors: [
-                                              const Color(0xffFFCC00).withOpacity(0.8),
-                                              const Color(0xffFF7A00).withOpacity(0.8),
+                                              const Color(
+                                                0xffFFCC00,
+                                              ).withOpacity(0.8),
+                                              const Color(
+                                                0xffFF7A00,
+                                              ).withOpacity(0.8),
                                             ],
                                           ),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: const Color(0xffFFCC00).withOpacity(0.2),
+                                              color: const Color(
+                                                0xffFFCC00,
+                                              ).withOpacity(0.2),
                                               blurRadius: 8,
                                             ),
                                           ],
@@ -276,16 +305,20 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
                                   const Spacer(),
                                   // Bottom row: Status & Features snapshot
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             "STATUS",
                                             style: GoogleFonts.outfit(
-                                              color: Colors.white.withOpacity(0.4),
+                                              color: Colors.white.withOpacity(
+                                                0.4,
+                                              ),
                                               fontSize: 9,
                                               letterSpacing: 1.0,
                                             ),
@@ -305,7 +338,9 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
                                               Text(
                                                 "ACTIVE",
                                                 style: GoogleFonts.outfit(
-                                                  color: const Color(0xff34C759),
+                                                  color: const Color(
+                                                    0xff34C759,
+                                                  ),
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.bold,
                                                   letterSpacing: 0.5,
@@ -316,10 +351,17 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
                                         ],
                                       ),
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 4,
+                                        ),
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10),
-                                          color: const Color(0xffFF00E5).withOpacity(0.12),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                          color: const Color(
+                                            0xffFF00E5,
+                                          ).withOpacity(0.12),
                                         ),
                                         child: Text(
                                           "30-DAY PLAN",
@@ -349,7 +391,8 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
                   child: Container(
-                    height: 48, width: double.infinity,
+                    height: 48,
+                    width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
                       gradient: const LinearGradient(
@@ -362,7 +405,9 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0xffB100FF).withOpacity(0.30),
-                          blurRadius: 12, spreadRadius: 1, offset: const Offset(0, 3),
+                          blurRadius: 12,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 3),
                         ),
                       ],
                     ),
@@ -377,8 +422,10 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
                           child: Text(
                             "Let's Go to Dashboard",
                             style: GoogleFonts.outfit(
-                              color: Colors.white, fontSize: 16,
-                              fontWeight: FontWeight.bold, letterSpacing: 0.5,
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ),
@@ -435,7 +482,11 @@ class ConfettiPainter extends CustomPainter {
 
       // Draw a small rotating rectangle/square confetti particle
       canvas.drawRect(
-        Rect.fromCenter(center: Offset.zero, width: p.size, height: p.size * 0.6),
+        Rect.fromCenter(
+          center: Offset.zero,
+          width: p.size,
+          height: p.size * 0.6,
+        ),
         paint,
       );
 
