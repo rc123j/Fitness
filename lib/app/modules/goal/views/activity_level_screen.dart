@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import '../../../services/onboarding_draft_service.dart';
 import 'dietary_preferences_screen.dart';
 
 class ActivityLevelScreen extends StatefulWidget {
@@ -281,6 +282,10 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                         borderRadius: BorderRadius.circular(24),
                         onTap: () {
                           final selectedLevel = activityLevels[selectedIndex];
+                          OnboardingDraftService.saveStep3(
+                            activityLevelId: selectedLevel["id"] as int,
+                            activityLevelName: selectedLevel["title"] as String,
+                          );
                           Get.to(
                             () => DietaryPreferencesScreen(
                               goalTitle: widget.goalTitle,

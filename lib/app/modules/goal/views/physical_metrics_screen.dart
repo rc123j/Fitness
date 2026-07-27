@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import '../../../services/onboarding_draft_service.dart';
 import 'activity_level_screen.dart';
 
 class PhysicalMetricsScreen extends StatefulWidget {
@@ -286,6 +287,12 @@ class _PhysicalMetricsScreenState extends State<PhysicalMetricsScreen> {
                         child: InkWell(
                           borderRadius: BorderRadius.circular(24),
                           onTap: () {
+                            OnboardingDraftService.saveStep2(
+                              gender: selectedGender,
+                              age: age.toInt(),
+                              height: height.toInt(),
+                              weight: weight,
+                            );
                             Get.to(
                               () => ActivityLevelScreen(
                                 goalTitle: widget.goalTitle,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/onboarding_draft_service.dart';
 import 'physical_metrics_screen.dart';
 
 class GoalSelectionScreen extends StatefulWidget {
@@ -393,6 +394,10 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                           final String finalTitle = isMuscleGainSelected && selectedGoal["title"] != "Muscle Gain"
                               ? "${selectedGoal["title"]} + Muscle Gain"
                               : selectedGoal["title"] as String;
+                          OnboardingDraftService.saveStep1(
+                            goalTitle: finalTitle,
+                            goalId: selectedGoal["id"] as int,
+                          );
                           Get.to(
                             () => PhysicalMetricsScreen(
                               goalTitle: finalTitle,

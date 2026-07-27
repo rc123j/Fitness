@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/onboarding_draft_service.dart';
 import 'congratulations_screen.dart';
 
 class ScreeningReportScreen extends StatefulWidget {
@@ -230,6 +231,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
 
       final data = response.data;
       _authService.setOnboardingDone(true);
+      OnboardingDraftService.clear();
 
       if (!mounted) return;
 

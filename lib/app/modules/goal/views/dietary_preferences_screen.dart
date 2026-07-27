@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import '../../../services/onboarding_draft_service.dart';
 import 'health_profile_screen.dart';
 
 class DietaryPreferencesScreen extends StatefulWidget {
@@ -138,6 +139,12 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
     if (selectedExclusions.contains('no_seafood')) {
       tastePreferenceIds.add(5); // id 5 = No Seafood in DB
     }
+
+    OnboardingDraftService.saveStep4(
+      tastePreferenceIds: tastePreferenceIds,
+      dietLabel: selectedDietLabel ?? 'Standard',
+      foodExclusions: selectedExclusions.toList(),
+    );
 
     Get.to(
       () => HealthProfileScreen(

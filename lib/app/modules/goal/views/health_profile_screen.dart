@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import '../../../services/onboarding_draft_service.dart';
 import 'lifestyle_habits_screen.dart';
 
 class HealthProfileScreen extends StatefulWidget {
@@ -79,6 +80,9 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
   bool get canProceed => selectedConditionIds.isNotEmpty || noConditions;
 
   void _proceed() {
+    OnboardingDraftService.saveStep5(
+      medicalConditionIds: selectedConditionIds.toList(),
+    );
     Get.to(
       () => LifestyleHabitsScreen(
         goalTitle: widget.goalTitle,

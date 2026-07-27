@@ -3,6 +3,14 @@ import 'package:get/get.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
+import '../../../services/onboarding_draft_service.dart';
+import '../../goal/views/goal_selection_screen.dart';
+import '../../goal/views/physical_metrics_screen.dart';
+import '../../goal/views/activity_level_screen.dart';
+import '../../goal/views/dietary_preferences_screen.dart';
+import '../../goal/views/health_profile_screen.dart';
+import '../../goal/views/lifestyle_habits_screen.dart';
+import '../../goal/views/screening_report_screen.dart';
 
 class SplashController extends GetxController {
   final _authService = Get.find<AuthService>();
@@ -23,8 +31,6 @@ class SplashController extends GetxController {
     }
 
     // Token exists locally — verify it is still valid on the backend.
-    // If the user was deleted from the DB or the token expired, this will
-    // return a 401/error and we force them back to login.
     final isValid = await _validateTokenWithServer();
     if (!isValid) {
       await _authService.clearSession();
@@ -35,7 +41,147 @@ class SplashController extends GetxController {
     if (_authService.isOnboardingDone) {
       Get.offAllNamed('/main-navigation');
     } else {
+      // Resume from whatever step the user reached before the restart
+      _resumeOnboarding();
+    }
+  }
+
+  /// Navigates straight to the screen matching the last saved onboarding step.
+  void _resumeOnboarding() {
+    final step = OnboardingDraftService.lastStep;
+    final d = OnboardingDraftService.getDraft();
+
+    if (step <= 1 || (d['goalTitle'] as String).isEmpty) {
+      // No draft or only goal step touched — start fresh
       Get.offAllNamed('/goal-selection');
+      return;
+    }
+
+    // Helper to safely extract values
+    final goalTitle   = d['goalTitle']  as String;
+    final goalId      = d['goalId']     as int;
+    final gender      = d['gender']     as String;
+    final age         = d['age']        as int;
+    final height      = d['height']     as int;
+    final weight      = d['weight']     as double;
+    final actId       = d['activityLevelId']   as int;
+    final actName     = d['activityLevelName'] as String;
+    final tasteIds    = d['tastePreferenceIds'] as List<int>;
+    final dietLabel   = d['dietLabel']  as String;
+    final foodExcl    = d['foodExclusions'] as List<String>;
+    final condIds     = d['medicalConditionIds'] as List<int>;
+    final smoking     = d['smokingHabit'] as String;
+    final alcohol     = d['alcoholHabit'] as String;
+
+    switch (step) {
+      case 1:
+        // Step 1 saved — resume at Step 2 (physical metrics)
+        Get.offAll(
+          () => PhysicalMetricsScreen(goalTitle: goalTitle, goalId: goalId),
+          transition: Transition.fadeIn,
+        );
+        break;
+
+      case 2:
+        // Step 2 saved — resume at Step 3 (activity level)
+        Get.offAll(
+          () => ActivityLevelScreen(
+            goalTitle: goalTitle,
+            goalId: goalId,
+            gender: gender,
+            age: age,
+            height: height,
+            weight: weight,
+          ),
+          transition: Transition.fadeIn,
+        );
+        break;
+
+      case 3:
+        // Step 3 saved — resume at Step 4 (dietary preferences)
+        Get.offAll(
+          () => DietaryPreferencesScreen(
+            goalTitle: goalTitle,
+            goalId: goalId,
+            gender: gender,
+            age: age,
+            height: height,
+            weight: weight,
+            activityLevelId: actId,
+            activityLevelName: actName,
+          ),
+          transition: Transition.fadeIn,
+        );
+        break;
+
+      case 4:
+        // Step 4 saved — resume at Step 5 (health profile)
+        Get.offAll(
+          () => HealthProfileScreen(
+            goalTitle: goalTitle,
+            goalId: goalId,
+            gender: gender,
+            age: age,
+            height: height,
+            weight: weight,
+            activityLevelId: actId,
+            activityLevelName: actName,
+            tastePreferenceIds: tasteIds,
+            dietLabel: dietLabel.isEmpty ? 'Standard' : dietLabel,
+            foodExclusions: foodExcl,
+          ),
+          transition: Transition.fadeIn,
+        );
+        break;
+
+      case 5:
+        // Step 5 saved — resume at Step 6 (lifestyle habits)
+        Get.offAll(
+          () => LifestyleHabitsScreen(
+            goalTitle: goalTitle,
+            goalId: goalId,
+            gender: gender,
+            age: age,
+            height: height,
+            weight: weight,
+            activityLevelId: actId,
+            activityLevelName: actName,
+            tastePreferenceIds: tasteIds,
+            dietLabel: dietLabel.isEmpty ? 'Standard' : dietLabel,
+            foodExclusions: foodExcl,
+            medicalConditionIds: condIds,
+          ),
+          transition: Transition.fadeIn,
+        );
+        break;
+
+      case 6:
+        // Step 6 saved — resume at Step 7 (screening report)
+        Get.offAll(
+          () => ScreeningReportScreen(
+            goalTitle: goalTitle,
+            goalId: goalId,
+            gender: gender,
+            age: age,
+            height: height,
+            weight: weight,
+            activityLevelId: actId,
+            activityLevelName: actName,
+            tastePreferenceIds: tasteIds,
+            dietLabel: dietLabel.isEmpty ? 'Standard' : dietLabel,
+            foodExclusions: foodExcl,
+            medicalConditionIds: condIds,
+            symptomIds: const [],
+            customConditions: const [],
+            smokingHabit: smoking,
+            alcoholHabit: alcohol,
+          ),
+          transition: Transition.fadeIn,
+        );
+        break;
+
+      default:
+        Get.offAllNamed('/goal-selection');
     }
   }
 

@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import '../../../services/onboarding_draft_service.dart';
 import 'screening_report_screen.dart';
 
 class LifestyleHabitsScreen extends StatefulWidget {
@@ -55,6 +56,10 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
   ];
 
   void _proceed() {
+    OnboardingDraftService.saveStep6(
+      smokingHabit: selectedSmoking,
+      alcoholHabit: selectedAlcohol,
+    );
     Get.to(
       () => ScreeningReportScreen(
         goalTitle: widget.goalTitle,
