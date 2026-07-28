@@ -140,7 +140,7 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
       tastePreferenceIds.add(5); // id 5 = No Seafood in DB
     }
 
-    OnboardingDraftService.saveStep4(
+    OnboardingDraftService.saveStep7(
       tastePreferenceIds: tastePreferenceIds,
       dietLabel: selectedDietLabel ?? 'Standard',
       foodExclusions: selectedExclusions.toList(),
@@ -222,7 +222,7 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('STEP 4 OF 7',
+                          Text('STEP 7 OF 7',
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5).withOpacity(0.9),
                               fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.w700,
@@ -232,8 +232,8 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
                           Row(children: [
                             _buildProgress(true), _buildProgress(true),
                             _buildProgress(true), _buildProgress(true),
-                            _buildProgress(false), _buildProgress(false),
-                            _buildProgress(false),
+                            _buildProgress(true), _buildProgress(true),
+                            _buildProgress(true),
                           ]),
                         ],
                       ),

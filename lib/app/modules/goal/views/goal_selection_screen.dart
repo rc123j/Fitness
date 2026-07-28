@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/onboarding_draft_service.dart';
-import 'physical_metrics_screen.dart';
+import 'gender_screen.dart';
 
 class GoalSelectionScreen extends StatefulWidget {
   const GoalSelectionScreen({super.key});
@@ -398,13 +398,13 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                             goalTitle: finalTitle,
                             goalId: selectedGoal["id"] as int,
                           );
-                          Get.to(
-                            () => PhysicalMetricsScreen(
-                              goalTitle: finalTitle,
-                              goalId: selectedGoal["id"] as int,
-                            ),
-                            transition: Transition.cupertino,
-                          );
+                           Get.to(
+                             () => GenderScreen(
+                               goalTitle: finalTitle,
+                               goalId: selectedGoal["id"] as int,
+                             ),
+                             transition: Transition.cupertino,
+                           );
                         },
                         child: Center(
                           child: Text(

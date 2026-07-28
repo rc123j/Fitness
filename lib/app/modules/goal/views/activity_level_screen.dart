@@ -168,7 +168,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            "STEP 3 OF 7",
+                            "STEP 6 OF 7",
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5).withOpacity(0.9),
                               fontSize: 11,
@@ -182,9 +182,9 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                               buildProgress(true),
                               buildProgress(true),
                               buildProgress(true),
-                              buildProgress(false),
-                              buildProgress(false),
-                              buildProgress(false),
+                              buildProgress(true),
+                              buildProgress(true),
+                              buildProgress(true),
                               buildProgress(false),
                             ],
                           ),
@@ -282,7 +282,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                         borderRadius: BorderRadius.circular(24),
                         onTap: () {
                           final selectedLevel = activityLevels[selectedIndex];
-                          OnboardingDraftService.saveStep3(
+                          OnboardingDraftService.saveStep6(
                             activityLevelId: selectedLevel["id"] as int,
                             activityLevelName: selectedLevel["title"] as String,
                           );

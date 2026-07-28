@@ -5,7 +5,10 @@ import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
 import '../../../services/onboarding_draft_service.dart';
 import '../../goal/views/goal_selection_screen.dart';
-import '../../goal/views/physical_metrics_screen.dart';
+import '../../goal/views/gender_screen.dart';
+import '../../goal/views/age_screen.dart';
+import '../../goal/views/height_screen.dart';
+import '../../goal/views/weight_screen.dart';
 import '../../goal/views/activity_level_screen.dart';
 import '../../goal/views/dietary_preferences_screen.dart';
 import '../../goal/views/health_profile_screen.dart';
@@ -75,15 +78,54 @@ class SplashController extends GetxController {
 
     switch (step) {
       case 1:
-        // Step 1 saved — resume at Step 2 (physical metrics)
+        // Step 1 saved (Goal) — resume at Step 2 (Gender)
         Get.offAll(
-          () => PhysicalMetricsScreen(goalTitle: goalTitle, goalId: goalId),
+          () => GenderScreen(goalTitle: goalTitle, goalId: goalId),
           transition: Transition.fadeIn,
         );
         break;
 
       case 2:
-        // Step 2 saved — resume at Step 3 (activity level)
+        // Step 2 saved (Gender) — resume at Step 3 (Age)
+        Get.offAll(
+          () => AgeScreen(
+            goalTitle: goalTitle,
+            goalId: goalId,
+            gender: gender,
+          ),
+          transition: Transition.fadeIn,
+        );
+        break;
+
+      case 3:
+        // Step 3 saved (Age) — resume at Step 4 (Height)
+        Get.offAll(
+          () => HeightScreen(
+            goalTitle: goalTitle,
+            goalId: goalId,
+            gender: gender,
+            age: age,
+          ),
+          transition: Transition.fadeIn,
+        );
+        break;
+
+      case 4:
+        // Step 4 saved (Height) — resume at Step 5 (Weight)
+        Get.offAll(
+          () => WeightScreen(
+            goalTitle: goalTitle,
+            goalId: goalId,
+            gender: gender,
+            age: age,
+            height: height,
+          ),
+          transition: Transition.fadeIn,
+        );
+        break;
+
+      case 5:
+        // Step 5 saved (Weight) — resume at Step 6 (Activity Level)
         Get.offAll(
           () => ActivityLevelScreen(
             goalTitle: goalTitle,
@@ -97,8 +139,8 @@ class SplashController extends GetxController {
         );
         break;
 
-      case 3:
-        // Step 3 saved — resume at Step 4 (dietary preferences)
+      case 6:
+        // Step 6 saved (Activity Level) — resume at Step 7 (Diet Type)
         Get.offAll(
           () => DietaryPreferencesScreen(
             goalTitle: goalTitle,
@@ -114,8 +156,8 @@ class SplashController extends GetxController {
         );
         break;
 
-      case 4:
-        // Step 4 saved — resume at Step 5 (health profile)
+      case 7:
+        // Step 7 saved (Diet Type) — resume at Step 8 (Health Profile)
         Get.offAll(
           () => HealthProfileScreen(
             goalTitle: goalTitle,
@@ -134,8 +176,8 @@ class SplashController extends GetxController {
         );
         break;
 
-      case 5:
-        // Step 5 saved — resume at Step 6 (lifestyle habits)
+      case 8:
+        // Step 8 saved (Health conditions) — resume at Step 9 (Lifestyle Habits)
         Get.offAll(
           () => LifestyleHabitsScreen(
             goalTitle: goalTitle,
@@ -155,8 +197,8 @@ class SplashController extends GetxController {
         );
         break;
 
-      case 6:
-        // Step 6 saved — resume at Step 7 (screening report)
+      case 9:
+        // Step 9 saved (Lifestyle habits) — resume at Step 10 (Assessment Report)
         Get.offAll(
           () => ScreeningReportScreen(
             goalTitle: goalTitle,

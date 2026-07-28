@@ -31,8 +31,8 @@ class OnboardingDraftService {
       'goalTitle':          _box.read(_kGoalTitle) ?? '',
       'goalId':             _box.read(_kGoalId) ?? 0,
       'gender':             _box.read(_kGender) ?? 'Male',
-      'age':                _box.read(_kAge) ?? 25,
-      'height':             _box.read(_kHeight) ?? 170,
+      'age':                _box.read(_kAge) ?? 24,
+      'height':             _box.read(_kHeight) ?? 172,
       'weight':             (_box.read(_kWeight) ?? 70.0).toDouble(),
       'activityLevelId':    _box.read(_kActId) ?? 1,
       'activityLevelName':  _box.read(_kActName) ?? 'Sedentary',
@@ -54,48 +54,58 @@ class OnboardingDraftService {
     _box.write(_kGoalId, goalId);
   }
 
-  /// Step 2: Physical metrics entered
-  static void saveStep2({
-    required String gender,
-    required int age,
-    required int height,
-    required double weight,
-  }) {
+  /// Step 2: Gender selected
+  static void saveStep2({required String gender}) {
     _box.write(_kStep, 2);
     _box.write(_kGender, gender);
+  }
+
+  /// Step 3: Age selected
+  static void saveStep3({required int age}) {
+    _box.write(_kStep, 3);
     _box.write(_kAge, age);
+  }
+
+  /// Step 4: Height selected
+  static void saveStep4({required int height}) {
+    _box.write(_kStep, 4);
     _box.write(_kHeight, height);
+  }
+
+  /// Step 5: Weight selected
+  static void saveStep5({required double weight}) {
+    _box.write(_kStep, 5);
     _box.write(_kWeight, weight);
   }
 
-  /// Step 3: Activity level chosen
-  static void saveStep3({required int activityLevelId, required String activityLevelName}) {
-    _box.write(_kStep, 3);
+  /// Step 6: Activity level chosen
+  static void saveStep6({required int activityLevelId, required String activityLevelName}) {
+    _box.write(_kStep, 6);
     _box.write(_kActId, activityLevelId);
     _box.write(_kActName, activityLevelName);
   }
 
-  /// Step 4: Dietary preferences chosen
-  static void saveStep4({
+  /// Step 7: Dietary preferences chosen
+  static void saveStep7({
     required List<int> tastePreferenceIds,
     required String dietLabel,
     required List<String> foodExclusions,
   }) {
-    _box.write(_kStep, 4);
+    _box.write(_kStep, 7);
     _box.write(_kTasteIds, tastePreferenceIds);
     _box.write(_kDietLabel, dietLabel);
     _box.write(_kFoodExcl, foodExclusions);
   }
 
-  /// Step 5: Health / medical conditions chosen
-  static void saveStep5({required List<int> medicalConditionIds}) {
-    _box.write(_kStep, 5);
+  /// Step 8: Health / medical conditions chosen
+  static void saveStep8({required List<int> medicalConditionIds}) {
+    _box.write(_kStep, 8);
     _box.write(_kCondIds, medicalConditionIds);
   }
 
-  /// Step 6: Lifestyle habits chosen
-  static void saveStep6({required String smokingHabit, required String alcoholHabit}) {
-    _box.write(_kStep, 6);
+  /// Step 9: Lifestyle habits chosen
+  static void saveStep9({required String smokingHabit, required String alcoholHabit}) {
+    _box.write(_kStep, 9);
     _box.write(_kSmoking, smokingHabit);
     _box.write(_kAlcohol, alcoholHabit);
   }

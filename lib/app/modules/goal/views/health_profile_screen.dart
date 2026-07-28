@@ -80,7 +80,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
   bool get canProceed => selectedConditionIds.isNotEmpty || noConditions;
 
   void _proceed() {
-    OnboardingDraftService.saveStep5(
+    OnboardingDraftService.saveStep8(
       medicalConditionIds: selectedConditionIds.toList(),
     );
     Get.to(
@@ -163,7 +163,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('STEP 5 OF 7',
+                          Text('STEP 7 OF 7',
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5).withOpacity(0.9),
                               fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.w700,
@@ -173,8 +173,8 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                           Row(children: [
                             _buildProgress(true), _buildProgress(true),
                             _buildProgress(true), _buildProgress(true),
-                            _buildProgress(true), _buildProgress(false),
-                            _buildProgress(false),
+                            _buildProgress(true), _buildProgress(true),
+                            _buildProgress(true),
                           ]),
                         ],
                       ),
