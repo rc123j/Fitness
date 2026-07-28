@@ -42,10 +42,9 @@ class _WeightScreenState extends State<WeightScreen> {
     if (draft['weight'] != null) {
       selectedWeight = (draft['weight'] as num).toDouble();
     }
-    // We represent weight from 30kg to 180kg as integer pages
     _pageController = PageController(
       initialPage: (selectedWeight - 30).round(),
-      viewportFraction: 0.16,
+      viewportFraction: 0.13, // ~7-8 items visible at once
     );
   }
 
@@ -146,7 +145,7 @@ class _WeightScreenState extends State<WeightScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            "STEP 5 OF 7",
+                            "STEP 5 OF 10",
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5).withOpacity(0.9),
                               fontSize: 11,
@@ -156,13 +155,12 @@ class _WeightScreenState extends State<WeightScreen> {
                           ),
                           const SizedBox(height: 6),
                           Row(
-                            children: List.generate(7, (index) {
-                              final active =
-                                  index <= 4; // Steps 1, 2, 3, 4, 5 active
+                            children: List.generate(10, (index) {
+                              final active = index <= 4; // Steps 1-5 active
                               return Container(
                                 margin: const EdgeInsets.only(right: 6),
                                 height: 3.5,
-                                width: 32,
+                                width: 24,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(2),
                                   gradient: active
@@ -240,29 +238,51 @@ class _WeightScreenState extends State<WeightScreen> {
                       Expanded(
                         flex: 4,
                         child: Center(
-                          child: RichText(
-                            textAlign: TextAlign.center,
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "${selectedWeight.toInt()}\n",
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.white,
-                                    fontSize: 64,
-                                    fontWeight: FontWeight.w900,
-                                    height: 1.0,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.baseline,
+                                textBaseline: TextBaseline.alphabetic,
+                                children: [
+                                  Text(
+                                    "${selectedWeight.toInt()}",
+                                    style: GoogleFonts.outfit(
+                                      color: Colors.white,
+                                      fontSize: 68,
+                                      fontWeight: FontWeight.w900,
+                                    ),
                                   ),
-                                ),
-                                TextSpan(
-                                  text: "kg",
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.white.withOpacity(0.40),
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    "kg",
+                                    style: GoogleFonts.outfit(
+                                      color: themeColor,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Container(
+                                height: 3,
+                                width: 110,
+                                decoration: BoxDecoration(
+                                  color: themeColor,
+                                  borderRadius: BorderRadius.circular(1.5),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: themeColor.withOpacity(0.50),
+                                      blurRadius: 8,
+                                      spreadRadius: 1,
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -271,69 +291,21 @@ class _WeightScreenState extends State<WeightScreen> {
                       Expanded(
                         flex: 6,
                         child: Center(
-                          child: Stack(
-                            alignment: Alignment.bottomCenter,
-                            children: [
-                              // Glowing Scale Platform
-                              Container(
-                                margin: const EdgeInsets.only(bottom: 10),
-                                height: 90,
-                                width: 180,
-                                decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.elliptical(90, 45),
-                                  ),
-                                  gradient: RadialGradient(
-                                    colors: [
-                                      themeColor.withOpacity(0.40),
-                                      themeColor.withOpacity(0.0),
-                                    ],
-                                  ),
-                                  border: Border.all(
-                                    color: themeColor.withOpacity(
-                                      0.95,
-                                    ), // Vibrant solid neon border
-                                    width: 2.0, // thicker border
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: themeColor.withOpacity(
-                                        0.45,
-                                      ), // strong back glow
-                                      blurRadius: 25,
-                                      spreadRadius: 3,
-                                    ),
-                                    BoxShadow(
-                                      color: themeColor.withOpacity(
-                                        0.25,
-                                      ), // wider ambient glow
-                                      blurRadius: 12,
-                                      spreadRadius: 1,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // Character model standing on the scale
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 24),
-                                child: Image.asset(
-                                  widget.gender == "Male"
-                                      ? "assets/new_images/man_weight.png"
-                                      : "assets/new_images/female_weight.png",
-                                  height: 280,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(
-                                      widget.gender == "Male"
-                                          ? Icons.accessibility_new_rounded
-                                          : Icons.woman_rounded,
-                                      size: 200,
-                                      color: themeColor.withOpacity(0.60),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
+                          child: Image.asset(
+                            widget.gender == "Male"
+                                ? "assets/new_images/man_weight.png"
+                                : "assets/new_images/female_weight.png",
+                            height: 400, // Make it very tall and big!
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                widget.gender == "Male"
+                                    ? Icons.accessibility_new_rounded
+                                    : Icons.woman_rounded,
+                                size: 280,
+                                color: themeColor.withOpacity(0.60),
+                              );
+                            },
                           ),
                         ),
                       ),
@@ -342,75 +314,90 @@ class _WeightScreenState extends State<WeightScreen> {
 
                   const Spacer(flex: 2),
 
-                  // 3. Horizontal scrolling wheel measuring scale
+                  // 3. Horizontal scrolling weight scale — stable PageView
                   SizedBox(
-                    height: 90,
+                    height: 110,
                     child: Stack(
-                      alignment: Alignment.topCenter,
+                      alignment: Alignment.bottomCenter,
                       children: [
-                        // Center Indicator Tick Line
-                        Container(
-                          height: 38,
-                          width: 3.5,
-                          decoration: BoxDecoration(
-                            color: themeColor,
-                            borderRadius: BorderRadius.circular(2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: themeColor.withOpacity(0.50),
-                                blurRadius: 6,
-                              ),
-                            ],
-                          ),
-                        ),
-                        // PageView scale ticks
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: PageView.builder(
-                            controller: _pageController,
-                            itemCount: 151, // 30 kg to 180 kg
-                            onPageChanged: (page) {
-                              setState(() {
-                                selectedWeight = (page + 30).toDouble();
-                              });
-                            },
-                            itemBuilder: (context, index) {
-                              final currentWeightVal = index + 30;
-                              final isMultipleOf5 = currentWeightVal % 5 == 0;
-                              final isSelected =
-                                  selectedWeight.toInt() == currentWeightVal;
+                        // The scrollable numbers + ticks
+                        PageView.builder(
+                          controller: _pageController,
+                          itemCount: 151, // 30 kg → 180 kg
+                          onPageChanged: (page) {
+                            setState(() {
+                              selectedWeight = (page + 30).toDouble();
+                            });
+                          },
+                          itemBuilder: (context, index) {
+                            final currentVal = index + 30;
+                            final isSelected = selectedWeight.toInt() == currentVal;
+                            final distanceFromSelected = (selectedWeight - currentVal).abs();
+                            final isNear = distanceFromSelected < 2.5;
 
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  // Tick Line
-                                  Container(
-                                    height: isMultipleOf5 ? 24 : 14,
-                                    width: isSelected ? 2.5 : 1.5,
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                // Number label
+                                Text(
+                                  currentVal.toString(),
+                                  style: GoogleFonts.outfit(
+                                    color: isSelected
+                                        ? Colors.white
+                                        : isNear
+                                            ? Colors.white.withOpacity(0.45)
+                                            : Colors.white.withOpacity(0.18),
+                                    fontSize: isSelected ? 20 : 14,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w900
+                                        : FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                // Tick mark
+                                Container(
+                                  height: isSelected ? 30 : (isNear ? 18 : 12),
+                                  width: isSelected ? 2.5 : 1.5,
+                                  decoration: BoxDecoration(
                                     color: isSelected
                                         ? themeColor
-                                        : Colors.white.withOpacity(
-                                            isMultipleOf5 ? 0.35 : 0.12,
-                                          ),
+                                        : Colors.white.withOpacity(isNear ? 0.35 : 0.12),
+                                    borderRadius: BorderRadius.circular(1),
+                                    boxShadow: isSelected
+                                        ? [
+                                            BoxShadow(
+                                              color: themeColor.withOpacity(0.70),
+                                              blurRadius: 6,
+                                              spreadRadius: 1,
+                                            ),
+                                          ]
+                                        : null,
                                   ),
-                                  const SizedBox(height: 8),
-                                  // Weight Number for multiples of 5
-                                  if (isMultipleOf5)
-                                    Text(
-                                      currentWeightVal.toString(),
-                                      style: GoogleFonts.outfit(
-                                        color: isSelected
-                                            ? Colors.white
-                                            : Colors.white.withOpacity(0.25),
-                                        fontSize: isSelected ? 13 : 11,
-                                        fontWeight: isSelected
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                      ),
-                                    ),
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                            );
+                          },
+                        ),
+                        // Static center indicator needle overlay
+                        IgnorePointer(
+                          child: Positioned(
+                            bottom: 8,
+                            child: Container(
+                              height: 2,
+                              width: 36,
+                              decoration: BoxDecoration(
+                                color: themeColor,
+                                borderRadius: BorderRadius.circular(1),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: themeColor.withOpacity(0.70),
+                                    blurRadius: 6,
+                                    spreadRadius: 1,
+                                  ),
                                 ],
-                              );
-                            },
+                              ),
+                            ),
                           ),
                         ),
                       ],

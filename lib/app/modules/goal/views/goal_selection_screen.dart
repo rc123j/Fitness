@@ -117,7 +117,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "STEP 1 OF 7",
+                            "STEP 1 OF 10",
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5).withOpacity(0.9),
                               fontSize: 11,
@@ -129,6 +129,9 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                           Row(
                             children: [
                               buildProgress(true),
+                              buildProgress(false),
+                              buildProgress(false),
+                              buildProgress(false),
                               buildProgress(false),
                               buildProgress(false),
                               buildProgress(false),

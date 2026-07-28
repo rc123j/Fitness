@@ -136,19 +136,26 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('STEP 7 OF 7',
+                          Text('STEP 9 OF 10',
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5).withOpacity(0.9),
                               fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Row(children: [
-                            _buildProgress(true), _buildProgress(true),
-                            _buildProgress(true), _buildProgress(true),
-                            _buildProgress(true), _buildProgress(true),
-                            _buildProgress(true),
-                          ]),
+                          Row(children: List.generate(10, (index) {
+                            final active = index <= 8; // Steps 1-9 active
+                            return Container(
+                              margin: const EdgeInsets.only(right: 6),
+                              height: 3.5,
+                              width: 24,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(2),
+                                gradient: active ? const LinearGradient(colors: [Color(0xffFF00E5), Color(0xffFF7A00)]) : null,
+                                color: active ? null : Colors.white.withOpacity(0.10),
+                              ),
+                            );
+                          })),
                         ],
                       ),
                     ],

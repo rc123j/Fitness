@@ -190,7 +190,7 @@ class _HeightScreenState extends State<HeightScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            "STEP 4 OF 7",
+                            "STEP 4 OF 10",
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5).withOpacity(0.9),
                               fontSize: 11,
@@ -200,13 +200,12 @@ class _HeightScreenState extends State<HeightScreen> {
                           ),
                           const SizedBox(height: 6),
                           Row(
-                            children: List.generate(7, (index) {
-                              final active =
-                                  index <= 3; // Steps 1, 2, 3, 4 active
+                            children: List.generate(10, (index) {
+                              final active = index <= 3; // Steps 1-4 active
                               return Container(
                                 margin: const EdgeInsets.only(right: 6),
                                 height: 3.5,
-                                width: 32,
+                                width: 24,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(2),
                                   gradient: active

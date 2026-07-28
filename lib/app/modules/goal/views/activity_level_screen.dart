@@ -168,7 +168,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            "STEP 6 OF 7",
+                            "STEP 6 OF 10",
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5).withOpacity(0.9),
                               fontSize: 11,
@@ -178,15 +178,23 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                           ),
                           const SizedBox(height: 6),
                           Row(
-                            children: [
-                              buildProgress(true),
-                              buildProgress(true),
-                              buildProgress(true),
-                              buildProgress(true),
-                              buildProgress(true),
-                              buildProgress(true),
-                              buildProgress(false),
-                            ],
+                            children: List.generate(10, (index) {
+                              final active = index <= 5; // Steps 1-6 active
+                              return Container(
+                                margin: const EdgeInsets.only(right: 6),
+                                height: 3.5,
+                                width: 24,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(2),
+                                  gradient: active
+                                      ? const LinearGradient(
+                                          colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
+                                        )
+                                      : null,
+                                  color: active ? null : Colors.white.withOpacity(0.10),
+                                ),
+                              );
+                            }),
                           ),
                         ],
                       ),

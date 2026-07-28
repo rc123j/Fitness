@@ -208,7 +208,7 @@ class _GenderScreenState extends State<GenderScreen> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                "STEP 2 OF 7",
+                                "STEP 2 OF 10",
                                 style: GoogleFonts.outfit(
                                   color: const Color(
                                     0xffFF00E5,
@@ -220,12 +220,12 @@ class _GenderScreenState extends State<GenderScreen> {
                               ),
                               const SizedBox(height: 6),
                               Row(
-                                children: List.generate(7, (index) {
+                                children: List.generate(10, (index) {
                                   final active = index <= 1;
                                   return Container(
                                     margin: const EdgeInsets.only(right: 6),
                                     height: 3.5,
-                                    width: 32,
+                                    width: 24,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(2),
                                       gradient: active
