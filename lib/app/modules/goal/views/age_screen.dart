@@ -49,6 +49,17 @@ class _AgeScreenState extends State<AgeScreen> {
     super.dispose();
   }
 
+  String _getAgeImage() {
+    final isMale = widget.gender == "Male";
+    if (selectedAge <= 18) {
+      return isMale ? "assets/new_images/boy_age.png" : "assets/new_images/girl_age.png";
+    } else if (selectedAge <= 45) {
+      return isMale ? "assets/new_images/boy_young_age.png" : "assets/new_images/girl_young_age.png";
+    } else {
+      return isMale ? "assets/new_images/boy_old_age.png" : "assets/new_images/girl_old_age.png";
+    }
+  }
+
   void _proceed() {
     OnboardingDraftService.saveStep3(age: selectedAge);
     Get.to(
@@ -59,212 +70,6 @@ class _AgeScreenState extends State<AgeScreen> {
         age: selectedAge,
       ),
       transition: Transition.rightToLeftWithFade,
-    );
-  }
-
-  Widget _buildAgeDisplayHeader(Color themeColor) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                "$selectedAge",
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 72,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -1.5,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                "years old",
-                style: GoogleFonts.outfit(
-                  color: themeColor,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          Container(
-            height: 3,
-            width: 90,
-            decoration: BoxDecoration(
-              color: themeColor,
-              borderRadius: BorderRadius.circular(1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: themeColor.withOpacity(0.4),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCylinderDial(Color themeColor) {
-    return Center(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(
-            height: 240,
-            width: 280,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.02),
-              borderRadius: BorderRadius.circular(32),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.08),
-                width: 1,
-              ),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Highlight Selected Area Background Overlay
-                Positioned.fill(
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      height: 52,
-                      width: 260,
-                      decoration: BoxDecoration(
-                        color: themeColor.withOpacity(0.03),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: themeColor.withOpacity(0.18),
-                          width: 1.2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: themeColor.withOpacity(0.06),
-                            blurRadius: 16,
-                            spreadRadius: 1,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Neon lines indicators
-                Positioned(
-                  top: 94,
-                  child: Container(
-                    height: 1,
-                    width: 240,
-                    color: themeColor.withOpacity(0.20),
-                  ),
-                ),
-                Positioned(
-                  bottom: 94,
-                  child: Container(
-                    height: 1,
-                    width: 240,
-                    color: themeColor.withOpacity(0.20),
-                  ),
-                ),
-
-                // Age Scroll ListWheel
-                SizedBox(
-                  height: 220,
-                  child: ListWheelScrollView.useDelegate(
-                    controller: _scrollController,
-                    itemExtent: 52,
-                    perspective: 0.0035,
-                    diameterRatio: 1.35,
-                    physics: const FixedExtentScrollPhysics(),
-                    onSelectedItemChanged: (index) {
-                      setState(() {
-                        selectedAge = index + 10;
-                      });
-                      HapticFeedback.selectionClick();
-                    },
-                    childDelegate: ListWheelChildBuilderDelegate(
-                      builder: (context, index) {
-                        final ageNum = index + 10;
-                        final isSelected = selectedAge == ageNum;
-
-                        final difference = (selectedAge - ageNum).abs();
-                        final opacity = (1.0 - (difference * 0.28)).clamp(0.10, 1.0);
-                        final scale = (1.0 - (difference * 0.12)).clamp(0.70, 1.0);
-
-                        return Center(
-                          child: Transform.scale(
-                            scale: scale,
-                            child: Opacity(
-                              opacity: opacity,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  // Left Cylinder Tick Line
-                                  Container(
-                                    width: isSelected ? 24 : 12,
-                                    height: isSelected ? 2.5 : 1.0,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: isSelected
-                                            ? [themeColor.withOpacity(0.0), themeColor]
-                                            : [Colors.white.withOpacity(0.0), Colors.white.withOpacity(0.25)],
-                                      ),
-                                      borderRadius: BorderRadius.circular(1),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 22),
-                                  // Age Number Display
-                                  SizedBox(
-                                    width: 76,
-                                    child: Center(
-                                      child: Text(
-                                        ageNum.toString(),
-                                        style: GoogleFonts.outfit(
-                                          color: isSelected ? Colors.white : Colors.white.withOpacity(0.4),
-                                          fontSize: isSelected ? 38 : 22,
-                                          fontWeight: isSelected ? FontWeight.w900 : FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 22),
-                                  // Right Cylinder Tick Line
-                                  Container(
-                                    width: isSelected ? 24 : 12,
-                                    height: isSelected ? 2.5 : 1.0,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: isSelected
-                                            ? [themeColor, themeColor.withOpacity(0.0)]
-                                            : [Colors.white.withOpacity(0.25), Colors.white.withOpacity(0.0)],
-                                      ),
-                                      borderRadius: BorderRadius.circular(1),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      childCount: 91, // Range 10 to 100
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -310,6 +115,54 @@ class _AgeScreenState extends State<AgeScreen> {
                   colors: [
                     const Color(0xffFF7A00).withOpacity(0.12),
                     Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Absolute Positioned Avatar on the right side (fills height beautifully)
+          Positioned(
+            right: -25, // shifted slightly left
+            bottom: 80, // slightly above the next button
+            child: IgnorePointer(
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.7,
+                height: 550,
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    // Avatar background glow
+                    Container(
+                      height: 450,
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          colors: [
+                            themeColor.withOpacity(0.08),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                    Transform.scale(
+                      scale: 1.5,
+                      alignment: Alignment.bottomCenter,
+                      child: Image.asset(
+                        _getAgeImage(),
+                        height: 480,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.bottomCenter,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            widget.gender == "Male"
+                                ? Icons.accessibility_new_rounded
+                                : Icons.woman_rounded,
+                            size: 260,
+                            color: themeColor.withOpacity(0.50),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -404,8 +257,11 @@ class _AgeScreenState extends State<AgeScreen> {
                             fontWeight: FontWeight.w900,
                             height: 1.15,
                             foreground: Paint()
-                              ..shader = LinearGradient(
-                                colors: [themeColor, themeColor.withOpacity(0.6)],
+                              ..shader = const LinearGradient(
+                                colors: [
+                                  Color(0xffFF00E5),
+                                  Color(0xffFF7A00),
+                                ],
                               ).createShader(
                                 const Rect.fromLTWH(0.0, 0.0, 200.0, 50.0),
                               ),
@@ -417,7 +273,7 @@ class _AgeScreenState extends State<AgeScreen> {
 
                   const SizedBox(height: 8),
                   Text(
-                    "This helps us estimate your metabolism and basic metabolic rate.",
+                    "Age helps us estimate your metabolism and calorie needs.",
                     style: GoogleFonts.outfit(
                       color: Colors.white.withOpacity(0.50),
                       fontSize: 13,
@@ -426,13 +282,128 @@ class _AgeScreenState extends State<AgeScreen> {
 
                   const Spacer(),
 
-                  // Selected Age Text View
-                  _buildAgeDisplayHeader(themeColor),
+                  // Row with scroll wheel on the left
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 180,
+                        height: 280,
+                        child: Stack(
+                          alignment: Alignment.centerLeft,
+                          children: [
+                            // Neon horizontal dividers
+                            Positioned(
+                              top: (280 / 2) - 35,
+                              left: 0,
+                              right: 30,
+                              child: Container(
+                                height: 1.5,
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color(0xffFF00E5),
+                                      Color(0xffFF7A00),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              top: (280 / 2) + 35,
+                              left: 0,
+                              right: 30,
+                              child: Container(
+                                height: 1.5,
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color(0xffFF00E5),
+                                      Color(0xffFF7A00),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
 
-                  const Spacer(),
+                            // The wheel scroll view
+                            ListWheelScrollView.useDelegate(
+                              controller: _scrollController,
+                              itemExtent: 70,
+                              perspective: 0.0015,
+                              diameterRatio: 1.8,
+                              physics: const FixedExtentScrollPhysics(),
+                              onSelectedItemChanged: (index) {
+                                setState(() {
+                                  selectedAge = index + 10;
+                                });
+                                HapticFeedback.selectionClick();
+                              },
+                              childDelegate: ListWheelChildBuilderDelegate(
+                                builder: (context, index) {
+                                  final ageNum = index + 10;
+                                  final isSelected = selectedAge == ageNum;
+                                  final difference = (selectedAge - ageNum).abs();
+                                  final opacity = (1.0 - (difference * 0.35)).clamp(0.12, 1.0);
 
-                  // Semicircular tactile Cylinder scroll dial
-                  _buildCylinderDial(themeColor),
+                                  if (isSelected) {
+                                    return Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 10),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                                          textBaseline: TextBaseline.alphabetic,
+                                          children: [
+                                            Text(
+                                              ageNum.toString(),
+                                              style: GoogleFonts.outfit(
+                                                color: Colors.white,
+                                                fontSize: 54,
+                                                fontWeight: FontWeight.w900,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              "Years",
+                                              style: GoogleFonts.outfit(
+                                                color: Colors.white.withOpacity(0.9),
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    return Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 10),
+                                        child: Opacity(
+                                          opacity: opacity,
+                                          child: Text(
+                                            ageNum.toString(),
+                                            style: GoogleFonts.outfit(
+                                              color: Colors.white.withOpacity(0.4),
+                                              fontSize: 28,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                                childCount: 91,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
 
                   const Spacer(flex: 2),
 
@@ -465,7 +436,7 @@ class _AgeScreenState extends State<AgeScreen> {
                         onTap: _proceed,
                         child: Center(
                           child: Text(
-                            "Continue",
+                            "Next",
                             style: GoogleFonts.outfit(
                               color: Colors.white,
                               fontSize: 16,
