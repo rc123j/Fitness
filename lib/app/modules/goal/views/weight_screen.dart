@@ -32,7 +32,8 @@ class _ThemeColors {
 
 class _WeightScreenState extends State<WeightScreen> {
   double selectedWeight = 70.0;
-  late PageController _pageController;
+  late ScrollController _scrollController;
+  final double _itemWidth = 10.0; // width of each tick mark container
 
   @override
   void initState() {
@@ -42,15 +43,39 @@ class _WeightScreenState extends State<WeightScreen> {
     if (draft['weight'] != null) {
       selectedWeight = (draft['weight'] as num).toDouble();
     }
-    _pageController = PageController(
-      initialPage: (selectedWeight - 30).round(),
-      viewportFraction: 0.13, // ~7-8 items visible at once
-    );
+    // Clamp to valid range (30kg to 180kg)
+    if (selectedWeight < 30.0) {
+      selectedWeight = 30.0;
+    } else if (selectedWeight > 180.0) {
+      selectedWeight = 180.0;
+    }
+
+    // Scroll offset calculation:
+    // (selectedWeight - 30.0) is the weight range.
+    // 0.1 kg increments means there are 10 items per 1 kg.
+    // Scroll offset = targetIndex * _itemWidth.
+    final initialOffset = (selectedWeight - 30.0) * 10 * _itemWidth;
+    _scrollController = ScrollController(initialScrollOffset: initialOffset);
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final offset = _scrollController.offset;
+    double weight = 30.0 + (offset / _itemWidth) * 0.1;
+    if (weight < 30.0) weight = 30.0;
+    if (weight > 180.0) weight = 180.0;
+    if ((selectedWeight - weight).abs() > 0.01) {
+      setState(() {
+        selectedWeight = weight;
+      });
+    }
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -248,35 +273,41 @@ class _WeightScreenState extends State<WeightScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.baseline,
-                                  textBaseline: TextBaseline.alphabetic,
-                                  children: [
-                                    Text(
-                                      "${selectedWeight.toInt()}",
-                                      style: GoogleFonts.outfit(
-                                        color: Colors.white,
-                                        fontSize: 68,
-                                        fontWeight: FontWeight.w900,
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.baseline,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
+                                      Text(
+                                        selectedWeight.toStringAsFixed(
+                                          1,
+                                        ), // shows decimal precision, e.g. 70.4
+                                        style: GoogleFonts.outfit(
+                                          color: Colors.white,
+                                          fontSize: 38,
+                                          fontWeight: FontWeight.w900,
+                                          height: 1.0,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      "kg",
-                                      style: GoogleFonts.outfit(
-                                        color: themeColor,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        "kg",
+                                        style: GoogleFonts.outfit(
+                                          color: themeColor,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 Container(
                                   height: 3,
-                                  width: 110,
+                                  width: 80,
                                   decoration: BoxDecoration(
                                     color: themeColor,
                                     borderRadius: BorderRadius.circular(1.5),
@@ -294,24 +325,33 @@ class _WeightScreenState extends State<WeightScreen> {
                           ),
                         ),
 
-                        // 2. Avatar standing on a scale platform
                         Expanded(
                           flex: 7,
                           child: SizedBox.expand(
-                            child: Image.asset(
-                              widget.gender == "Male"
-                                  ? "assets/new_images/man_weight.png"
-                                  : "assets/new_images/female_weight.png",
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(
+                            child: Transform.translate(
+                              offset: const Offset(
+                                0,
+                                220,
+                              ), // shifts the avatar down, static
+                              child: Transform.scale(
+                                scale: 2.0, // bigger static avatar
+                                alignment: Alignment.bottomCenter,
+                                child: Image.asset(
                                   widget.gender == "Male"
-                                      ? Icons.accessibility_new_rounded
-                                      : Icons.woman_rounded,
-                                  size: 200,
-                                  color: themeColor.withOpacity(0.60),
-                                );
-                              },
+                                      ? "assets/new_images/man_weight.png"
+                                      : "assets/new_images/female_weight.png",
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      widget.gender == "Male"
+                                          ? Icons.accessibility_new_rounded
+                                          : Icons.woman_rounded,
+                                      size: 240,
+                                      color: themeColor.withOpacity(0.60),
+                                    );
+                                  },
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -321,99 +361,165 @@ class _WeightScreenState extends State<WeightScreen> {
 
                   const SizedBox(height: 12),
 
-                  // 3. Horizontal scrolling weight scale — stable PageView
-                  SizedBox(
-                    height: 110,
-                    child: Stack(
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        // The scrollable numbers + ticks
-                        PageView.builder(
-                          controller: _pageController,
-                          itemCount: 151, // 30 kg → 180 kg
-                          onPageChanged: (page) {
-                            setState(() {
-                              selectedWeight = (page + 30).toDouble();
-                            });
-                          },
-                          itemBuilder: (context, index) {
-                            final currentVal = index + 30;
-                            final isSelected =
-                                selectedWeight.toInt() == currentVal;
-                            final distanceFromSelected =
-                                (selectedWeight - currentVal).abs();
-                            final isNear = distanceFromSelected < 2.5;
+                  // 3. Horizontal scrolling weight scale — stable scrollable ruler
+                  Container(
+                    height: 125,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.02),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.05),
+                        width: 1,
+                      ),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withOpacity(0.01),
+                          Colors.white.withOpacity(0.03),
+                        ],
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final screenWidth = constraints.maxWidth;
+                        final outerPadding = screenWidth / 2;
+                        return Stack(
+                          alignment: Alignment.bottomCenter,
+                          children: [
+                            // The scrollable numbers + ticks
+                            ListView.builder(
+                              controller: _scrollController,
+                              scrollDirection: Axis.horizontal,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: outerPadding - (_itemWidth / 2),
+                              ),
+                              itemCount: 1501, // 30.0 kg → 180.0 kg (0.1 kg steps)
+                              physics: const BouncingScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                final currentVal = 30.0 + index * 0.1;
+                                final isWholeNumber = (index % 10) == 0;
+                                final isHalfNumber = (index % 5) == 0;
 
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                // Number label
-                                Text(
-                                  currentVal.toString(),
-                                  style: GoogleFonts.outfit(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : isNear
-                                        ? Colors.white.withOpacity(0.45)
-                                        : Colors.white.withOpacity(0.18),
-                                    fontSize: isSelected ? 20 : 14,
-                                    fontWeight: isSelected
-                                        ? FontWeight.w900
-                                        : FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                // Tick mark
-                                Container(
-                                  height: isSelected ? 30 : (isNear ? 18 : 12),
-                                  width: isSelected ? 2.5 : 1.5,
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? themeColor
-                                        : Colors.white.withOpacity(
-                                            isNear ? 0.35 : 0.12,
+                                final difference = (selectedWeight - currentVal).abs();
+                                // Magnifying bubble factor: 1.0 when centered, 0.0 when 1.5kg or further away
+                                final factor = (1.0 - (difference / 1.5)).clamp(0.0, 1.0);
+
+                                final double tickHeight;
+                                if (isWholeNumber) {
+                                  tickHeight = 20.0 + (factor * 18.0); // 20 to 38
+                                } else if (isHalfNumber) {
+                                  tickHeight = 12.0 + (factor * 14.0); // 12 to 26
+                                } else {
+                                  tickHeight = 8.0 + (factor * 10.0);  // 8 to 18
+                                }
+
+                                final double tickWidth = 1.5 + (factor * 1.5); // 1.5 to 3.0
+
+                                final tickColor = Color.lerp(
+                                  Colors.white.withOpacity(0.15),
+                                  themeColor,
+                                  factor,
+                                )!;
+
+                                return SizedBox(
+                                  width: _itemWidth,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      // Number label
+                                      if (isWholeNumber)
+                                        Text(
+                                          currentVal.toInt().toString(),
+                                          softWrap: false,
+                                          overflow: TextOverflow.visible,
+                                          style: GoogleFonts.outfit(
+                                            color: Color.lerp(
+                                              Colors.white.withOpacity(0.18),
+                                              Colors.white,
+                                              factor,
+                                            )!,
+                                            fontSize: 13.0 + (factor * 6.0), // 13 to 19
+                                            fontWeight: FontWeight.lerp(
+                                              FontWeight.w400,
+                                              FontWeight.w900,
+                                              factor,
+                                            )!,
                                           ),
-                                    borderRadius: BorderRadius.circular(1),
-                                    boxShadow: isSelected
-                                        ? [
-                                            BoxShadow(
-                                              color: themeColor.withOpacity(
-                                                0.70,
-                                              ),
-                                              blurRadius: 6,
-                                              spreadRadius: 1,
-                                            ),
-                                          ]
-                                        : null,
+                                        )
+                                      else
+                                        const SizedBox(height: 25),
+                                      const SizedBox(height: 10),
+                                      // Tick mark
+                                      Container(
+                                        height: tickHeight,
+                                        width: tickWidth,
+                                        decoration: BoxDecoration(
+                                          color: tickColor,
+                                          borderRadius: BorderRadius.circular(1),
+                                          boxShadow: factor > 0.8
+                                              ? [
+                                                  BoxShadow(
+                                                    color: themeColor.withOpacity(0.4 * factor),
+                                                    blurRadius: 4,
+                                                    spreadRadius: 0.5,
+                                                  ),
+                                                ]
+                                              : null,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                    ],
                                   ),
+                                );
+                              },
+                            ),
+                            // Static center indicator needle overlay
+                            Positioned(
+                              bottom: 6,
+                              child: IgnorePointer(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      height: 42,
+                                      width: 3,
+                                      decoration: BoxDecoration(
+                                        color: themeColor,
+                                        borderRadius: BorderRadius.circular(1.5),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: themeColor.withOpacity(0.8),
+                                            blurRadius: 8,
+                                            spreadRadius: 1.5,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: themeColor,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: themeColor.withOpacity(0.8),
+                                            blurRadius: 6,
+                                            spreadRadius: 1,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 8),
-                              ],
-                            );
-                          },
-                        ),
-                        // Static center indicator needle overlay
-                        IgnorePointer(
-                          child: Positioned(
-                            bottom: 8,
-                            child: Container(
-                              height: 2,
-                              width: 36,
-                              decoration: BoxDecoration(
-                                color: themeColor,
-                                borderRadius: BorderRadius.circular(1),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: themeColor.withOpacity(0.70),
-                                    blurRadius: 6,
-                                    spreadRadius: 1,
-                                  ),
-                                ],
                               ),
                             ),
-                          ),
-                        ),
-                      ],
+                          ],
+                        );
+                      },
                     ),
                   ),
 

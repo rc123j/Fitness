@@ -24,7 +24,7 @@ class HeightScreen extends StatefulWidget {
 }
 
 class _HeightScreenState extends State<HeightScreen> {
-  int selectedHeight = 172;
+  int selectedHeight = 180;
   late FixedExtentScrollController _scrollController;
 
   @override
@@ -128,9 +128,9 @@ class _HeightScreenState extends State<HeightScreen> {
                         ),
                       ),
                     ),
-                    // Standing character shape (scaled up for maximum size)
+                    // Standing character shape (scales dynamically based on height)
                     Transform.scale(
-                      scale: 1.70, // slightly smaller (was 1.85)
+                      scale: 1.4 + ((selectedHeight - 100) / 120.0) * 0.5, // scales from 1.4 (at 100cm) to 1.9 (at 220cm)
                       alignment:
                           Alignment.bottomCenter, // anchor scaling to bottom
                       child: Image.asset(

@@ -32,7 +32,7 @@ class OnboardingDraftService {
       'goalId':             _box.read(_kGoalId) ?? 0,
       'gender':             _box.read(_kGender) ?? 'Male',
       'age':                _box.read(_kAge) ?? 24,
-      'height':             _box.read(_kHeight) ?? 172,
+      'height':             _box.read(_kHeight) ?? 180,
       'weight':             (_box.read(_kWeight) ?? 70.0).toDouble(),
       'activityLevelId':    _box.read(_kActId) ?? 1,
       'activityLevelName':  _box.read(_kActName) ?? 'Sedentary',
