@@ -468,35 +468,39 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                       ),
 
                       // Step Indicator
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            "STEP 10 OF 10",
-                            style: GoogleFonts.outfit(
-                              color: const Color(0xffFF00E5).withOpacity(0.9),
-                              fontSize: 11,
-                              letterSpacing: 1.5,
-                              fontWeight: FontWeight.w700,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              "STEP 10 OF 10",
+                              style: GoogleFonts.outfit(
+                                color: const Color(0xffFF00E5).withOpacity(0.9),
+                                fontSize: 11,
+                                letterSpacing: 1.5,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: List.generate(10, (index) {
-                              final active = index <= 9; // Steps 1-10 active
-                              return Container(
-                                margin: const EdgeInsets.only(right: 6),
-                                height: 3.5,
-                                width: 24,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(2),
-                                  gradient: active ? const LinearGradient(colors: [Color(0xffFF00E5), Color(0xffFF7A00)]) : null,
-                                  color: active ? null : Colors.white.withOpacity(0.10),
-                                ),
-                              );
-                            }),
-                          ),
-                        ],
+                            const SizedBox(height: 6),
+                            Row(
+                              children: List.generate(10, (index) {
+                                final active = index <= 9; // Steps 1-10 active
+                                return Expanded(
+                                  child: Container(
+                                    margin: EdgeInsets.only(right: index == 9 ? 0 : 4),
+                                    height: 3.5,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(2),
+                                      gradient: active ? const LinearGradient(colors: [Color(0xffFF00E5), Color(0xffFF7A00)]) : null,
+                                      color: active ? null : Colors.white.withOpacity(0.10),
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -865,10 +869,10 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
 
                   /// 6. START PLAN / CTA BUTTON
                   Container(
-                    height: 46,
+                    height: 48,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(23),
+                      borderRadius: BorderRadius.circular(24),
                       gradient: const LinearGradient(
                         colors: [
                           Color(0xffB100FF),
@@ -878,17 +882,17 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xffB100FF).withOpacity(0.35),
-                          blurRadius: 12,
+                          color: const Color(0xffB100FF).withOpacity(0.30),
+                          blurRadius: 10,
                           spreadRadius: 1,
-                          offset: const Offset(0, 3),
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(23),
+                        borderRadius: BorderRadius.circular(24),
                         onTap: _isLoading ? null : _submitOnboarding,
                         child: Center(
                           child: _isLoading
@@ -901,7 +905,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                   ),
                                 )
                               : Text(
-                                  "Unlock & Start 30-Day Plan",
+                                  "Continue",
                                   style: GoogleFonts.outfit(
                                     color: Colors.white,
                                     fontSize: 16,

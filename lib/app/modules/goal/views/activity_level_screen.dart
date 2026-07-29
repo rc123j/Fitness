@@ -164,39 +164,43 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                       ),
 
                       // Step Indicator
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            "STEP 6 OF 10",
-                            style: GoogleFonts.outfit(
-                              color: const Color(0xffFF00E5).withOpacity(0.9),
-                              fontSize: 11,
-                              letterSpacing: 1.5,
-                              fontWeight: FontWeight.w700,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              "STEP 6 OF 10",
+                              style: GoogleFonts.outfit(
+                                color: const Color(0xffFF00E5).withOpacity(0.9),
+                                fontSize: 11,
+                                letterSpacing: 1.5,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: List.generate(10, (index) {
-                              final active = index <= 5; // Steps 1-6 active
-                              return Container(
-                                margin: const EdgeInsets.only(right: 6),
-                                height: 3.5,
-                                width: 24,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(2),
-                                  gradient: active
-                                      ? const LinearGradient(
-                                          colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
-                                        )
-                                      : null,
-                                  color: active ? null : Colors.white.withOpacity(0.10),
-                                ),
-                              );
-                            }),
-                          ),
-                        ],
+                            const SizedBox(height: 6),
+                            Row(
+                              children: List.generate(10, (index) {
+                                final active = index <= 5; // Steps 1-6 active
+                                return Expanded(
+                                  child: Container(
+                                    margin: EdgeInsets.only(right: index == 9 ? 0 : 4),
+                                    height: 3.5,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(2),
+                                      gradient: active
+                                          ? const LinearGradient(
+                                              colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
+                                            )
+                                          : null,
+                                      color: active ? null : Colors.white.withOpacity(0.10),
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

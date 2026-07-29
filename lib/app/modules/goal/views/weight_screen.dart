@@ -141,44 +141,50 @@ class _WeightScreenState extends State<WeightScreen> {
                           ),
                         ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            "STEP 5 OF 10",
-                            style: GoogleFonts.outfit(
-                              color: const Color(0xffFF00E5).withOpacity(0.9),
-                              fontSize: 11,
-                              letterSpacing: 1.5,
-                              fontWeight: FontWeight.w700,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              "STEP 5 OF 10",
+                              style: GoogleFonts.outfit(
+                                color: const Color(0xffFF00E5).withOpacity(0.9),
+                                fontSize: 11,
+                                letterSpacing: 1.5,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: List.generate(10, (index) {
-                              final active = index <= 4; // Steps 1-5 active
-                              return Container(
-                                margin: const EdgeInsets.only(right: 6),
-                                height: 3.5,
-                                width: 24,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(2),
-                                  gradient: active
-                                      ? const LinearGradient(
-                                          colors: [
-                                            Color(0xffFF00E5),
-                                            Color(0xffFF7A00),
-                                          ],
-                                        )
-                                      : null,
-                                  color: active
-                                      ? null
-                                      : Colors.white.withOpacity(0.10),
-                                ),
-                              );
-                            }),
-                          ),
-                        ],
+                            const SizedBox(height: 6),
+                            Row(
+                              children: List.generate(10, (index) {
+                                final active = index <= 4; // Steps 1-5 active
+                                return Expanded(
+                                  child: Container(
+                                    margin: EdgeInsets.only(
+                                      right: index == 9 ? 0 : 4,
+                                    ),
+                                    height: 3.5,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(2),
+                                      gradient: active
+                                          ? const LinearGradient(
+                                              colors: [
+                                                Color(0xffFF00E5),
+                                                Color(0xffFF7A00),
+                                              ],
+                                            )
+                                          : null,
+                                      color: active
+                                          ? null
+                                          : Colors.white.withOpacity(0.10),
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -229,90 +235,91 @@ class _WeightScreenState extends State<WeightScreen> {
                     ),
                   ),
 
-                  const Spacer(),
-
                   // Weight visual layout
-                  Row(
-                    children: [
-                      // 1. Large Weight Display Text
-                      Expanded(
-                        flex: 4,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.baseline,
-                                textBaseline: TextBaseline.alphabetic,
-                                children: [
-                                  Text(
-                                    "${selectedWeight.toInt()}",
-                                    style: GoogleFonts.outfit(
-                                      color: Colors.white,
-                                      fontSize: 68,
-                                      fontWeight: FontWeight.w900,
+                  Expanded(
+                    flex: 9,
+                    child: Row(
+                      children: [
+                        // 1. Large Weight Display Text
+                        Expanded(
+                          flex: 4,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: [
+                                    Text(
+                                      "${selectedWeight.toInt()}",
+                                      style: GoogleFonts.outfit(
+                                        color: Colors.white,
+                                        fontSize: 68,
+                                        fontWeight: FontWeight.w900,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    "kg",
-                                    style: GoogleFonts.outfit(
-                                      color: themeColor,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Container(
-                                height: 3,
-                                width: 110,
-                                decoration: BoxDecoration(
-                                  color: themeColor,
-                                  borderRadius: BorderRadius.circular(1.5),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: themeColor.withOpacity(0.50),
-                                      blurRadius: 8,
-                                      spreadRadius: 1,
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      "kg",
+                                      style: GoogleFonts.outfit(
+                                        color: themeColor,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 4),
+                                Container(
+                                  height: 3,
+                                  width: 110,
+                                  decoration: BoxDecoration(
+                                    color: themeColor,
+                                    borderRadius: BorderRadius.circular(1.5),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: themeColor.withOpacity(0.50),
+                                        blurRadius: 8,
+                                        spreadRadius: 1,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
 
-                      // 2. Avatar standing on a scale platform
-                      Expanded(
-                        flex: 6,
-                        child: Center(
-                          child: Image.asset(
-                            widget.gender == "Male"
-                                ? "assets/new_images/man_weight.png"
-                                : "assets/new_images/female_weight.png",
-                            height: 400, // Make it very tall and big!
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Icon(
-                                widget.gender == "Male"
-                                    ? Icons.accessibility_new_rounded
-                                    : Icons.woman_rounded,
-                                size: 280,
-                                color: themeColor.withOpacity(0.60),
-                              );
-                            },
+                        // 2. Avatar standing on a scale platform
+                        Expanded(
+                          flex: 7,
+                          child: SizedBox.expand(
+                            child: Image.asset(
+                              widget.gender == "Male"
+                                  ? "assets/new_images/man_weight.png"
+                                  : "assets/new_images/female_weight.png",
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  widget.gender == "Male"
+                                      ? Icons.accessibility_new_rounded
+                                      : Icons.woman_rounded,
+                                  size: 200,
+                                  color: themeColor.withOpacity(0.60),
+                                );
+                              },
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
 
-                  const Spacer(flex: 2),
+                  const SizedBox(height: 12),
 
                   // 3. Horizontal scrolling weight scale — stable PageView
                   SizedBox(
@@ -331,8 +338,10 @@ class _WeightScreenState extends State<WeightScreen> {
                           },
                           itemBuilder: (context, index) {
                             final currentVal = index + 30;
-                            final isSelected = selectedWeight.toInt() == currentVal;
-                            final distanceFromSelected = (selectedWeight - currentVal).abs();
+                            final isSelected =
+                                selectedWeight.toInt() == currentVal;
+                            final distanceFromSelected =
+                                (selectedWeight - currentVal).abs();
                             final isNear = distanceFromSelected < 2.5;
 
                             return Column(
@@ -345,8 +354,8 @@ class _WeightScreenState extends State<WeightScreen> {
                                     color: isSelected
                                         ? Colors.white
                                         : isNear
-                                            ? Colors.white.withOpacity(0.45)
-                                            : Colors.white.withOpacity(0.18),
+                                        ? Colors.white.withOpacity(0.45)
+                                        : Colors.white.withOpacity(0.18),
                                     fontSize: isSelected ? 20 : 14,
                                     fontWeight: isSelected
                                         ? FontWeight.w900
@@ -361,12 +370,16 @@ class _WeightScreenState extends State<WeightScreen> {
                                   decoration: BoxDecoration(
                                     color: isSelected
                                         ? themeColor
-                                        : Colors.white.withOpacity(isNear ? 0.35 : 0.12),
+                                        : Colors.white.withOpacity(
+                                            isNear ? 0.35 : 0.12,
+                                          ),
                                     borderRadius: BorderRadius.circular(1),
                                     boxShadow: isSelected
                                         ? [
                                             BoxShadow(
-                                              color: themeColor.withOpacity(0.70),
+                                              color: themeColor.withOpacity(
+                                                0.70,
+                                              ),
                                               blurRadius: 6,
                                               spreadRadius: 1,
                                             ),
@@ -413,14 +426,18 @@ class _WeightScreenState extends State<WeightScreen> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
                       gradient: const LinearGradient(
-                        colors: [Color(0xffB100FF), Color(0xffFF7A00)],
+                        colors: [
+                          Color(0xffB100FF),
+                          Color(0xffFF5F6D),
+                          Color(0xffFF7A00),
+                        ],
                       ),
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0xffB100FF).withOpacity(0.30),
-                          blurRadius: 12,
+                          blurRadius: 10,
                           spreadRadius: 1,
-                          offset: const Offset(0, 3),
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
@@ -431,7 +448,7 @@ class _WeightScreenState extends State<WeightScreen> {
                         onTap: _proceed,
                         child: Center(
                           child: Text(
-                            "Next",
+                            "Continue",
                             style: GoogleFonts.outfit(
                               color: Colors.white,
                               fontSize: 16,

@@ -204,28 +204,30 @@ class _GenderScreenState extends State<GenderScreen> {
                               ),
                             ),
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                "STEP 2 OF 10",
-                                style: GoogleFonts.outfit(
-                                  color: const Color(
-                                    0xffFF00E5,
-                                  ).withOpacity(0.9),
-                                  fontSize: 11,
-                                  letterSpacing: 1.5,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              "STEP 2 OF 10",
+                              style: GoogleFonts.outfit(
+                                color: const Color(
+                                  0xffFF00E5,
+                                ).withOpacity(0.9),
+                                fontSize: 11,
+                                letterSpacing: 1.5,
+                                fontWeight: FontWeight.w700,
                               ),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: List.generate(10, (index) {
-                                  final active = index <= 1;
-                                  return Container(
-                                    margin: const EdgeInsets.only(right: 6),
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: List.generate(10, (index) {
+                                final active = index <= 1;
+                                return Expanded(
+                                  child: Container(
+                                    margin: EdgeInsets.only(right: index == 9 ? 0 : 4),
                                     height: 3.5,
-                                    width: 24,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(2),
                                       gradient: active
@@ -240,11 +242,13 @@ class _GenderScreenState extends State<GenderScreen> {
                                           ? null
                                           : Colors.white.withOpacity(0.10),
                                     ),
-                                  );
-                                }),
-                              ),
-                            ],
-                          ),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
+                      ),
                         ],
                       ),
 
@@ -349,7 +353,7 @@ class _GenderScreenState extends State<GenderScreen> {
                             onTap: _proceed,
                             child: Center(
                               child: Text(
-                                "Next",
+                                "Continue",
                                 style: GoogleFonts.outfit(
                                   color: Colors.white,
                                   fontSize: 16,

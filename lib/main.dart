@@ -12,7 +12,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
 
-  GetStorage().erase();
+  // GetStorage().erase();
 
   Get.put(AuthService(), permanent: true);
   await Get.putAsync(() => ApiClient().init(), permanent: true);
