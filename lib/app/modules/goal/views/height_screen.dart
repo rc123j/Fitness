@@ -128,9 +128,9 @@ class _HeightScreenState extends State<HeightScreen> {
                         ),
                       ),
                     ),
-                    // Standing character shape (scales dynamically based on height)
+                    // Standing character shape (scales dynamically based on height, clamped at 195cm max)
                     Transform.scale(
-                      scale: 1.4 + ((selectedHeight - 100) / 120.0) * 0.5, // scales from 1.4 (at 100cm) to 1.9 (at 220cm)
+                      scale: 1.4 + ((selectedHeight.clamp(100, 195) - 100) / 120.0) * 0.5,
                       alignment:
                           Alignment.bottomCenter, // anchor scaling to bottom
                       child: Image.asset(
