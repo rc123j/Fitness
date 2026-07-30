@@ -43,14 +43,34 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
 
   // Expanded master medical conditions
   final List<Map<String, dynamic>> medicalConditions = [
-    {'id': 1, 'label': 'Diabetes / Pre-Diabetes', 'icon': Icons.water_drop_rounded, 'color': const Color(0xffFF5F6D), 'note': 'Restricts high-GI foods & refined sugars'},
-    {'id': 2, 'label': 'Hypertension (High BP)', 'icon': Icons.favorite_rounded, 'color': const Color(0xffFF7A00), 'note': 'Reduces sodium-heavy foods & pickles'},
+    {
+      'id': 1,
+      'label': 'Diabetes',
+      'icon': Icons.water_drop_rounded,
+      'color': const Color(0xff00E5FF),
+      'note': 'Restricts high-GI foods & refined sugars',
+    },
+    {
+      'id': 4,
+      'label': 'Pre-Diabetes',
+      'icon': Icons.water_drop_rounded,
+      'color': const Color(0xff00E5FF),
+      'note': 'Restricts high-GI foods & refined sugars',
+    },
+    {
+      'id': 2,
+      'label': 'Hypertension (High BP)',
+      'icon': Icons.favorite_rounded,
+      'color': const Color(0xffFF5F6D),
+      'note': 'Reduces sodium-heavy foods & pickles',
+    },
   ];
 
-  // Filter conditions: PCOS only visible for females
+  // Filter conditions
   List<Map<String, dynamic>> get filteredConditions {
     return medicalConditions.where((c) {
-      if (c['label']!.toString().contains('PCOS') && widget.gender.toLowerCase() != 'female') {
+      if (c['label']!.toString().contains('PCOS') &&
+          widget.gender.toLowerCase() != 'female') {
         return false;
       }
       return true;
@@ -109,43 +129,84 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeColor = widget.gender == "Male"
+        ? const Color(0xff7B61FF)
+        : const Color(0xffFF00E5);
+
     return Scaffold(
       backgroundColor: const Color(0xff050510),
       body: Stack(
         children: [
-          // Background glows (Aligned to purple/pink theme of Steps 1-3)
+          // Background glows
           Positioned(
-            top: -80, right: -80,
+            top: -80,
+            right: -80,
             child: Container(
-              height: 240, width: 240,
+              height: 240,
+              width: 240,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: RadialGradient(colors: [
-                  const Color(0xffFF00E5).withOpacity(0.12), Colors.transparent,
-                ]),
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xffFF00E5).withOpacity(0.12),
+                    Colors.transparent,
+                  ],
+                ),
               ),
             ),
           ),
           Positioned(
-            bottom: -60, left: -40,
+            bottom: -60,
+            left: -40,
             child: Container(
-              height: 200, width: 200,
+              height: 200,
+              width: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: RadialGradient(colors: [
-                  const Color(0xffFF7A00).withOpacity(0.10), Colors.transparent,
-                ]),
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xffFF7A00).withOpacity(0.10),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Centered Clipboard 3D Illustration Graphic (drawn in background)
+          Positioned(
+            top: 130,
+            left: 0,
+            right: 0,
+            child: IgnorePointer(
+              child: Image.asset(
+                "assets/new_images/health_profile.png",
+                height: 490,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [Color(0xffFF00E5), Color(0xff7B61FF)],
+                    ).createShader(bounds),
+                    child: const Icon(
+                      Icons.assignment_turned_in_rounded,
+                      size: 280,
+                      color: Colors.white,
+                    ),
+                  );
+                },
               ),
             ),
           ),
 
           SafeArea(
-            child: Column(
-              children: [
-                // ── HEADER
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                  child: Row(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       GestureDetector(
@@ -155,9 +216,16 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.04),
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white.withOpacity(0.08), width: 0.8),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.08),
+                              width: 0.8,
+                            ),
                           ),
-                          child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 18),
+                          child: const Icon(
+                            Icons.arrow_back_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -165,100 +233,118 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text('STEP 8 OF 10',
+                            Text(
+                              'STEP 5 OF 7',
                               style: GoogleFonts.outfit(
                                 color: const Color(0xffFF00E5).withOpacity(0.9),
-                                fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.w700,
+                                fontSize: 11,
+                                letterSpacing: 1.5,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                             const SizedBox(height: 6),
-                            Row(children: List.generate(10, (index) {
-                              final active = index <= 7; // Steps 1-8 active
-                              return Expanded(
-                                child: Container(
-                                  margin: EdgeInsets.only(right: index == 9 ? 0 : 4),
-                                  height: 3.5,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(2),
-                                    gradient: active ? const LinearGradient(colors: [Color(0xffFF00E5), Color(0xffFF7A00)]) : null,
-                                    color: active ? null : Colors.white.withOpacity(0.10),
+                            Row(
+                              children: List.generate(7, (index) {
+                                final active = index <= 4; // Steps 1-5 active
+                                return Expanded(
+                                  child: Container(
+                                    margin: EdgeInsets.only(
+                                      right: index == 6 ? 0 : 4,
+                                    ),
+                                    height: 3.5,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(2),
+                                      gradient: active
+                                          ? const LinearGradient(
+                                              colors: [
+                                                Color(0xffFF00E5),
+                                                Color(0xffFF7A00),
+                                              ],
+                                            )
+                                          : null,
+                                      color: active
+                                          ? null
+                                          : Colors.white.withOpacity(0.10),
+                                    ),
                                   ),
-                                ),
-                              );
-                            })),
+                                );
+                              }),
+                            ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                ),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  // Title
+                  RichText(
+                    text: TextSpan(
                       children: [
-                        RichText(
-                          text: TextSpan(children: [
-                            TextSpan(
-                              text: 'Your\n',
-                              style: GoogleFonts.outfit(
-                                height: 1.1, color: Colors.white,
-                                fontSize: 32, fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            TextSpan(
-                              text: 'Health Profile',
-                              style: GoogleFonts.outfit(
-                                height: 1.1, fontSize: 32, fontWeight: FontWeight.w900,
-                                foreground: Paint()..shader = const LinearGradient(
-                                  colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
-                                ).createShader(const Rect.fromLTWH(0, 0, 240, 50)),
-                              ),
-                            ),
-                          ]),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'This helps us generate a safe, customized and medically-aware meal plan. Your data is private and never shared.',
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(0.60), fontSize: 12, height: 1.45,
+                        TextSpan(
+                          text: 'Your\n',
+                          style: GoogleFonts.outfit(
+                            height: 1.1,
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
-
-                        const SizedBox(height: 24),
-
-                        // ── SECTION 1: Medical Conditions
-                        _buildSectionHeader(
-                          'ANY MEDICAL CONDITIONS?',
-                          'We will filter out foods that may aggravate your condition.',
-                          const Color(0xffFF00E5),
-                          Icons.local_hospital_rounded,
+                        TextSpan(
+                          text: 'Health Profile',
+                          style: GoogleFonts.outfit(
+                            height: 1.1,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            foreground: Paint()
+                              ..shader =
+                                  const LinearGradient(
+                                    colors: [
+                                      Color(0xffFF00E5),
+                                      Color(0xffFF7A00),
+                                    ],
+                                  ).createShader(
+                                    const Rect.fromLTWH(0, 0, 240, 50),
+                                  ),
+                          ),
                         ),
-                        const SizedBox(height: 12),
-                        ...filteredConditions.map((c) => _buildConditionCard(c)),
-                        
-                        const SizedBox(height: 12),
-                        _buildNoneOption(
-                          label: 'None — I have no medical conditions',
-                          isSelected: noConditions,
-                          onTap: () => _setNoConditions(!noConditions),
-                        ),
-
-                        const SizedBox(height: 24),
                       ],
                     ),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'This helps us create a safe and medically-aware plan for you.',
+                    style: GoogleFonts.outfit(
+                      color: Colors.white.withOpacity(0.50),
+                      fontSize: 13,
+                    ),
+                  ),
 
-                // Continue Button (Aligned to pink/purple/orange gradient theme)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  child: AnimatedOpacity(
+                  const Spacer(flex: 4),
+
+                  // Medical conditions list - full-width vertical layout, overlays background image
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Any medical conditions?",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white.withOpacity(0.6),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ...filteredConditions.map((c) => _buildConditionCard(c)),
+                      _buildNoneCard(),
+                    ],
+                  ),
+
+                  const Spacer(flex: 1),
+
+                  // Continue Button (Aligned to pink/purple/orange gradient theme)
+                  AnimatedOpacity(
                     opacity: canProceed ? 1.0 : 0.4,
                     duration: const Duration(milliseconds: 200),
                     child: Container(
@@ -273,12 +359,18 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                             Color(0xffFF7A00),
                           ],
                         ),
-                        boxShadow: canProceed ? [
-                          BoxShadow(
-                            color: const Color(0xffB100FF).withOpacity(0.30),
-                            blurRadius: 12, spreadRadius: 1, offset: const Offset(0, 3),
-                          ),
-                        ] : [],
+                        boxShadow: canProceed
+                            ? [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xffB100FF,
+                                  ).withOpacity(0.30),
+                                  blurRadius: 12,
+                                  spreadRadius: 1,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ]
+                            : [],
                       ),
                       child: Material(
                         color: Colors.transparent,
@@ -286,10 +378,13 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                           borderRadius: BorderRadius.circular(24),
                           onTap: canProceed ? _proceed : null,
                           child: Center(
-                            child: Text('Continue',
+                            child: Text(
+                              'Next',
                               style: GoogleFonts.outfit(
-                                color: Colors.white, fontSize: 16,
-                                fontWeight: FontWeight.bold, letterSpacing: 0.5,
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
                               ),
                             ),
                           ),
@@ -297,43 +392,9 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title, String subtitle, Color color, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.07),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.20), width: 0.8),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                  style: GoogleFonts.outfit(
-                    color: color, fontSize: 11, letterSpacing: 1.4, fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(subtitle,
-                  style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.55), fontSize: 11, height: 1.35,
-                  ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
           ),
         ],
@@ -350,56 +411,65 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
       onTap: () => _toggleCondition(id),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          color: isSelected ? color.withOpacity(0.12) : Colors.white.withOpacity(0.04),
+          color: isSelected
+              ? color.withOpacity(0.12)
+              : Colors.white.withOpacity(0.05),
           border: Border.all(
-            color: isSelected ? color : Colors.white.withOpacity(0.10),
+            color: isSelected
+                ? color.withOpacity(0.6)
+                : Colors.white.withOpacity(0.08),
             width: isSelected ? 1.2 : 0.8,
           ),
         ),
         child: Row(
           children: [
-            Icon(condition['icon'] as IconData,
-              color: isSelected ? color : Colors.white.withOpacity(0.40),
-              size: 18,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                condition['icon'] as IconData,
+                color: color,
+                size: 18,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(condition['label'] as String,
-                    style: GoogleFonts.outfit(
-                      color: isSelected ? color : Colors.white,
-                      fontSize: 13.5, fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  if (isSelected) ...[
-                    const SizedBox(height: 2),
-                    Text(condition['note'] as String,
-                      style: GoogleFonts.inter(
-                        color: color.withOpacity(0.70), fontSize: 10.5, height: 1.3,
-                      ),
-                    ),
-                  ],
-                ],
+              child: Text(
+                condition['label'] as String,
+                style: GoogleFonts.outfit(
+                  color: isSelected
+                      ? Colors.white
+                      : Colors.white.withOpacity(0.7),
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             AnimatedContainer(
               duration: const Duration(milliseconds: 180),
-              height: 20, width: 20,
+              height: 20,
+              width: 20,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isSelected ? color : Colors.transparent,
                 border: Border.all(
-                  color: isSelected ? color : Colors.white.withOpacity(0.25), width: 1.5,
+                  color: isSelected ? color : Colors.white.withOpacity(0.2),
+                  width: 1.2,
                 ),
               ),
               child: isSelected
-                  ? const Icon(Icons.check_rounded, color: Colors.white, size: 12)
+                  ? const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 12,
+                    )
                   : null,
             ),
           ],
@@ -408,59 +478,77 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
     );
   }
 
-  Widget _buildNoneOption({required String label, required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildNoneCard() {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => _setNoConditions(!noConditions),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: isSelected ? Colors.white.withOpacity(0.10) : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          color: noConditions
+              ? const Color(0xffFF7A00).withOpacity(0.12)
+              : Colors.white.withOpacity(0.05),
           border: Border.all(
-            color: isSelected ? Colors.white.withOpacity(0.4) : Colors.white.withOpacity(0.12),
-            width: 0.8,
+            color: noConditions
+                ? const Color(0xffFF7A00).withOpacity(0.6)
+                : Colors.white.withOpacity(0.08),
+            width: noConditions ? 1.2 : 0.8,
           ),
         ),
         child: Row(
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              height: 18, width: 18,
+            Container(
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
+                color: const Color(0xffFF7A00).withOpacity(0.12),
                 shape: BoxShape.circle,
-                color: isSelected ? Colors.white : Colors.transparent,
-                border: Border.all(
-                  color: isSelected ? Colors.white : Colors.white.withOpacity(0.3), width: 1.5,
-                ),
               ),
-              child: isSelected
-                  ? const Icon(Icons.check_rounded, color: Colors.black, size: 11)
-                  : null,
+              child: const Icon(
+                Icons.check_circle_outline_rounded,
+                color: Color(0xffFF7A00),
+                size: 18,
+              ),
             ),
             const SizedBox(width: 12),
-            Text(label,
-              style: GoogleFonts.inter(
-                color: Colors.white.withOpacity(isSelected ? 0.90 : 0.55),
-                fontSize: 13, fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            Expanded(
+              child: Text(
+                "None — I have no conditions",
+                style: GoogleFonts.outfit(
+                  color: noConditions
+                      ? Colors.white
+                      : Colors.white.withOpacity(0.7),
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+            ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              height: 20,
+              width: 20,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: noConditions
+                    ? const Color(0xffFF7A00)
+                    : Colors.transparent,
+                border: Border.all(
+                  color: noConditions
+                      ? const Color(0xffFF7A00)
+                      : Colors.white.withOpacity(0.2),
+                  width: 1.2,
+                ),
+              ),
+              child: noConditions
+                  ? const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 12,
+                    )
+                  : null,
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildProgress(bool active) {
-    return Container(
-      margin: const EdgeInsets.only(right: 6),
-      height: 3, width: 36,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(1.5),
-        gradient: active ? const LinearGradient(
-          colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
-        ) : null,
-        color: active ? null : Colors.white.withOpacity(0.12),
       ),
     );
   }
