@@ -15,51 +15,44 @@ class GoalSelectionScreen extends StatefulWidget {
 
 class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
   String selectedGoalTitle = "Weight Loss";
-  bool isMuscleGainSelected = false;
 
   final List<Map<String, dynamic>> goals = [
     {
       "id": 1,
       "title": "Weight Loss",
-      "subtitle": "Burn fat and lose weight\nin a healthy way.",
-      "icon": Icons.local_fire_department_rounded,
+      "subtitle": "Burn fat and lose weight in a healthy way.",
+      "image": "assets/new_images/weight_loss.png",
       "color": const Color(0xffFF5F6D),
     },
     {
       "id": 5,
       "title": "Weight Gain",
-      "subtitle": "Gain healthy mass and\nincrease body weight.",
-      "icon": Icons.trending_up_rounded,
+      "subtitle": "Gain healthy mass and increase body weight.",
+      "image": "assets/new_images/weight_gain.png",
       "color": const Color(0xff00E5FF),
-    },
-    {
-      "id": 2,
-      "title": "Muscle Gain",
-      "subtitle": "Build lean muscle and\nincrease strength.",
-      "icon": Icons.fitness_center_rounded,
-      "color": const Color(0xffFF7A00),
     },
     {
       "id": 3,
       "title": "Fitness",
-      "subtitle": "Improve overall fitness\nand daily energy.",
-      "icon": Icons.directions_run_rounded,
+      "subtitle": "Improve overall fitness and daily energy.",
+      "image": "assets/new_images/fitness.png",
       "color": const Color(0xffC026D3),
     },
     {
       "id": 4,
       "title": "Athletic Performance",
-      "subtitle": "Enhance endurance, speed\nand performance.",
-      "icon": Icons.bolt_rounded,
+      "subtitle": "Enhance endurance, speed and performance.",
+      "image": "assets/new_images/athelitcperformance.png",
+      "color": const Color(0xffFF7A00),
+    },
+    {
+      "id": 2,
+      "title": "Muscle Gain",
+      "subtitle": "Build lean muscle and increase strength.",
+      "image": "assets/new_images/muscle_gain.png",
       "color": const Color(0xffFF7A00),
     },
   ];
-
-  List<Map<String, dynamic>> get categoryAGoals =>
-      goals.where((g) => g["title"] != "Muscle Gain").toList();
-
-  List<Map<String, dynamic>> get categoryBGoals =>
-      goals.where((g) => g["title"] == "Muscle Gain").toList();
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +137,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                           ],
                         ),
                       ),
-
+                      const SizedBox(width: 16),
                       // Logout Button
                       GestureDetector(
                         onTap: () {
@@ -171,7 +164,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
 
                 /// 2. MIDDLE SCROLLABLE CONTENT
                 Expanded(
@@ -220,143 +213,26 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 8),
                         Text(
-                          "Choose your primary fitness goal and let our AI build your plan accordingly.",
+                          "Choose your primary fitness goal and let AI build your perfect plan.",
                           style: GoogleFonts.inter(
                             color: Colors.white.withOpacity(0.60),
-                            fontSize: 12,
+                            fontSize: 13,
                             height: 1.4,
                           ),
                         ),
 
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 24),
 
-                        /// CATEGORY A HEADER
-                        Text(
-                          "CATEGORY A • GENERAL & WEIGHT GOALS",
-                          style: GoogleFonts.outfit(
-                            color: const Color(0xffFF00E5).withOpacity(0.85),
-                            fontSize: 11,
-                            letterSpacing: 1.5,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-
-                        /// CATEGORY A DYNAMIC GOAL CARDS
-                        ...categoryAGoals.map((goal) {
+                        /// GOAL CARDS
+                        ...goals.map((goal) {
                           return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: buildHorizontalGoalCard(goal, true),
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: buildHorizontalGoalCard(goal),
                           );
-                        }),
+                        }).toList(),
 
-                        const SizedBox(height: 12),
-
-                        /// CATEGORY B HEADER
-                        Text(
-                          "CATEGORY B • MUSCLE BUILDING (OPTIONAL ADD-ON)",
-                          style: GoogleFonts.outfit(
-                            color: const Color(0xffFF7A00).withOpacity(0.85),
-                            fontSize: 11,
-                            letterSpacing: 1.5,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-
-                        /// CATEGORY B DYNAMIC GOAL CARDS
-                        ...categoryBGoals.map((goal) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: buildHorizontalGoalCard(goal, false),
-                          );
-                        }),
-
-                        const SizedBox(height: 8),
-
-                        /// AI PERSONALIZATION INFO CARD
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 16,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.03),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.12),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    height: 48,
-                                    width: 48,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(14),
-                                      color: const Color(0xff090918),
-                                      border: Border.all(
-                                        color: const Color(
-                                          0xff7B61FF,
-                                        ).withOpacity(0.35),
-                                        width: 1.2,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: const Color(
-                                            0xff7B61FF,
-                                          ).withOpacity(0.25),
-                                          blurRadius: 10,
-                                          spreadRadius: 1,
-                                        ),
-                                      ],
-                                    ),
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        Opacity(
-                                          opacity: 0.4,
-                                          child: const Icon(
-                                            Icons.memory_rounded,
-                                            color: Color(0xffFF00E5),
-                                            size: 32,
-                                          ),
-                                        ),
-                                        Text(
-                                          "AI",
-                                          style: GoogleFonts.outfit(
-                                            color: Colors.white,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w900,
-                                            letterSpacing: 0.5,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Text(
-                                      "Our AI will personalize your diet, workouts and recommendations based on your goal.",
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white.withOpacity(0.75),
-                                        fontSize: 12,
-                                        height: 1.45,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
                         const SizedBox(height: 16),
                       ],
                     ),
@@ -396,24 +272,21 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                             (g) => g["title"] == selectedGoalTitle,
                             orElse: () => goals.first,
                           );
-                          final String finalTitle = isMuscleGainSelected && selectedGoal["title"] != "Muscle Gain"
-                              ? "${selectedGoal["title"]} + Muscle Gain"
-                              : selectedGoal["title"] as String;
                           OnboardingDraftService.saveStep1(
-                            goalTitle: finalTitle,
+                            goalTitle: selectedGoal["title"] as String,
                             goalId: selectedGoal["id"] as int,
                           );
-                           Get.to(
-                             () => GenderScreen(
-                               goalTitle: finalTitle,
-                               goalId: selectedGoal["id"] as int,
-                             ),
-                             transition: Transition.cupertino,
-                           );
+                          Get.to(
+                            () => GenderScreen(
+                              goalTitle: selectedGoal["title"] as String,
+                              goalId: selectedGoal["id"] as int,
+                            ),
+                            transition: Transition.cupertino,
+                          );
                         },
                         child: Center(
                           child: Text(
-                            "Continue",
+                            "Next",
                             style: GoogleFonts.outfit(
                               color: Colors.white,
                               fontSize: 16,
@@ -452,7 +325,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
     );
   }
 
-  Widget buildGoalCard(Map<String, dynamic> goal) {
+  Widget buildHorizontalGoalCard(Map<String, dynamic> goal) {
     final isSelected = selectedGoalTitle == goal["title"];
     final themeColor = goal["color"] as Color;
 
@@ -463,11 +336,16 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
         });
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.12), width: 0.8),
+          border: Border.all(
+            color: isSelected
+                ? Colors.transparent
+                : Colors.white.withOpacity(0.06),
+            width: 1,
+          ),
           gradient: isSelected
               ? const LinearGradient(
                   begin: Alignment.topLeft,
@@ -475,7 +353,6 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                   colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
                 )
               : null,
-          color: isSelected ? null : Colors.white.withOpacity(0.05),
           boxShadow: isSelected
               ? [
                   BoxShadow(
@@ -487,160 +364,25 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
               : [],
         ),
         child: Container(
-          margin: const EdgeInsets.all(1.5),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+          margin: const EdgeInsets.all(1.2),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18.5),
-            color: const Color(0xff090918),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Icon Backdrop Glow
-                  Container(
-                    height: 48,
-                    width: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [
-                          themeColor.withOpacity(0.18),
-                          themeColor.withOpacity(0.03),
-                        ],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: themeColor.withOpacity(0.10),
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      goal["icon"] as IconData,
-                      color: themeColor,
-                      size: 24,
-                    ),
-                  ),
-
-                  // Checkmark Badge
-                  if (isSelected)
-                    Container(
-                      height: 18,
-                      width: 18,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                      ),
-                      child: const Icon(
-                        Icons.check_rounded,
-                        color: Colors.black,
-                        size: 13,
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                goal["title"] as String,
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                goal["subtitle"] as String,
-                style: GoogleFonts.inter(
-                  color: Colors.white.withOpacity(0.60),
-                  fontSize: 12,
-                  height: 1.35,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget buildHorizontalGoalCard(Map<String, dynamic> goal, bool isCategoryA) {
-    final isSelected = isCategoryA
-        ? selectedGoalTitle == goal["title"]
-        : isMuscleGainSelected;
-    final themeColor = goal["color"] as Color;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          if (isCategoryA) {
-            selectedGoalTitle = goal["title"] as String;
-          } else {
-            isMuscleGainSelected = !isMuscleGainSelected;
-          }
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeInOut,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.12), width: 0.8),
-          gradient: isSelected
-              ? const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
-                )
-              : null,
-          color: isSelected ? null : Colors.white.withOpacity(0.05),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: const Color(0xffFF00E5).withOpacity(0.15),
-                    blurRadius: 10,
-                    spreadRadius: 1,
-                  ),
-                ]
-              : [],
-        ),
-        child: Container(
-          margin: const EdgeInsets.all(1.5),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18.5),
-            color: const Color(0xff090918),
+            color: const Color(0xff151520),
           ),
           child: Row(
             children: [
-              // Icon Backdrop Glow
-              Container(
-                height: 48,
-                width: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      themeColor.withOpacity(0.18),
-                      themeColor.withOpacity(0.03),
-                    ],
+              // Icon used directly without circle container
+              SizedBox(
+                height: 72,
+                width: 72,
+                child: OverflowBox(
+                  maxHeight: 130,
+                  maxWidth: 130,
+                  child: Image.asset(
+                    goal["image"] as String,
+                    fit: BoxFit.contain,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: themeColor.withOpacity(0.10),
-                      blurRadius: 6,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  goal["icon"] as IconData,
-                  color: themeColor,
-                  size: 24,
                 ),
               ),
               const SizedBox(width: 16),
@@ -653,15 +395,15 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                       goal["title"] as String,
                       style: GoogleFonts.outfit(
                         color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       goal["subtitle"] as String,
                       style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.60),
+                        color: Colors.white.withOpacity(0.50),
                         fontSize: 12,
                         height: 1.35,
                       ),
@@ -673,16 +415,14 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
               // Checkmark Badge
               if (isSelected)
                 Container(
-                  height: 18,
-                  width: 18,
+                  height: 22,
+                  width: 22,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.white,
                   ),
-                  child: const Icon(
-                    Icons.check_rounded,
-                    color: Colors.black,
-                    size: 13,
+                  child: const Center(
+                    child: Icon(Icons.check, color: Colors.black, size: 15),
                   ),
                 ),
             ],

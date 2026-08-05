@@ -86,7 +86,10 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
-                  colors: [const Color(0xffFF00E5).withOpacity(0.18), Colors.transparent],
+                  colors: [
+                    const Color(0xffFF00E5).withOpacity(0.18),
+                    Colors.transparent,
+                  ],
                 ),
               ),
             ),
@@ -100,7 +103,10 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
-                  colors: [const Color(0xff00E5FF).withOpacity(0.12), Colors.transparent],
+                  colors: [
+                    const Color(0xff00E5FF).withOpacity(0.12),
+                    Colors.transparent,
+                  ],
                 ),
               ),
             ),
@@ -122,9 +128,16 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.04),
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white.withOpacity(0.08), width: 0.8),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.08),
+                              width: 0.8,
+                            ),
                           ),
-                          child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 18),
+                          child: const Icon(
+                            Icons.arrow_back_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -147,12 +160,23 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
                                 final active = index <= 8; // Steps 1-9 active
                                 return Expanded(
                                   child: Container(
-                                    margin: EdgeInsets.only(right: index == 9 ? 0 : 4),
+                                    margin: EdgeInsets.only(
+                                      right: index == 9 ? 0 : 4,
+                                    ),
                                     height: 3.5,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(2),
-                                      gradient: active ? const LinearGradient(colors: [Color(0xffFF00E5), Color(0xffFF7A00)]) : null,
-                                      color: active ? null : Colors.white.withOpacity(0.10),
+                                      gradient: active
+                                          ? const LinearGradient(
+                                              colors: [
+                                                Color(0xffFF00E5),
+                                                Color(0xffFF7A00),
+                                              ],
+                                            )
+                                          : null,
+                                      color: active
+                                          ? null
+                                          : Colors.white.withOpacity(0.10),
                                     ),
                                   ),
                                 );
@@ -168,29 +192,37 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
 
                   // Title
                   RichText(
-                    text: TextSpan(children: [
-                      TextSpan(
-                        text: 'Lifestyle\n',
-                        style: GoogleFonts.outfit(
-                          height: 1.1,
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Lifestyle\n',
+                          style: GoogleFonts.outfit(
+                            height: 1.1,
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
-                      ),
-                      TextSpan(
-                        text: 'Habits',
-                        style: GoogleFonts.outfit(
-                          height: 1.1,
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          foreground: Paint()
-                            ..shader = const LinearGradient(
-                              colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
-                            ).createShader(const Rect.fromLTWH(0, 0, 240, 50)),
+                        TextSpan(
+                          text: 'Habits',
+                          style: GoogleFonts.outfit(
+                            height: 1.1,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            foreground: Paint()
+                              ..shader =
+                                  const LinearGradient(
+                                    colors: [
+                                      Color(0xffFF00E5),
+                                      Color(0xffFF7A00),
+                                    ],
+                                  ).createShader(
+                                    const Rect.fromLTWH(0, 0, 240, 50),
+                                  ),
+                          ),
                         ),
-                      ),
-                    ]),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -201,145 +233,62 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
                     ),
                   ),
 
-                  const Spacer(),
+                  const SizedBox(height: 24),
 
-                  // 1. Smoking & Tobacco Section
-                  Text(
-                    "Smoking & Tobacco",
-                    style: GoogleFonts.outfit(
-                      color: Colors.white.withOpacity(0.6),
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
+                  // Scrollable Content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        children: [
+                          _buildHabitSection(
+                            title: "Smoking & Tobacco",
+                            imagePath: "assets/new_images/smoking.png",
+                            options: [
+                              {"label": "No, Never", "value": "No, never"},
+                              {
+                                "label": "Occasionally",
+                                "value": "Occasionally / Socially",
+                              },
+                              {
+                                "label": "Yes, Regularly",
+                                "value": "Yes, regularly",
+                              },
+                            ],
+                            selectedValue: selectedSmoking,
+                            onSelect: (val) =>
+                                setState(() => selectedSmoking = val),
+                            imageTop: -28,
+                            imageRight: -4,
+                            imageHeight: 120,
+                          ),
+                          const SizedBox(height: 20),
+                          _buildHabitSection(
+                            title: "Alcohol Consumption",
+                            imagePath: "assets/new_images/alcohol.png",
+                            options: [
+                              {"label": "No, Never", "value": "No, never"},
+                              {
+                                "label": "Occasionally / Socially",
+                                "value": "Occasionally / Socially",
+                              },
+                              {
+                                "label": "Yes, Regularly",
+                                "value": "Yes, regularly",
+                              },
+                            ],
+                            selectedValue: selectedAlcohol,
+                            onSelect: (val) =>
+                                setState(() => selectedAlcohol = val),
+                            imageTop: -20,
+                            imageRight: 4,
+                            imageHeight: 115,
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        flex: 6,
-                        child: Column(
-                          children: [
-                            _buildHabitCard(
-                              label: "No, Never",
-                              isSelected: selectedSmoking == "No, never",
-                              color: const Color(0xffFF00E5),
-                              onTap: () => setState(() => selectedSmoking = "No, never"),
-                            ),
-                            _buildHabitCard(
-                              label: "Occasionally",
-                              isSelected: selectedSmoking == "Occasionally / Socially",
-                              color: const Color(0xffFF00E5),
-                              onTap: () => setState(() => selectedSmoking = "Occasionally / Socially"),
-                            ),
-                            _buildHabitCard(
-                              label: "Yes, Regularly",
-                              isSelected: selectedSmoking == "Yes, regularly",
-                              color: const Color(0xffFF00E5),
-                              onTap: () => setState(() => selectedSmoking = "Yes, regularly"),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        flex: 4,
-                        child: Center(
-                          child: Image.asset(
-                            "assets/new_images/smoking_habit.png",
-                            height: 90,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xffFF00E5).withOpacity(0.08),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: const Color(0xffFF00E5).withOpacity(0.2), width: 1),
-                                ),
-                                child: const Icon(
-                                  Icons.smoke_free_rounded,
-                                  color: Color(0xffFF00E5),
-                                  size: 36,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const Spacer(),
-
-                  // 2. Alcohol Section
-                  Text(
-                    "Alcohol Consumption",
-                    style: GoogleFonts.outfit(
-                      color: Colors.white.withOpacity(0.6),
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        flex: 6,
-                        child: Column(
-                          children: [
-                            _buildHabitCard(
-                              label: "No, Never",
-                              isSelected: selectedAlcohol == "No, never",
-                              color: const Color(0xffFF7A00),
-                              onTap: () => setState(() => selectedAlcohol = "No, never"),
-                            ),
-                            _buildHabitCard(
-                              label: "Occasionally / Socially",
-                              isSelected: selectedAlcohol == "Occasionally / Socially",
-                              color: const Color(0xffFF7A00),
-                              onTap: () => setState(() => selectedAlcohol = "Occasionally / Socially"),
-                            ),
-                            _buildHabitCard(
-                              label: "Yes, Regularly",
-                              isSelected: selectedAlcohol == "Yes, regularly",
-                              color: const Color(0xffFF7A00),
-                              onTap: () => setState(() => selectedAlcohol = "Yes, regularly"),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        flex: 4,
-                        child: Center(
-                          child: Image.asset(
-                            "assets/new_images/alcohol_habit.png",
-                            height: 90,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xffFF7A00).withOpacity(0.08),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: const Color(0xffFF7A00).withOpacity(0.2), width: 1),
-                                ),
-                                child: const Icon(
-                                  Icons.wine_bar_rounded,
-                                  color: Color(0xffFF7A00),
-                                  size: 36,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const Spacer(flex: 2),
 
                   // Next Button
                   Container(
@@ -392,55 +341,138 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
     );
   }
 
-  Widget _buildHabitCard({
+  Widget _buildHabitSection({
+    required String title,
+    required String imagePath,
+    required List<Map<String, String>> options,
+    required String selectedValue,
+    required Function(String) onSelect,
+    double imageTop = -10,
+    double imageRight = -5,
+    double imageHeight = 110,
+  }) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xff151520), // Matches the dark card background
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withOpacity(0.08), width: 1),
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 24,
+              bottom: 20,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ...List.generate(options.length, (index) {
+                  final option = options[index];
+                  final label = option["label"]!;
+                  final value = option["value"]!;
+                  final isSelected = selectedValue == value;
+                  final icon = label.contains("Never")
+                      ? Icons.check_box_outlined
+                      : Icons.person_outline;
+
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      bottom: index == options.length - 1 ? 0 : 12,
+                    ),
+                    child: _buildHabitOption(
+                      label: label,
+                      icon: icon,
+                      isSelected: isSelected,
+                      onTap: () => onSelect(value),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+          Positioned(
+            top: imageTop,
+            right: imageRight,
+            child: Image.asset(
+              imagePath,
+              height: imageHeight,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHabitOption({
     required String label,
+    required IconData icon,
     required bool isSelected,
-    required Color color,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withOpacity(0.04) : const Color(0xff0D0D1E),
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected
+              ? const Color(0xffB100FF).withOpacity(0.12)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? color.withOpacity(0.6) : Colors.white.withOpacity(0.05),
-            width: isSelected ? 1.2 : 0.8,
+            color: isSelected
+                ? const Color(0xffB100FF).withOpacity(0.4)
+                : Colors.white.withOpacity(0.06),
+            width: 1,
           ),
         ),
         child: Row(
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              height: 18,
-              width: 18,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isSelected ? color : Colors.transparent,
-                border: Border.all(
-                  color: isSelected ? color : Colors.white.withOpacity(0.2),
-                  width: 1.2,
-                ),
-              ),
-              child: isSelected
-                  ? const Icon(Icons.check_rounded, color: Colors.white, size: 10)
-                  : null,
+            Icon(
+              icon,
+              color: isSelected ? Colors.white : Colors.white.withOpacity(0.4),
+              size: 20,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             Expanded(
               child: Text(
                 label,
                 style: GoogleFonts.outfit(
-                  color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+                  color: isSelected
+                      ? Colors.white
+                      : Colors.white.withOpacity(0.7),
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
                 ),
               ),
             ),
+            if (isSelected)
+              Container(
+                height: 22,
+                width: 22,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(Icons.check, color: Colors.black, size: 15),
+                ),
+              ),
           ],
         ),
       ),
