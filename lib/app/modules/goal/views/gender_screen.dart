@@ -204,51 +204,55 @@ class _GenderScreenState extends State<GenderScreen> {
                               ),
                             ),
                           ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              "STEP 2 OF 10",
-                              style: GoogleFonts.outfit(
-                                color: const Color(
-                                  0xffFF00E5,
-                                ).withOpacity(0.9),
-                                fontSize: 11,
-                                letterSpacing: 1.5,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: List.generate(10, (index) {
-                                final active = index <= 1;
-                                return Expanded(
-                                  child: Container(
-                                    margin: EdgeInsets.only(right: index == 9 ? 0 : 4),
-                                    height: 3.5,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(2),
-                                      gradient: active
-                                          ? const LinearGradient(
-                                              colors: [
-                                                Color(0xffFF00E5),
-                                                Color(0xffFF7A00),
-                                              ],
-                                            )
-                                          : null,
-                                      color: active
-                                          ? null
-                                          : Colors.white.withOpacity(0.10),
-                                    ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  "STEP 2 OF 10",
+                                  style: GoogleFonts.outfit(
+                                    color: const Color(
+                                      0xffFF00E5,
+                                    ).withOpacity(0.9),
+                                    fontSize: 11,
+                                    letterSpacing: 1.5,
+                                    fontWeight: FontWeight.w700,
                                   ),
-                                );
-                              }),
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: List.generate(10, (index) {
+                                    final active = index <= 1;
+                                    return Expanded(
+                                      child: Container(
+                                        margin: EdgeInsets.only(
+                                          right: index == 9 ? 0 : 4,
+                                        ),
+                                        height: 3.5,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            2,
+                                          ),
+                                          gradient: active
+                                              ? const LinearGradient(
+                                                  colors: [
+                                                    Color(0xffFF00E5),
+                                                    Color(0xffFF7A00),
+                                                  ],
+                                                )
+                                              : null,
+                                          color: active
+                                              ? null
+                                              : Colors.white.withOpacity(0.10),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
                         ],
                       ),
 
@@ -311,7 +315,7 @@ class _GenderScreenState extends State<GenderScreen> {
                           Expanded(
                             child: _buildGenderButton(
                               gender: "Male",
-                              icon: Icons.male_rounded,
+                              imagePath: "assets/new_images/male_icon.png",
                               color: const Color(0xff7B61FF),
                             ),
                           ),
@@ -319,7 +323,7 @@ class _GenderScreenState extends State<GenderScreen> {
                           Expanded(
                             child: _buildGenderButton(
                               gender: "Female",
-                              icon: Icons.female_rounded,
+                              imagePath: "assets/new_images/female_icon.png",
                               color: const Color(0xffFF00E5),
                             ),
                           ),
@@ -379,7 +383,7 @@ class _GenderScreenState extends State<GenderScreen> {
 
   Widget _buildGenderButton({
     required String gender,
-    required IconData icon,
+    required String imagePath,
     required Color color,
   }) {
     final isSelected = selectedGender == gender;
@@ -416,10 +420,17 @@ class _GenderScreenState extends State<GenderScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: isSelected ? color : Colors.white.withOpacity(0.30),
-              size: 22,
+            Opacity(
+              opacity: isSelected ? 1.0 : 0.5,
+              child: SizedBox(
+                width: 36,
+                height: 36,
+                child: OverflowBox(
+                  maxWidth: 72,
+                  maxHeight: 72,
+                  child: Image.asset(imagePath, fit: BoxFit.contain),
+                ),
+              ),
             ),
             const SizedBox(width: 8),
             Text(
