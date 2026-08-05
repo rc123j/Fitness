@@ -13,8 +13,33 @@ class GoalSelectionScreen extends StatefulWidget {
   State<GoalSelectionScreen> createState() => _GoalSelectionScreenState();
 }
 
-class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
+class _GoalSelectionScreenState extends State<GoalSelectionScreen>
+    with SingleTickerProviderStateMixin {
   String selectedGoalTitle = "Weight Loss";
+
+  late AnimationController _shineController;
+  late Animation<double> _shineAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _shineController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    );
+    _shineAnimation = Tween<double>(begin: -1.5, end: 2.5).animate(
+      CurvedAnimation(parent: _shineController, curve: Curves.easeInOut),
+    );
+    _shineController.repeat(
+      reverse: false,
+    ); // start AFTER _shineAnimation is ready
+  }
+
+  @override
+  void dispose() {
+    _shineController.dispose();
+    super.dispose();
+  }
 
   final List<Map<String, dynamic>> goals = [
     {
@@ -372,16 +397,40 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
           ),
           child: Row(
             children: [
-              // Icon used directly without circle container
+              // Icon with shine animation
               SizedBox(
                 height: 72,
                 width: 72,
                 child: OverflowBox(
                   maxHeight: 130,
                   maxWidth: 130,
-                  child: Image.asset(
-                    goal["image"] as String,
-                    fit: BoxFit.contain,
+                  child: AnimatedBuilder(
+                    animation: _shineAnimation,
+                    builder: (context, child) {
+                      return ShaderMask(
+                        blendMode: BlendMode.srcATop,
+                        shaderCallback: (rect) {
+                          final x = _shineAnimation.value;
+                          return LinearGradient(
+                            begin: Alignment(x - 1.2, -1.0),
+                            end: Alignment(x + 1.2, 1.0),
+                            colors: [
+                              Colors.white.withOpacity(0.0),
+                              Colors.white.withOpacity(0.92),
+                              const Color(0xffFFE8A0).withOpacity(0.95),
+                              Colors.white.withOpacity(0.92),
+                              Colors.white.withOpacity(0.0),
+                            ],
+                            stops: const [0.0, 0.35, 0.5, 0.65, 1.0],
+                          ).createShader(rect);
+                        },
+                        child: child,
+                      );
+                    },
+                    child: Image.asset(
+                      goal["image"] as String,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
