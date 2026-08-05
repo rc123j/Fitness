@@ -25,7 +25,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen>
     super.initState();
     _shineController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 2500),
     );
     _shineAnimation = Tween<double>(begin: -1.5, end: 2.5).animate(
       CurvedAnimation(parent: _shineController, curve: Curves.easeInOut),
@@ -412,16 +412,16 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen>
                         shaderCallback: (rect) {
                           final x = _shineAnimation.value;
                           return LinearGradient(
-                            begin: Alignment(x - 1.2, -1.0),
-                            end: Alignment(x + 1.2, 1.0),
+                            begin: Alignment(x - 1.5, -1.0),
+                            end: Alignment(x + 1.5, 1.0),
                             colors: [
                               Colors.white.withOpacity(0.0),
-                              Colors.white.withOpacity(0.92),
-                              const Color(0xffFFE8A0).withOpacity(0.95),
-                              Colors.white.withOpacity(0.92),
+                              Colors.white.withOpacity(0.35),
+                              const Color(0xffFFE8A0).withOpacity(0.65),
+                              Colors.white.withOpacity(0.35),
                               Colors.white.withOpacity(0.0),
                             ],
-                            stops: const [0.0, 0.35, 0.5, 0.65, 1.0],
+                            stops: const [0.0, 0.4, 0.5, 0.6, 1.0],
                           ).createShader(rect);
                         },
                         child: child,

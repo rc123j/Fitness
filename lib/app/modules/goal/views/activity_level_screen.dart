@@ -26,8 +26,31 @@ class ActivityLevelScreen extends StatefulWidget {
   State<ActivityLevelScreen> createState() => _ActivityLevelScreenState();
 }
 
-class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
+class _ActivityLevelScreenState extends State<ActivityLevelScreen>
+    with SingleTickerProviderStateMixin {
   int selectedIndex = 2; // Default to Moderately Active
+
+  late AnimationController _shineController;
+  late Animation<double> _shineAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _shineController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2500),
+    );
+    _shineAnimation = Tween<double>(begin: -1.5, end: 2.5).animate(
+      CurvedAnimation(parent: _shineController, curve: Curves.easeInOut),
+    );
+    _shineController.repeat(reverse: false);
+  }
+
+  @override
+  void dispose() {
+    _shineController.dispose();
+    super.dispose();
+  }
 
   final List<Map<String, dynamic>> activityLevels = [
     {
@@ -36,7 +59,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
       "desc":
           "Little to no regular physical activity. Desk job, reading or sitting.",
       "multiplier": 1.2,
-      "icon": Icons.airline_seat_recline_normal_rounded,
+      "image": "assets/new_images/sedentry.png",
       "color": const Color(0xffFF5F6D),
     },
     {
@@ -45,7 +68,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
       "desc":
           "Light exercise or sports 1-3 days per week. Light walking, gardening.",
       "multiplier": 1.375,
-      "icon": Icons.directions_walk_rounded,
+      "image": "assets/new_images/lightly_active.png",
       "color": const Color(0xffFF7A00),
     },
     {
@@ -53,7 +76,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
       "title": "Moderately Active",
       "desc": "Moderate workout, gym sessions, or sports 3-5 days per week.",
       "multiplier": 1.55,
-      "icon": Icons.directions_run_rounded,
+      "image": "assets/new_images/modrate_active.png",
       "color": const Color(0xffC026D3),
     },
     {
@@ -62,7 +85,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
       "desc":
           "Hard exercise, high-intensity training, or sports 6-7 days per week.",
       "multiplier": 1.725,
-      "icon": Icons.fitness_center_rounded,
+      "image": "assets/new_images/very_active.png",
       "color": const Color(0xff7B61FF),
     },
     {
@@ -71,7 +94,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
       "desc":
           "Extremely hard daily training/sports & physical job (e.g. athlete, construction).",
       "multiplier": 1.9,
-      "icon": Icons.bolt_rounded,
+      "image": "assets/new_images/extra_active.png",
       "color": const Color(0xff00E5FF),
     },
   ];
@@ -80,12 +103,18 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
     final g = widget.gender.toLowerCase();
     final isMale = g == 'male' || g == 'm';
     switch (id) {
-      case 1: return 1.3;
-      case 2: return isMale ? 1.6 : 1.5;
-      case 3: return isMale ? 1.7 : 1.6;
-      case 4: return isMale ? 2.1 : 1.9;
-      case 5: return isMale ? 2.4 : 2.2;
-      default: return 1.3;
+      case 1:
+        return 1.3;
+      case 2:
+        return isMale ? 1.6 : 1.5;
+      case 3:
+        return isMale ? 1.7 : 1.6;
+      case 4:
+        return isMale ? 2.1 : 1.9;
+      case 5:
+        return isMale ? 2.4 : 2.2;
+      default:
+        return 1.3;
     }
   }
 
@@ -184,16 +213,23 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                                 final active = index <= 5; // Steps 1-6 active
                                 return Expanded(
                                   child: Container(
-                                    margin: EdgeInsets.only(right: index == 9 ? 0 : 4),
+                                    margin: EdgeInsets.only(
+                                      right: index == 9 ? 0 : 4,
+                                    ),
                                     height: 3.5,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(2),
                                       gradient: active
                                           ? const LinearGradient(
-                                              colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
+                                              colors: [
+                                                Color(0xffFF00E5),
+                                                Color(0xffFF7A00),
+                                              ],
                                             )
                                           : null,
-                                      color: active ? null : Colors.white.withOpacity(0.10),
+                                      color: active
+                                          ? null
+                                          : Colors.white.withOpacity(0.10),
                                     ),
                                   ),
                                 );
@@ -369,10 +405,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
         curve: Curves.easeInOut,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.12),
-            width: 0.8,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.12), width: 0.8),
           gradient: isSelected
               ? const LinearGradient(
                   begin: Alignment.topLeft,
@@ -392,41 +425,52 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
               : [],
         ),
         child: Container(
-          margin: const EdgeInsets.all(1.5),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 26),
+          margin: const EdgeInsets.all(1.2),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18.5),
             color: const Color(0xff090918),
           ),
           child: Row(
             children: [
-              // Icon Backdrop Glow
-              Container(
-                height: 38,
-                width: 38,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      themeColor.withOpacity(0.18),
-                      themeColor.withOpacity(0.03),
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: themeColor.withOpacity(0.10),
-                      blurRadius: 6,
-                      spreadRadius: 1,
+              // Icon with shine animation
+              SizedBox(
+                height: 72,
+                width: 72,
+                child: OverflowBox(
+                  maxHeight: 140,
+                  maxWidth: 140,
+                  child: AnimatedBuilder(
+                    animation: _shineAnimation,
+                    builder: (context, child) {
+                      return ShaderMask(
+                        blendMode: BlendMode.srcATop,
+                        shaderCallback: (rect) {
+                          final x = _shineAnimation.value;
+                          return LinearGradient(
+                            begin: Alignment(x - 1.5, -1.0),
+                            end: Alignment(x + 1.5, 1.0),
+                            colors: [
+                              Colors.white.withOpacity(0.0),
+                              Colors.white.withOpacity(0.15),
+                              const Color(0xffFFE8A0).withOpacity(0.35),
+                              Colors.white.withOpacity(0.15),
+                              Colors.white.withOpacity(0.0),
+                            ],
+                            stops: const [0.0, 0.4, 0.5, 0.6, 1.0],
+                          ).createShader(rect);
+                        },
+                        child: child,
+                      );
+                    },
+                    child: Image.asset(
+                      activity["image"] as String,
+                      fit: BoxFit.contain,
                     ),
-                  ],
-                ),
-                child: Icon(
-                  activity["icon"] as IconData,
-                  color: themeColor,
-                  size: 18,
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
 
               Expanded(
                 child: Column(
@@ -438,7 +482,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                           activity["title"] as String,
                           style: GoogleFonts.outfit(
                             color: Colors.white,
-                            fontSize: 13.5,
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -463,13 +507,13 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       activity["desc"] as String,
                       style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.55),
-                        fontSize: 10,
-                        height: 1.25,
+                        color: Colors.white.withOpacity(0.50),
+                        fontSize: 12,
+                        height: 1.35,
                       ),
                     ),
                   ],

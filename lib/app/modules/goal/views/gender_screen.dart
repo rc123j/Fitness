@@ -420,15 +420,18 @@ class _GenderScreenState extends State<GenderScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Opacity(
-              opacity: isSelected ? 1.0 : 0.5,
-              child: SizedBox(
-                width: 36,
-                height: 36,
-                child: OverflowBox(
-                  maxWidth: 72,
-                  maxHeight: 72,
-                  child: Image.asset(imagePath, fit: BoxFit.contain),
+            Transform.translate(
+              offset: const Offset(-4, 0),
+              child: Opacity(
+                opacity: isSelected ? 1.0 : 0.5,
+                child: SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: OverflowBox(
+                    maxWidth: 56,
+                    maxHeight: 56,
+                    child: Image.asset(imagePath, fit: BoxFit.contain),
+                  ),
                 ),
               ),
             ),
@@ -439,7 +442,7 @@ class _GenderScreenState extends State<GenderScreen> {
                 color: isSelected
                     ? Colors.white
                     : Colors.white.withOpacity(0.50),
-                fontSize: 15,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
