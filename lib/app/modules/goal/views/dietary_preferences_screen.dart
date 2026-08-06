@@ -27,7 +27,8 @@ class DietaryPreferencesScreen extends StatefulWidget {
   });
 
   @override
-  State<DietaryPreferencesScreen> createState() => _DietaryPreferencesScreenState();
+  State<DietaryPreferencesScreen> createState() =>
+      _DietaryPreferencesScreenState();
 }
 
 class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
@@ -44,36 +45,36 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
     {
       'id': null, // Non-Veg has no taste_preference row
       'label': 'Non-Vegetarian',
-      'icon': Icons.set_meal_rounded,
-      'desc': 'Includes all foods: meat, fish, eggs & dairy',
+      'image': 'assets/new_images/non-veg.png',
+      'desc': 'Includes meat, fish,\neggs & dairy',
       'color': const Color(0xffFF5F6D),
     },
     {
       'id': 4, // Eggitarian
       'label': 'Eggitarian',
-      'icon': Icons.egg_alt_rounded,
-      'desc': 'Vegetarian diet that includes eggs',
+      'image': 'assets/new_images/eggeterian.png',
+      'desc': 'Vegetarian diet\nthat includes eggs',
       'color': const Color(0xffFF7A00),
     },
     {
       'id': 1, // Vegetarian
       'label': 'Vegetarian',
-      'icon': Icons.eco_rounded,
-      'desc': 'No meat or fish. Includes dairy & eggs',
+      'image': 'assets/new_images/vegeterian.png',
+      'desc': 'No meat or fish.\nIncludes dairy & eggs',
       'color': const Color(0xff34C759),
     },
     {
       'id': 2, // Vegan
       'label': 'Vegan',
-      'icon': Icons.spa_rounded,
-      'desc': 'No animal products whatsoever',
+      'image': 'assets/new_images/vegan.png',
+      'desc': 'No animal products\nwhatsoever',
       'color': const Color(0xff00E5FF),
     },
     {
       'id': 3, // Keto
       'label': 'Keto / Low-Carb',
-      'icon': Icons.bolt_rounded,
-      'desc': 'High fat, very low carbohydrate intake',
+      'image': 'assets/new_images/keto.png',
+      'desc': 'High fat, very low\ncarbohydrate intake',
       'color': const Color(0xffC026D3),
     },
   ];
@@ -82,29 +83,74 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
   List<Map<String, dynamic>> get exclusionOptions {
     if (selectedDietLabel == null) return [];
 
-    if (selectedDietLabel == 'Non-Vegetarian' || selectedDietLabel == 'Eggitarian') {
+    if (selectedDietLabel == 'Non-Vegetarian' ||
+        selectedDietLabel == 'Eggitarian') {
       return [
-        {'key': 'no_seafood', 'label': 'No Seafood / Fish', 'icon': Icons.water_rounded},
-        {'key': 'no_mutton', 'label': 'No Mutton', 'icon': Icons.no_meals_outlined},
-        {'key': 'no_poultry', 'label': 'No Chicken / Poultry', 'icon': Icons.block_rounded},
+        {
+          'key': 'no_seafood',
+          'label': 'No Seafood / Fish',
+          'icon': Icons.water_rounded,
+        },
+        {
+          'key': 'no_mutton',
+          'label': 'No Mutton',
+          'icon': Icons.no_meals_outlined,
+        },
+        {
+          'key': 'no_poultry',
+          'label': 'No Chicken / Poultry',
+          'icon': Icons.block_rounded,
+        },
       ];
     }
 
     if (selectedDietLabel == 'Vegetarian' || selectedDietLabel == 'Vegan') {
       return [
-        {'key': 'no_egg', 'label': 'No Egg (Strict Veg)', 'icon': Icons.egg_rounded},
-        {'key': 'no_gluten', 'label': 'Gluten Intolerant', 'icon': Icons.grain_rounded},
-        {'key': 'no_nuts', 'label': 'Nut Allergy', 'icon': Icons.dangerous_rounded},
-        {'key': 'no_lactose', 'label': 'Lactose Intolerant', 'icon': Icons.no_drinks_rounded},
-        {'key': 'no_soy', 'label': 'No Soy / Tofu', 'icon': Icons.block_rounded},
+        {
+          'key': 'no_egg',
+          'label': 'No Egg (Strict Veg)',
+          'icon': Icons.egg_rounded,
+        },
+        {
+          'key': 'no_gluten',
+          'label': 'Gluten Intolerant',
+          'icon': Icons.grain_rounded,
+        },
+        {
+          'key': 'no_nuts',
+          'label': 'Nut Allergy',
+          'icon': Icons.dangerous_rounded,
+        },
+        {
+          'key': 'no_lactose',
+          'label': 'Lactose Intolerant',
+          'icon': Icons.no_drinks_rounded,
+        },
+        {
+          'key': 'no_soy',
+          'label': 'No Soy / Tofu',
+          'icon': Icons.block_rounded,
+        },
       ];
     }
 
     if (selectedDietLabel == 'Keto / Low-Carb') {
       return [
-        {'key': 'no_seafood', 'label': 'No Seafood / Fish', 'icon': Icons.water_rounded},
-        {'key': 'no_dairy', 'label': 'No Dairy', 'icon': Icons.no_drinks_rounded},
-        {'key': 'no_nuts', 'label': 'Nut Allergy', 'icon': Icons.dangerous_rounded},
+        {
+          'key': 'no_seafood',
+          'label': 'No Seafood / Fish',
+          'icon': Icons.water_rounded,
+        },
+        {
+          'key': 'no_dairy',
+          'label': 'No Dairy',
+          'icon': Icons.no_drinks_rounded,
+        },
+        {
+          'key': 'no_nuts',
+          'label': 'Nut Allergy',
+          'icon': Icons.dangerous_rounded,
+        },
       ];
     }
 
@@ -172,28 +218,36 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
         children: [
           // Background glows (Aligned to purple/pink theme of Steps 1-3)
           Positioned(
-            top: -80, left: -80,
+            top: -80,
+            left: -80,
             child: Container(
-              height: 260, width: 260,
+              height: 260,
+              width: 260,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: RadialGradient(colors: [
-                  const Color(0xffFF00E5).withOpacity(0.12),
-                  Colors.transparent,
-                ]),
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xffFF00E5).withOpacity(0.12),
+                    Colors.transparent,
+                  ],
+                ),
               ),
             ),
           ),
           Positioned(
-            bottom: -60, right: -60,
+            bottom: -60,
+            right: -60,
             child: Container(
-              height: 220, width: 220,
+              height: 220,
+              width: 220,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: RadialGradient(colors: [
-                  const Color(0xffFF7A00).withOpacity(0.10),
-                  Colors.transparent,
-                ]),
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xffFF7A00).withOpacity(0.10),
+                    Colors.transparent,
+                  ],
+                ),
               ),
             ),
           ),
@@ -214,9 +268,16 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.04),
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white.withOpacity(0.08), width: 0.8),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.08),
+                              width: 0.8,
+                            ),
                           ),
-                          child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 18),
+                          child: const Icon(
+                            Icons.arrow_back_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -224,27 +285,43 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text('STEP 7 OF 10',
+                            Text(
+                              'STEP 7 OF 10',
                               style: GoogleFonts.outfit(
                                 color: const Color(0xffFF00E5).withOpacity(0.9),
-                                fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.w700,
+                                fontSize: 11,
+                                letterSpacing: 1.5,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                             const SizedBox(height: 6),
-                            Row(children: List.generate(10, (index) {
-                              final active = index <= 6; // Steps 1-7 active
-                              return Expanded(
-                                child: Container(
-                                  margin: EdgeInsets.only(right: index == 9 ? 0 : 4),
-                                  height: 3.5,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(2),
-                                    gradient: active ? const LinearGradient(colors: [Color(0xffFF00E5), Color(0xffFF7A00)]) : null,
-                                    color: active ? null : Colors.white.withOpacity(0.10),
+                            Row(
+                              children: List.generate(10, (index) {
+                                final active = index <= 6; // Steps 1-7 active
+                                return Expanded(
+                                  child: Container(
+                                    margin: EdgeInsets.only(
+                                      right: index == 9 ? 0 : 4,
+                                    ),
+                                    height: 3.5,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(2),
+                                      gradient: active
+                                          ? const LinearGradient(
+                                              colors: [
+                                                Color(0xffFF00E5),
+                                                Color(0xffFF7A00),
+                                              ],
+                                            )
+                                          : null,
+                                      color: active
+                                          ? null
+                                          : Colors.white.withOpacity(0.10),
+                                    ),
                                   ),
-                                ),
-                              );
-                            })),
+                                );
+                              }),
+                            ),
                           ],
                         ),
                       ),
@@ -263,40 +340,57 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
                       children: [
                         // Title (Gradient matching Steps 1-3)
                         RichText(
-                          text: TextSpan(children: [
-                            TextSpan(
-                              text: 'What is\nyour ',
-                              style: GoogleFonts.outfit(
-                                height: 1.1, color: Colors.white,
-                                fontSize: 32, fontWeight: FontWeight.w900,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'What is\nyour ',
+                                style: GoogleFonts.outfit(
+                                  height: 1.1,
+                                  color: Colors.white,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w900,
+                                ),
                               ),
-                            ),
-                            TextSpan(
-                              text: 'Diet Type?',
-                              style: GoogleFonts.outfit(
-                                height: 1.1, fontSize: 32, fontWeight: FontWeight.w900,
-                                foreground: Paint()..shader = const LinearGradient(
-                                  colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
-                                ).createShader(const Rect.fromLTWH(0, 0, 220, 50)),
+                              TextSpan(
+                                text: 'Diet Type?',
+                                style: GoogleFonts.outfit(
+                                  height: 1.1,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w900,
+                                  foreground: Paint()
+                                    ..shader =
+                                        const LinearGradient(
+                                          colors: [
+                                            Color(0xffFF00E5),
+                                            Color(0xffFF7A00),
+                                          ],
+                                        ).createShader(
+                                          const Rect.fromLTWH(0, 0, 220, 50),
+                                        ),
+                                ),
                               ),
-                            ),
-                          ]),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Your diet type is the foundation of your meal plan. Choose accurately — this determines every food recommendation we generate for you.',
                           style: GoogleFonts.inter(
                             color: Colors.white.withOpacity(0.60),
-                            fontSize: 12, height: 1.45,
+                            fontSize: 12,
+                            height: 1.45,
                           ),
                         ),
                         const SizedBox(height: 20),
 
                         // Diet type cards
-                        Text('SELECT YOUR DIET TYPE',
+                        Text(
+                          'SELECT YOUR DIET TYPE',
                           style: GoogleFonts.outfit(
                             color: const Color(0xffFF00E5).withOpacity(0.85),
-                            fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.w700,
+                            fontSize: 11,
+                            letterSpacing: 1.5,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -305,23 +399,31 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
                         // Conditional exclusions section
                         if (exclusionOptions.isNotEmpty) ...[
                           const SizedBox(height: 24),
-                          Text('ANY ADDITIONAL EXCLUSIONS?',
+                          Text(
+                            'ANY ADDITIONAL EXCLUSIONS?',
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF7A00).withOpacity(0.85),
-                              fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.w700,
+                              fontSize: 11,
+                              letterSpacing: 1.5,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 6),
                           Text(
                             'Select any foods you cannot or do not eat. Your meal plan will strictly avoid these.',
                             style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.55), fontSize: 11.5, height: 1.4,
+                              color: Colors.white.withOpacity(0.55),
+                              fontSize: 11.5,
+                              height: 1.4,
                             ),
                           ),
                           const SizedBox(height: 12),
                           Wrap(
-                            spacing: 10, runSpacing: 10,
-                            children: exclusionOptions.map((exc) => _buildExclusionChip(exc)).toList(),
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: exclusionOptions
+                                .map((exc) => _buildExclusionChip(exc))
+                                .toList(),
                           ),
                         ],
 
@@ -349,12 +451,18 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
                             Color(0xffFF7A00),
                           ],
                         ),
-                        boxShadow: canProceed ? [
-                          BoxShadow(
-                            color: const Color(0xffB100FF).withOpacity(0.30),
-                            blurRadius: 12, spreadRadius: 1, offset: const Offset(0, 3),
-                          ),
-                        ] : [],
+                        boxShadow: canProceed
+                            ? [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xffB100FF,
+                                  ).withOpacity(0.30),
+                                  blurRadius: 12,
+                                  spreadRadius: 1,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ]
+                            : [],
                       ),
                       child: Material(
                         color: Colors.transparent,
@@ -362,10 +470,13 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
                           borderRadius: BorderRadius.circular(24),
                           onTap: canProceed ? _proceed : null,
                           child: Center(
-                            child: Text('Continue',
+                            child: Text(
+                              'Continue',
                               style: GoogleFonts.outfit(
-                                color: Colors.white, fontSize: 16,
-                                fontWeight: FontWeight.bold, letterSpacing: 0.5,
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
                               ),
                             ),
                           ),
@@ -391,64 +502,112 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
-        margin: const EdgeInsets.only(bottom: 10),
+        margin: const EdgeInsets.only(bottom: 12),
+        height: 96, // Fixed height keeps cards uniform
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          gradient: isSelected ? LinearGradient(
-            begin: Alignment.topLeft, end: Alignment.bottomRight,
-            colors: [color, color.withOpacity(0.5)],
-          ) : null,
-          color: isSelected ? null : Colors.white.withOpacity(0.05),
+          gradient: isSelected
+              ? LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [color.withOpacity(0.18), Colors.transparent],
+                )
+              : null,
+          color: isSelected
+              ? const Color(0xff1A1325)
+              : Colors.white.withOpacity(0.03),
           border: Border.all(
-            color: isSelected ? color : Colors.white.withOpacity(0.1),
-            width: isSelected ? 1.5 : 0.8,
+            color: isSelected
+                ? color.withOpacity(0.8)
+                : Colors.white.withOpacity(0.08),
+            width: isSelected ? 1.5 : 1.0,
           ),
-          boxShadow: isSelected ? [
-            BoxShadow(color: color.withOpacity(0.2), blurRadius: 14, spreadRadius: 1),
-          ] : [],
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: color.withOpacity(0.2),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : [],
         ),
-        child: Container(
-          margin: isSelected ? const EdgeInsets.all(1.5) : EdgeInsets.zero,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: isSelected ? BoxDecoration(
-            borderRadius: BorderRadius.circular(16.5),
-            color: const Color(0xff090918),
-          ) : null,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16.5),
           child: Row(
             children: [
+              const SizedBox(width: 16),
+              // Left Radio Circle
               Container(
-                height: 42, width: 42,
+                height: 22,
+                width: 22,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: color.withOpacity(isSelected ? 0.18 : 0.10),
+                  color: isSelected ? Colors.white : Colors.transparent,
+                  border: isSelected
+                      ? null
+                      : Border.all(
+                          color: Colors.white.withOpacity(0.35),
+                          width: 1.2,
+                        ),
                 ),
-                child: Icon(diet['icon'] as IconData, color: color, size: 20),
+                child: isSelected
+                    ? const Icon(
+                        Icons.check_rounded,
+                        color: Colors.black,
+                        size: 15,
+                      )
+                    : null,
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 16),
+
+              // Middle Text
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(diet['label'] as String,
+                    Text(
+                      diet['label'] as String,
                       style: GoogleFonts.outfit(
-                        color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 3),
-                    Text(diet['desc'] as String,
+                    Text(
+                      diet['desc'] as String,
                       style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.55), fontSize: 11.5, height: 1.3,
+                        color: Colors.white.withOpacity(0.60),
+                        fontSize: 11.5,
+                        height: 1.4,
                       ),
                     ),
                   ],
                 ),
               ),
-              if (isSelected)
-                Container(
-                  height: 20, width: 20,
-                  decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
-                  child: const Icon(Icons.check_rounded, color: Colors.black, size: 13),
+
+              // Right Image
+              SizedBox(
+                width: 110,
+                height: double.infinity,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.centerRight,
+                  children: [
+                    Positioned(
+                      right: -25, // Bleed off the right edge intentionally
+                      child: Image.asset(
+                        diet['image'] as String,
+                        width: 160, // Significantly larger image
+                        height: 160,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ],
                 ),
+              ),
             ],
           ),
         ),
@@ -467,24 +626,35 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          color: isSelected ? const Color(0xffFF7A00).withOpacity(0.15) : Colors.white.withOpacity(0.05),
+          color: isSelected
+              ? const Color(0xffFF7A00).withOpacity(0.15)
+              : Colors.white.withOpacity(0.05),
           border: Border.all(
-            color: isSelected ? const Color(0xffFF7A00) : Colors.white.withOpacity(0.12),
+            color: isSelected
+                ? const Color(0xffFF7A00)
+                : Colors.white.withOpacity(0.12),
             width: isSelected ? 1.2 : 0.8,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(exc['icon'] as IconData,
-              color: isSelected ? const Color(0xffFF7A00) : Colors.white.withOpacity(0.50),
+            Icon(
+              exc['icon'] as IconData,
+              color: isSelected
+                  ? const Color(0xffFF7A00)
+                  : Colors.white.withOpacity(0.50),
               size: 14,
             ),
             const SizedBox(width: 6),
-            Text(exc['label'] as String,
+            Text(
+              exc['label'] as String,
               style: GoogleFonts.inter(
-                color: isSelected ? const Color(0xffFF7A00) : Colors.white.withOpacity(0.65),
-                fontSize: 12.5, fontWeight: FontWeight.w500,
+                color: isSelected
+                    ? const Color(0xffFF7A00)
+                    : Colors.white.withOpacity(0.65),
+                fontSize: 12.5,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -496,12 +666,15 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
   Widget _buildProgress(bool active) {
     return Container(
       margin: const EdgeInsets.only(right: 6),
-      height: 3, width: 36,
+      height: 3,
+      width: 36,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(1.5),
-        gradient: active ? const LinearGradient(
-          colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
-        ) : null,
+        gradient: active
+            ? const LinearGradient(
+                colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
+              )
+            : null,
         color: active ? null : Colors.white.withOpacity(0.12),
       ),
     );
