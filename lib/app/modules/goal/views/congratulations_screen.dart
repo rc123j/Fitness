@@ -145,44 +145,24 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
           SafeArea(
             child: Column(
               children: [
-                // Top Spacer
-                const Spacer(),
+                // Top Spacer (Replaced with SizedBox to push content up)
+                const SizedBox(height: 20),
 
-                // ── CONGRATULATIONS ICON HEADER
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      height: 88,
-                      width: 88,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color(0xffFF00E5).withOpacity(0.08),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xffFF00E5).withOpacity(0.25),
-                            blurRadius: 30,
-                            spreadRadius: 3,
-                          ),
-                        ],
+                // ── CONGRATULATIONS IMAGE HEADER
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: const Duration(milliseconds: 1000),
+                  curve: Curves.elasticOut,
+                  builder: (context, value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: Image.asset(
+                        'assets/new_images/extra_active.png',
+                        height: 250,
+                        fit: BoxFit.contain,
                       ),
-                    ),
-                    TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0.0, end: 1.0),
-                      duration: const Duration(milliseconds: 1000),
-                      curve: Curves.elasticOut,
-                      builder: (context, value, child) {
-                        return Transform.scale(
-                          scale: value,
-                          child: const Icon(
-                            Icons.celebration_rounded,
-                            color: Color(0xffFF7A00),
-                            size: 48,
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 20),
@@ -229,153 +209,163 @@ class _CongratulationsScreenState extends State<CongratulationsScreen>
                             color: Colors.white.withOpacity(0.12),
                             width: 1.0,
                           ),
+                          image: DecorationImage(
+                            image: const AssetImage(
+                              'assets/images/athlete.png',
+                            ),
+                            opacity:
+                                0.6, // Lowered opacity to make the background more subtle
+                            fit: BoxFit.cover,
+                            alignment: const Alignment(
+                              0,
+                              -0.7,
+                            ), // Shifts the image downwards inside the card
+                            colorFilter: ColorFilter.mode(
+                              Colors.black.withOpacity(0.4),
+                              BlendMode.darken,
+                            ),
+                          ),
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              Colors.white.withOpacity(0.06),
-                              Colors.white.withOpacity(0.01),
+                              const Color(0xffFF00E5).withOpacity(
+                                0.2,
+                              ), // Added some tint since we have a bg image
+                              const Color(0xffFF7A00).withOpacity(0.2),
                             ],
                           ),
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(23),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                            child: Padding(
-                              padding: const EdgeInsets.all(22),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Top row: Brand & EMV Chip
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "FITFUEL HEALTH PASS",
-                                        style: GoogleFonts.outfit(
-                                          color: Colors.white.withOpacity(0.75),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 1.5,
-                                        ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(22),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Top row: Brand & EMV Chip
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "FITFUEL HEALTH PASS",
+                                      style: GoogleFonts.outfit(
+                                        color: Colors.white.withOpacity(0.75),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.5,
                                       ),
-                                      // Glowing Gold EMV Chip
-                                      Container(
-                                        height: 26,
-                                        width: 34,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              const Color(
-                                                0xffFFCC00,
-                                              ).withOpacity(0.8),
-                                              const Color(
-                                                0xffFF7A00,
-                                              ).withOpacity(0.8),
-                                            ],
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: const Color(
-                                                0xffFFCC00,
-                                              ).withOpacity(0.2),
-                                              blurRadius: 8,
-                                            ),
+                                    ),
+                                    // Glowing Gold EMV Chip
+                                    Container(
+                                      height: 26,
+                                      width: 34,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(6),
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            const Color(
+                                              0xffFFCC00,
+                                            ).withOpacity(0.8),
+                                            const Color(
+                                              0xffFF7A00,
+                                            ).withOpacity(0.8),
                                           ],
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const Spacer(),
-                                  // Middle row: Member Code (Credit Card Style)
-                                  Text(
-                                    _formatMemberCode(widget.memberCode),
-                                    style: GoogleFonts.outfit(
-                                      color: Colors.white,
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 2.5,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  // Bottom row: Status & Features snapshot
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "STATUS",
-                                            style: GoogleFonts.outfit(
-                                              color: Colors.white.withOpacity(
-                                                0.4,
-                                              ),
-                                              fontSize: 9,
-                                              letterSpacing: 1.0,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 3),
-                                          Row(
-                                            children: [
-                                              Container(
-                                                height: 6,
-                                                width: 6,
-                                                decoration: const BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: Color(0xff34C759),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                "ACTIVE",
-                                                style: GoogleFonts.outfit(
-                                                  color: const Color(
-                                                    0xff34C759,
-                                                  ),
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.bold,
-                                                  letterSpacing: 0.5,
-                                                ),
-                                              ),
-                                            ],
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color(
+                                              0xffFFCC00,
+                                            ).withOpacity(0.2),
+                                            blurRadius: 8,
                                           ),
                                         ],
                                       ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                          color: const Color(
-                                            0xffFF00E5,
-                                          ).withOpacity(0.12),
-                                        ),
-                                        child: Text(
-                                          "30-DAY PLAN",
+                                    ),
+                                  ],
+                                ),
+                                const Spacer(),
+                                // Middle row: Member Code (Credit Card Style)
+                                Text(
+                                  _formatMemberCode(widget.memberCode),
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.white,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 2.5,
+                                  ),
+                                ),
+                                const Spacer(),
+                                // Bottom row: Status & Features snapshot
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "STATUS",
                                           style: GoogleFonts.outfit(
-                                            color: const Color(0xffFF00E5),
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white.withOpacity(
+                                              0.4,
+                                            ),
+                                            fontSize: 9,
+                                            letterSpacing: 1.0,
                                           ),
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              height: 6,
+                                              width: 6,
+                                              decoration: const BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Color(0xff34C759),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              "ACTIVE",
+                                              style: GoogleFonts.outfit(
+                                                color: const Color(0xff34C759),
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: const Color(
+                                          0xffFF00E5,
+                                        ).withOpacity(0.12),
+                                      ),
+                                      child: Text(
+                                        "30-DAY PLAN",
+                                        style: GoogleFonts.outfit(
+                                          color: Colors
+                                              .white, // Changed to white as requested
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         ),
