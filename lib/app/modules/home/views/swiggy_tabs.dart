@@ -51,6 +51,46 @@ class SwiggyTabPainter extends CustomPainter {
     }
 
     canvas.drawPath(path, paint);
+
+    final activeBorderPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    final inactiveBorderPaint = Paint()
+      ..color = Colors.white.withOpacity(0.15)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    if (isMeal) {
+      // Active tab curves (Meal tab)
+      final activePath = Path()
+        ..moveTo(0, baseY)
+        ..cubicTo(18, baseY, 36, topY, 48, topY)
+        ..lineTo(middle - 36, topY)
+        ..cubicTo(middle - 14, topY, middle + 14, baseY, middle + 36, baseY);
+      canvas.drawPath(activePath, activeBorderPaint);
+
+      // Inactive flat shoulder
+      final inactivePath = Path()
+        ..moveTo(middle + 36, baseY)
+        ..lineTo(W, baseY);
+      canvas.drawPath(inactivePath, inactiveBorderPaint);
+    } else {
+      // Inactive flat shoulder
+      final inactivePath = Path()
+        ..moveTo(0, baseY)
+        ..lineTo(middle - 36, baseY);
+      canvas.drawPath(inactivePath, inactiveBorderPaint);
+
+      // Active tab curves (Workout tab)
+      final activePath = Path()
+        ..moveTo(middle - 36, baseY)
+        ..cubicTo(middle - 14, baseY, middle + 14, topY, middle + 36, topY)
+        ..lineTo(W - 48, topY)
+        ..cubicTo(W - 36, topY, W - 18, baseY, W, baseY);
+      canvas.drawPath(activePath, activeBorderPaint);
+    }
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/home_controller.dart';
@@ -14,19 +15,42 @@ class HomeView extends GetView<HomeController> {
     return Scaffold(
       backgroundColor: const Color(0xff06010F),
       body: SafeArea(
+        top: false,
         bottom: false,
         child: Column(
           children: [
             /// 1. TOP HEADER SECTION (Location/Profile)
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 18,
-                right: 18,
-                top: 10,
-                bottom: 8,
-              ),
-              child: buildTopHeader(),
-            ),
+            Obx(() {
+              final isMeal = controller.activeTab.value == 0;
+              final headerBg = isMeal
+                  ? const Color(0xffFD6702).withOpacity(0.20)
+                  : const Color(0xff3F72AF).withOpacity(0.20);
+
+              // Dynamically update system status bar style to match the tab theme
+              SystemChrome.setSystemUIOverlayStyle(
+                SystemUiOverlayStyle(
+                  statusBarColor: Colors.transparent,
+                  statusBarIconBrightness: Brightness.light,
+                  statusBarBrightness: Brightness.dark, // iOS
+                  systemNavigationBarColor: const Color(0xff06010F),
+                  systemNavigationBarIconBrightness: Brightness.light,
+                ),
+              );
+
+              final double topPadding = MediaQuery.of(context).padding.top;
+
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                color: headerBg,
+                padding: EdgeInsets.only(
+                  left: 18,
+                  right: 18,
+                  top: topPadding + 14,
+                  bottom: 16,
+                ),
+                child: buildTopHeader(),
+              );
+            }),
 
             /// THE SWIGGY STYLE TOP TABS
             const SwiggyTabsHeader(),
@@ -2666,3 +2690,4 @@ class ActivePlanBgPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
