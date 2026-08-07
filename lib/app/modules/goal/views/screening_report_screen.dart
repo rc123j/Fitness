@@ -799,7 +799,9 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                               letterSpacing: 1.2,
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(
+                            height: 30,
+                          ), // Increased to give room for the giant images
                           Row(
                             children: [
                               Expanded(
@@ -807,6 +809,8 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                   title: "CARBS",
                                   grams: "${carbsTargetG}g",
                                   color: const Color(0xff00E5FF),
+                                  bgImage:
+                                      "assets/new_images1/carbs_macros.png",
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -815,6 +819,8 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                   title: "PROTEIN",
                                   grams: "${proteinTargetG}g",
                                   color: const Color(0xffFF00E5),
+                                  bgImage:
+                                      "assets/new_images1/protiene_macros.png",
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -823,6 +829,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                   title: "FATS",
                                   grams: "${fatTargetG}g",
                                   color: const Color(0xffFF7A00),
+                                  bgImage: "assets/new_images1/fats_macros.png",
                                 ),
                               ),
                             ],
@@ -1141,44 +1148,67 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
     required String title,
     required String grams,
     required Color color,
+    required String bgImage,
   }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Container(
-          height: 90,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.02),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: color.withOpacity(0.3), width: 0.8),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.outfit(
-                  color: color,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
+    return Container(
+      height: 130,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.bottomCenter,
+        children: [
+          // The Dark Card Box
+          Container(
+            height: 95,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color(0xff2A2A35),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.08),
+                width: 1.0,
               ),
-              const SizedBox(height: 8),
-              Text(
-                grams,
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
-              ),
-            ],
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  grams,
+                  style: GoogleFonts.outfit(
+                    color: Colors.white, // Changed to white as requested
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  title,
+                  style: GoogleFonts.outfit(
+                    color: Colors.white.withOpacity(0.6),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
           ),
-        ),
+          // The Image (popping out and scaled up)
+          Positioned(
+            top: 10, // Pushed down to sit better within the card
+            child: Transform.scale(
+              scale: 2.85, // Visually scales the image even larger!
+              child: Image.asset(bgImage, height: 75, fit: BoxFit.contain),
+            ),
+          ),
+        ],
       ),
     );
   }
