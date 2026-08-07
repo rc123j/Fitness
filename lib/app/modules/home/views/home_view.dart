@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/home_controller.dart';
+import 'swiggy_tabs.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -12,288 +13,300 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xff06010F),
-      body: Stack(
-        children: [
-          /// BACKGROUND NEON GLOW BLOBS
-          Positioned(
-            top: -120,
-            right: -100,
-            child: Container(
-              height: 350,
-              width: 350,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xffFF00E5).withOpacity(0.12),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 100,
-            left: -150,
-            child: Container(
-              height: 400,
-              width: 400,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xffB100FF).withOpacity(0.10),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 400,
-            right: -180,
-            child: Container(
-              height: 380,
-              width: 380,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xffFF7A00).withOpacity(0.08),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          /// MAIN SCROLL BODY
-          SafeArea(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            /// 1. TOP HEADER SECTION (Location/Profile)
+            Padding(
               padding: const EdgeInsets.only(
                 left: 18,
                 right: 18,
                 top: 10,
-                bottom: 100,
+                bottom: 8,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// 1. TOP HEADER SECTION
-                  buildTopHeader(),
-
-                  // Safely move the image up without crashing using Transform
-                  Transform.translate(
-                    offset: const Offset(0, 10), // Move it up by 12 pixels
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(24),
-                      child: Image.asset(
-                        'assets/home/home1.png',
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  /// 2. ACTIVE PLAN CARD (Glassmorphic)
-                  buildActivePlanCard(),
-
-                  const SizedBox(height: 16),
-
-                  /// HONEST RESULTS PROMISE CARD
-                  buildHonestResultsCard(),
-
-                  const SizedBox(height: 16),
-
-                  /// TODAY'S MEAL PROGRESS CARD
-                  buildMealProgressCard(),
-
-                  const SizedBox(height: 24),
-
-                  /// 3. STATS GRID ROW 1 & 2 (Reactive)
-                  Obx(() {
-                    final double calProgress =
-                        controller.targetCalories.value > 0
-                        ? (controller.currentCalories.value /
-                                  controller.targetCalories.value)
-                              .clamp(0.0, 1.0)
-                        : 0.0;
-                    final double stepProgress = controller.targetSteps.value > 0
-                        ? (controller.currentSteps.value /
-                                  controller.targetSteps.value)
-                              .clamp(0.0, 1.0)
-                        : 0.0;
-
-                    return Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => Get.toNamed('/calorie-history'),
-                                child: buildStatCard(
-                                  title: "Calories",
-                                  value: controller.currentCalories.value
-                                      .toString(),
-                                  sub:
-                                      "/ ${controller.targetCalories.value} kcal",
-                                  icon: Icons.local_fire_department_rounded,
-                                  color: const Color(0xffFF7A00),
-                                  progress: calProgress,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () {
-                                  controller.addWater(0.25);
-                                  Get.snackbar(
-                                    "Water Logged 💧",
-                                    "Successfully added +250ml to your daily intake.",
-                                    snackPosition: SnackPosition.BOTTOM,
-                                    backgroundColor: const Color(
-                                      0xff0B0817,
-                                    ).withOpacity(0.9),
-                                    colorText: Colors.white,
-                                    borderColor: const Color(
-                                      0xff00A3FF,
-                                    ).withOpacity(0.3),
-                                    borderWidth: 1,
-                                    margin: const EdgeInsets.all(16),
-                                  );
-                                },
-                                child: buildWaterCard(
-                                  current: controller.currentWater.value,
-                                  target: controller.targetWater.value,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () {
-                                  controller.addSteps(1000);
-                                  Get.snackbar(
-                                    "Steps Tracked 👟",
-                                    "Successfully logged +1000 steps walked.",
-                                    snackPosition: SnackPosition.BOTTOM,
-                                    backgroundColor: const Color(
-                                      0xff0B0817,
-                                    ).withOpacity(0.9),
-                                    colorText: Colors.white,
-                                    borderColor: const Color(
-                                      0xff00FF87,
-                                    ).withOpacity(0.3),
-                                    borderWidth: 1,
-                                    margin: const EdgeInsets.all(16),
-                                  );
-                                },
-                                child: buildStatCard(
-                                  title: "Steps",
-                                  value: controller.currentSteps.value
-                                      .toString(),
-                                  sub: "/ ${controller.targetSteps.value}",
-                                  icon: Icons.directions_walk_rounded,
-                                  color: const Color(0xff00FF87),
-                                  progress: stepProgress,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: buildStatCard(
-                                title: "Weight",
-                                value:
-                                    "${controller.currentWeight.value.toStringAsFixed(1)} kg",
-                                sub: controller.weightDifference.value >= 0
-                                    ? "+${controller.weightDifference.value.toStringAsFixed(1)} kg"
-                                    : "${controller.weightDifference.value.toStringAsFixed(1)} kg",
-                                icon: Icons.monitor_weight_rounded,
-                                color: const Color(0xffB100FF),
-                                progress: 0.8, // decorative progress bar
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  }),
-
-                  const SizedBox(height: 28),
-
-                  /// 4. TODAY'S MEAL PLAN
-                  GestureDetector(
-                    onTap: () => Get.toNamed('/meal-plan'),
-                    child: sectionTitle("TODAY'S MEAL PLAN", "View Full Plan"),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  buildMealPlanTimeline(),
-
-                  const SizedBox(height: 28),
-
-                  /// 5. AI COACH & HYDRATION GOAL (ROW)
-                  // Row(
-                  //   crossAxisAlignment: CrossAxisAlignment.start,
-                  //   children: [
-                  //     Expanded(flex: 11, child: buildAICoachCard()),
-                  //     const SizedBox(width: 12),
-                  //     Expanded(flex: 8, child: buildHydrationGoalCard()),
-                  //   ],
-                  // ),`
-                  const SizedBox(height: 28),
-
-                  /// 6. PROGRESS & STREAK SECTION
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      GestureDetector(
-                        onTap: () => Get.toNamed('/progress'),
-                        child: sectionTitle("YOUR PROGRESS", "View All"),
-                      ),
-                      const SizedBox(height: 14),
-                      GestureDetector(
-                        onTap: () => Get.toNamed('/progress'),
-                        child: buildWeightProgressCard(),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      sectionTitle("STREAK", "View All"),
-                      const SizedBox(height: 14),
-                      buildStreakAndRewardsCard(),
-                      const SizedBox(height: 12),
-                      buildBadgesCard(),
-                    ],
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  /// 7. QUICK ACTIONS Grid
-                  sectionTitle("QUICK ACTIONS", ""),
-
-                  const SizedBox(height: 16),
-
-                  buildQuickActionsGrid(),
-                ],
-              ),
+              child: buildTopHeader(),
             ),
-          ),
-        ],
+
+            /// THE SWIGGY STYLE TOP TABS
+            const SwiggyTabsHeader(),
+
+            /// THE DYNAMIC CONTENT AREA
+            Expanded(
+              child: Obx(() {
+                final isMeal = controller.activeTab.value == 0;
+                final bgColor = isMeal
+                    ? const Color(0xffFD6702)
+                    : const Color(0xff3F72AF);
+
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      // Colored Section (Bleeds from tabs)
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        decoration: BoxDecoration(
+                          color: bgColor,
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(24),
+                            bottomRight: Radius.circular(24),
+                          ),
+                        ),
+                        padding: const EdgeInsets.only(
+                          left: 18,
+                          right: 18,
+                          top: 16,
+                          bottom: 18,
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(24),
+                          child: Image.asset(
+                            'assets/home/home1.png',
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+
+                      // Dark Section (Rest of the content)
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Color(0xff06010F),
+                        ),
+                        padding: const EdgeInsets.only(
+                          left: 18,
+                          right: 18,
+                          top: 24,
+                          bottom: 100,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 8),
+
+                            /// 2. ACTIVE PLAN CARD (Glassmorphic)
+                            buildActivePlanCard(),
+
+                            const SizedBox(height: 16),
+
+                            /// HONEST RESULTS PROMISE CARD
+                            buildHonestResultsCard(),
+
+                            const SizedBox(height: 16),
+
+                            /// TODAY'S MEAL PROGRESS CARD
+                            buildMealProgressCard(),
+
+                            const SizedBox(height: 24),
+
+                            /// 3. STATS GRID ROW 1 & 2 (Reactive)
+                            Obx(() {
+                              final double calProgress =
+                                  controller.targetCalories.value > 0
+                                  ? (controller.currentCalories.value /
+                                            controller.targetCalories.value)
+                                        .clamp(0.0, 1.0)
+                                  : 0.0;
+                              final double stepProgress =
+                                  controller.targetSteps.value > 0
+                                  ? (controller.currentSteps.value /
+                                            controller.targetSteps.value)
+                                        .clamp(0.0, 1.0)
+                                  : 0.0;
+
+                              return Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () =>
+                                              Get.toNamed('/calorie-history'),
+                                          child: buildStatCard(
+                                            title: "Calories",
+                                            value: controller
+                                                .currentCalories
+                                                .value
+                                                .toString(),
+                                            sub:
+                                                "/ ${controller.targetCalories.value} kcal",
+                                            icon: Icons
+                                                .local_fire_department_rounded,
+                                            color: const Color(0xffFF7A00),
+                                            progress: calProgress,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            controller.addWater(0.25);
+                                            Get.snackbar(
+                                              "Water Logged 💧",
+                                              "Successfully added +250ml to your daily intake.",
+                                              snackPosition:
+                                                  SnackPosition.BOTTOM,
+                                              backgroundColor: const Color(
+                                                0xff0B0817,
+                                              ).withOpacity(0.9),
+                                              colorText: Colors.white,
+                                              borderColor: const Color(
+                                                0xff00A3FF,
+                                              ).withOpacity(0.3),
+                                              borderWidth: 1,
+                                              margin: const EdgeInsets.all(16),
+                                            );
+                                          },
+                                          child: buildWaterCard(
+                                            current:
+                                                controller.currentWater.value,
+                                            target:
+                                                controller.targetWater.value,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 14),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            controller.addSteps(1000);
+                                            Get.snackbar(
+                                              "Steps Tracked 👟",
+                                              "Successfully logged +1000 steps walked.",
+                                              snackPosition:
+                                                  SnackPosition.BOTTOM,
+                                              backgroundColor: const Color(
+                                                0xff0B0817,
+                                              ).withOpacity(0.9),
+                                              colorText: Colors.white,
+                                              borderColor: const Color(
+                                                0xff00FF87,
+                                              ).withOpacity(0.3),
+                                              borderWidth: 1,
+                                              margin: const EdgeInsets.all(16),
+                                            );
+                                          },
+                                          child: buildStatCard(
+                                            title: "Steps",
+                                            value: controller.currentSteps.value
+                                                .toString(),
+                                            sub:
+                                                "/ ${controller.targetSteps.value}",
+                                            icon: Icons.directions_walk_rounded,
+                                            color: const Color(0xff00FF87),
+                                            progress: stepProgress,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: buildStatCard(
+                                          title: "Weight",
+                                          value:
+                                              "${controller.currentWeight.value.toStringAsFixed(1)} kg",
+                                          sub:
+                                              controller
+                                                      .weightDifference
+                                                      .value >=
+                                                  0
+                                              ? "+${controller.weightDifference.value.toStringAsFixed(1)} kg"
+                                              : "${controller.weightDifference.value.toStringAsFixed(1)} kg",
+                                          icon: Icons.monitor_weight_rounded,
+                                          color: const Color(0xffB100FF),
+                                          progress:
+                                              0.8, // decorative progress bar
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            }),
+
+                            const SizedBox(height: 28),
+
+                            /// 4. TODAY'S MEAL PLAN
+                            GestureDetector(
+                              onTap: () => Get.toNamed('/meal-plan'),
+                              child: sectionTitle(
+                                "TODAY'S MEAL PLAN",
+                                "View Full Plan",
+                              ),
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            buildMealPlanTimeline(),
+
+                            const SizedBox(height: 28),
+
+                            /// 5. AI COACH & HYDRATION GOAL (ROW)
+                            // Row(
+                            //   crossAxisAlignment: CrossAxisAlignment.start,
+                            //   children: [
+                            //     Expanded(flex: 11, child: buildAICoachCard()),
+                            //     const SizedBox(width: 12),
+                            //     Expanded(flex: 8, child: buildHydrationGoalCard()),
+                            //   ],
+                            // ),`
+                            const SizedBox(height: 28),
+
+                            /// 6. PROGRESS & STREAK SECTION
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                GestureDetector(
+                                  onTap: () => Get.toNamed('/progress'),
+                                  child: sectionTitle(
+                                    "YOUR PROGRESS",
+                                    "View All",
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                GestureDetector(
+                                  onTap: () => Get.toNamed('/progress'),
+                                  child: buildWeightProgressCard(),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 28),
+
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                sectionTitle("STREAK", "View All"),
+                                const SizedBox(height: 14),
+                                buildStreakAndRewardsCard(),
+                                const SizedBox(height: 12),
+                                buildBadgesCard(),
+                              ],
+                            ),
+
+                            const SizedBox(height: 28),
+
+                            /// 7. QUICK ACTIONS Grid
+                            sectionTitle("QUICK ACTIONS", ""),
+
+                            const SizedBox(height: 16),
+
+                            buildQuickActionsGrid(),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -304,60 +317,6 @@ class HomeView extends GetView<HomeController> {
   Widget buildTopHeader() {
     return Row(
       children: [
-        /// PROFILE IMAGE WITH NEON CIRCULAR RING
-        GestureDetector(
-          onTap: () => Get.toNamed('/profile'),
-          child: Container(
-            height: 60,
-            width: 60,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0xffFF00E5).withOpacity(0.75),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xffFF00E5).withOpacity(0.20),
-                  blurRadius: 10,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(30),
-                child: Image.network(
-                  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200", // consistent with profile image
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      "assets/images/athlete.png",
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Color(0xffB100FF), Color(0xffFF7A00)],
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.person_rounded,
-                            color: Colors.white,
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 14),
-
         /// USER INFO TEXT
         Expanded(
           child: Column(
@@ -377,95 +336,17 @@ class HomeView extends GetView<HomeController> {
                   ),
                 );
               }),
-              const SizedBox(height: 4),
-              // Text(
-              //   "You’re doing amazing today!\nKeep going, results are coming.",
-              //   style: GoogleFonts.inter(
-              //     color: Colors.white.withOpacity(0.65),
-              //     fontSize: 12,
-              //     height: 1.35,
-              //   ),
-              // ),
             ],
           ),
         ),
 
         /// HEADER TOP RIGHT ACTIONS
-        Row(
-          children: [
-            /// STREAK BADGE CARD
-            GestureDetector(
-              onTap: () => Get.toNamed('/rewards-hub'),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.03),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: const Color(0xffFF7A00).withOpacity(0.12),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.local_fire_department_rounded,
-                      color: Color(0xffFF7A00),
-                      size: 20,
-                    ),
-                    const SizedBox(width: 6),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Obx(
-                          () => Text(
-                            "${controller.currentStreak.value}",
-                            style: GoogleFonts.outfit(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              height: 1.0,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          "Day Streak",
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(0.55),
-                            fontSize: 9,
-                            height: 1.1,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(width: 8),
-
-            /// NOTIFICATION ICON
-            GestureDetector(
-              onTap: () => Get.toNamed('/notifications'),
-              child: buildTopActionButton(
-                icon: Icons.notifications_none_rounded,
-                showDot: true,
-              ),
-            ),
-
-            const SizedBox(width: 8),
-
-            /// SCAN/SCANNER ICON
-            buildTopActionButton(
-              icon: Icons.qr_code_scanner_rounded,
-              showDot: false,
-            ),
-          ],
+        GestureDetector(
+          onTap: () => Get.toNamed('/notifications'),
+          child: buildTopActionButton(
+            icon: Icons.notifications_none_rounded,
+            showDot: true,
+          ),
         ),
       ],
     );

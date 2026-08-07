@@ -18,6 +18,9 @@ class HomeController extends GetxController {
   final homeMeals = <Map<String, dynamic>>[].obs;
   final weightHistoryLogs = <Map<String, dynamic>>[].obs;
 
+  // Swiggy-style tab navigation state
+  final activeTab = 0.obs; // 0 = Meal, 1 = Workout
+
   // Real-time progress trackers
   final currentCalories = 0.obs;
   final targetCalories = 2000.obs;
