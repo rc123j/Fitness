@@ -83,6 +83,19 @@ class HomeView extends GetView<HomeController> {
                   /// 1. TOP HEADER SECTION
                   buildTopHeader(),
 
+                  // Safely move the image up without crashing using Transform
+                  Transform.translate(
+                    offset: const Offset(0, 10), // Move it up by 12 pixels
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: Image.asset(
+                        'assets/home/home1.png',
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+
                   const SizedBox(height: 24),
 
                   /// 2. ACTIVE PLAN CARD (Glassmorphic)
@@ -102,11 +115,16 @@ class HomeView extends GetView<HomeController> {
 
                   /// 3. STATS GRID ROW 1 & 2 (Reactive)
                   Obx(() {
-                    final double calProgress = controller.targetCalories.value > 0
-                        ? (controller.currentCalories.value / controller.targetCalories.value).clamp(0.0, 1.0)
+                    final double calProgress =
+                        controller.targetCalories.value > 0
+                        ? (controller.currentCalories.value /
+                                  controller.targetCalories.value)
+                              .clamp(0.0, 1.0)
                         : 0.0;
                     final double stepProgress = controller.targetSteps.value > 0
-                        ? (controller.currentSteps.value / controller.targetSteps.value).clamp(0.0, 1.0)
+                        ? (controller.currentSteps.value /
+                                  controller.targetSteps.value)
+                              .clamp(0.0, 1.0)
                         : 0.0;
 
                     return Column(
@@ -118,8 +136,10 @@ class HomeView extends GetView<HomeController> {
                                 onTap: () => Get.toNamed('/calorie-history'),
                                 child: buildStatCard(
                                   title: "Calories",
-                                  value: controller.currentCalories.value.toString(),
-                                  sub: "/ ${controller.targetCalories.value} kcal",
+                                  value: controller.currentCalories.value
+                                      .toString(),
+                                  sub:
+                                      "/ ${controller.targetCalories.value} kcal",
                                   icon: Icons.local_fire_department_rounded,
                                   color: const Color(0xffFF7A00),
                                   progress: calProgress,
@@ -135,9 +155,13 @@ class HomeView extends GetView<HomeController> {
                                     "Water Logged 💧",
                                     "Successfully added +250ml to your daily intake.",
                                     snackPosition: SnackPosition.BOTTOM,
-                                    backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
+                                    backgroundColor: const Color(
+                                      0xff0B0817,
+                                    ).withOpacity(0.9),
                                     colorText: Colors.white,
-                                    borderColor: const Color(0xff00A3FF).withOpacity(0.3),
+                                    borderColor: const Color(
+                                      0xff00A3FF,
+                                    ).withOpacity(0.3),
                                     borderWidth: 1,
                                     margin: const EdgeInsets.all(16),
                                   );
@@ -161,16 +185,21 @@ class HomeView extends GetView<HomeController> {
                                     "Steps Tracked 👟",
                                     "Successfully logged +1000 steps walked.",
                                     snackPosition: SnackPosition.BOTTOM,
-                                    backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
+                                    backgroundColor: const Color(
+                                      0xff0B0817,
+                                    ).withOpacity(0.9),
                                     colorText: Colors.white,
-                                    borderColor: const Color(0xff00FF87).withOpacity(0.3),
+                                    borderColor: const Color(
+                                      0xff00FF87,
+                                    ).withOpacity(0.3),
                                     borderWidth: 1,
                                     margin: const EdgeInsets.all(16),
                                   );
                                 },
                                 child: buildStatCard(
                                   title: "Steps",
-                                  value: controller.currentSteps.value.toString(),
+                                  value: controller.currentSteps.value
+                                      .toString(),
                                   sub: "/ ${controller.targetSteps.value}",
                                   icon: Icons.directions_walk_rounded,
                                   color: const Color(0xff00FF87),
@@ -182,7 +211,8 @@ class HomeView extends GetView<HomeController> {
                             Expanded(
                               child: buildStatCard(
                                 title: "Weight",
-                                value: "${controller.currentWeight.value.toStringAsFixed(1)} kg",
+                                value:
+                                    "${controller.currentWeight.value.toStringAsFixed(1)} kg",
                                 sub: controller.weightDifference.value >= 0
                                     ? "+${controller.weightDifference.value.toStringAsFixed(1)} kg"
                                     : "${controller.weightDifference.value.toStringAsFixed(1)} kg",
@@ -335,7 +365,9 @@ class HomeView extends GetView<HomeController> {
             children: [
               Obx(() {
                 final String fullName = controller.userName.value;
-                final String firstName = fullName.isNotEmpty ? fullName.split(' ')[0] : 'Member';
+                final String firstName = fullName.isNotEmpty
+                    ? fullName.split(' ')[0]
+                    : 'Member';
                 return Text(
                   "Hey, $firstName!",
                   style: GoogleFonts.outfit(
@@ -389,15 +421,17 @@ class HomeView extends GetView<HomeController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Obx(() => Text(
-                          "${controller.currentStreak.value}",
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            height: 1.0,
+                        Obx(
+                          () => Text(
+                            "${controller.currentStreak.value}",
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              height: 1.0,
+                            ),
                           ),
-                        )),
+                        ),
                         Text(
                           "Day Streak",
                           style: GoogleFonts.inter(
@@ -473,7 +507,10 @@ class HomeView extends GetView<HomeController> {
   /// ----------------------------------------------------
   Widget buildActivePlanCard() {
     return Obx(() {
-      final double progress = (controller.planDayNumber.value / 30.0).clamp(0.0, 1.0);
+      final double progress = (controller.planDayNumber.value / 30.0).clamp(
+        0.0,
+        1.0,
+      );
 
       return Container(
         height: 154,
@@ -515,7 +552,9 @@ class HomeView extends GetView<HomeController> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            controller.planName.value.isNotEmpty ? controller.planName.value : "Fat Loss Plan",
+                            controller.planName.value.isNotEmpty
+                                ? controller.planName.value
+                                : "Fat Loss Plan",
                             style: GoogleFonts.outfit(
                               color: Colors.white,
                               fontSize: 26,
@@ -609,7 +648,9 @@ class HomeView extends GetView<HomeController> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: const Color(0xff051911).withOpacity(0.40), // Subtle emerald health tint
+        color: const Color(
+          0xff051911,
+        ).withOpacity(0.40), // Subtle emerald health tint
         border: Border.all(
           color: const Color(0xff00FF87).withOpacity(0.18),
           width: 1.0,
@@ -675,7 +716,10 @@ class HomeView extends GetView<HomeController> {
                       height: 1.4,
                     ),
                     children: [
-                      const TextSpan(text: "Follow this customized meal plan consistently for 30 days and we assure you a safe, healthy weight change of "),
+                      const TextSpan(
+                        text:
+                            "Follow this customized meal plan consistently for 30 days and we assure you a safe, healthy weight change of ",
+                      ),
                       TextSpan(
                         text: "5 to 7 kg",
                         style: GoogleFonts.outfit(
@@ -683,7 +727,10 @@ class HomeView extends GetView<HomeController> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const TextSpan(text: ". No crash dieting, just home-cooked Indian meals matching your body profile."),
+                      const TextSpan(
+                        text:
+                            ". No crash dieting, just home-cooked Indian meals matching your body profile.",
+                      ),
                     ],
                   ),
                 ),
@@ -693,7 +740,10 @@ class HomeView extends GetView<HomeController> {
                   children: [
                     buildTrustBadge("Science-Based", Icons.science_rounded),
                     buildTrustBadge("Indian-Friendly", Icons.home_rounded),
-                    buildTrustBadge("No False Claims", Icons.fact_check_rounded),
+                    buildTrustBadge(
+                      "No False Claims",
+                      Icons.fact_check_rounded,
+                    ),
                   ],
                 ),
               ],
@@ -728,7 +778,9 @@ class HomeView extends GetView<HomeController> {
   Widget buildMealProgressCard() {
     return Obx(() {
       final double progress = controller.totalMealsToday.value > 0
-          ? (controller.mealsCompletedToday.value / controller.totalMealsToday.value).clamp(0.0, 1.0)
+          ? (controller.mealsCompletedToday.value /
+                    controller.totalMealsToday.value)
+                .clamp(0.0, 1.0)
           : 0.0;
 
       return GestureDetector(
@@ -794,10 +846,7 @@ class HomeView extends GetView<HomeController> {
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [
-                              Color(0xffB100FF),
-                              Color(0xffFF00E5),
-                            ],
+                            colors: [Color(0xffB100FF), Color(0xffFF00E5)],
                           ),
                           borderRadius: BorderRadius.circular(3),
                         ),
@@ -1072,7 +1121,10 @@ class HomeView extends GetView<HomeController> {
           child: Center(
             child: Text(
               "No active meal plans found.",
-              style: GoogleFonts.inter(color: Colors.white.withOpacity(0.6), fontSize: 13),
+              style: GoogleFonts.inter(
+                color: Colors.white.withOpacity(0.6),
+                fontSize: 13,
+              ),
             ),
           ),
         );
@@ -1148,11 +1200,7 @@ class HomeView extends GetView<HomeController> {
                               width: 0.8,
                             ),
                           ),
-                          child: Icon(
-                            icon,
-                            color: color,
-                            size: 24,
-                          ),
+                          child: Icon(icon, color: color, size: 24),
                         ),
                         const SizedBox(width: 14),
 
@@ -1481,11 +1529,19 @@ class HomeView extends GetView<HomeController> {
     return Obx(() {
       final double currentW = controller.currentWeight.value;
       final double diffW = controller.weightDifference.value;
-      final String diffText = diffW >= 0 ? "↑ ${diffW.toStringAsFixed(1)} kg" : "↓ ${diffW.abs().toStringAsFixed(1)} kg";
-      final Color diffColor = diffW <= 0 ? const Color(0xff00FF87) : const Color(0xffFF3B30);
+      final String diffText = diffW >= 0
+          ? "↑ ${diffW.toStringAsFixed(1)} kg"
+          : "↓ ${diffW.abs().toStringAsFixed(1)} kg";
+      final Color diffColor = diffW <= 0
+          ? const Color(0xff00FF87)
+          : const Color(0xffFF3B30);
 
-      final List<double> weights = controller.weightHistoryLogs.map((log) => (log['weight'] as num).toDouble()).toList();
-      final List<String> labels = controller.weightHistoryLogs.map((log) => log['date'] as String).toList();
+      final List<double> weights = controller.weightHistoryLogs
+          .map((log) => (log['weight'] as num).toDouble())
+          .toList();
+      final List<String> labels = controller.weightHistoryLogs
+          .map((log) => log['date'] as String)
+          .toList();
 
       return Container(
         height: 180,
@@ -2537,7 +2593,8 @@ class ProgressLineChartPainter extends CustomPainter {
     double valRange = maxVal - minVal;
     if (valRange == 0) valRange = 1.0;
 
-    double stepX = size.width / (weights.length - 1 == 0 ? 1 : weights.length - 1);
+    double stepX =
+        size.width / (weights.length - 1 == 0 ? 1 : weights.length - 1);
     final points = <Offset>[];
 
     for (int i = 0; i < weights.length; i++) {
