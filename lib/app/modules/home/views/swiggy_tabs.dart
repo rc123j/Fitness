@@ -110,8 +110,12 @@ class SwiggyTabsHeader extends GetView<HomeController> {
       final workoutColor = const Color(0xff3F72AF); // Soft Blue
       final activeColor = isMeal ? mealColor : workoutColor;
 
+      final inactiveBg = isMeal
+          ? const Color(0xffFD6702).withOpacity(0.20)
+          : const Color(0xff3F72AF).withOpacity(0.20);
+
       return Container(
-        color: const Color(0xff06010F), // App dark background
+        color: inactiveBg,
         width: double.infinity,
         height: 80,
         child: Stack(

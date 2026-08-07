@@ -29,7 +29,7 @@ class HomeView extends GetView<HomeController> {
               // Dynamically update system status bar style to match the tab theme
               SystemChrome.setSystemUIOverlayStyle(
                 SystemUiOverlayStyle(
-                  statusBarColor: Colors.transparent,
+                  statusBarColor: headerBg,
                   statusBarIconBrightness: Brightness.light,
                   statusBarBrightness: Brightness.dark, // iOS
                   systemNavigationBarColor: const Color(0xff06010F),
@@ -2690,4 +2690,3 @@ class ActivePlanBgPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
