@@ -83,9 +83,11 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
   List<Map<String, dynamic>> get exclusionOptions {
     if (selectedDietLabel == null) return [];
 
+    final List<Map<String, dynamic>> options = [];
+
     if (selectedDietLabel == 'Non-Vegetarian' ||
         selectedDietLabel == 'Eggitarian') {
-      return [
+      options.addAll([
         {
           'key': 'no_seafood',
           'label': 'No Seafood / Fish',
@@ -101,11 +103,9 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
           'label': 'No Chicken / Poultry',
           'icon': Icons.block_rounded,
         },
-      ];
-    }
-
-    if (selectedDietLabel == 'Vegetarian' || selectedDietLabel == 'Vegan') {
-      return [
+      ]);
+    } else if (selectedDietLabel == 'Vegetarian' || selectedDietLabel == 'Vegan') {
+      options.addAll([
         {
           'key': 'no_egg',
           'label': 'No Egg (Strict Veg)',
@@ -131,11 +131,9 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
           'label': 'No Soy / Tofu',
           'icon': Icons.block_rounded,
         },
-      ];
-    }
-
-    if (selectedDietLabel == 'Keto / Low-Carb') {
-      return [
+      ]);
+    } else if (selectedDietLabel == 'Keto / Low-Carb') {
+      options.addAll([
         {
           'key': 'no_seafood',
           'label': 'No Seafood / Fish',
@@ -151,13 +149,21 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
           'label': 'Nut Allergy',
           'icon': Icons.dangerous_rounded,
         },
-      ];
+      ]);
     }
 
-    return [];
+    if (options.isNotEmpty) {
+      options.add({
+        'key': 'none',
+        'label': 'None / No Exclusions',
+        'icon': Icons.check_circle_outline_rounded,
+      });
+    }
+
+    return options;
   }
 
-  bool get canProceed => selectedDietLabel != null;
+  bool get canProceed => selectedDietLabel != null && selectedExclusions.isNotEmpty;
 
   void _selectDietType(Map<String, dynamic> diet) {
     setState(() {
@@ -169,10 +175,20 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
 
   void _toggleExclusion(String key) {
     setState(() {
-      if (selectedExclusions.contains(key)) {
-        selectedExclusions.remove(key);
+      if (key == 'none') {
+        if (selectedExclusions.contains('none')) {
+          selectedExclusions.remove('none');
+        } else {
+          selectedExclusions.clear();
+          selectedExclusions.add('none');
+        }
       } else {
-        selectedExclusions.add(key);
+        selectedExclusions.remove('none');
+        if (selectedExclusions.contains(key)) {
+          selectedExclusions.remove(key);
+        } else {
+          selectedExclusions.add(key);
+        }
       }
     });
   }
@@ -186,10 +202,13 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
       tastePreferenceIds.add(5); // id 5 = No Seafood in DB
     }
 
+    // Filter out the local 'none' exclusion before saving or passing
+    final finalExclusions = selectedExclusions.where((e) => e != 'none').toList();
+
     OnboardingDraftService.saveStep7(
       tastePreferenceIds: tastePreferenceIds,
       dietLabel: selectedDietLabel ?? 'Standard',
-      foodExclusions: selectedExclusions.toList(),
+      foodExclusions: finalExclusions,
     );
 
     Get.to(
@@ -204,7 +223,7 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
         activityLevelName: widget.activityLevelName,
         tastePreferenceIds: tastePreferenceIds,
         dietLabel: selectedDietLabel!,
-        foodExclusions: selectedExclusions.toList(),
+        foodExclusions: finalExclusions,
       ),
       transition: Transition.cupertino,
     );

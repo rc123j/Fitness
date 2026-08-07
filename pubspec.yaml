@@ -68,6 +68,7 @@ flutter:
     - assets/images/register_girl.png
     - assets/images/health_screen.png
     - assets/new_images/
+    - assets/new_images1/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

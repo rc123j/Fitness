@@ -166,7 +166,10 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
     // 6. Dynamic Macronutrient & Calorie Target calculations
     String goal = widget.goalTitle.toLowerCase();
     double calTarget = tdee;
-    if (goal.contains('fat loss') || goal.contains('lose') || goal.contains('weight loss') || goal.contains('burn')) {
+    if (goal.contains('fat loss') ||
+        goal.contains('lose') ||
+        goal.contains('weight loss') ||
+        goal.contains('burn')) {
       calTarget = tdee - 500;
       if (calTarget < 1200) calTarget = 1200;
     } else if (goal.contains('weight gain')) {
@@ -186,8 +189,12 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
   String getAISuggestionText() {
     String goal = widget.goalTitle.toLowerCase();
     String lifestyleNote = "";
-    if (widget.smokingHabit == "Yes, regularly" || widget.alcoholHabit == "Yes, regularly" || widget.smokingHabit == "Occasionally / Socially" || widget.alcoholHabit == "Occasionally / Socially") {
-      lifestyleNote = " Additionally, your plan is calibrated with extra hydration and antioxidant-rich micronutrients to support cellular health and liver processing based on your lifestyle profile.";
+    if (widget.smokingHabit == "Yes, regularly" ||
+        widget.alcoholHabit == "Yes, regularly" ||
+        widget.smokingHabit == "Occasionally / Socially" ||
+        widget.alcoholHabit == "Occasionally / Socially") {
+      lifestyleNote =
+          " Additionally, your plan is calibrated with extra hydration and antioxidant-rich micronutrients to support cellular health and liver processing based on your lifestyle profile.";
     }
 
     if (goal.contains("loss") || goal.contains("burn")) {
@@ -488,12 +495,23 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                 final active = index <= 9; // Steps 1-10 active
                                 return Expanded(
                                   child: Container(
-                                    margin: EdgeInsets.only(right: index == 9 ? 0 : 4),
+                                    margin: EdgeInsets.only(
+                                      right: index == 9 ? 0 : 4,
+                                    ),
                                     height: 3.5,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(2),
-                                      gradient: active ? const LinearGradient(colors: [Color(0xffFF00E5), Color(0xffFF7A00)]) : null,
-                                      color: active ? null : Colors.white.withOpacity(0.10),
+                                      gradient: active
+                                          ? const LinearGradient(
+                                              colors: [
+                                                Color(0xffFF00E5),
+                                                Color(0xffFF7A00),
+                                              ],
+                                            )
+                                          : null,
+                                      color: active
+                                          ? null
+                                          : Colors.white.withOpacity(0.10),
                                     ),
                                   ),
                                 );
@@ -533,14 +551,20 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                     fontSize: 32,
                                     fontWeight: FontWeight.w900,
                                     foreground: Paint()
-                                      ..shader = const LinearGradient(
-                                        colors: [
-                                          Color(0xffFF00E5),
-                                          Color(0xff00E5FF),
-                                        ],
-                                      ).createShader(
-                                        const Rect.fromLTWH(0.0, 0.0, 200.0, 50.0),
-                                      ),
+                                      ..shader =
+                                          const LinearGradient(
+                                            colors: [
+                                              Color(0xffFF00E5),
+                                              Color(0xff00E5FF),
+                                            ],
+                                          ).createShader(
+                                            const Rect.fromLTWH(
+                                              0.0,
+                                              0.0,
+                                              200.0,
+                                              50.0,
+                                            ),
+                                          ),
                                   ),
                                 ),
                               ],
@@ -599,7 +623,10 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                       width: 170,
                                       child: CustomPaint(
                                         painter: _BmiArcPainter(
-                                          progress: (bmi / 40.0).clamp(0.0, 1.0),
+                                          progress: (bmi / 40.0).clamp(
+                                            0.0,
+                                            1.0,
+                                          ),
                                           color: bmiColor,
                                         ),
                                       ),
@@ -621,7 +648,9 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                         Text(
                                           "BMI",
                                           style: GoogleFonts.outfit(
-                                            color: Colors.white.withOpacity(0.35),
+                                            color: Colors.white.withOpacity(
+                                              0.35,
+                                            ),
                                             fontSize: 10,
                                             fontWeight: FontWeight.bold,
                                             letterSpacing: 2.0,
@@ -636,7 +665,9 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                           ),
                                           decoration: BoxDecoration(
                                             color: bmiColor.withOpacity(0.15),
-                                            borderRadius: BorderRadius.circular(20),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
                                             border: Border.all(
                                               color: bmiColor.withOpacity(0.45),
                                               width: 0.8,
@@ -659,9 +690,12 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                 const SizedBox(height: 6),
                                 // Min / Max scale labels
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 30,
+                                  ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         "0",
@@ -692,44 +726,62 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                               Expanded(
                                 child: buildMetricReportCard(
                                   title: "BMR",
-                                  value: "${bmr.toInt()} kcal",
+                                  value: "${bmr.toInt()}",
+                                  unit: "kcal",
                                   desc: "Basal Metabolic Rate",
                                   icon: Icons.local_fire_department_rounded,
                                   color: const Color(0xffFF5F6D),
+                                  bgImage: "assets/new_images1/bmr.png",
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: buildMetricReportCard(
+                                  imageLeft: 25, // Anchored left
+                                  imageTop: -35, // Scaled slightly larger
+                                  imageBottom: -35,
                                   title: "IDEAL WEIGHT",
-                                  value: "${ibw.toStringAsFixed(1)} kg",
-                                  desc: "Devine Formula IBW",
-                                  icon: Icons.scale_rounded,
+                                  value: ibw.toStringAsFixed(1),
+                                  unit: "kg",
+                                  desc: "Devine Formula (IBW)",
+                                  icon: Icons.monitor_weight_outlined,
                                   color: const Color(0xff7B61FF),
+                                  bgImage:
+                                      "assets/new_images1/ideal_weight.png",
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
                           Row(
                             children: [
                               Expanded(
                                 child: buildMetricReportCard(
+                                  imageRight:
+                                      -20, // Shifted slightly left from default
+                                  imageTop: -30, // Scaled slightly larger
+                                  imageBottom: -30,
                                   title: "DAILY TDEE",
-                                  value: "${tdee.toInt()} kcal",
-                                  desc: "Active Energy Needs",
-                                  icon: Icons.offline_bolt_rounded,
+                                  value: "${tdee.toInt()}",
+                                  unit: "kcal",
+                                  desc: "Total Daily Energy\nExpenditure",
+                                  icon: Icons.bolt_rounded,
                                   color: const Color(0xff00E5FF),
+                                  bgImage: "assets/new_images1/daily_tdeee.png",
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: buildMetricReportCard(
+                                  imageRight: -5, // Shifted slightly left only
                                   title: "WEIGHT RATIO",
-                                  value: "${pctIbw.toInt()}%",
-                                  desc: "Actual / Ideal Weight",
-                                  icon: Icons.analytics_rounded,
+                                  value: "${pctIbw.toInt()}",
+                                  unit: "%",
+                                  desc: "Current / Ideal Weight",
+                                  icon: Icons.show_chart_rounded,
                                   color: const Color(0xffFF7A00),
+                                  bgImage:
+                                      "assets/new_images1/weight ratio.png",
                                 ),
                               ),
                             ],
@@ -805,7 +857,9 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                           height: 30,
                                           width: 30,
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(10),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
                                             gradient: const LinearGradient(
                                               colors: [
                                                 Color(0xffFF00E5),
@@ -832,7 +886,9 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                                       ],
                                     ),
                                     const SizedBox(height: 6),
-                                    buildRichMarkdownText(getAISuggestionText()),
+                                    buildRichMarkdownText(
+                                      getAISuggestionText(),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -948,75 +1004,134 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
   Widget buildMetricReportCard({
     required String title,
     required String value,
+    required String unit,
     required String desc,
     required IconData icon,
     required Color color,
+    required String bgImage,
+    double? imageTop,
+    double? imageBottom,
+    double? imageRight,
+    double? imageLeft,
   }) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Container(
-          height: 96,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.02),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.12),
-              width: 0.8,
+      child: Container(
+        height: 180,
+        decoration: BoxDecoration(
+          color: const Color(0xff151520),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.0),
+        ),
+        child: Stack(
+          children: [
+            // Background Image shifted
+            Positioned(
+              top: imageTop ?? -10,
+              bottom: imageBottom ?? -10,
+              right: imageLeft != null ? null : (imageRight ?? -30),
+              left: imageLeft,
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  const Color(0xff151520).withOpacity(0.3),
+                  BlendMode.darken,
+                ),
+                child: Image.asset(bgImage, fit: BoxFit.fitHeight),
+              ),
             ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    height: 28,
-                    width: 28,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: color.withOpacity(0.1),
-                    ),
-                    child: Icon(icon, color: color, size: 16),
+            // Gradient Overlay and Content
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xff151520).withOpacity(0.8),
+                      const Color(0xff151520).withOpacity(0.2),
+                      const Color(0xff151520).withOpacity(0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: GoogleFonts.outfit(
-                        color: Colors.white.withOpacity(0.5),
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        /* Container(
+                          height: 36,
+                          width: 36,
+                          decoration: BoxDecoration(
+                            color: color.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(icon, color: color, size: 20),
+                        ),
+                        const SizedBox(width: 12), */
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: GoogleFonts.outfit(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                value,
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              value,
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 32,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              unit,
+                              style: GoogleFonts.outfit(
+                                color: Colors.white.withOpacity(0.7),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Container(height: 2, width: 24, color: color),
+                        const SizedBox(height: 12),
+                        Text(
+                          desc,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 11,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                desc,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
-                  color: Colors.white.withOpacity(0.4),
-                  fontSize: 9,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1037,10 +1152,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.02),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: color.withOpacity(0.3),
-              width: 0.8,
-            ),
+            border: Border.all(color: color.withOpacity(0.3), width: 0.8),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1194,10 +1306,7 @@ class _BmiArcPainter extends CustomPainter {
       ..shader = SweepGradient(
         startAngle: startAngle,
         endAngle: startAngle + sweepFull * progress,
-        colors: [
-          color.withOpacity(0.7),
-          color,
-        ],
+        colors: [color.withOpacity(0.7), color],
       ).createShader(rect)
       ..strokeWidth = 10
       ..style = PaintingStyle.stroke
