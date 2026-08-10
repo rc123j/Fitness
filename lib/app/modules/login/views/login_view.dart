@@ -270,20 +270,32 @@ class LoginView extends GetView<LoginController> {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xffFF3B30).withOpacity(0.15),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xffFF3B30).withOpacity(0.3)),
+                            border: Border.all(
+                              color: const Color(0xffFF3B30).withOpacity(0.3),
+                            ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline, color: Color(0xffFF3B30), size: 18),
+                              const Icon(
+                                Icons.error_outline,
+                                color: Color(0xffFF3B30),
+                                size: 18,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   msg,
-                                  style: GoogleFonts.inter(color: const Color(0xffFF3B30), fontSize: 13),
+                                  style: GoogleFonts.inter(
+                                    color: const Color(0xffFF3B30),
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ),
                             ],
@@ -297,20 +309,32 @@ class LoginView extends GetView<LoginController> {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xff34C759).withOpacity(0.15),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xff34C759).withOpacity(0.3)),
+                            border: Border.all(
+                              color: const Color(0xff34C759).withOpacity(0.3),
+                            ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.check_circle_outline_rounded, color: Color(0xff34C759), size: 18),
+                              const Icon(
+                                Icons.check_circle_outline_rounded,
+                                color: Color(0xff34C759),
+                                size: 18,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   controller.successMessage!,
-                                  style: GoogleFonts.inter(color: const Color(0xff34C759), fontSize: 13),
+                                  style: GoogleFonts.inter(
+                                    color: const Color(0xff34C759),
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ),
                             ],
@@ -329,16 +353,19 @@ class LoginView extends GetView<LoginController> {
                     const SizedBox(height: 16),
 
                     // PASSWORD FIELD
-                    Obx(() => PremiumTextField(
-                      hint: 'Password',
-                      icon: Icons.lock_outline_rounded,
-                      suffix: controller.obscurePassword.value
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
-                      obscureText: controller.obscurePassword.value,
-                      onSuffixTap: () => controller.togglePasswordVisibility(),
-                      controller: controller.passwordController,
-                    )),
+                    Obx(
+                      () => PremiumTextField(
+                        hint: 'Password',
+                        icon: Icons.lock_outline_rounded,
+                        suffix: controller.obscurePassword.value
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                        obscureText: controller.obscurePassword.value,
+                        onSuffixTap: () =>
+                            controller.togglePasswordVisibility(),
+                        controller: controller.passwordController,
+                      ),
+                    ),
 
                     const SizedBox(height: 16),
 
@@ -370,10 +397,7 @@ class LoginView extends GetView<LoginController> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(32),
                           gradient: const LinearGradient(
-                            colors: [
-                              Color(0xffB000FF),
-                              Color(0xffFF5E00),
-                            ],
+                            colors: [Color(0xffB000FF), Color(0xffFF5E00)],
                           ),
                           boxShadow: [
                             BoxShadow(
@@ -388,7 +412,9 @@ class LoginView extends GetView<LoginController> {
                           color: Colors.transparent,
                           child: InkWell(
                             borderRadius: BorderRadius.circular(32),
-                            onTap: controller.isLoading.value ? null : () => controller.login(),
+                            onTap: controller.isLoading.value
+                                ? null
+                                : () => controller.login(),
                             child: Center(
                               child: controller.isLoading.value
                                   ? const SizedBox(
@@ -400,7 +426,8 @@ class LoginView extends GetView<LoginController> {
                                       ),
                                     )
                                   : Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Text(
                                           'Log In',
@@ -622,9 +649,7 @@ class _PremiumTextFieldState extends State<PremiumTextField> {
               ? Colors.black.withOpacity(0.4)
               : Colors.white.withOpacity(0.06),
           border: Border.all(
-            color: _isFocused
-                ? highlightColor
-                : Colors.white.withOpacity(0.12),
+            color: _isFocused ? highlightColor : Colors.white.withOpacity(0.12),
             width: _isFocused ? 1.5 : 0.8,
           ),
           boxShadow: _isFocused
@@ -633,7 +658,7 @@ class _PremiumTextFieldState extends State<PremiumTextField> {
                     color: highlightColor.withOpacity(0.12),
                     blurRadius: 10,
                     spreadRadius: 1,
-                  )
+                  ),
                 ]
               : [],
         ),
@@ -641,7 +666,9 @@ class _PremiumTextFieldState extends State<PremiumTextField> {
           children: [
             Icon(
               widget.icon,
-              color: _isFocused ? highlightColor : Colors.white.withOpacity(0.40),
+              color: _isFocused
+                  ? highlightColor
+                  : Colors.white.withOpacity(0.40),
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -666,7 +693,9 @@ class _PremiumTextFieldState extends State<PremiumTextField> {
                 onTap: widget.onSuffixTap,
                 child: Icon(
                   widget.suffix,
-                  color: _isFocused ? highlightColor : Colors.white.withOpacity(0.45),
+                  color: _isFocused
+                      ? highlightColor
+                      : Colors.white.withOpacity(0.45),
                   size: 20,
                 ),
               ),

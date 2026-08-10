@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -83,13 +84,25 @@ class HomeView extends GetView<HomeController> {
                           top: 16,
                           bottom: 18,
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: Image.asset(
-                            'assets/home/home1.png',
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
+                        child: Column(
+                          children: [
+                            if (isMeal) ...[
+                              const PremiumSearchBar(),
+                              const SizedBox(height: 16),
+                              const AnimatedPartyBanner(),
+                              const SizedBox(height: 16),
+                              const SwiggyPromoCards(),
+                            ] else
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(24),
+                                child: Image.asset(
+                                  'assets/home/home1.png',
+                                  width: double.infinity,
+                                  height: 140,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
 
@@ -108,6 +121,11 @@ class HomeView extends GetView<HomeController> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 8),
+
+                            /// PROMO BANNERS
+                            buildPromoBanners(),
+
+                            const SizedBox(height: 16),
 
                             /// 2. ACTIVE PLAN CARD (Glassmorphic)
                             buildActivePlanCard(),
@@ -365,12 +383,43 @@ class HomeView extends GetView<HomeController> {
         ),
 
         /// HEADER TOP RIGHT ACTIONS
-        GestureDetector(
-          onTap: () => Get.toNamed('/notifications'),
-          child: buildTopActionButton(
-            icon: Icons.notifications_none_rounded,
-            showDot: true,
-          ),
+        Row(
+          children: [
+            GestureDetector(
+              onTap: () => Get.toNamed('/notifications'),
+              child: buildTopActionButton(
+                icon: Icons.notifications_none_rounded,
+                showDot: true,
+              ),
+            ),
+            const SizedBox(width: 12),
+            GestureDetector(
+              onTap: () => Get.toNamed('/profile'),
+              child: Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.05),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.08),
+                    width: 0.8,
+                  ),
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/profile/avatar.png',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Icon(
+                      Icons.person_rounded,
+                      color: Colors.white.withOpacity(0.85),
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -1013,6 +1062,31 @@ class HomeView extends GetView<HomeController> {
   /// ----------------------------------------------------
   /// MEAL PLAN TIMELINE WIDGETS
   /// ----------------------------------------------------
+  Widget buildPromoBanners() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        children: [
+          _buildBannerImage('assets/home/banner1.png'),
+          const SizedBox(width: 12),
+          _buildBannerImage('assets/home/banner2.png'),
+          const SizedBox(width: 12),
+          _buildBannerImage('assets/home/banner3.png'),
+          const SizedBox(width: 12),
+          _buildBannerImage('assets/home/banner4.png'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBannerImage(String path) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Image.asset(path, width: 300, height: 150, fit: BoxFit.cover),
+    );
+  }
+
   Widget buildMealPlanTimeline() {
     return Obx(() {
       if (controller.homeMeals.isEmpty) {
@@ -2689,4 +2763,284 @@ class ActivePlanBgPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// ----------------------------------------------------
+/// PREMIUM SEARCH BAR WIDGET
+/// ----------------------------------------------------
+class PremiumSearchBar extends StatefulWidget {
+  const PremiumSearchBar({super.key});
+
+  @override
+  State<PremiumSearchBar> createState() => _PremiumSearchBarState();
+}
+
+class _PremiumSearchBarState extends State<PremiumSearchBar> {
+  final List<String> searchHints = [
+    "Search Breakfast...",
+    "Search Lunch...",
+    "Search Mid Meal...",
+    "Search Dinner...",
+  ];
+  int currentIndex = 0;
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (mounted) {
+        setState(() {
+          currentIndex = (currentIndex + 1) % searchHints.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 54,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.search_rounded, color: Colors.black54, size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 0.2),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: Align(
+                key: ValueKey<int>(currentIndex),
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  searchHints[currentIndex],
+                  style: GoogleFonts.outfit(
+                    color: Colors.black87,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xffFD6702),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.tune_rounded,
+              color: Colors.white,
+              size: 18,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// ----------------------------------------------------
+/// SWIGGY STYLE PROMO CARDS WIDGET
+/// ----------------------------------------------------
+class SwiggyPromoCards extends StatelessWidget {
+  const SwiggyPromoCards({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // 4 cards as per project
+    final List<Map<String, String>> cards = [
+      {"title": "Up To 50% OFF", "sub": "Pro Plan"},
+      {"title": "Healthy Recipes", "sub": "Explore"},
+      {"title": "Track Macros", "sub": "Calculator"},
+      {"title": "Vegan Meals", "sub": "Green"},
+    ];
+
+    return Row(
+      children: [
+        Expanded(child: _buildCard(cards[0])),
+        const SizedBox(width: 8),
+        Expanded(child: _buildCard(cards[1])),
+        const SizedBox(width: 8),
+        Expanded(child: _buildCard(cards[2])),
+        const SizedBox(width: 8),
+        Expanded(child: _buildCard(cards[3])),
+      ],
+    );
+  }
+
+  Widget _buildCard(Map<String, String> card) {
+    return Container(
+      height: 85,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+      ),
+      padding: const EdgeInsets.all(6),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            card["title"]!,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.outfit(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              height: 1.1,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              card["sub"]!,
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// ----------------------------------------------------
+/// ANIMATED PARTY BANNER WIDGET
+/// ----------------------------------------------------
+class AnimatedPartyBanner extends StatefulWidget {
+  const AnimatedPartyBanner({super.key});
+
+  @override
+  State<AnimatedPartyBanner> createState() => _AnimatedPartyBannerState();
+}
+
+class _AnimatedPartyBannerState extends State<AnimatedPartyBanner> {
+  final List<Map<String, String>> banners = [
+    {"emoji": "🎉", "text": "Flash Sale: Flat 50% Off on Diet Plans!"},
+    {"emoji": "🔥", "text": "Burn Fat Faster with our new Expert Coaches!"},
+    {"emoji": "🥑", "text": "New Vegan Recipes added today! Tap to explore."},
+  ];
+  int currentIndex = 0;
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      if (mounted) {
+        setState(() {
+          currentIndex = (currentIndex + 1) % banners.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final banner = banners[currentIndex];
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+      ),
+      child: Row(
+        children: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            transitionBuilder: (child, animation) =>
+                ScaleTransition(scale: animation, child: child),
+            child: Text(
+              banner["emoji"]!,
+              key: ValueKey(banner["emoji"]),
+              style: const TextStyle(fontSize: 24),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 0.5),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  banner["text"]!,
+                  key: ValueKey(banner["text"]),
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ),
+          const Icon(
+            Icons.arrow_forward_ios_rounded,
+            color: Colors.white70,
+            size: 14,
+          ),
+        ],
+      ),
+    );
+  }
 }
