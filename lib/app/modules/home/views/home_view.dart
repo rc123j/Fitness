@@ -1111,203 +1111,7 @@ class HomeView extends GetView<HomeController> {
 
   Widget buildMealPlanTimeline() {
     return Obx(() {
-      if (controller.homeMeals.isEmpty) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: const Color(0xff0B0817).withOpacity(0.55),
-            border: Border.all(color: Colors.white.withOpacity(0.04)),
-          ),
-          child: Center(
-            child: Text(
-              "No active meal plans found.",
-              style: GoogleFonts.inter(
-                color: Colors.white.withOpacity(0.6),
-                fontSize: 13,
-              ),
-            ),
-          ),
-        );
-      }
-
-      return Column(
-        children: List.generate(controller.homeMeals.length, (index) {
-          final meal = controller.homeMeals[index];
-          final bool isFirst = index == 0;
-          final bool isLast = index == controller.homeMeals.length - 1;
-          final color = meal["color"] as Color;
-          final icon = meal["icon"] as IconData;
-
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// Vertical timeline custom drawn
-              SizedBox(
-                width: 24,
-                height: 106,
-                child: CustomPaint(
-                  painter: TimelineNodePainter(
-                    isFirst: isFirst,
-                    isLast: isLast,
-                    color: color,
-                    isActive: meal["tag"] == "Completed",
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-
-              /// Meal card itself
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => Get.toNamed('/meal-plan'),
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(22),
-                      color: const Color(0xff0B0817).withOpacity(0.50),
-                      border: Border.all(
-                        color: color.withOpacity(0.22),
-                        width: 1.0,
-                      ),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          color.withOpacity(0.06),
-                          const Color(0xff0B0817).withOpacity(0.40),
-                        ],
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        /// Circle Gradient Icon Left
-                        Container(
-                          height: 52,
-                          width: 52,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                color.withOpacity(0.25),
-                                color.withOpacity(0.05),
-                              ],
-                            ),
-                            border: Border.all(
-                              color: color.withOpacity(0.35),
-                              width: 0.8,
-                            ),
-                          ),
-                          child: Icon(icon, color: color, size: 24),
-                        ),
-                        const SizedBox(width: 14),
-
-                        /// Middle texts
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                meal["title"] as String,
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                meal["desc"] as String,
-                                style: GoogleFonts.inter(
-                                  color: Colors.white.withOpacity(0.70),
-                                  fontSize: 12,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                meal["macros"] as String,
-                                style: GoogleFonts.inter(
-                                  color: Colors.white.withOpacity(0.35),
-                                  fontSize: 10,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        /// Right side info and badge
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              meal["kcal"] as String,
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-
-                            /// Status Capsule Badge
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 5,
-                              ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: color.withOpacity(0.12),
-                                border: Border.all(
-                                  color: color.withOpacity(0.20),
-                                  width: 0.6,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    meal["tag"] == "Completed"
-                                        ? Icons.check_circle_outline_rounded
-                                        : Icons.access_time_rounded,
-                                    size: 10,
-                                    color: color,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    meal["tag"] as String,
-                                    style: GoogleFonts.outfit(
-                                      color: color,
-                                      fontSize: 8.5,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 6),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          color: Colors.white.withOpacity(0.35),
-                          size: 18,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        }),
-      );
+      return BlockbusterMealCarousel(meals: controller.homeMeals.toList());
     });
   }
 
@@ -3062,6 +2866,243 @@ class _AnimatedPartyBannerState extends State<AnimatedPartyBanner> {
             size: 14,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// BLOCKBUSTER MEAL CAROUSEL
+class BlockbusterMealCarousel extends StatefulWidget {
+  final List<dynamic> meals;
+  const BlockbusterMealCarousel({super.key, required this.meals});
+
+  @override
+  State<BlockbusterMealCarousel> createState() =>
+      _BlockbusterMealCarouselState();
+}
+
+class _BlockbusterMealCarouselState extends State<BlockbusterMealCarousel> {
+  late PageController _pageController;
+  double _currentPage = 0.0;
+
+  final List<String> placeholderImages = [
+    'https://images.unsplash.com/photo-1493770348161-369560ae357d?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(viewportFraction: 0.85);
+    _pageController.addListener(() {
+      setState(() {
+        _currentPage = _pageController.page ?? 0.0;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.meals.isEmpty) {
+      return Container(
+        height: 220,
+        margin: const EdgeInsets.symmetric(horizontal: 18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: const Color(0xff0B0817).withOpacity(0.55),
+          border: Border.all(color: Colors.white.withOpacity(0.04)),
+        ),
+        child: Center(
+          child: Text(
+            "No active meal plans found.",
+            style: GoogleFonts.inter(
+              color: Colors.white.withOpacity(0.6),
+              fontSize: 13,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        // The trick: padding + clipBehavior: none reveals the adjacent cards
+        SizedBox(
+          height: 330,
+          child: PageView.builder(
+            controller: _pageController,
+            physics: const BouncingScrollPhysics(),
+            clipBehavior: Clip.none,
+            itemCount: widget.meals.length,
+            itemBuilder: (context, index) {
+              double scale = 1.0;
+              if (_pageController.hasClients &&
+                  _pageController.positions.length == 1 &&
+                  _pageController.position.haveDimensions) {
+                double pageOffset = _currentPage - index;
+                scale = (1 - (pageOffset.abs() * 0.13)).clamp(0.87, 1.0);
+              } else {
+                scale = index == 0 ? 1.0 : 0.87;
+              }
+
+              final meal = widget.meals[index];
+              final String imageUrl =
+                  placeholderImages[index % placeholderImages.length];
+
+              return _buildMovieStyleMealCard(meal, scale, imageUrl);
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Pagination Dots
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(widget.meals.length, (index) {
+            final isSelected = (_currentPage.round() == index);
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              height: 6,
+              width: isSelected ? 20 : 6,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Colors.white
+                    : Colors.white.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMovieStyleMealCard(dynamic meal, double scale, String imageUrl) {
+    final color = meal["color"] as Color;
+
+    return GestureDetector(
+      onTap: () => Get.toNamed('/meal-plan'),
+      child: Transform.scale(
+        scale: scale,
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xff13001F),
+            boxShadow: [
+              if (scale > 0.95)
+                BoxShadow(
+                  color: color.withOpacity(0.3),
+                  blurRadius: 24,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 8),
+                ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Image section (takes ~65% of card) ──
+              Expanded(
+                flex: 65,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: const Color(0xff1A0030),
+                      child: const Icon(Icons.restaurant_rounded,
+                          color: Colors.white38, size: 48),
+                    ),
+                  ),
+                ),
+              ),
+
+              // ── Text section (takes ~35% of card) ──
+              Expanded(
+                flex: 35,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(20),
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xff1C0035),
+                        Color.lerp(color, const Color(0xff0A0014), 0.5)!,
+                      ],
+                    ),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Small meal-type label (like "BIBI KA MAQBARA, Chh...")
+                      Row(
+                        children: [
+                          Icon(meal["icon"] as IconData,
+                              size: 12, color: color),
+                          const SizedBox(width: 5),
+                          Text(
+                            (meal["title"] as String).toUpperCase(),
+                            style: GoogleFonts.inter(
+                              color: color,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.8,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      // Big bold title
+                      Text(
+                        meal["title"] as String,
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          height: 1.1,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      // Subtitle (kcal | macros)
+                      Text(
+                        "${meal["kcal"]} | ${meal["macros"]}",
+                        style: GoogleFonts.inter(
+                          color: Colors.white.withOpacity(0.55),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
