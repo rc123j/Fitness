@@ -133,8 +133,7 @@ class HomeView extends GetView<HomeController> {
                             const SizedBox(height: 16),
 
                             /// HONEST RESULTS PROMISE CARD
-                            buildHonestResultsCard(),
-
+                            // buildHonestResultsCard(),
                             const SizedBox(height: 16),
 
                             /// TODAY'S MEAL PROGRESS CARD
@@ -369,13 +368,36 @@ class HomeView extends GetView<HomeController> {
                 final String firstName = fullName.isNotEmpty
                     ? fullName.split(' ')[0]
                     : 'Member';
-                return Text(
-                  "Hey, $firstName!",
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Hey, ",
+                      style: GoogleFonts.outfit(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    ShaderMask(
+                      blendMode: BlendMode.srcIn,
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [
+                          Color(0xffB100FF),
+                          Color(0xffFF00E5),
+                          Color(0xffFF7A00),
+                        ],
+                      ).createShader(bounds),
+                      child: Text(
+                        "$firstName!",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 );
               }),
             ],
@@ -470,8 +492,8 @@ class HomeView extends GetView<HomeController> {
         height: 154,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          color: const Color(0xff0B0817).withOpacity(0.55),
-          border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
+          color: const Color(0xff120D23).withOpacity(0.8),
+          border: Border.all(color: Colors.white.withOpacity(0.25), width: 1.5),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(24),
@@ -494,7 +516,7 @@ class HomeView extends GetView<HomeController> {
                       Text(
                         "ACTIVE PLAN",
                         style: GoogleFonts.outfit(
-                          color: const Color(0xffFF00E5),
+                          color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 2.0,
