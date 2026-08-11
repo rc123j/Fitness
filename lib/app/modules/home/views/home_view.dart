@@ -111,233 +111,322 @@ class HomeView extends GetView<HomeController> {
                         decoration: const BoxDecoration(
                           color: Color(0xff06010F),
                         ),
-                        padding: const EdgeInsets.only(
-                          left: 18,
-                          right: 18,
-                          top: 24,
-                          bottom: 100,
-                        ),
+                        padding: const EdgeInsets.only(top: 24, bottom: 100),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: 8),
-
-                            /// PROMO BANNERS
-                            buildPromoBanners(),
-
-                            const SizedBox(height: 16),
-
-                            /// 2. ACTIVE PLAN CARD (Glassmorphic)
-                            buildActivePlanCard(),
-
-                            const SizedBox(height: 16),
-
-                            /// HONEST RESULTS PROMISE CARD
-                            // buildHonestResultsCard(),
-                            const SizedBox(height: 16),
-
-                            /// TODAY'S MEAL PROGRESS CARD
-                            buildMealProgressCard(),
-
-                            const SizedBox(height: 24),
-
-                            /// 3. STATS GRID ROW 1 & 2 (Reactive)
-                            Obx(() {
-                              final double calProgress =
-                                  controller.targetCalories.value > 0
-                                  ? (controller.currentCalories.value /
-                                            controller.targetCalories.value)
-                                        .clamp(0.0, 1.0)
-                                  : 0.0;
-                              final double stepProgress =
-                                  controller.targetSteps.value > 0
-                                  ? (controller.currentSteps.value /
-                                            controller.targetSteps.value)
-                                        .clamp(0.0, 1.0)
-                                  : 0.0;
-
-                              return Column(
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: GestureDetector(
-                                          onTap: () =>
-                                              Get.toNamed('/calorie-history'),
-                                          child: buildStatCard(
-                                            title: "Calories",
-                                            value: controller
-                                                .currentCalories
-                                                .value
-                                                .toString(),
-                                            sub:
-                                                "/ ${controller.targetCalories.value} kcal",
-                                            icon: Icons
-                                                .local_fire_department_rounded,
-                                            color: const Color(0xffFF7A00),
-                                            progress: calProgress,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Expanded(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            controller.addWater(0.25);
-                                            Get.snackbar(
-                                              "Water Logged 💧",
-                                              "Successfully added +250ml to your daily intake.",
-                                              snackPosition:
-                                                  SnackPosition.BOTTOM,
-                                              backgroundColor: const Color(
-                                                0xff0B0817,
-                                              ).withOpacity(0.9),
-                                              colorText: Colors.white,
-                                              borderColor: const Color(
-                                                0xff00A3FF,
-                                              ).withOpacity(0.3),
-                                              borderWidth: 1,
-                                              margin: const EdgeInsets.all(16),
-                                            );
-                                          },
-                                          child: buildWaterCard(
-                                            current:
-                                                controller.currentWater.value,
-                                            target:
-                                                controller.targetWater.value,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 14),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            controller.addSteps(1000);
-                                            Get.snackbar(
-                                              "Steps Tracked 👟",
-                                              "Successfully logged +1000 steps walked.",
-                                              snackPosition:
-                                                  SnackPosition.BOTTOM,
-                                              backgroundColor: const Color(
-                                                0xff0B0817,
-                                              ).withOpacity(0.9),
-                                              colorText: Colors.white,
-                                              borderColor: const Color(
-                                                0xff00FF87,
-                                              ).withOpacity(0.3),
-                                              borderWidth: 1,
-                                              margin: const EdgeInsets.all(16),
-                                            );
-                                          },
-                                          child: buildStatCard(
-                                            title: "Steps",
-                                            value: controller.currentSteps.value
-                                                .toString(),
-                                            sub:
-                                                "/ ${controller.targetSteps.value}",
-                                            icon: Icons.directions_walk_rounded,
-                                            color: const Color(0xff00FF87),
-                                            progress: stepProgress,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Expanded(
-                                        child: buildStatCard(
-                                          title: "Weight",
-                                          value:
-                                              "${controller.currentWeight.value.toStringAsFixed(1)} kg",
-                                          sub:
-                                              controller
-                                                      .weightDifference
-                                                      .value >=
-                                                  0
-                                              ? "+${controller.weightDifference.value.toStringAsFixed(1)} kg"
-                                              : "${controller.weightDifference.value.toStringAsFixed(1)} kg",
-                                          icon: Icons.monitor_weight_rounded,
-                                          color: const Color(0xffB100FF),
-                                          progress:
-                                              0.8, // decorative progress bar
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                  const SizedBox(height: 8),
+
+                                  /// 2. ACTIVE PLAN CARD (Glassmorphic)
+                                  buildActivePlanCard(),
                                 ],
-                              );
-                            }),
-
-                            const SizedBox(height: 28),
-
-                            /// 4. TODAY'S MEAL PLAN
-                            GestureDetector(
-                              onTap: () => Get.toNamed('/meal-plan'),
-                              child: sectionTitle(
-                                "TODAY'S MEAL PLAN",
-                                "View Full Plan",
                               ),
                             ),
 
-                            const SizedBox(height: 16),
-
-                            buildMealPlanTimeline(),
-
                             const SizedBox(height: 28),
 
-                            /// 5. AI COACH & HYDRATION GOAL (ROW)
-                            // Row(
-                            //   crossAxisAlignment: CrossAxisAlignment.start,
-                            //   children: [
-                            //     Expanded(flex: 11, child: buildAICoachCard()),
-                            //     const SizedBox(width: 12),
-                            //     Expanded(flex: 8, child: buildHydrationGoalCard()),
-                            //   ],
-                            // ),`
-                            const SizedBox(height: 28),
-
-                            /// 6. PROGRESS & STREAK SECTION
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                GestureDetector(
-                                  onTap: () => Get.toNamed('/progress'),
-                                  child: sectionTitle(
-                                    "YOUR PROGRESS",
-                                    "View All",
+                            /// 4. TODAY'S MEAL PLAN — full-width blue gradient section
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.only(
+                                top: 32,
+                                bottom: 28,
+                              ),
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Color(0xff06010F), // match background
+                                    Color(0xff09287B), // rich deep blue
+                                    Color(
+                                      0xff0E44B5,
+                                    ), // vibrant royal blue center glow
+                                    Color(
+                                      0xff081E57,
+                                    ), // dark blue/navy transition
+                                    Color(0xff06010F), // match background
+                                  ],
+                                  stops: [0.0, 0.25, 0.55, 0.85, 1.0],
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 18,
+                                    ),
+                                    child: GestureDetector(
+                                      onTap: () => Get.toNamed('/meal-plan'),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Today's\nMeal Plan",
+                                            style: GoogleFonts.outfit(
+                                              color: Colors.white,
+                                              fontSize: 28,
+                                              fontWeight: FontWeight.bold,
+                                              height: 1.15,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            "View Full Plan →",
+                                            style: GoogleFonts.inter(
+                                              color: Colors.white.withOpacity(
+                                                0.6,
+                                              ),
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 14),
-                                GestureDetector(
-                                  onTap: () => Get.toNamed('/progress'),
-                                  child: buildWeightProgressCard(),
-                                ),
-                              ],
+                                  const SizedBox(height: 16),
+                                  buildMealPlanTimeline(),
+                                ],
+                              ),
                             ),
 
                             const SizedBox(height: 28),
 
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                sectionTitle("STREAK", "View All"),
-                                const SizedBox(height: 14),
-                                buildStreakAndRewardsCard(),
-                                const SizedBox(height: 12),
-                                buildBadgesCard(),
-                              ],
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  /// PROMO BANNERS
+                                  buildPromoBanners(),
+
+                                  const SizedBox(height: 24),
+
+                                  /// TODAY'S MEAL PROGRESS CARD
+                                  buildMealProgressCard(),
+
+                                  const SizedBox(height: 24),
+
+                                  /// 3. STATS GRID ROW 1 & 2 (Reactive)
+                                  Obx(() {
+                                    final double calProgress =
+                                        controller.targetCalories.value > 0
+                                        ? (controller.currentCalories.value /
+                                                  controller
+                                                      .targetCalories
+                                                      .value)
+                                              .clamp(0.0, 1.0)
+                                        : 0.0;
+                                    final double stepProgress =
+                                        controller.targetSteps.value > 0
+                                        ? (controller.currentSteps.value /
+                                                  controller.targetSteps.value)
+                                              .clamp(0.0, 1.0)
+                                        : 0.0;
+
+                                    return Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: GestureDetector(
+                                                onTap: () => Get.toNamed(
+                                                  '/calorie-history',
+                                                ),
+                                                child: buildStatCard(
+                                                  title: "Calories",
+                                                  value: controller
+                                                      .currentCalories
+                                                      .value
+                                                      .toString(),
+                                                  sub:
+                                                      "/ ${controller.targetCalories.value} kcal",
+                                                  icon: Icons
+                                                      .local_fire_department_rounded,
+                                                  color: const Color(
+                                                    0xffFF7A00,
+                                                  ),
+                                                  progress: calProgress,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 14),
+                                            Expanded(
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  controller.addWater(0.25);
+                                                  Get.snackbar(
+                                                    "Water Logged 💧",
+                                                    "Successfully added +250ml to your daily intake.",
+                                                    snackPosition:
+                                                        SnackPosition.BOTTOM,
+                                                    backgroundColor:
+                                                        const Color(
+                                                          0xff0B0817,
+                                                        ).withOpacity(0.9),
+                                                    colorText: Colors.white,
+                                                    borderColor: const Color(
+                                                      0xff00A3FF,
+                                                    ).withOpacity(0.3),
+                                                    borderWidth: 1,
+                                                    margin:
+                                                        const EdgeInsets.all(
+                                                          16,
+                                                        ),
+                                                  );
+                                                },
+                                                child: buildWaterCard(
+                                                  current: controller
+                                                      .currentWater
+                                                      .value,
+                                                  target: controller
+                                                      .targetWater
+                                                      .value,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 14),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  controller.addSteps(1000);
+                                                  Get.snackbar(
+                                                    "Steps Tracked 👟",
+                                                    "Successfully logged +1000 steps walked.",
+                                                    snackPosition:
+                                                        SnackPosition.BOTTOM,
+                                                    backgroundColor:
+                                                        const Color(
+                                                          0xff0B0817,
+                                                        ).withOpacity(0.9),
+                                                    colorText: Colors.white,
+                                                    borderColor: const Color(
+                                                      0xff00FF87,
+                                                    ).withOpacity(0.3),
+                                                    borderWidth: 1,
+                                                    margin:
+                                                        const EdgeInsets.all(
+                                                          16,
+                                                        ),
+                                                  );
+                                                },
+                                                child: buildStatCard(
+                                                  title: "Steps",
+                                                  value: controller
+                                                      .currentSteps
+                                                      .value
+                                                      .toString(),
+                                                  sub:
+                                                      "/ ${controller.targetSteps.value}",
+                                                  icon: Icons
+                                                      .directions_walk_rounded,
+                                                  color: const Color(
+                                                    0xff00FF87,
+                                                  ),
+                                                  progress: stepProgress,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 14),
+                                            Expanded(
+                                              child: buildStatCard(
+                                                title: "Weight",
+                                                value:
+                                                    "${controller.currentWeight.value.toStringAsFixed(1)} kg",
+                                                sub:
+                                                    controller
+                                                            .weightDifference
+                                                            .value >=
+                                                        0
+                                                    ? "+${controller.weightDifference.value.toStringAsFixed(1)} kg"
+                                                    : "${controller.weightDifference.value.toStringAsFixed(1)} kg",
+                                                icon: Icons
+                                                    .monitor_weight_rounded,
+                                                color: const Color(0xffB100FF),
+                                                progress:
+                                                    0.8, // decorative progress bar
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    );
+                                  }),
+
+                                  const SizedBox(height: 28),
+
+                                  /// 5. AI COACH & HYDRATION GOAL (ROW)
+                                  // Row(
+                                  //   crossAxisAlignment: CrossAxisAlignment.start,
+                                  //   children: [
+                                  //     Expanded(flex: 11, child: buildAICoachCard()),
+                                  //     const SizedBox(width: 12),
+                                  //     Expanded(flex: 8, child: buildHydrationGoalCard()),
+                                  //   ],
+                                  // ),`
+                                  const SizedBox(height: 28),
+
+                                  /// 6. PROGRESS & STREAK SECTION
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () => Get.toNamed('/progress'),
+                                        child: sectionTitle(
+                                          "YOUR PROGRESS",
+                                          "View All",
+                                        ),
+                                      ),
+                                      const SizedBox(height: 14),
+                                      GestureDetector(
+                                        onTap: () => Get.toNamed('/progress'),
+                                        child: buildWeightProgressCard(),
+                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 28),
+
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      sectionTitle("STREAK", "View All"),
+                                      const SizedBox(height: 14),
+                                      buildStreakAndRewardsCard(),
+                                      const SizedBox(height: 12),
+                                      buildBadgesCard(),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 28),
+
+                                  /// 7. QUICK ACTIONS Grid
+                                  sectionTitle("QUICK ACTIONS", ""),
+
+                                  const SizedBox(height: 16),
+
+                                  buildQuickActionsGrid(),
+                                ],
+                              ),
                             ),
-
-                            const SizedBox(height: 28),
-
-                            /// 7. QUICK ACTIONS Grid
-                            sectionTitle("QUICK ACTIONS", ""),
-
-                            const SizedBox(height: 16),
-
-                            buildQuickActionsGrid(),
                           ],
                         ),
                       ),
@@ -1105,7 +1194,7 @@ class HomeView extends GetView<HomeController> {
   Widget _buildBannerImage(String path) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: Image.asset(path, width: 300, height: 150, fit: BoxFit.cover),
+      child: Image.asset(path, width: 360, height: 180, fit: BoxFit.cover),
     );
   }
 
@@ -2896,7 +2985,7 @@ class _BlockbusterMealCarouselState extends State<BlockbusterMealCarousel> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.85);
+    _pageController = PageController(viewportFraction: 0.74);
     _pageController.addListener(() {
       setState(() {
         _currentPage = _pageController.page ?? 0.0;
@@ -2937,7 +3026,7 @@ class _BlockbusterMealCarouselState extends State<BlockbusterMealCarousel> {
       children: [
         // The trick: padding + clipBehavior: none reveals the adjacent cards
         SizedBox(
-          height: 330,
+          height: 350,
           child: PageView.builder(
             controller: _pageController,
             physics: const BouncingScrollPhysics(),
@@ -2949,9 +3038,9 @@ class _BlockbusterMealCarouselState extends State<BlockbusterMealCarousel> {
                   _pageController.positions.length == 1 &&
                   _pageController.position.haveDimensions) {
                 double pageOffset = _currentPage - index;
-                scale = (1 - (pageOffset.abs() * 0.13)).clamp(0.87, 1.0);
+                scale = (1 - (pageOffset.abs() * 0.20)).clamp(0.80, 1.0);
               } else {
-                scale = index == 0 ? 1.0 : 0.87;
+                scale = index == 0 ? 1.0 : 0.80;
               }
 
               final meal = widget.meals[index];
@@ -2994,16 +3083,17 @@ class _BlockbusterMealCarouselState extends State<BlockbusterMealCarousel> {
       child: Transform.scale(
         scale: scale,
         child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            color: const Color(0xff13001F),
+            color: Colors.transparent,
             boxShadow: [
               if (scale > 0.95)
                 BoxShadow(
-                  color: color.withOpacity(0.3),
-                  blurRadius: 24,
-                  spreadRadius: 0,
+                  color: Colors.black.withOpacity(0.4),
+                  blurRadius: 20,
+                  spreadRadius: 2,
                   offset: const Offset(0, 8),
                 ),
             ],
@@ -3011,9 +3101,9 @@ class _BlockbusterMealCarouselState extends State<BlockbusterMealCarousel> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ── Image section (takes ~65% of card) ──
+              // ── Image section (takes ~74% of card) ──
               Expanded(
-                flex: 65,
+                flex: 74,
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(20),
@@ -3023,31 +3113,31 @@ class _BlockbusterMealCarouselState extends State<BlockbusterMealCarousel> {
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
                       color: const Color(0xff1A0030),
-                      child: const Icon(Icons.restaurant_rounded,
-                          color: Colors.white38, size: 48),
+                      child: const Icon(
+                        Icons.restaurant_rounded,
+                        color: Colors.white38,
+                        size: 48,
+                      ),
                     ),
                   ),
                 ),
               ),
 
-              // ── Text section (takes ~35% of card) ──
+              // ── Text section (takes ~26% of card) ──
               Expanded(
-                flex: 35,
+                flex: 26,
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(20),
-                    ),
                     gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
                       colors: [
-                        const Color(0xff1C0035),
-                        Color.lerp(color, const Color(0xff0A0014), 0.5)!,
+                        const Color(0xff06010F).withOpacity(0.85),
+                        Colors.transparent,
                       ],
                     ),
                   ),
-                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+                  padding: const EdgeInsets.fromLTRB(14, 6, 14, 6),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -3055,8 +3145,11 @@ class _BlockbusterMealCarouselState extends State<BlockbusterMealCarousel> {
                       // Small meal-type label (like "BIBI KA MAQBARA, Chh...")
                       Row(
                         children: [
-                          Icon(meal["icon"] as IconData,
-                              size: 12, color: color),
+                          Icon(
+                            meal["icon"] as IconData,
+                            size: 12,
+                            color: color,
+                          ),
                           const SizedBox(width: 5),
                           Text(
                             (meal["title"] as String).toUpperCase(),
