@@ -32,6 +32,15 @@ class ProgressController extends GetxController {
   final bmi = 23.1.obs;
   final bmiChange = (-0.8).obs;
 
+  // New Health Report Metrics
+  final tdee = 2450.obs;
+  final bmr = 1800.obs;
+  final ibw = 72.0.obs;
+  final targetCalories = 2150.obs;
+
+  // 7-Day Adherence Data Points
+  final weeklyAdherenceData = <Map<String, dynamic>>[].obs;
+
   // Weight Trend Data Points (Date, Weight)
   final weightTrendData = <Map<String, dynamic>>[
     {"date": "16 Apr", "weight": 71.0},
@@ -94,6 +103,23 @@ class ProgressController extends GetxController {
             weightTrendData.value = trend;
           }
         }
+        
+        // Setup mock 7-day adherence data (Calories vs Target)
+        final List<Map<String, dynamic>> adherence = [];
+        final today = DateTime.now();
+        final days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        for (int i = 6; i >= 0; i--) {
+          final d = today.subtract(Duration(days: i));
+          // Mock data: sometimes hitting target, sometimes over
+          int cal = 1900 + (d.day * 50) % 600; 
+          adherence.add({
+            "day": days[d.weekday - 1],
+            "calories": cal,
+            "target": targetCalories.value,
+          });
+        }
+        weeklyAdherenceData.value = adherence;
+
       }
     } catch (_) {
       // Fallback gracefully on network failures
@@ -113,6 +139,9 @@ class ProgressController extends GetxController {
 
         if (latestMetrics != null) {
           bmi.value = (latestMetrics['bmi'] as num?)?.toDouble() ?? bmi.value;
+          tdee.value = (latestMetrics['tdee'] as num?)?.toInt() ?? tdee.value;
+          bmr.value = (latestMetrics['bmr'] as num?)?.toInt() ?? bmr.value;
+          ibw.value = (latestMetrics['ibw'] as num?)?.toDouble() ?? ibw.value;
           
           final double fatPct = (latestMetrics['body_fat_pct'] as num?)?.toDouble() ?? 0.0;
           final double musclePct = (latestMetrics['muscle_mass_pct'] as num?)?.toDouble() ?? 0.0;

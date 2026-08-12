@@ -8,419 +8,310 @@ import 'package:google_fonts/google_fonts.dart';
 import '../controllers/home_controller.dart';
 import 'swiggy_tabs.dart';
 
-class HomeView extends GetView<HomeController> {
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
   @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  final HomeController controller = Get.find<HomeController>();
+  final ScrollController _scrollController = ScrollController();
+  bool _showStickySearch = false;
+
+  /// Approximate pixel offset at which the search bar scrolls off-screen.
+  /// Header (~80) + tabs (~80) + search bar top padding (16) ≈ 176px.
+  static const double _stickyThreshold = 176.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final shouldShow = _scrollController.offset > _stickyThreshold;
+    if (shouldShow != _showStickySearch) {
+      setState(() {
+        _showStickySearch = shouldShow;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final double topPadding = MediaQuery.of(context).padding.top;
     return Scaffold(
       backgroundColor: const Color(0xff06010F),
-      body: SafeArea(
-        top: false,
-        bottom: false,
-        child: Column(
-          children: [
-            /// 1. TOP HEADER SECTION (Location/Profile)
-            Obx(() {
-              final isMeal = controller.activeTab.value == 0;
-              final headerBg = isMeal
-                  ? const Color(0xff00A2FF).withOpacity(0.20)
-                  : const Color(0xff3F72AF).withOpacity(0.20);
+      body: Stack(
+        children: [
+          SafeArea(
+            top: false,
+            bottom: false,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  /// 1. TOP HEADER SECTION (Location/Profile)
+                  Obx(() {
+                    final isMeal = controller.activeTab.value == 0;
+                    final headerBg = isMeal
+                        ? const Color(0xff00A2FF).withOpacity(0.20)
+                        : const Color(0xff3F72AF).withOpacity(0.20);
 
-              // Dynamically update system status bar style to match the tab theme
-              SystemChrome.setSystemUIOverlayStyle(
-                SystemUiOverlayStyle(
-                  statusBarColor: headerBg,
-                  statusBarIconBrightness: Brightness.light,
-                  statusBarBrightness: Brightness.dark, // iOS
-                  systemNavigationBarColor: const Color(0xff06010F),
-                  systemNavigationBarIconBrightness: Brightness.light,
-                ),
-              );
+                    // Dynamically update system status bar style to match the tab theme
+                    SystemChrome.setSystemUIOverlayStyle(
+                      SystemUiOverlayStyle(
+                        statusBarColor: headerBg,
+                        statusBarIconBrightness: Brightness.light,
+                        statusBarBrightness: Brightness.dark, // iOS
+                        systemNavigationBarColor: const Color(0xff06010F),
+                        systemNavigationBarIconBrightness: Brightness.light,
+                      ),
+                    );
 
-              final double topPadding = MediaQuery.of(context).padding.top;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      color: headerBg,
+                      padding: EdgeInsets.only(
+                        left: 18,
+                        right: 18,
+                        top: topPadding + 14,
+                        bottom: 16,
+                      ),
+                      child: buildTopHeader(),
+                    );
+                  }),
 
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                color: headerBg,
-                padding: EdgeInsets.only(
-                  left: 18,
-                  right: 18,
-                  top: topPadding + 14,
-                  bottom: 16,
-                ),
-                child: buildTopHeader(),
-              );
-            }),
+                  /// THE SWIGGY STYLE TOP TABS
+                  const SwiggyTabsHeader(),
 
-            /// THE SWIGGY STYLE TOP TABS
-            const SwiggyTabsHeader(),
+                  /// THE DYNAMIC CONTENT AREA
+                  Obx(() {
+                    final isMeal = controller.activeTab.value == 0;
+                    final bgColor = isMeal
+                        ? const Color(0xff00A2FF)
+                        : const Color(0xff3F72AF);
 
-            /// THE DYNAMIC CONTENT AREA
-            Expanded(
-              child: Obx(() {
-                final isMeal = controller.activeTab.value == 0;
-                final bgColor = isMeal
-                    ? const Color(0xff00A2FF)
-                    : const Color(0xff3F72AF);
-
-                return SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Column(
-                    children: [
-                      // Colored Section (Bleeds from tabs)
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        decoration: BoxDecoration(
-                          color: bgColor,
-                          borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(24),
-                            bottomRight: Radius.circular(24),
+                    return Column(
+                      children: [
+                        // Colored Section (Bleeds from tabs)
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          decoration: BoxDecoration(
+                            color: bgColor,
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(24),
+                              bottomRight: Radius.circular(24),
+                            ),
+                          ),
+                          padding: const EdgeInsets.only(
+                            left: 18,
+                            right: 18,
+                            top: 16,
+                            bottom: 18,
+                          ),
+                          child: Column(
+                            children: [
+                              if (isMeal) ...[
+                                // When sticky bar is visible, hide the inline
+                                // search bar so it doesn't show twice.
+                                AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 250),
+                                  opacity: _showStickySearch ? 0.0 : 1.0,
+                                  child: const PremiumSearchBar(),
+                                ),
+                                const SizedBox(height: 16),
+                                const PromoBannerSection(),
+                                const SizedBox(height: 16),
+                                SwiggyPromoCards(),
+                              ] else
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: Image.asset(
+                                    'assets/home/home1.png',
+                                    width: double.infinity,
+                                    height: 140,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
-                        padding: const EdgeInsets.only(
-                          left: 18,
-                          right: 18,
-                          top: 16,
-                          bottom: 18,
-                        ),
-                        child: Column(
-                          children: [
-                            if (isMeal) ...[
-                              const PremiumSearchBar(),
-                              const SizedBox(height: 16),
-                              const AnimatedPartyBanner(),
-                              const SizedBox(height: 16),
-                              SwiggyPromoCards(),
-                            ] else
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(24),
-                                child: Image.asset(
-                                  'assets/home/home1.png',
-                                  width: double.infinity,
-                                  height: 140,
-                                  fit: BoxFit.cover,
+
+                        // Dark Section (Rest of the content)
+                        Container(
+                          decoration: const BoxDecoration(
+                            color: Color(0xff06010F),
+                          ),
+                          padding: const EdgeInsets.only(top: 24, bottom: 100),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
                                 ),
-                              ),
-                          ],
-                        ),
-                      ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 8),
 
-                      // Dark Section (Rest of the content)
-                      Container(
-                        decoration: const BoxDecoration(
-                          color: Color(0xff06010F),
-                        ),
-                        padding: const EdgeInsets.only(top: 24, bottom: 100),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 8),
-
-                                  /// 2. ACTIVE PLAN CARD (Glassmorphic)
-                                  buildActivePlanCard(),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(height: 28),
-
-                            /// 4. TODAY'S MEAL PLAN — full-width blue gradient section
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.only(
-                                top: 32,
-                                bottom: 28,
-                              ),
-                              decoration: const BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Color(0xff06010F), // match background
-                                    Color(0xff09287B), // rich deep blue
-                                    Color(
-                                      0xff0E44B5,
-                                    ), // vibrant royal blue center glow
-                                    Color(
-                                      0xff081E57,
-                                    ), // dark blue/navy transition
-                                    Color(0xff06010F), // match background
+                                    /// 2. ACTIVE PLAN CARD (Glassmorphic)
+                                    buildActivePlanCard(),
                                   ],
-                                  stops: [0.0, 0.25, 0.55, 0.85, 1.0],
                                 ),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 18,
-                                    ),
-                                    child: GestureDetector(
-                                      onTap: () => Get.toNamed('/meal-plan'),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "Today's\nMeal Plan",
-                                            style: GoogleFonts.outfit(
-                                              color: Colors.white,
-                                              fontSize: 28,
-                                              fontWeight: FontWeight.bold,
-                                              height: 1.15,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            "View Full Plan →",
-                                            style: GoogleFonts.inter(
-                                              color: Colors.white.withOpacity(
-                                                0.6,
-                                              ),
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+
+                              const SizedBox(height: 28),
+
+                              /// 4. TODAY'S MEAL PLAN — full-width blue gradient section
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.only(
+                                  top: 32,
+                                  bottom: 28,
+                                ),
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Color(0xff06010F), // match background
+                                      Color(0xff09287B), // rich deep blue
+                                      Color(
+                                        0xff0E44B5,
+                                      ), // vibrant royal blue center glow
+                                      Color(
+                                        0xff081E57,
+                                      ), // dark blue/navy transition
+                                      Color(0xff06010F), // match background
+                                    ],
+                                    stops: [0.0, 0.25, 0.55, 0.85, 1.0],
                                   ),
-                                  const SizedBox(height: 16),
-                                  buildMealPlanTimeline(),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(height: 28),
-
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  /// PROMO BANNERS
-                                  buildPromoBanners(),
-
-                                  const SizedBox(height: 24),
-
-                                  /// OFFER CARDS
-                                ], // close Column children
-                              ), // close Column
-                            ), // close Padding
-                            // Offers Section - full width, no extra padding
-                            buildOfferCards(context),
-
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // const SizedBox(height: 24),
-
-                                  /// TODAY'S MEAL PROGRESS CARD
-                                  // buildMealProgressCard(),
-                                  // const SizedBox(height: 24),
-
-                                  /// 3. STATS GRID ROW 1 & 2 (Reactive)
-                                  /*
-                                  Obx(() {
-                                    final double calProgress =
-                                        controller.targetCalories.value > 0
-                                        ? (controller.currentCalories.value /
-                                                  controller
-                                                      .targetCalories
-                                                      .value)
-                                              .clamp(0.0, 1.0)
-                                        : 0.0;
-                                    final double stepProgress =
-                                        controller.targetSteps.value > 0
-                                        ? (controller.currentSteps.value /
-                                                  controller.targetSteps.value)
-                                              .clamp(0.0, 1.0)
-                                        : 0.0;
-
-                                    return Column(
-                                      children: [
-                                        Row(
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 18,
+                                      ),
+                                      child: GestureDetector(
+                                        onTap: () => Get.toNamed('/meal-plan'),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Expanded(
-                                              child: GestureDetector(
-                                                onTap: () => Get.toNamed(
-                                                  '/calorie-history',
-                                                ),
-                                                child: buildStatCard(
-                                                  title: "Calories",
-                                                  value: controller
-                                                      .currentCalories
-                                                      .value
-                                                      .toString(),
-                                                  sub:
-                                                      "/ ${controller.targetCalories.value} kcal",
-                                                  icon: Icons
-                                                      .local_fire_department_rounded,
-                                                  color: const Color(
-                                                    0xffFF7A00,
-                                                  ),
-                                                  progress: calProgress,
-                                                ),
+                                            Text(
+                                              "Today's\nMeal Plan",
+                                              style: GoogleFonts.outfit(
+                                                color: Colors.white,
+                                                fontSize: 28,
+                                                fontWeight: FontWeight.bold,
+                                                height: 1.15,
                                               ),
                                             ),
-                                            const SizedBox(width: 14),
-                                            Expanded(
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  controller.addWater(0.25);
-                                                  Get.snackbar(
-                                                    "Water Logged 💧",
-                                                    "Successfully added +250ml to your daily intake.",
-                                                    snackPosition:
-                                                        SnackPosition.BOTTOM,
-                                                    backgroundColor:
-                                                        const Color(
-                                                          0xff0B0817,
-                                                        ).withOpacity(0.9),
-                                                    colorText: Colors.white,
-                                                    borderColor: const Color(
-                                                      0xff00A3FF,
-                                                    ).withOpacity(0.3),
-                                                    borderWidth: 1,
-                                                    margin:
-                                                        const EdgeInsets.all(
-                                                          16,
-                                                        ),
-                                                  );
-                                                },
-                                                child: buildWaterCard(
-                                                  current: controller
-                                                      .currentWater
-                                                      .value,
-                                                  target: controller
-                                                      .targetWater
-                                                      .value,
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              "View Full Plan →",
+                                              style: GoogleFonts.inter(
+                                                color: Colors.white.withOpacity(
+                                                  0.6,
                                                 ),
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
                                               ),
                                             ),
                                           ],
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    buildMealPlanTimeline(),
+                                  ],
+                                ),
+                              ),
+
+                              const SizedBox(height: 28),
+
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    /// PROMO BANNERS
+                                    buildPromoBanners(),
+
+                                    const SizedBox(height: 24),
+
+                                    /// OFFER CARDS
+                                  ], // close Column children
+                                ), // close Column
+                              ), // close Padding
+                              // Offers Section - full width, no extra padding
+                              buildOfferCards(context),
+
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // const SizedBox(height: 24),
+
+                                    /// TODAY'S MEAL PROGRESS CARD
+                                    // buildMealProgressCard(),
+                                    /// 3. DAILY PROGRESS DASHBOARD (Reactive)
+                                    buildDailyProgressDashboard(),
+                                    const SizedBox(height: 28),
+
+                                    /// 5. AI COACH & HYDRATION GOAL (ROW)
+                                    // Row(
+                                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                                    //   children: [
+                                    //     Expanded(flex: 11, child: buildAICoachCard()),
+                                    //     const SizedBox(width: 12),
+                                    //     Expanded(flex: 8, child: buildHydrationGoalCard()),
+                                    //   ],
+                                    // ),`
+                                    // const SizedBox(height: 28),
+
+                                    /// 6. PROGRESS & STREAK SECTION
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () => Get.toNamed('/progress'),
+                                          child: sectionTitle(
+                                            "YOUR PROGRESS",
+                                            "View All",
+                                          ),
                                         ),
                                         const SizedBox(height: 14),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  controller.addSteps(1000);
-                                                  Get.snackbar(
-                                                    "Steps Tracked 👟",
-                                                    "Successfully logged +1000 steps walked.",
-                                                    snackPosition:
-                                                        SnackPosition.BOTTOM,
-                                                    backgroundColor:
-                                                        const Color(
-                                                          0xff0B0817,
-                                                        ).withOpacity(0.9),
-                                                    colorText: Colors.white,
-                                                    borderColor: const Color(
-                                                      0xff00FF87,
-                                                    ).withOpacity(0.3),
-                                                    borderWidth: 1,
-                                                    margin:
-                                                        const EdgeInsets.all(
-                                                          16,
-                                                        ),
-                                                  );
-                                                },
-                                                child: buildStatCard(
-                                                  title: "Steps",
-                                                  value: controller
-                                                      .currentSteps
-                                                      .value
-                                                      .toString(),
-                                                  sub:
-                                                      "/ ${controller.targetSteps.value}",
-                                                  icon: Icons
-                                                      .directions_walk_rounded,
-                                                  color: const Color(
-                                                    0xff00FF87,
-                                                  ),
-                                                  progress: stepProgress,
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 14),
-                                            Expanded(
-                                              child: buildStatCard(
-                                                title: "Weight",
-                                                value:
-                                                    "${controller.currentWeight.value.toStringAsFixed(1)} kg",
-                                                sub:
-                                                    controller
-                                                            .weightDifference
-                                                            .value >=
-                                                        0
-                                                    ? "+${controller.weightDifference.value.toStringAsFixed(1)} kg"
-                                                    : "${controller.weightDifference.value.toStringAsFixed(1)} kg",
-                                                icon: Icons
-                                                    .monitor_weight_rounded,
-                                                color: const Color(0xffB100FF),
-                                                progress:
-                                                    0.8, // decorative progress bar
-                                              ),
-                                            ),
-                                          ],
+                                        GestureDetector(
+                                          onTap: () => Get.toNamed('/progress'),
+                                          child: buildWeightProgressCard(),
                                         ),
                                       ],
-                                    );
-                                  }),
-                                  */
-                                  // const SizedBox(height: 28),
+                                    ),
 
-                                  /// 5. AI COACH & HYDRATION GOAL (ROW)
-                                  // Row(
-                                  //   crossAxisAlignment: CrossAxisAlignment.start,
-                                  //   children: [
-                                  //     Expanded(flex: 11, child: buildAICoachCard()),
-                                  //     const SizedBox(width: 12),
-                                  //     Expanded(flex: 8, child: buildHydrationGoalCard()),
-                                  //   ],
-                                  // ),`
-                                  // const SizedBox(height: 28),
+                                    const SizedBox(height: 28),
 
-                                  /// 6. PROGRESS & STREAK SECTION
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () => Get.toNamed('/progress'),
-                                        child: sectionTitle(
-                                          "YOUR PROGRESS",
-                                          "View All",
-                                        ),
-                                      ),
-                                      const SizedBox(height: 14),
-                                      GestureDetector(
-                                        onTap: () => Get.toNamed('/progress'),
-                                        child: buildWeightProgressCard(),
-                                      ),
-                                    ],
-                                  ),
-
-                                  const SizedBox(height: 28),
-
-                                  /*
+                                    /*
                                   Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -433,29 +324,64 @@ class HomeView extends GetView<HomeController> {
                                     ],
                                   ),
                                   */
-                                  const SizedBox(height: 28),
+                                    const SizedBox(height: 28),
 
-                                  /// 7. QUICK ACTIONS Grid
-                                  /*
+                                    /// 7. QUICK ACTIONS Grid
+                                    /*
                                   sectionTitle("QUICK ACTIONS", ""),
 
                                   const SizedBox(height: 16),
 
                                   buildQuickActionsGrid(),
                                   */
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+
+          /// STICKY SEARCH BAR — appears at the top when scrolled past the blue section
+          Obx(() {
+            final isMeal = controller.activeTab.value == 0;
+            if (!isMeal) return const SizedBox.shrink();
+            return AnimatedSlide(
+              offset: _showStickySearch ? Offset.zero : const Offset(0, -1),
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: AnimatedOpacity(
+                opacity: _showStickySearch ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 250),
+                child: Container(
+                  padding: EdgeInsets.only(
+                    top: topPadding + 10,
+                    left: 18,
+                    right: 18,
+                    bottom: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xff00A2FF),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xff00A2FF).withOpacity(0.35),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                );
-              }),
-            ),
-          ],
-        ),
+                  child: const PremiumSearchBar(),
+                ),
+              ),
+            );
+          }),
+        ],
       ),
     );
   }
@@ -518,7 +444,10 @@ class HomeView extends GetView<HomeController> {
             // FitCoins Wallet Widget
             Obx(() {
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(16),
@@ -530,10 +459,7 @@ class HomeView extends GetView<HomeController> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      "🪙",
-                      style: TextStyle(fontSize: 13),
-                    ),
+                    const Text("🪙", style: TextStyle(fontSize: 13)),
                     const SizedBox(width: 4),
                     Text(
                       "${controller.fitPoints.value}",
@@ -892,6 +818,184 @@ class HomeView extends GetView<HomeController> {
   /// ----------------------------------------------------
   /// OFFER CARDS & BOTTOM SHEET
   /// ----------------------------------------------------
+  Widget buildDailyProgressDashboard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xff121220),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Obx(() {
+        final double calProgress = controller.targetCalories.value > 0
+            ? (controller.currentCalories.value / controller.targetCalories.value).clamp(0.0, 1.0)
+            : 0.0;
+            
+        final double pProgress = controller.targetProtein.value > 0
+            ? (controller.currentProtein.value / controller.targetProtein.value).clamp(0.0, 1.0)
+            : 0.0;
+        final double cProgress = controller.targetCarbs.value > 0
+            ? (controller.currentCarbs.value / controller.targetCarbs.value).clamp(0.0, 1.0)
+            : 0.0;
+        final double fProgress = controller.targetFat.value > 0
+            ? (controller.currentFat.value / controller.targetFat.value).clamp(0.0, 1.0)
+            : 0.0;
+
+        return Column(
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Daily Progress",
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Get.toNamed('/progress'), // Navigate to full Dedicated Progress Screen
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffFF7A00).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      "Analytics ↗",
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xffFF7A00),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            
+            // Circular Calorie Ring
+            Row(
+              children: [
+                SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      CircularProgressIndicator(
+                        value: 1.0,
+                        strokeWidth: 10,
+                        color: const Color(0xffFF7A00).withOpacity(0.1),
+                        backgroundColor: Colors.transparent,
+                      ),
+                      CircularProgressIndicator(
+                        value: calProgress,
+                        strokeWidth: 10,
+                        color: const Color(0xffFF7A00),
+                        strokeCap: StrokeCap.round,
+                        backgroundColor: Colors.transparent,
+                      ),
+                      Center(
+                        child: Icon(
+                          Icons.local_fire_department_rounded,
+                          color: const Color(0xffFF7A00),
+                          size: 32,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 24),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${controller.currentCalories.value} / ${controller.targetCalories.value}",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      Text(
+                        "Calories Consumed",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white.withOpacity(0.6),
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Macro Bars
+            buildMacroBar("Protein", controller.currentProtein.value, controller.targetProtein.value, pProgress, const Color(0xff00A2FF)),
+            const SizedBox(height: 12),
+            buildMacroBar("Carbs", controller.currentCarbs.value, controller.targetCarbs.value, cProgress, const Color(0xff00FF87)),
+            const SizedBox(height: 12),
+            buildMacroBar("Fats", controller.currentFat.value, controller.targetFat.value, fProgress, const Color(0xffFF3E3E)),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget buildMacroBar(String title, int current, int target, double progress, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              "${current}g / ${target}g",
+              style: GoogleFonts.outfit(
+                color: Colors.white.withOpacity(0.6),
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: progress,
+            backgroundColor: color.withOpacity(0.15),
+            color: color,
+            minHeight: 8,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget buildOfferCards(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -3419,16 +3523,22 @@ class SwiggyPromoCards extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final double kcalProgress = controller.targetCalories.value > 0
-          ? (controller.currentCalories.value / controller.targetCalories.value).clamp(0.0, 1.0)
+          ? (controller.currentCalories.value / controller.targetCalories.value)
+                .clamp(0.0, 1.0)
           : 0.0;
       final double proteinProgress = controller.targetProtein.value > 0
-          ? (controller.currentProtein.value / controller.targetProtein.value).clamp(0.0, 1.0)
+          ? (controller.currentProtein.value / controller.targetProtein.value)
+                .clamp(0.0, 1.0)
           : 0.0;
       final double carbsProgress = controller.targetCarbs.value > 0
-          ? (controller.currentCarbs.value / controller.targetCarbs.value).clamp(0.0, 1.0)
+          ? (controller.currentCarbs.value / controller.targetCarbs.value)
+                .clamp(0.0, 1.0)
           : 0.0;
       final double fatProgress = controller.targetFat.value > 0
-          ? (controller.currentFat.value / controller.targetFat.value).clamp(0.0, 1.0)
+          ? (controller.currentFat.value / controller.targetFat.value).clamp(
+              0.0,
+              1.0,
+            )
           : 0.0;
 
       return Row(
@@ -3503,7 +3613,7 @@ class SwiggyPromoCards extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          
+
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -3544,101 +3654,335 @@ class SwiggyPromoCards extends StatelessWidget {
 }
 
 /// ----------------------------------------------------
-/// ANIMATED PARTY BANNER WIDGET
+/// PROMOTIONAL BANNER SECTION
 /// ----------------------------------------------------
-class AnimatedPartyBanner extends StatefulWidget {
-  const AnimatedPartyBanner({super.key});
+class PromoBannerSection extends StatefulWidget {
+  const PromoBannerSection({super.key});
 
   @override
-  State<AnimatedPartyBanner> createState() => _AnimatedPartyBannerState();
+  State<PromoBannerSection> createState() => _PromoBannerSectionState();
 }
 
-class _AnimatedPartyBannerState extends State<AnimatedPartyBanner> {
-  final List<Map<String, String>> banners = [
-    {"emoji": "🎉", "text": "Flash Sale: Flat 50% Off on Diet Plans!"},
-    {"emoji": "🔥", "text": "Burn Fat Faster with our new Expert Coaches!"},
-    {"emoji": "🥑", "text": "New Vegan Recipes added today! Tap to explore."},
-  ];
-  int currentIndex = 0;
+class _PromoBannerSectionState extends State<PromoBannerSection>
+    with TickerProviderStateMixin {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
   late Timer _timer;
+  late AnimationController _floatController;
+  late Animation<double> _floatAnim;
+
+  final List<Map<String, dynamic>> _promos = [
+    {
+      "tag": "🔥 Limited Offer",
+      "tagColor": const Color(0xffFF9A3C),
+      "headline": "Flat 50% Off\nDiet Plans!",
+      "sub": "Personalised Indian meal plans\ncrafted by expert dietitians.",
+      "cta": "Grab Deal →",
+      "icons": ["🥗", "🥑", "🍎"],
+      "gradientStart": const Color(0xff003A6E),
+      "gradientEnd": const Color(0xff00509E),
+      "glowColor": const Color(0xffFF9A3C),
+    },
+    {
+      "tag": "💪 New Feature",
+      "tagColor": const Color(0xff00E5A0),
+      "headline": "AI Coach\nNow Live!",
+      "sub": "Real-time feedback on\nyour workouts & calories.",
+      "cta": "Try Now →",
+      "icons": ["🤖", "📊", "⚡"],
+      "gradientStart": const Color(0xff00316A),
+      "gradientEnd": const Color(0xff004A90),
+      "glowColor": const Color(0xff00E5A0),
+    },
+    {
+      "tag": "🥑 Just Added",
+      "tagColor": const Color(0xffC97FFF),
+      "headline": "New Vegan\nRecipes!",
+      "sub": "50+ plant-based Indian\nrecipes — added today.",
+      "cta": "Explore →",
+      "icons": ["🥦", "🥕", "🌿"],
+      "gradientStart": const Color(0xff002D60),
+      "gradientEnd": const Color(0xff0044A0),
+      "glowColor": const Color(0xffC97FFF),
+    },
+    {
+      "tag": "🏃 Challenge",
+      "tagColor": const Color(0xffFF6B9D),
+      "headline": "30-Day Fat\nBurn Sprint!",
+      "sub": "Join 12,000+ members in\nour biggest challenge yet.",
+      "cta": "Join Free →",
+      "icons": ["🏅", "🔥", "💦"],
+      "gradientStart": const Color(0xff003570),
+      "gradientEnd": const Color(0xff004C9E),
+      "glowColor": const Color(0xffFF6B9D),
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
-      if (mounted) {
-        setState(() {
-          currentIndex = (currentIndex + 1) % banners.length;
-        });
-      }
+    _floatController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    )..repeat(reverse: true);
+    _floatAnim = Tween<double>(begin: -6, end: 6).animate(
+      CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
+    );
+    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!mounted) return;
+      final next = (_currentPage + 1) % _promos.length;
+      _pageController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 550),
+        curve: Curves.easeInOut,
+      );
     });
   }
 
   @override
   void dispose() {
     _timer.cancel();
+    _floatController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final banner = banners[currentIndex];
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
-      ),
-      child: Row(
-        children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            transitionBuilder: (child, animation) =>
-                ScaleTransition(scale: animation, child: child),
-            child: Text(
-              banner["emoji"]!,
-              key: ValueKey(banner["emoji"]),
-              style: const TextStyle(fontSize: 24),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: SizedBox(
+            height: 190,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: _promos.length,
+              onPageChanged: (i) => setState(() => _currentPage = i),
+              itemBuilder: (context, index) {
+                final p = _promos[index];
+                return _buildSlide(p);
+              },
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 500),
-              transitionBuilder: (child, animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 0.5),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
-                  ),
-                );
-              },
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  banner["text"]!,
-                  key: ValueKey(banner["text"]),
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 10),
+        // Dot indicators
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(_promos.length, (i) {
+            final active = i == _currentPage;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              margin: const EdgeInsets.symmetric(horizontal: 3.5),
+              width: active ? 22 : 7,
+              height: 7,
+              decoration: BoxDecoration(
+                color: active ? Colors.white : Colors.white.withOpacity(0.28),
+                borderRadius: BorderRadius.circular(4),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSlide(Map<String, dynamic> p) {
+    final Color glowColor = p["glowColor"] as Color;
+    final List<String> icons = p["icons"] as List<String>;
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [p["gradientStart"] as Color, p["gradientEnd"] as Color],
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Glowing circle blobs in background
+          Positioned(
+            right: -30,
+            top: -30,
+            child: Container(
+              width: 160,
+              height: 160,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [glowColor.withOpacity(0.28), Colors.transparent],
                 ),
               ),
             ),
           ),
-          const Icon(
-            Icons.arrow_forward_ios_rounded,
-            color: Colors.white70,
-            size: 14,
+          Positioned(
+            left: -20,
+            bottom: -40,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [glowColor.withOpacity(0.14), Colors.transparent],
+                ),
+              ),
+            ),
+          ),
+
+          // Content row
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // LEFT: text
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Tag chip
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: (p["tagColor"] as Color).withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: (p["tagColor"] as Color).withOpacity(0.5),
+                          ),
+                        ),
+                        child: Text(
+                          p["tag"] as String,
+                          style: GoogleFonts.inter(
+                            color: p["tagColor"] as Color,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      // Headline
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 400),
+                        transitionBuilder: (child, anim) => FadeTransition(
+                          opacity: anim,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(0, 0.12),
+                              end: Offset.zero,
+                            ).animate(anim),
+                            child: child,
+                          ),
+                        ),
+                        child: Text(
+                          p["headline"] as String,
+                          key: ValueKey(p["headline"]),
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            height: 1.15,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      // Sub text
+                      Text(
+                        p["sub"] as String,
+                        style: GoogleFonts.inter(
+                          color: Colors.white.withOpacity(0.55),
+                          fontSize: 10,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      // CTA chip
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: glowColor,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: glowColor.withOpacity(0.4),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          p["cta"] as String,
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // RIGHT: Floating emoji column
+                AnimatedBuilder(
+                  animation: _floatAnim,
+                  builder: (context, child) {
+                    return Transform.translate(
+                      offset: Offset(0, _floatAnim.value),
+                      child: child,
+                    );
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: icons.asMap().entries.map((e) {
+                      final delay = e.key;
+                      return Padding(
+                        padding: EdgeInsets.only(top: delay == 0 ? 0 : 6),
+                        child: AnimatedBuilder(
+                          animation: _floatController,
+                          builder: (context, ch) {
+                            // Stagger each icon slightly
+                            final offset =
+                                (_floatAnim.value + (delay * 4.0)) % 12 - 6;
+                            return Transform.translate(
+                              offset: Offset(0, offset * 0.6),
+                              child: ch,
+                            );
+                          },
+                          child: Container(
+                            width: 46,
+                            height: 46,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.07),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.12),
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                e.value,
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

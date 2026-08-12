@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import '../../../services/api_client.dart';
 
 class CongratulationsScreen extends StatefulWidget {
   final String memberCode;
@@ -11,6 +12,33 @@ class CongratulationsScreen extends StatefulWidget {
 }
 
 class _CongratulationsScreenState extends State<CongratulationsScreen> {
+  bool _isLoading = false;
+
+  Future<void> _generateMealPlan() async {
+    setState(() => _isLoading = true);
+    try {
+      final apiClient = Get.find<ApiClient>();
+      
+      // We pass mock/default Health Report metrics here for now to generate the baseline plan
+      await apiClient.post('/api/diet-plans/generate', data: {
+        "target_calories": 2150,
+        "protein_target": 150,
+        "carbs_target": 215,
+        "fat_target": 60,
+        "bmi": 24.2,
+        "bmr": 1850,
+        "tdee": 2550,
+        "ibw": 70.0
+      });
+      
+    } catch (e) {
+      debugPrint("Error generating plan: $e");
+    } finally {
+      setState(() => _isLoading = false);
+      Get.offAllNamed('/main-navigation');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,11 +112,13 @@ class _CongratulationsScreenState extends State<CongratulationsScreen> {
                   const SizedBox(height: 48),
 
                   // Bouncing Swipe Button
-                  BouncingSwipeButton(
-                    onSwipeComplete: () {
-                      Get.offAllNamed('/main-navigation');
-                    },
-                  ),
+                  _isLoading 
+                    ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                    : BouncingSwipeButton(
+                        onSwipeComplete: () {
+                          _generateMealPlan();
+                        },
+                      ),
                   const SizedBox(height: 10), // extra padding at bottom
                 ],
               ),

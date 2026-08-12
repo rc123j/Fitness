@@ -30,10 +30,6 @@ class HomeController extends GetxController {
   final targetCarbs = 200.obs;
   final currentFat = 0.obs;
   final targetFat = 65.obs;
-  final currentWater = 0.0.obs; // In Liters
-  final targetWater = 3.0.obs;  // In Liters
-  final currentSteps = 0.obs;
-  final targetSteps = 10000.obs;
   final currentWeight = 0.0.obs;
   final weightDifference = 0.0.obs; // weight loss/gain tracking
 
@@ -159,17 +155,9 @@ class HomeController extends GetxController {
       tempHomeMeals.sort((a, b) => (a['meal_id'] as int).compareTo(b['meal_id'] as int));
       homeMeals.value = tempHomeMeals;
 
-      // 4. Fetch today's water logging aggregates
-      try {
-        final waterRes = await _apiClient.get(ApiEndpoints.todayWaterLog);
-        final waterData = waterRes.data;
-        final ml = (waterData['amount_ml'] as num?)?.toDouble() ?? 0.0;
-        final tgtMl = (waterData['target_ml'] as num?)?.toDouble() ?? 3000.0;
-        currentWater.value = ml / 1000.0;
-        targetWater.value = tgtMl / 1000.0;
-      } catch (_) {}
+      // 4. Removed Water Logging Aggregates
 
-      // 5. Fetch progress logs history (weight delta, step count)
+      // 5. Fetch progress logs history (weight delta)
       try {
         final progRes = await _apiClient.get(ApiEndpoints.progressLog);
         final progData = progRes.data;
@@ -177,16 +165,6 @@ class HomeController extends GetxController {
         
         final List logs = progData['logs'] ?? [];
         if (logs.isNotEmpty) {
-          final todayStr = DateTime.now().toIso8601String().split('T')[0];
-          final todayLog = logs.firstWhere(
-            (l) => l['logged_date'] == todayStr,
-            orElse: () => null,
-          );
-          if (todayLog != null) {
-            currentSteps.value = (todayLog['steps'] as num?)?.toInt() ?? 0;
-          } else {
-            currentSteps.value = 0;
-          }
 
           // Parse weights and dates for line chart
           weightHistoryLogs.clear();
@@ -214,8 +192,6 @@ class HomeController extends GetxController {
               }
             } catch (_) {}
           }
-        } else {
-          currentSteps.value = 0;
         }
 
         // Fill dynamic fallback log entries to keep weight chart look good
@@ -236,21 +212,22 @@ class HomeController extends GetxController {
     }
   }
 
-  Future<void> addWater(double amountLiters) async {
-    try {
-      final amountMl = (amountLiters * 1000).toInt();
-      await _apiClient.post(ApiEndpoints.logWater, data: {'amount_ml': amountMl});
-      // Optimistically update UI
-      final newVal = currentWater.value + amountLiters;
-      currentWater.value = newVal > targetWater.value ? targetWater.value : newVal;
-    } catch (_) {}
-  }
-
-  Future<void> addSteps(int stepsToAdd) async {
-    try {
-      final newSteps = currentSteps.value + stepsToAdd;
-      await _apiClient.post(ApiEndpoints.logSteps, data: {'steps': newSteps});
-      currentSteps.value = newSteps;
-    } catch (_) {}
+  // Optional: Function to mark a meal as eaten
+  void markMealAsEaten(int mealId, double kcal, double p, double c, double f) {
+    // 1. Find meal and mark as completed
+    final index = homeMeals.indexWhere((m) => m['meal_id'] == mealId);
+    if (index != -1) {
+      final updatedMeal = Map<String, dynamic>.from(homeMeals[index]);
+      updatedMeal['tag'] = 'Completed';
+      homeMeals[index] = updatedMeal;
+    }
+    
+    // 2. Add macros
+    currentCalories.value += kcal.toInt();
+    currentProtein.value += p.toInt();
+    currentCarbs.value += c.toInt();
+    currentFat.value += f.toInt();
+    
+    // Note: A real app would make a POST request to an API here
   }
 }
