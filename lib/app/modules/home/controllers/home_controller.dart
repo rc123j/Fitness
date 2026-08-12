@@ -24,6 +24,12 @@ class HomeController extends GetxController {
   // Real-time progress trackers
   final currentCalories = 0.obs;
   final targetCalories = 2000.obs;
+  final currentProtein = 0.obs;
+  final targetProtein = 150.obs;
+  final currentCarbs = 0.obs;
+  final targetCarbs = 200.obs;
+  final currentFat = 0.obs;
+  final targetFat = 65.obs;
   final currentWater = 0.0.obs; // In Liters
   final targetWater = 3.0.obs;  // In Liters
   final currentSteps = 0.obs;
@@ -87,6 +93,12 @@ class HomeController extends GetxController {
         final nutData = nutRes.data;
         currentCalories.value = (nutData['consumed']?['calories'] as num?)?.toInt() ?? 0;
         targetCalories.value = (nutData['targets']?['calories'] as num?)?.toInt() ?? 2000;
+        currentProtein.value = (nutData['consumed']?['protein'] as num?)?.toInt() ?? 0;
+        targetProtein.value = (nutData['targets']?['protein'] as num?)?.toInt() ?? 150;
+        currentCarbs.value = (nutData['consumed']?['carbs'] as num?)?.toInt() ?? 0;
+        targetCarbs.value = (nutData['targets']?['carbs'] as num?)?.toInt() ?? 200;
+        currentFat.value = (nutData['consumed']?['fat'] as num?)?.toInt() ?? 0;
+        targetFat.value = (nutData['targets']?['fat'] as num?)?.toInt() ?? 65;
         
         final List rawLogged = nutData['logged_meal_ids'] ?? [];
         loggedIds = rawLogged.map((id) => int.tryParse(id?.toString() ?? '')).whereType<int>().toList();

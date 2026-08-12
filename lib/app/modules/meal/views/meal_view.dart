@@ -1,11 +1,8 @@
 import 'dart:convert';
-import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/meal_controller.dart';
-import '../../../widgets/rocket_launch_overlay.dart';
 
 class MealView extends GetView<MealController> {
   const MealView({super.key});
@@ -16,13 +13,30 @@ class MealView extends GetView<MealController> {
       backgroundColor: const Color(0xff06010F),
       body: Stack(
         children: [
-          /// BACKGROUND NEON GLOW BLOBS
+          // Background Glow Blobs (mocking the purple design shade on appbars side)
           Positioned(
             top: -120,
-            right: -100,
+            left: -80,
             child: Container(
               height: 350,
               width: 350,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xffB100FF).withOpacity(0.18),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: -120,
+            right: -80,
+            child: Container(
+              height: 300,
+              width: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
@@ -35,7 +49,7 @@ class MealView extends GetView<MealController> {
             ),
           ),
           Positioned(
-            bottom: 150,
+            bottom: 100,
             left: -150,
             child: Container(
               height: 400,
@@ -44,7 +58,7 @@ class MealView extends GetView<MealController> {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xffB100FF).withOpacity(0.10),
+                    const Color(0xffB100FF).withOpacity(0.06),
                     Colors.transparent,
                   ],
                 ),
@@ -52,34 +66,73 @@ class MealView extends GetView<MealController> {
             ),
           ),
 
-          /// MAIN VIEW CONTENT
           SafeArea(
             child: Column(
               children: [
-                /// 1. APP BAR / HEADER
-                buildHeader(context),
+                // 1. App Bar
+                _buildAppBar(),
 
-                /// 2. SCROLLABLE BODY
+                // 2. Scrollable Body
                 Expanded(
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.fromLTRB(18, 8, 18, 90),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        /// TODAY'S NUTRITION JOURNEY CARD
-                        buildNutritionJourneyCard(),
+                        // Weekly Calendar Timeline (mocking selected Capsule design)
+                        _buildWeeklyCalendar(),
+                        const SizedBox(height: 28),
+
+                        // Today's Nutrition Section (mocking the mockups' Calories ring & Macro cards layout)
+                        _buildTodayNutritionCard(),
+                        const SizedBox(height: 24),
+
+                        // Check Calories Search Bar
+                        _buildSearchBox(),
+                        const SizedBox(height: 28),
+
+                        // Daily Meal Section Header
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Daily Meal",
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => Get.toNamed('/meal-plan'),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Edit plan ",
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white.withOpacity(0.4),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.edit_calendar_rounded,
+                                    size: 14,
+                                    color: Colors.white.withOpacity(0.4),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 16),
 
-                        /// DAILY TARGET CARD
-                        buildDailyTargetCard(),
+                        // Promo customization Card
+                        _buildPromoCard(),
                         const SizedBox(height: 16),
 
-                        /// TIMELINE OF MEALS
-                        buildMealsTimeline(context),
-                        const SizedBox(height: 16),
-
-                        buildBottomRow(),
-                        const SizedBox(height: 20),
+                        // Meal Timeline Cards List
+                        _buildMealsTimeline(context),
                       ],
                     ),
                   ),
@@ -92,419 +145,180 @@ class MealView extends GetView<MealController> {
     );
   }
 
-  /// ----------------------------------------------------
-  /// 1. HEADER WIDGET
-  /// ----------------------------------------------------
-  Widget buildHeader(BuildContext context) {
+  // 1. APP BAR
+  Widget _buildAppBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              GestureDetector(
-                onTap: () => Get.back(),
-                child: Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.03),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.08),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
+          GestureDetector(
+            onTap: () => Get.back(),
+            child: Container(
+              height: 40,
+              width: 40,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.03),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.08),
+                  width: 0.8,
                 ),
               ),
-              const SizedBox(width: 12),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Meal Plan",
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Obx(() => GestureDetector(
-                        onTap: () {
-                          if (controller.selectedQueryDate.value.isNotEmpty) {
-                            controller.selectedQueryDate.value = "";
-                            controller.fetchMealData();
-                          }
-                        },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              controller.selectedDate.value,
-                              style: GoogleFonts.inter(
-                                color: const Color(0xffFF00E5).withOpacity(0.85),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              controller.selectedQueryDate.value.isNotEmpty
-                                  ? Icons.close_rounded
-                                  : Icons.keyboard_arrow_down_rounded,
-                              color: const Color(0xffFF00E5).withOpacity(0.85),
-                              size: 14,
-                            ),
-                          ],
-                        ),
-                      )),
-                ],
-              ),
-            ],
+              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
+            ),
           ),
-
-          /// Calendar & Options button
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () async {
-                  final DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: controller.selectedQueryDate.value.isNotEmpty
-                        ? DateTime.parse(controller.selectedQueryDate.value)
-                        : DateTime.now(),
-                    firstDate: DateTime.now().subtract(const Duration(days: 30)),
-                    lastDate: DateTime.now().add(const Duration(days: 30)),
-                    builder: (context, child) {
-                      return Theme(
-                        data: Theme.of(context).copyWith(
-                          colorScheme: const ColorScheme.dark(
-                            primary: Color(0xffFF00E5),
-                            onPrimary: Colors.black,
-                            surface: Color(0xff0B0817),
-                            onSurface: Colors.white,
-                          ),
-                          dialogBackgroundColor: const Color(0xff06010F),
-                        ),
-                        child: child!,
-                      );
-                    },
-                  );
-                  if (picked != null) {
-                    final monthStr = picked.month.toString().padLeft(2, '0');
-                    final dayStr = picked.day.toString().padLeft(2, '0');
-                    controller.selectedQueryDate.value = "${picked.year}-$monthStr-$dayStr";
-                    controller.fetchMealData();
-                  }
-                },
-                child: Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.03),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.08),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: const Icon(Icons.calendar_month_outlined, color: Colors.white, size: 18),
-                ),
+          Text(
+            "Nutrition",
+            style: GoogleFonts.outfit(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.03),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.08),
+                width: 0.8,
               ),
-              const SizedBox(width: 8),
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.03),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.08),
-                    width: 0.8,
-                  ),
-                ),
-                child: const Icon(Icons.more_horiz_rounded, color: Colors.white, size: 18),
-              ),
-            ],
+            ),
+            child: const Icon(Icons.more_horiz_rounded, color: Colors.white, size: 18),
           ),
         ],
       ),
     );
   }
 
-  /// ----------------------------------------------------
-  /// 2. NUTRITION JOURNEY CARD
-  /// ----------------------------------------------------
-  Widget buildNutritionJourneyCard() {
-    return Obx(() {
-      double progressPercent = controller.targetCalories.value > 0
-          ? (controller.currentCalories.value / controller.targetCalories.value).clamp(0.0, 1.0)
-          : 0.0;
+  // 2. WEEKLY CALENDAR (mocking Capsule design from mockup)
+  Widget _buildWeeklyCalendar() {
+    final now = DateTime.now();
+    // Generate dates for current week (Monday to Sunday)
+    final int currentWeekday = now.weekday; // 1 = Monday, 7 = Sunday
+    final List<DateTime> weekDates = List.generate(7, (index) {
+      return now.subtract(Duration(days: currentWeekday - 1 - index));
+    });
 
-    return GestureDetector(
-      onTap: () => Get.toNamed('/calorie-history'),
-      child: Container(
-        decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(
-          color: const Color(0xffFF00E5).withOpacity(0.20),
-          width: 1.0,
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Stack(
-            children: [
-              /// A. Background Health/Nutrition Image (Option B)
-              Positioned.fill(
-                child: Image.asset(
-                  'assets/images/health_screen.png',
-                  fit: BoxFit.cover,
-                  alignment: const Alignment(0.8, 0.0),
+    final List<String> weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: List.generate(7, (index) {
+        final DateTime date = weekDates[index];
+        final String dayName = weekdays[index];
+        final String dayNum = date.day.toString();
+        final String dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+
+        return Obx(() {
+          final isSelected = controller.selectedQueryDate.value == dateStr ||
+              (controller.selectedQueryDate.value.isEmpty &&
+                  date.day == now.day &&
+                  date.month == now.month &&
+                  date.year == now.year);
+
+          if (isSelected) {
+            // Selected Day: Dark capsule container card with subtle borders
+            return Container(
+              height: 72,
+              width: 46,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.15),
+                  width: 1.0,
                 ),
               ),
-
-              /// B. Black Gradient Overlay to fade out the left side for text readability
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        const Color(0xff0B0817),
-                        const Color(0xff0B0817).withOpacity(0.85),
-                        const Color(0xff0B0817).withOpacity(0.35),
-                        const Color(0xff0B0817).withOpacity(0.15),
-                      ],
-                      stops: const [0.0, 0.45, 0.8, 1.0],
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    dayName,
+                    style: GoogleFonts.inter(
+                      color: Colors.white.withOpacity(0.5),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                ),
-              ),
-
-              /// C. Radial Ambient Neon Glow on the right edge
-              Positioned(
-                right: -40,
-                top: -40,
-                child: Container(
-                  width: 140,
-                  height: 140,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        const Color(0xffFF00E5).withOpacity(0.30),
-                        Colors.transparent,
-                      ],
+                  const SizedBox(height: 4),
+                  Text(
+                    dayNum,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
+                ],
               ),
-
-              /// Card Content Row
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Row(
+            );
+          } else {
+            // Unselected Day: Plain text items
+            return GestureDetector(
+              onTap: () {
+                controller.selectedQueryDate.value = dateStr;
+                controller.fetchMealData();
+              },
+              child: Container(
+                height: 72,
+                width: 44,
+                color: Colors.transparent,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    /// Left Info & Progress
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.auto_awesome_rounded,
-                                color: Color(0xffFF00E5),
-                                size: 14,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                "Today's Nutrition Journey",
-                                style: GoogleFonts.outfit(
-                                  color: const Color(0xffFF00E5),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Obx(() => RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: "${controller.currentCalories.value} ",
-                                      style: GoogleFonts.outfit(
-                                        color: Colors.white,
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: "/ ${controller.targetCalories.value} kcal",
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white.withOpacity(0.40),
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )),
-                          const SizedBox(height: 12),
-
-                          /// Gradient Progress Bar
-                          Row(
-                            children: [
-                              Expanded(
-                                child: SizedBox(
-                                  height: 8,
-                                  child: Stack(
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10),
-                                          color: Colors.white.withOpacity(0.08),
-                                        ),
-                                      ),
-                                      FractionallySizedBox(
-                                        alignment: Alignment.centerLeft,
-                                        widthFactor: progressPercent,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(10),
-                                            gradient: const LinearGradient(
-                                              colors: [
-                                                Color(0xffB100FF),
-                                                Color(0xffFF00E5),
-                                                Color(0xffFF7A00),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                "${(progressPercent * 100).toInt()}%",
-                                style: GoogleFonts.outfit(
-                                  color: const Color(0xffFF7A00),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                    Text(
+                      dayName,
+                      style: GoogleFonts.inter(
+                        color: Colors.white.withOpacity(0.4),
+                        fontSize: 12,
                       ),
                     ),
-
-                    const SizedBox(width: 18),
-
-                    /// Right glowing circular icon
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        /// Glowing backdrop circle
-                        Container(
-                          height: 60,
-                          width: 60,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xffFF00E5).withOpacity(0.35),
-                                blurRadius: 18,
-                                spreadRadius: 2,
-                              ),
-                              BoxShadow(
-                                color: const Color(0xffFF7A00).withOpacity(0.20),
-                                blurRadius: 22,
-                                spreadRadius: 1,
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        /// Outer double gradient circle ring
-                        Container(
-                          height: 64,
-                          width: 64,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: const Color(0xffFF00E5).withOpacity(0.5),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: Container(
-                            margin: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(0xffFF7A00).withOpacity(0.3),
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        /// Inside Fork/Knife icon
-                        Container(
-                          height: 50,
-                          width: 50,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color(0xff090414),
-                          ),
-                          child: const Icon(
-                            Icons.restaurant_rounded,
-                            color: Color(0xffFF00E5),
-                            size: 20,
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 6),
+                    Text(
+                      dayNum,
+                      style: GoogleFonts.outfit(
+                        color: Colors.white.withOpacity(0.85),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    ),
+            );
+          }
+        });
+      }),
     );
-    });
   }
 
-  /// ----------------------------------------------------
-  /// 3. DAILY TARGET CARD (WITH CUSTOM PAINT DONUT)
-  /// ----------------------------------------------------
-  Widget buildDailyTargetCard() {
+  // 3. TODAY'S NUTRITION CARD (mocking left mockup screen)
+  Widget _buildTodayNutritionCard() {
     return Obx(() {
-      final double progress = controller.targetCalories.value > 0
+      final double kcalProgress = controller.targetCalories.value > 0
           ? (controller.currentCalories.value / controller.targetCalories.value).clamp(0.0, 1.0)
           : 0.0;
+      final double proteinProgress = controller.targetProtein.value > 0
+          ? (controller.consumedProtein.value / controller.targetProtein.value).clamp(0.0, 1.0)
+          : 0.0;
+      final double carbsProgress = controller.targetCarbs.value > 0
+          ? (controller.consumedCarbs.value / controller.targetCarbs.value).clamp(0.0, 1.0)
+          : 0.0;
+      final double fatProgress = controller.targetFat.value > 0
+          ? (controller.consumedFat.value / controller.targetFat.value).clamp(0.0, 1.0)
+          : 0.0;
+
+      final int calPercentage = (kcalProgress * 100).toInt();
 
       return Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
+          color: const Color(0xff0B0817).withOpacity(0.6),
           borderRadius: BorderRadius.circular(24),
-          color: const Color(0xff0B0817).withOpacity(0.55),
           border: Border.all(
             color: Colors.white.withOpacity(0.04),
             width: 1.0,
@@ -513,1107 +327,72 @@ class MealView extends GetView<MealController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// Target Header
+            // Row 1: Calorie numeric info (left) vs flame percentage ring (right)
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Icon(
-                  Icons.track_changes_rounded,
-                  color: Color(0xffFF00E5),
-                  size: 16,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  "Daily Target",
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            /// Macros row + Donut circle
-            Row(
-              children: [
-                /// Left 4 macro metrics in a 2x2 grid (represented as 2 columns of 2 items)
-                Expanded(
-                  child: Row(
-                    children: [
-                      /// Column 1: Calories & Carbs
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            buildMacroItem(
-                              icon: Icons.local_fire_department_rounded,
-                              iconColor: const Color(0xffFF7A00),
-                              value: controller.targetCalories.value.toString(),
-                              unit: "kcal",
-                            ),
-                            const SizedBox(height: 16),
-                            buildMacroItem(
-                              icon: Icons.grass_rounded,
-                              iconColor: const Color(0xffB100FF),
-                              value: "${controller.targetCarbs.value}g",
-                              unit: "Carbs",
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                      /// Column 2: Protein & Fat
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            buildMacroItem(
-                              icon: Icons.fitness_center_rounded,
-                              iconColor: const Color(0xff00FF87),
-                              value: "${controller.targetProtein.value}g",
-                              unit: "Protein",
-                            ),
-                            const SizedBox(height: 16),
-                            buildMacroItem(
-                              icon: Icons.water_drop_rounded,
-                              iconColor: const Color(0xff00A3FF),
-                              value: "${controller.targetFat.value}g",
-                              unit: "Fat",
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(width: 10),
-
-                /// Right: Donut Progress Ring
-                CustomPaint(
-                  size: const Size(86, 86),
-                  painter: DonutProgressPainter(
-                    progress: progress,
-                    gradientColors: [
-                      const Color(0xffB100FF),
-                      const Color(0xffFF00E5),
-                      const Color(0xffFF7A00),
-                      const Color(0xff00A3FF),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    });
-  }
-
-  Widget buildMacroItem({
-    required IconData icon,
-    required Color iconColor,
-    required String value,
-    required String unit,
-  }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: iconColor, size: 18),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              value,
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                height: 1.1,
-              ),
-            ),
-            Text(
-              unit,
-              style: GoogleFonts.inter(
-                color: Colors.white.withOpacity(0.40),
-                fontSize: 10,
-                height: 1.1,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  /// ----------------------------------------------------
-  /// 4. MEALS TIMELINE SECTION
-  /// ----------------------------------------------------
-  Widget buildMealsTimeline(BuildContext context) {
-    return Obx(() {
-      if (controller.isLoading.value) {
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(24.0),
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xffFF00E5)),
-            ),
-          ),
-        );
-      }
-
-      if (controller.mealTimeline.isEmpty) {
-        return Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: const Color(0xff0B0817).withOpacity(0.55),
-            border: Border.all(color: Colors.white.withOpacity(0.04)),
-          ),
-          child: Center(
-            child: Text(
-              "No active meal plans found.\nPlease complete Onboarding first.",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(color: Colors.white.withOpacity(0.6), fontSize: 13),
-            ),
-          ),
-        );
-      }
-
-      final bool isPast = controller.selectedQueryDate.value.isNotEmpty
-          ? DateTime.parse(controller.selectedQueryDate.value).isBefore(
-              DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
-            )
-          : false;
-      final bool isFuture = controller.selectedQueryDate.value.isNotEmpty
-          ? DateTime.parse(controller.selectedQueryDate.value).isAfter(
-              DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
-            )
-          : false;
-
-      return Column(
-        children: List.generate(controller.mealTimeline.length, (index) {
-          final meal = controller.mealTimeline[index];
-          final isFirst = index == 0;
-          final isLast = index == controller.mealTimeline.length - 1;
-
-          IconData icon = Icons.restaurant_rounded;
-          Color iconColor = const Color(0xffFF7A00);
-          
-          if (meal['title'] == 'Breakfast') {
-            icon = Icons.emoji_food_beverage_rounded;
-            iconColor = const Color(0xff00FF87);
-          } else if (meal['title'] == 'Lunch') {
-            icon = Icons.lunch_dining_rounded;
-            iconColor = const Color(0xffFF7A00);
-          } else if (meal['title'] == 'Dinner') {
-            icon = Icons.soup_kitchen_rounded;
-            iconColor = const Color(0xffFF3E3E);
-          } else if (meal['title'] == 'Evening Snack' || meal['title'] == 'Snacks' || meal['title'] == 'Mid Meal') {
-            icon = Icons.local_drink_rounded;
-            iconColor = const Color(0xffB100FF);
-          }
-
-          final int mealTypeId = meal['meal_id'] ?? 0;
-          final bool isCompleted = controller.completedMealIds.contains(mealTypeId);
-
-          var timelineState = TimelineState.active;
-          if (isCompleted) {
-            timelineState = TimelineState.completed;
-          } else if (isPast || isFuture) {
-            timelineState = TimelineState.upcomingGrey;
-          }
-
-          return buildTimelineRow(
-            dotColor: iconColor,
-            state: timelineState,
-            isFirst: isFirst,
-            isLast: isLast,
-            child: buildMealCard(
-              context: context,
-              title: meal['title'],
-              desc: meal['desc'],
-              details: meal['details'],
-              icon: icon,
-              iconColor: iconColor,
-              timeText: isCompleted ? "Done" : (isPast ? "Missed" : "Daily target"),
-              timeColor: isCompleted ? const Color(0xff00FF87) : (isPast ? const Color(0xffFF3E3E) : iconColor.withOpacity(0.7)),
-              hasActions: true,
-              mealId: meal['id'],
-              mealTypeId: mealTypeId,
-              isCompleted: isCompleted,
-              isPast: isPast,
-              isFuture: isFuture,
-              foods: meal['foods'],
-              onTap: () {
-                // Click opens detail
-              },
-            ),
-          );
-        }),
-      );
-    });
-  }
-
-  /// Timeline custom connector layout
-  Widget buildTimelineRow({
-    required Color dotColor,
-    required TimelineState state,
-    required bool isFirst,
-    required bool isLast,
-    required Widget child,
-  }) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          /// Timeline indicator line & dot
-          SizedBox(
-            width: 32,
-            child: Stack(
-              alignment: Alignment.topCenter,
-              children: [
-                /// Vertical Line
-                Positioned(
-                  top: isFirst ? 20 : 0,
-                  bottom: isLast ? 20 : 0,
-                  child: Container(
-                    width: 1.5,
-                    color: state == TimelineState.upcomingGrey
-                        ? Colors.white.withOpacity(0.10)
-                        : const Color(0xffB100FF).withOpacity(0.35),
-                  ),
-                ),
-
-                /// Timeline Circle Dot
-                Positioned(
-                  top: 22,
-                  child: state == TimelineState.completed
-                      ? Container(
-                          height: 18,
-                          width: 18,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color(0xff00FF87),
-                          ),
-                          child: const Icon(Icons.check, size: 12, color: Colors.black),
-                        )
-                      : Container(
-                          height: 12,
-                          width: 12,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xff06010F),
-                            border: Border.all(
-                              color: dotColor,
-                              width: 2.2,
-                            ),
-                          ),
-                        ),
-                ),
-              ],
-            ),
-          ),
-
-          /// Card content
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: child,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// General Meal Card UI
-  Widget buildMealCard({
-    required BuildContext context,
-    required String title,
-    required String desc,
-    required String details,
-    required IconData icon,
-    required Color iconColor,
-    String? badgeText,
-    Color? badgeColor,
-    String? timeText,
-    Color? timeColor,
-    bool hasActions = false,
-    int? mealId,
-    int? mealTypeId,
-    bool isCompleted = false,
-    bool isPast = false,
-    bool isFuture = false,
-    List? foods,
-    VoidCallback? onTap,
-  }) {
-    // 1. Group foods by option (1, 2, 3, or 4) and parse option names + benefits
-    final Map<int, List<dynamic>> optionFoods = {1: [], 2: [], 3: [], 4: []};
-    final Map<int, String> optionNames = {
-      1: "Recommended Balanced",
-      2: "Veg Alternative",
-      3: "High Protein Boost",
-      4: "Light & Easy"
-    };
-    final Map<int, String> optionBenefits = {
-      1: "",
-      2: "",
-      3: "",
-      4: ""
-    };
-
-    if (foods != null) {
-      for (var f in foods) {
-        if (f == null) continue;
-        int opt = 1;
-        String optName = "";
-        String optBenefit = "";
-
-        final String? notesStr = f['notes']?.toString();
-        if (notesStr != null && notesStr.isNotEmpty) {
-          try {
-            final Map<String, dynamic> meta = jsonDecode(notesStr);
-            opt = int.tryParse(meta['option']?.toString() ?? '1') ?? 1;
-            optName = meta['option_name']?.toString() ?? "";
-            optBenefit = meta['benefit']?.toString() ?? "";
-          } catch (_) {
-            if (notesStr.contains("Option 2") || notesStr.toLowerCase().contains("veg")) {
-              opt = 2;
-            } else if (notesStr.contains("Option 3") || notesStr.toLowerCase().contains("protein")) {
-              opt = 3;
-            } else if (notesStr.contains("Option 4") || notesStr.toLowerCase().contains("light")) {
-              opt = 4;
-            }
-          }
-        }
-
-        if (opt < 1 || opt > 4) opt = 1;
-        optionFoods[opt]?.add(f);
-        if (optName.isNotEmpty) {
-          optionNames[opt] = optName;
-        }
-        if (optBenefit.isNotEmpty) {
-          optionBenefits[opt] = optBenefit;
-        }
-      }
-    }
-
-    final int currentSelectedOption = controller.selectedOptions[mealId ?? 0] ?? 1;
-
-    // Helper to calculate total macros for a specific food option list
-    Map<String, double> getMacros(List<dynamic> list) {
-      double calories = 0.0;
-      double protein = 0.0;
-      double carbs = 0.0;
-      double fat = 0.0;
-      return {
-        'calories': list.fold(0.0, (sum, f) => sum + (double.tryParse(f['calories']?.toString() ?? '0') ?? 0)),
-        'protein': list.fold(0.0, (sum, f) => sum + (double.tryParse(f['protein']?.toString() ?? '0') ?? 0)),
-        'carbs': list.fold(0.0, (sum, f) => sum + (double.tryParse(f['carbs']?.toString() ?? '0') ?? 0)),
-        'fat': list.fold(0.0, (sum, f) => sum + (double.tryParse(f['fat']?.toString() ?? '0') ?? 0)),
-      };
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color(0xff120D2C).withOpacity(0.85),
-            const Color(0xff090416).withOpacity(0.95),
-          ],
-        ),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.06),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: iconColor.withOpacity(0.03),
-            blurRadius: 20,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // HEADER ROW (Icon, Title, completion status badge)
-            Row(
-              children: [
-                Container(
-                  height: 48,
-                  width: 48,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    color: const Color(0xff090414),
-                    border: Border.all(
-                      color: iconColor.withOpacity(0.20),
-                      width: 1.2,
-                    ),
-                  ),
-                  child: Icon(icon, color: iconColor, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        desc,
-                        style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.60),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Status Badge
-                if (isCompleted)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xff00FF87).withOpacity(0.10),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Completed",
-                          style: GoogleFonts.inter(
-                            color: const Color(0xff00FF87),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.check_circle_outline_rounded, color: Color(0xff00FF87), size: 10),
-                      ],
-                    ),
-                  )
-                else if (isPast)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xffFF3B30).withOpacity(0.10),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Absent",
-                          style: GoogleFonts.inter(
-                            color: const Color(0xffFF3B30),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.cancel_outlined, color: Color(0xffFF3B30), size: 10),
-                      ],
-                    ),
-                  )
-                else if (isFuture)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.04),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Upcoming",
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(0.40),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.lock_clock_outlined, color: Colors.white.withOpacity(0.40), size: 10),
-                      ],
-                    ),
-                  )
-                else if (timeText != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.02),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.05),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          timeText,
-                          style: GoogleFonts.inter(
-                            color: timeColor,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.access_time_rounded, color: timeColor, size: 10),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-
-            // CONDITIONAL CONTENT (Pending / Past or Future / Completed)
-            if (isCompleted) ...[
-              // COMPLETED VIEW: Just show logged option
-              const SizedBox(height: 14),
-              Divider(color: Colors.white.withOpacity(0.06), height: 1),
-              const SizedBox(height: 14),
-              Text(
-                "Logged: ${optionNames[currentSelectedOption] ?? 'Option $currentSelectedOption'}",
-                style: GoogleFonts.outfit(
-                  color: const Color(0xff00FF87),
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              // Foods list
-              Column(
-                children: (optionFoods[currentSelectedOption] ?? []).map<Widget>((f) {
-                  final foodDetails = f['food_details'] ?? {};
-                  final String foodName = foodDetails['food_name'] ?? 'Food Item';
-                  final double cal = double.tryParse(f['calories']?.toString() ?? '0.0') ?? 0.0;
-                  final qty = f['quantity'] ?? '1 serving';
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            "$foodName (Qty: $qty)",
-                            style: GoogleFonts.inter(color: Colors.white.withOpacity(0.9), fontSize: 13),
-                          ),
-                        ),
-                        Text(
-                          "${cal.toInt()} kcal",
-                          style: GoogleFonts.inter(color: const Color(0xffFF7A00), fontSize: 12, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 14),
-              // Macros
-              (() {
-                final macros = getMacros(optionFoods[currentSelectedOption] ?? []);
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildCardMacroChip("Calories", "${macros['calories']!.toInt()} kcal", const Color(0xffFF7A00)),
-                      const SizedBox(width: 8),
-                      _buildCardMacroChip("Protein", "${macros['protein']!.toInt()}g", const Color(0xff00FF87)),
-                      const SizedBox(width: 8),
-                      _buildCardMacroChip("Carbs", "${macros['carbs']!.toInt()}g", const Color(0xff00E5FF)),
-                      const SizedBox(width: 8),
-                      _buildCardMacroChip("Fat", "${macros['fat']!.toInt()}g", const Color(0xffFF00D4)),
-                    ],
-                  ),
-                );
-              })(),
-              // Undo log action
-              if (hasActions) ...[
-                const SizedBox(height: 14),
-                Divider(color: Colors.white.withOpacity(0.06), height: 1),
-                const SizedBox(height: 12),
-                GestureDetector(
-                  onTap: () async {
-                    if (mealId != null && mealTypeId != null) {
-                      final success = await controller.unmarkMealAsCompleted(mealId, mealTypeId);
-                      if (success) {
-                        Get.snackbar(
-                          "Meal Unmarked ↩️",
-                          "Removed $title from today's summary.",
-                          snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
-                          colorText: Colors.white,
-                          borderColor: const Color(0xffFF3B30).withOpacity(0.3),
-                          borderWidth: 1,
-                          margin: const EdgeInsets.all(16),
-                        );
-                      }
-                    }
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xffFF3B30).withOpacity(0.10),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xffFF3B30).withOpacity(0.18),
-                        width: 1.0,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Undo Log",
-                          style: GoogleFonts.outfit(
-                            color: const Color(0xffFF3B30),
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.undo_rounded, color: Color(0xffFF3B30), size: 13),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ] else if (isPast || isFuture) ...[
-              // PAST OR FUTURE VIEW: Just show default Option 1
-              const SizedBox(height: 14),
-              Divider(color: Colors.white.withOpacity(0.06), height: 1),
-              const SizedBox(height: 10),
-              Column(
-                children: (optionFoods[1] ?? []).map<Widget>((f) {
-                  final foodDetails = f['food_details'] ?? {};
-                  final String foodName = foodDetails['food_name'] ?? 'Food Item';
-                  final double cal = double.tryParse(f['calories']?.toString() ?? '0.0') ?? 0.0;
-                  final qty = f['quantity'] ?? '1 serving';
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            "$foodName (Qty: $qty)",
-                            style: GoogleFonts.inter(color: Colors.white.withOpacity(0.4), fontSize: 13),
-                          ),
-                        ),
-                        Text(
-                          "${cal.toInt()} kcal",
-                          style: GoogleFonts.inter(color: Colors.white.withOpacity(0.3), fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ] else ...[
-              // PENDING VIEW: List all 4 options stacked beautifully
-              const SizedBox(height: 14),
-              Divider(color: Colors.white.withOpacity(0.06), height: 1),
-              const SizedBox(height: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: (() {
-                  final List<Widget> widgets = [];
-                  int renderedCount = 0;
-
-                  for (int optNum = 1; optNum <= 4; optNum++) {
-                    final optionFoodsList = optionFoods[optNum] ?? [];
-                    if (optionFoodsList.isEmpty) continue;
-
-                    final List<String> foodStrings = optionFoodsList.map((f) {
-                      final foodDetails = f['food_details'] ?? {};
-                      final String foodName = foodDetails['food_name'] ?? 'Food Item';
-                      final qty = f['quantity'] ?? '1 serving';
-                      return "$foodName ($qty)";
-                    }).toList();
-
-                    final String foodsText = foodStrings.join(" + ");
-                    final String altSuffix = optNum > 1 ? " (${optionNames[optNum] ?? 'Alternative'})" : "";
-
-                    if (renderedCount > 0) {
-                      widgets.add(
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Text(
-                            "or",
-                            style: GoogleFonts.outfit(
-                              color: const Color(0xffFF00E5).withOpacity(0.60),
-                              fontSize: 11,
-                              fontStyle: FontStyle.italic,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    widgets.add(
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Text(
-                          "$foodsText$altSuffix",
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(0.90),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    );
-
-                    renderedCount++;
-                  }
-
-                  return widgets;
-                })(),
-              ),
-
-              // CLINICIAN MEDICAL TIP BOX (From Option 1)
-              (() {
-                final benefit = optionBenefits[1] ?? "";
-                if (benefit.isEmpty) return const SizedBox.shrink();
-
-                return Column(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 14),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xffB100FF).withOpacity(0.04),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xffB100FF).withOpacity(0.12),
-                          width: 0.8,
-                        ),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.psychology_rounded,
-                            color: Color(0xffB100FF),
-                            size: 16,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              "💡 Clinician Tip: $benefit",
-                              style: GoogleFonts.inter(
-                                color: Colors.white.withOpacity(0.70),
-                                fontSize: 11,
-                                height: 1.45,
-                              ),
-                            ),
-                          ),
-                        ],
+                    Text(
+                      "Today's Nutrition",
+                      style: GoogleFonts.inter(
+                        color: Colors.white.withOpacity(0.4),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ],
-                );
-              })(),
-
-              // MACROS TARGET SUMMARY GRID (From Option 1)
-              const SizedBox(height: 14),
-              Divider(color: Colors.white.withOpacity(0.06), height: 1),
-              const SizedBox(height: 12),
-              (() {
-                final macros = getMacros(optionFoods[1] ?? (foods ?? []));
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: Row(
-                    children: [
-                      _buildCardMacroChip("Calories", "${macros['calories']!.toInt()} kcal", const Color(0xffFF7A00)),
-                      const SizedBox(width: 8),
-                      _buildCardMacroChip("Protein", "${macros['protein']!.toInt()}g", const Color(0xff00FF87)),
-                      const SizedBox(width: 8),
-                      _buildCardMacroChip("Carbs", "${macros['carbs']!.toInt()}g", const Color(0xff00E5FF)),
-                      const SizedBox(width: 8),
-                      _buildCardMacroChip("Fat", "${macros['fat']!.toInt()}g", const Color(0xffFF00D4)),
-                    ],
-                  ),
-                );
-              })(),
-
-              // ACTIONS FOOTER (Single Complete button)
-              if (hasActions) ...[
-                const SizedBox(height: 14),
-                Divider(color: Colors.white.withOpacity(0.06), height: 1),
-                const SizedBox(height: 12),
-                GestureDetector(
-                  onTap: () async {
-                    if (mealId != null && mealTypeId != null) {
-                      final success = await controller.markMealAsCompleted(
-                        mealId,
-                        mealTypeId,
-                        selectedOption: 1,
-                      );
-                      if (success) {
-                        RocketLaunchOverlay.show(context, mealTitle: title);
-                      }
-                    }
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xffFF00D4), Color(0xffB100FF)],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xffFF00D4).withOpacity(0.20),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
                       children: [
                         Text(
-                          "Mark Meal as Completed",
+                          _formatNumber(controller.currentCalories.value),
                           style: GoogleFonts.outfit(
                             color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 34,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 14),
+                        Text(
+                          " /${_formatNumber(controller.targetCalories.value)} kcal",
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.4),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                ),
-              ],
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// AI Suggestion timeline card
-  Widget buildAISuggestionCard() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: const Color(0xff0B0817).withOpacity(0.45),
-        border: Border.all(
-          color: const Color(0xffB100FF).withOpacity(0.25),
-          width: 1.0,
-        ),
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xffB100FF).withOpacity(0.05),
-            Colors.transparent,
-          ],
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// Brain Icon
-          Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xff090414),
-              border: Border.all(
-                color: const Color(0xffB100FF).withOpacity(0.20),
-                width: 1.0,
-              ),
-            ),
-            child: const Icon(
-              Icons.psychology_rounded,
-              color: Color(0xffFF00E5),
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          /// Message content
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "AI Suggestion",
-                  style: GoogleFonts.outfit(
-                    color: const Color(0xffFF00E5),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Your protein intake is slightly behind target.",
-                  style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.70),
-                    fontSize: 10,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Consider adding:",
-                  style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.40),
-                    fontSize: 9,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    buildPill("+ Greek Yogurt"),
-                    const SizedBox(width: 8),
-                    buildPill("+ Whey Protein"),
                   ],
                 ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildPill(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xffB100FF).withOpacity(0.30),
-          width: 0.8,
-        ),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          color: const Color(0xffB100FF),
-          fontSize: 9,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCardMacroChip(String label, String value, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.12), width: 0.8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 5,
-            height: 5,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label.toUpperCase(),
-                style: GoogleFonts.inter(
-                  color: Colors.white.withOpacity(0.35),
-                  fontSize: 7.5,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.3,
-                ),
-              ),
-              const SizedBox(height: 1),
-              Text(
-                value,
-                style: GoogleFonts.outfit(
-                  color: color,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// ----------------------------------------------------
-  /// 5. BOTTOM METRICS ROW (WATER BOTTLE & CALORIES ARC)
-  /// ----------------------------------------------------
-  Widget buildBottomRow() {
-    return Row(
-      children: [
-        /// Left Column: Water Progress
-        Expanded(
-          child: Container(
-            height: 172,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: const Color(0xff0B0817).withOpacity(0.55),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.04),
-                width: 1.0,
-              ),
-            ),
-            child: Row(
-              children: [
-                /// Text & drops on left
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                
+                // Ring with Fire Icon
+                Container(
+                  height: 60,
+                  width: 60,
+                  alignment: Alignment.center,
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
+                      SizedBox(
+                        height: 52,
+                        width: 52,
+                        child: CircularProgressIndicator(
+                          value: kcalProgress,
+                          backgroundColor: Colors.white.withOpacity(0.05),
+                          valueColor: const AlwaysStoppedAnimation<Color>(Color(0xffFF00E5)),
+                          strokeWidth: 4.5,
+                        ),
+                      ),
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
-                            Icons.water_drop_rounded,
-                            color: Color(0xff00A3FF),
-                            size: 14,
-                          ),
-                          const SizedBox(width: 4),
+                          const Text("🔥", style: TextStyle(fontSize: 11)),
+                          const SizedBox(width: 1),
                           Text(
-                            "Water Progress",
+                            "$calPercentage%",
                             style: GoogleFonts.outfit(
                               color: Colors.white,
                               fontSize: 10,
@@ -1622,428 +401,404 @@ class MealView extends GetView<MealController> {
                           ),
                         ],
                       ),
-                      const Spacer(),
-                      Obx(() => RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "${controller.currentWater.value.toStringAsFixed(1)} ",
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.white,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: "/ ${controller.targetWater.value.toInt()} L",
-                                  style: GoogleFonts.inter(
-                                    color: Colors.white.withOpacity(0.40),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )),
-                      const SizedBox(height: 10),
-
-                      /// Droplets layout
-                      Obx(() {
-                        double current = controller.currentWater.value;
-                        double target = controller.targetWater.value;
-                        int filled = ((current / target) * 5).round().clamp(0, 5);
-
-                        return Row(
-                          children: List.generate(5, (index) {
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 3.0),
-                              child: Icon(
-                                Icons.water_drop_rounded,
-                                color: index < filled
-                                    ? const Color(0xff00A3FF)
-                                    : Colors.white.withOpacity(0.12),
-                                size: 12,
-                              ),
-                            );
-                          }),
-                        );
-                      }),
                     ],
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 22),
 
-                /// Drawing of Bottle on right
-                Obx(() {
-                  double ratio = controller.currentWater.value / controller.targetWater.value;
-                  return CustomPaint(
-                    size: const Size(60, 140),
-                    painter: WaterBottlePainter(fillPercentage: ratio),
-                  );
-                }),
+            // Row 2: 3 Horizontal Macro Cards
+            Row(
+              children: [
+                Expanded(
+                  child: _buildMacroCard(
+                    label: "Protein",
+                    consumed: controller.consumedProtein.value,
+                    target: controller.targetProtein.value,
+                    progress: proteinProgress,
+                    color: const Color(0xffFF00E5),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildMacroCard(
+                    label: "Carbs",
+                    consumed: controller.consumedCarbs.value,
+                    target: controller.targetCarbs.value,
+                    progress: carbsProgress,
+                    color: const Color(0xff00FF87),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildMacroCard(
+                    label: "Fats",
+                    consumed: controller.consumedFat.value,
+                    target: controller.targetFat.value,
+                    progress: fatProgress,
+                    color: const Color(0xffFFD166),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildMacroCard({
+    required String label,
+    required int consumed,
+    required int target,
+    required double progress,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.035),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.06),
+          width: 0.8,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.outfit(
+              color: Colors.white.withOpacity(0.45),
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            "$consumed / ${target}g",
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          // Small horizontal progress indicator
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: SizedBox(
+              height: 3,
+              child: LinearProgressIndicator(
+                value: progress,
+                backgroundColor: Colors.white.withOpacity(0.05),
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatNumber(int val) {
+    if (val >= 1000) {
+      final double formatted = val / 1000.0;
+      return formatted.toStringAsFixed(1).replaceAll('.0', '') + "k";
+    }
+    return val.toString();
+  }
+
+  // 4. CHECK CALORIES SEARCH BOX
+  Widget _buildSearchBox() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xff0B0817).withOpacity(0.55),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.04),
+          width: 1.0,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.search_rounded, color: Colors.white.withOpacity(0.3), size: 20),
+              const SizedBox(width: 12),
+              Text(
+                "Check calories",
+                style: GoogleFonts.inter(
+                  color: Colors.white.withOpacity(0.3),
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          Icon(Icons.qr_code_scanner_rounded, color: Colors.white.withOpacity(0.4), size: 20),
+        ],
+      ),
+    );
+  }
+
+  // 5. PROMO CARD (Customize Grocery List)
+  Widget _buildPromoCard() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xff2A1649),
+            const Color(0xff120D23).withOpacity(0.8),
+          ],
+        ),
+        border: Border.all(
+          color: const Color(0xffB100FF).withOpacity(0.12),
+          width: 1,
+        ),
+      ),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "It's time to customize your\nGrocery list & Recipes ➔",
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today_rounded,
+                      color: Colors.white.withOpacity(0.4),
+                      size: 12,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      "Nov 26 - Nov 30",
+                      style: GoogleFonts.inter(
+                        color: Colors.white.withOpacity(0.4),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-        ),
+          // Floating graphics (apples, broccolis) on the right
+          Positioned(
+            right: 12,
+            bottom: 8,
+            top: 8,
+            child: Row(
+              children: [
+                const Text("🥦", style: TextStyle(fontSize: 34)),
+                const SizedBox(width: 4),
+                Transform.rotate(
+                  angle: 0.2,
+                  child: const Text("🍎", style: TextStyle(fontSize: 34)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-        const SizedBox(width: 14),
+  // 6. MEALS LIST TIMELINE
+  Widget _buildMealsTimeline(BuildContext context) {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.all(32.0),
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xff00FF87)),
+            ),
+          ),
+        );
+      }
 
-        /// Right Column: Calories Summary
-        Expanded(
-          child: Container(
-            height: 172,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: const Color(0xff0B0817).withOpacity(0.55),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.04),
-                width: 1.0,
+      if (controller.mealTimeline.isEmpty) {
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xff0B0817).withOpacity(0.55),
+            border: Border.all(color: Colors.white.withOpacity(0.04)),
+          ),
+          child: Center(
+            child: Text(
+              "No active meal plans found.",
+              style: GoogleFonts.inter(
+                color: Colors.white.withOpacity(0.5),
+                fontSize: 13,
               ),
             ),
-            child: Stack(
-              children: [
-                /// Main Stats
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.bar_chart_rounded,
-                          color: Color(0xffB100FF),
-                          size: 14,
+          ),
+        );
+      }
+
+      return ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: controller.mealTimeline.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 14),
+        itemBuilder: (context, index) {
+          final meal = controller.mealTimeline[index];
+          final int mealTypeId = meal['meal_id'] ?? 0;
+          final bool isCompleted = controller.completedMealIds.contains(mealTypeId);
+
+          // Get total foods details and clean names
+          final List foods = meal['foods'] ?? [];
+          final String foodDesc = foods.isNotEmpty
+              ? foods.map((f) => f['food_details']?['food_name'] ?? '').join(', ')
+              : 'Tap to configure foods';
+
+          final double targetKcal = double.tryParse(meal['target_calories']?.toString() ?? '') ?? 300.0;
+
+          // Placeholder illustration based on meal slot
+          String emoji = "🥗";
+          if (meal['title'] == 'Breakfast') {
+            emoji = "🥣";
+          } else if (meal['title'] == 'Lunch') {
+            emoji = "🍱";
+          } else if (meal['title'] == 'Dinner') {
+            emoji = "🍲";
+          } else if (meal['title'] == 'Pre-Workout' || meal['title'] == 'Post-Workout') {
+            emoji = "🍌";
+          }
+
+          return GestureDetector(
+            onTap: () => Get.toNamed('/meal-detail', arguments: {
+              "dietPlanMealId": meal['id'],
+              "mealId": mealTypeId,
+              "title": meal['title'],
+              "foods": foods,
+              "isCompleted": isCompleted,
+              "targetKcal": targetKcal,
+            }),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(22),
+                color: const Color(0xff0B0817).withOpacity(0.55),
+                border: Border.all(
+                  color: isCompleted
+                      ? const Color(0xff00FF87).withOpacity(0.15)
+                      : Colors.white.withOpacity(0.04),
+                  width: 1.0,
+                ),
+              ),
+              child: Row(
+                children: [
+                  // Log status Checkbox
+                  GestureDetector(
+                    onTap: () {
+                      if (isCompleted) {
+                        controller.unmarkMealAsCompleted(meal['id'], mealTypeId);
+                      } else {
+                        controller.markMealAsCompleted(meal['id'], mealTypeId);
+                      }
+                    },
+                    child: Container(
+                      height: 24,
+                      width: 24,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isCompleted ? const Color(0xff00FF87) : Colors.transparent,
+                        border: Border.all(
+                          color: isCompleted
+                              ? Colors.transparent
+                              : Colors.white.withOpacity(0.2),
+                          width: 1.5,
                         ),
-                        const SizedBox(width: 4),
+                      ),
+                      child: isCompleted
+                          ? const Icon(Icons.check, color: Colors.black, size: 14)
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+
+                  // Meal details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          "Calories Summary",
+                          "15 min • ${targetKcal.toInt()} kcal",
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.4),
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          meal['title'],
                           style: GoogleFonts.outfit(
                             color: Colors.white,
-                            fontSize: 10,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          foodDesc,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.5),
+                            fontSize: 12,
                           ),
                         ),
                       ],
                     ),
-                    const Spacer(),
-                    Obx(() {
-                      final consumed = controller.currentCalories.value;
-                      final target = controller.targetCalories.value;
-                      final remaining = max(0, target - consumed);
-
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "Consumed",
-                                style: GoogleFonts.inter(
-                                  color: Colors.white.withOpacity(0.40),
-                                  fontSize: 10,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                consumed.toString(),
-                                style: GoogleFonts.outfit(
-                                  color: const Color(0xffB100FF),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                "kcal",
-                                style: GoogleFonts.inter(
-                                  color: Colors.white.withOpacity(0.40),
-                                  fontSize: 9,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "Remaining",
-                                style: GoogleFonts.inter(
-                                  color: Colors.white.withOpacity(0.40),
-                                  fontSize: 10,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                remaining.toString(),
-                                style: GoogleFonts.outfit(
-                                  color: const Color(0xffFF7A00),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                "kcal",
-                                style: GoogleFonts.inter(
-                                  color: Colors.white.withOpacity(0.40),
-                                  fontSize: 9,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
-                    }),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-
-                /// Custom Painter glowing arc at the bottom
-                Positioned(
-                  bottom: -15,
-                  left: 0,
-                  right: 0,
-                  child: CustomPaint(
-                    size: const Size(120, 50),
-                    painter: CaloriesArcPainter(),
                   ),
-                ),
-              ],
+
+                  // Rounded image box on right
+                  Container(
+                    height: 54,
+                    width: 54,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.04),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.06),
+                        width: 0.8,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      emoji,
+                      style: const TextStyle(fontSize: 26),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-enum TimelineState { completed, active, suggestion, upcoming, upcomingGrey }
-
-/// ----------------------------------------------------
-/// CUSTOM PAINTERS FOR GRAPHICS
-/// ----------------------------------------------------
-
-/// 1. Donut Progress Painter (Daily Target)
-class DonutProgressPainter extends CustomPainter {
-  final double progress;
-  final List<Color> gradientColors;
-
-  DonutProgressPainter({required this.progress, required this.gradientColors});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    double strokeWidth = 8.0;
-    double radius = (size.width - strokeWidth) / 2;
-    Offset center = Offset(size.width / 2, size.height / 2);
-
-    /// Draw background ring
-    Paint bgPaint = Paint()
-      ..color = Colors.white.withOpacity(0.04)
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke;
-    canvas.drawCircle(center, radius, bgPaint);
-
-    /// Draw progress arc
-    Rect rect = Rect.fromCircle(center: center, radius: radius);
-    Paint progressPaint = Paint()
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..shader = SweepGradient(
-        colors: gradientColors,
-        startAngle: 0.0,
-        endAngle: 2 * pi,
-        transform: const GradientRotation(-pi / 2),
-      ).createShader(rect);
-
-    canvas.drawArc(rect, -pi / 2, 2 * pi * progress, false, progressPaint);
-
-    /// Draw Center Text
-    TextPainter textPainter = TextPainter(
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: "${(progress * 100).toInt()}%\n",
-            style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              height: 1.1,
-            ),
-          ),
-          TextSpan(
-            text: "of target",
-            style: GoogleFonts.inter(
-              color: Colors.white.withOpacity(0.40),
-              fontSize: 8,
-              height: 1.1,
-            ),
-          ),
-        ],
-      ),
-      textAlign: TextAlign.center,
-      textDirection: TextDirection.ltr,
-    );
-
-    textPainter.layout(minWidth: 0, maxWidth: size.width);
-    textPainter.paint(
-      canvas,
-      Offset(
-        center.dx - (textPainter.width / 2),
-        center.dy - (textPainter.height / 2),
-      ),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-/// 2. Neon Water Bottle Painter
-class WaterBottlePainter extends CustomPainter {
-  final double fillPercentage;
-
-  WaterBottlePainter({required this.fillPercentage});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    double w = size.width;
-    double h = size.height;
-
-    Paint bottlePaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..color = const Color(0xff00A3FF).withOpacity(0.7);
-
-    /// Define Path for Bottle
-    Path bottlePath = Path();
-
-    // Start at neck top left
-    bottlePath.moveTo(w * 0.35, h * 0.12);
-    // top edge of cap
-    bottlePath.lineTo(w * 0.35, h * 0.06);
-    bottlePath.lineTo(w * 0.65, h * 0.06);
-    bottlePath.lineTo(w * 0.65, h * 0.12);
-    // neck down
-    bottlePath.lineTo(w * 0.32, h * 0.12);
-    bottlePath.lineTo(w * 0.32, h * 0.17);
-    // shoulder out left
-    bottlePath.quadraticBezierTo(w * 0.32, h * 0.22, w * 0.15, h * 0.26);
-    // left body side
-    bottlePath.lineTo(w * 0.15, h * 0.88);
-    // bottom left corner
-    bottlePath.quadraticBezierTo(w * 0.15, h * 0.94, w * 0.30, h * 0.94);
-    // bottom edge
-    bottlePath.lineTo(w * 0.70, h * 0.94);
-    // bottom right corner
-    bottlePath.quadraticBezierTo(w * 0.85, h * 0.94, w * 0.85, h * 0.88);
-    // right body side
-    bottlePath.lineTo(w * 0.85, h * 0.26);
-    // shoulder out right
-    bottlePath.quadraticBezierTo(w * 0.68, h * 0.22, w * 0.68, h * 0.17);
-    bottlePath.lineTo(w * 0.68, h * 0.12);
-    bottlePath.close();
-
-    /// Draw Water Fill
-    canvas.save();
-    canvas.clipPath(bottlePath);
-
-    double fillHeight = h * 0.94 - (h * 0.68 * fillPercentage);
-
-    Rect waterRect = Rect.fromLTRB(w * 0.05, fillHeight, w * 0.95, h * 0.95);
-    Paint waterPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          const Color(0xff00A3FF).withOpacity(0.60),
-          const Color(0xff0051FF).withOpacity(0.25),
-        ],
-      ).createShader(waterRect);
-
-    canvas.drawRect(waterRect, waterPaint);
-
-    /// Draw inside ticks
-    Paint tickPaint = Paint()
-      ..color = Colors.white.withOpacity(0.2)
-      ..strokeWidth = 1.0;
-
-    double startTickY = h * 0.32;
-    double endTickY = h * 0.84;
-    double step = (endTickY - startTickY) / 4;
-
-    for (int i = 0; i < 5; i++) {
-      double y = startTickY + (step * i);
-      canvas.drawLine(Offset(w * 0.30, y), Offset(w * 0.42, y), tickPaint);
-    }
-    canvas.restore();
-
-    /// Draw Bottle boundary
-    canvas.drawPath(bottlePath, bottlePaint);
-
-    /// Draw Neon outer glow border reflection - concentric lines (safe)
-    for (double i = 1; i <= 3; i++) {
-      canvas.drawPath(
-        bottlePath,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.5 + (i * 0.8)
-          ..color = const Color(0xff00A3FF).withOpacity(0.10 / i),
+          );
+        },
       );
-    }
+    });
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-/// 3. Calories Summary Arc Painter
-class CaloriesArcPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    double w = size.width;
-    double h = size.height;
-
-    Rect rect = Rect.fromLTWH(-w * 0.1, 0, w * 1.2, h * 2.0);
-
-    /// Draw main neon arc
-    Paint arcPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0
-      ..strokeCap = StrokeCap.round
-      ..shader = const LinearGradient(
-        colors: [
-          Color(0xffB100FF),
-          Color(0xffFF00E5),
-          Color(0xffFF7A00),
-        ],
-      ).createShader(rect);
-
-    canvas.drawArc(rect, pi, pi, false, arcPaint);
-
-    /// Draw neon glow shadow - concentric arcs (safe)
-    for (double i = 1; i <= 3; i++) {
-      canvas.drawArc(
-        rect,
-        pi,
-        pi,
-        false,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3.0 + (i * 1.5)
-          ..strokeCap = StrokeCap.round
-          ..color = const Color(0xffFF00E5).withOpacity(0.12 / i),
-      );
-    }
-
-    /// Paint small floating glowing particle points
-    Paint dotPaint = Paint()..color = const Color(0xffFF00E5);
-    canvas.drawCircle(Offset(w * 0.22, h * 0.32), 2.0, dotPaint);
-
-    Paint dotPaintOrange = Paint()..color = const Color(0xffFF7A00);
-    canvas.drawCircle(Offset(w * 0.78, h * 0.32), 1.5, dotPaintOrange);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -24,7 +24,7 @@ class HomeView extends GetView<HomeController> {
             Obx(() {
               final isMeal = controller.activeTab.value == 0;
               final headerBg = isMeal
-                  ? const Color(0xffFD6702).withOpacity(0.20)
+                  ? const Color(0xff00A2FF).withOpacity(0.20)
                   : const Color(0xff3F72AF).withOpacity(0.20);
 
               // Dynamically update system status bar style to match the tab theme
@@ -61,7 +61,7 @@ class HomeView extends GetView<HomeController> {
               child: Obx(() {
                 final isMeal = controller.activeTab.value == 0;
                 final bgColor = isMeal
-                    ? const Color(0xffFD6702)
+                    ? const Color(0xff00A2FF)
                     : const Color(0xff3F72AF);
 
                 return SingleChildScrollView(
@@ -91,7 +91,7 @@ class HomeView extends GetView<HomeController> {
                               const SizedBox(height: 16),
                               const AnimatedPartyBanner(),
                               const SizedBox(height: 16),
-                              const SwiggyPromoCards(),
+                              SwiggyPromoCards(),
                             ] else
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(24),
@@ -214,12 +214,28 @@ class HomeView extends GetView<HomeController> {
 
                                   const SizedBox(height: 24),
 
-                                  /// TODAY'S MEAL PROGRESS CARD
-                                  buildMealProgressCard(),
+                                  /// OFFER CARDS
+                                ], // close Column children
+                              ), // close Column
+                            ), // close Padding
+                            // Offers Section - full width, no extra padding
+                            buildOfferCards(context),
 
-                                  const SizedBox(height: 24),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // const SizedBox(height: 24),
+
+                                  /// TODAY'S MEAL PROGRESS CARD
+                                  // buildMealProgressCard(),
+                                  // const SizedBox(height: 24),
 
                                   /// 3. STATS GRID ROW 1 & 2 (Reactive)
+                                  /*
                                   Obx(() {
                                     final double calProgress =
                                         controller.targetCalories.value > 0
@@ -368,8 +384,8 @@ class HomeView extends GetView<HomeController> {
                                       ],
                                     );
                                   }),
-
-                                  const SizedBox(height: 28),
+                                  */
+                                  // const SizedBox(height: 28),
 
                                   /// 5. AI COACH & HYDRATION GOAL (ROW)
                                   // Row(
@@ -380,7 +396,7 @@ class HomeView extends GetView<HomeController> {
                                   //     Expanded(flex: 8, child: buildHydrationGoalCard()),
                                   //   ],
                                   // ),`
-                                  const SizedBox(height: 28),
+                                  // const SizedBox(height: 28),
 
                                   /// 6. PROGRESS & STREAK SECTION
                                   Column(
@@ -404,6 +420,7 @@ class HomeView extends GetView<HomeController> {
 
                                   const SizedBox(height: 28),
 
+                                  /*
                                   Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -415,15 +432,17 @@ class HomeView extends GetView<HomeController> {
                                       buildBadgesCard(),
                                     ],
                                   ),
-
+                                  */
                                   const SizedBox(height: 28),
 
                                   /// 7. QUICK ACTIONS Grid
+                                  /*
                                   sectionTitle("QUICK ACTIONS", ""),
 
                                   const SizedBox(height: 16),
 
                                   buildQuickActionsGrid(),
+                                  */
                                 ],
                               ),
                             ),
@@ -496,6 +515,39 @@ class HomeView extends GetView<HomeController> {
         /// HEADER TOP RIGHT ACTIONS
         Row(
           children: [
+            // FitCoins Wallet Widget
+            Obx(() {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xffFFD166).withOpacity(0.25),
+                    width: 0.8,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "🪙",
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      "${controller.fitPoints.value}",
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xffFFD166),
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(width: 10),
             GestureDetector(
               onTap: () => Get.toNamed('/notifications'),
               child: buildTopActionButton(
@@ -503,7 +555,7 @@ class HomeView extends GetView<HomeController> {
                 showDot: true,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             GestureDetector(
               onTap: () => Get.toNamed('/profile'),
               child: Container(
@@ -833,6 +885,577 @@ class HomeView extends GetView<HomeController> {
             fontWeight: FontWeight.w600,
           ),
         ),
+      ],
+    );
+  }
+
+  /// ----------------------------------------------------
+  /// OFFER CARDS & BOTTOM SHEET
+  /// ----------------------------------------------------
+  Widget buildOfferCards(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: Text(
+            "Offers For You",
+            style: GoogleFonts.outfit(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.only(left: 18, right: 18),
+          clipBehavior: Clip.none,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Transform.translate(
+                offset: const Offset(0, -8),
+                child: GestureDetector(
+                  onTap: () => _showPremiumOfferBottomSheet(
+                    context,
+                    "50% OFF",
+                    "On Annual Plan",
+                    const Color(0xffFF7A00),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/home/offer1.png',
+                      width: 320,
+                      height: 190,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              GestureDetector(
+                onTap: () => _showTalkToExpertBottomSheet(context),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/home/offer2.png',
+                    width: 320,
+                    height: 190,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  void _showPremiumOfferBottomSheet(
+    BuildContext context,
+    String offerTitle,
+    String offerSubtitle,
+    Color accentColor,
+  ) {
+    int selectedPlanIndex = 1; // 0 = monthly, 1 = annual
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 8,
+                bottom: 32,
+              ),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xff9D4EDD), // Bright vibrant purple
+                    Color(0xff3A0CA3), // Deep rich purple
+                  ],
+                ),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(32),
+                ),
+                border: Border.all(color: Colors.white.withOpacity(0.05)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.8),
+                    blurRadius: 40,
+                    spreadRadius: 10,
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Drag handle
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+
+                  // Top Banner Image (fully visible)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/home/bottom_sheet1.png',
+                      width: double.infinity,
+                      height: 200, // Reverted to slightly larger size
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                  // Plan Selection Cards
+                  Row(
+                    children: [
+                      // Monthly Plan
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => selectedPlanIndex = 0),
+                          child: _buildPlanCard(
+                            title: "Monthly Plan",
+                            price: "₹499",
+                            duration: "/month",
+                            billing: "Billed monthly",
+                            isSelected: selectedPlanIndex == 0,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // Annual Plan
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => selectedPlanIndex = 1),
+                          child: _buildPlanCard(
+                            title: "Annual Plan",
+                            price: "₹2,999",
+                            duration: "",
+                            oldPrice: "₹5,999",
+                            billing: "Billed yearly • Save 50%",
+                            isSelected: selectedPlanIndex == 1,
+                            isBestValue: true,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // CTA Button
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xffFFD166), Color(0xffF7931A)],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xffF7931A).withOpacity(0.3),
+                            blurRadius: 15,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            selectedPlanIndex == 1
+                                ? "Get 50% Off Now"
+                                : "Start Monthly Plan",
+                            style: GoogleFonts.outfit(
+                              color: const Color(0xff3E2000),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Color(0xff3E2000),
+                            size: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Footer
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.shield_outlined,
+                        color: Colors.white.withOpacity(0.5),
+                        size: 14,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        "Secure payment   •   Cancel anytime",
+                        style: GoogleFonts.inter(
+                          color: Colors.white.withOpacity(0.5),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ], // Closes children of Column
+              ), // Closes Column
+            ); // Closes Container
+          }, // Closes StatefulBuilder builder
+        ); // Closes StatefulBuilder
+      },
+    );
+  }
+
+  void _showTalkToExpertBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 8,
+            bottom: 32,
+          ),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xff00A3FF), // Bright vibrant blue
+                Color(0xff09287B), // Deep rich blue
+              ],
+            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border.all(color: Colors.white.withOpacity(0.05)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.8),
+                blurRadius: 40,
+                spreadRadius: 10,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag handle
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 4),
+
+              // Top Banner Image (fully visible)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'assets/home/botoom_sheet2.png',
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              // Title and Subtitle
+              Text(
+                "Talk to an Expert Dietitian",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Get personalized guidance on your diet, workout, and supplements directly from certified experts.",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: Colors.white.withOpacity(0.7),
+                  fontSize: 14,
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // CTA Button
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xff00D1FF), Color(0xff0088FF)],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xff0088FF).withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Talk Now",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.call_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Footer
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.shield_outlined,
+                    color: Colors.white.withOpacity(0.5),
+                    size: 14,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    "100% Confidential & Secure",
+                    style: GoogleFonts.inter(
+                      color: Colors.white.withOpacity(0.5),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ], // Closes children of Column
+          ), // Closes Column
+        ); // Closes Container
+      }, // Closes showModalBottomSheet builder
+    ); // Closes showModalBottomSheet
+  } // Closes _showTalkToExpertBottomSheet
+
+  Widget _buildFeatureIcon(String emoji, String text) {
+    return Expanded(
+      child: Column(
+        children: [
+          Container(
+            height: 60,
+            width: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withOpacity(0.04),
+              border: Border.all(color: Colors.white.withOpacity(0.08)),
+            ),
+            child: Center(
+              child: Text(emoji, style: const TextStyle(fontSize: 26)),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              color: Colors.white.withOpacity(0.85),
+              fontSize: 11,
+              height: 1.3,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlanCard({
+    required String title,
+    required String price,
+    required String duration,
+    required String billing,
+    required bool isSelected,
+    String? oldPrice,
+    bool isBestValue = false,
+  }) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: isSelected
+                ? const Color(0xffE98C00).withOpacity(0.12)
+                : Colors.white.withOpacity(0.03),
+            border: Border.all(
+              color: isSelected
+                  ? const Color(0xffE98C00)
+                  : Colors.white.withOpacity(0.08),
+              width: isSelected ? 1.5 : 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Icon(
+                    isSelected
+                        ? Icons.check_circle_rounded
+                        : Icons.radio_button_unchecked,
+                    color: isSelected
+                        ? const Color(0xffE98C00)
+                        : Colors.white.withOpacity(0.2),
+                    size: 20,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    price,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (duration.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0, left: 2.0),
+                      child: Text(
+                        duration,
+                        style: GoogleFonts.inter(
+                          color: Colors.white.withOpacity(0.5),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  if (oldPrice != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5.0, left: 6.0),
+                      child: Text(
+                        oldPrice,
+                        style: GoogleFonts.inter(
+                          color: Colors.white.withOpacity(0.4),
+                          fontSize: 13,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                billing,
+                style: GoogleFonts.inter(
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (isBestValue)
+          Positioned(
+            top: -12,
+            right: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xffFFD166),
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xffFFD166).withOpacity(0.3),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.star_rounded,
+                    color: Color(0xff3E2000),
+                    size: 12,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    "Best Value",
+                    style: GoogleFonts.outfit(
+                      color: const Color(0xff3E2000),
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -2769,7 +3392,7 @@ class _PremiumSearchBarState extends State<PremiumSearchBar> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xffFD6702),
+              color: const Color(0xff00A2FF),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(
@@ -2788,67 +3411,130 @@ class _PremiumSearchBarState extends State<PremiumSearchBar> {
 /// SWIGGY STYLE PROMO CARDS WIDGET
 /// ----------------------------------------------------
 class SwiggyPromoCards extends StatelessWidget {
-  const SwiggyPromoCards({super.key});
+  SwiggyPromoCards({super.key});
+
+  final HomeController controller = Get.find<HomeController>();
 
   @override
   Widget build(BuildContext context) {
-    // 4 cards as per project
-    final List<Map<String, String>> cards = [
-      {"title": "Up To 50% OFF", "sub": "Pro Plan"},
-      {"title": "Healthy Recipes", "sub": "Explore"},
-      {"title": "Track Macros", "sub": "Calculator"},
-      {"title": "Vegan Meals", "sub": "Green"},
-    ];
+    return Obx(() {
+      final double kcalProgress = controller.targetCalories.value > 0
+          ? (controller.currentCalories.value / controller.targetCalories.value).clamp(0.0, 1.0)
+          : 0.0;
+      final double proteinProgress = controller.targetProtein.value > 0
+          ? (controller.currentProtein.value / controller.targetProtein.value).clamp(0.0, 1.0)
+          : 0.0;
+      final double carbsProgress = controller.targetCarbs.value > 0
+          ? (controller.currentCarbs.value / controller.targetCarbs.value).clamp(0.0, 1.0)
+          : 0.0;
+      final double fatProgress = controller.targetFat.value > 0
+          ? (controller.currentFat.value / controller.targetFat.value).clamp(0.0, 1.0)
+          : 0.0;
 
-    return Row(
-      children: [
-        Expanded(child: _buildCard(cards[0])),
-        const SizedBox(width: 8),
-        Expanded(child: _buildCard(cards[1])),
-        const SizedBox(width: 8),
-        Expanded(child: _buildCard(cards[2])),
-        const SizedBox(width: 8),
-        Expanded(child: _buildCard(cards[3])),
-      ],
-    );
+      return Row(
+        children: [
+          Expanded(
+            child: _buildMacroCard(
+              title: "Calories",
+              consumed: "${controller.currentCalories.value}",
+              target: "${controller.targetCalories.value} kcal",
+              progress: kcalProgress,
+              color: const Color(0xffFF7A00),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: _buildMacroCard(
+              title: "Protein",
+              consumed: "${controller.currentProtein.value}g",
+              target: "${controller.targetProtein.value}g",
+              progress: proteinProgress,
+              color: const Color(0xff00FF87),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: _buildMacroCard(
+              title: "Carbs",
+              consumed: "${controller.currentCarbs.value}g",
+              target: "${controller.targetCarbs.value}g",
+              progress: carbsProgress,
+              color: const Color(0xff00A3FF),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: _buildMacroCard(
+              title: "Fat",
+              consumed: "${controller.currentFat.value}g",
+              target: "${controller.targetFat.value}g",
+              progress: fatProgress,
+              color: const Color(0xffB100FF),
+            ),
+          ),
+        ],
+      );
+    });
   }
 
-  Widget _buildCard(Map<String, String> card) {
+  Widget _buildMacroCard({
+    required String title,
+    required String consumed,
+    required String target,
+    required double progress,
+    required Color color,
+  }) {
     return Container(
-      height: 85,
+      height: 90,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.12),
+        color: Colors.white.withOpacity(0.09),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+        border: Border.all(color: Colors.white.withOpacity(0.12), width: 0.8),
       ),
       padding: const EdgeInsets.all(6),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            card["title"]!,
-            textAlign: TextAlign.center,
+            title,
             style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              height: 1.1,
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              card["sub"]!,
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
+          
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                consumed,
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+              const SizedBox(height: 1),
+              Text(
+                target,
+                style: GoogleFonts.inter(
+                  color: Colors.white.withOpacity(0.4),
+                  fontSize: 9,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+
+          // Small horizontal progress bar at bottom of card
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: Colors.white.withOpacity(0.05),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+              minHeight: 3,
             ),
           ),
         ],
@@ -2971,7 +3657,9 @@ class BlockbusterMealCarousel extends StatefulWidget {
 }
 
 class _BlockbusterMealCarouselState extends State<BlockbusterMealCarousel> {
-  late PageController _pageController;
+  late final PageController _pageController = PageController(
+    viewportFraction: 0.74,
+  )..addListener(_pageListener);
   double _currentPage = 0.0;
 
   final List<String> placeholderImages = [
@@ -2982,19 +3670,17 @@ class _BlockbusterMealCarouselState extends State<BlockbusterMealCarousel> {
     'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80',
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(viewportFraction: 0.74);
-    _pageController.addListener(() {
+  void _pageListener() {
+    if (mounted) {
       setState(() {
         _currentPage = _pageController.page ?? 0.0;
       });
-    });
+    }
   }
 
   @override
   void dispose() {
+    _pageController.removeListener(_pageListener);
     _pageController.dispose();
     super.dispose();
   }
@@ -3024,31 +3710,36 @@ class _BlockbusterMealCarouselState extends State<BlockbusterMealCarousel> {
 
     return Column(
       children: [
-        // The trick: padding + clipBehavior: none reveals the adjacent cards
-        SizedBox(
-          height: 350,
-          child: PageView.builder(
-            controller: _pageController,
-            physics: const BouncingScrollPhysics(),
-            clipBehavior: Clip.none,
-            itemCount: widget.meals.length,
-            itemBuilder: (context, index) {
-              double scale = 1.0;
-              if (_pageController.hasClients &&
-                  _pageController.positions.length == 1 &&
-                  _pageController.position.haveDimensions) {
-                double pageOffset = _currentPage - index;
-                scale = (1 - (pageOffset.abs() * 0.20)).clamp(0.80, 1.0);
-              } else {
-                scale = index == 0 ? 1.0 : 0.80;
-              }
+        Transform.translate(
+          offset: const Offset(
+            -26,
+            0,
+          ), // Shift slightly left so first card aligns left
+          child: SizedBox(
+            height: 350,
+            child: PageView.builder(
+              controller: _pageController,
+              physics: const BouncingScrollPhysics(),
+              clipBehavior: Clip.none,
+              itemCount: widget.meals.length,
+              itemBuilder: (context, index) {
+                double scale = 1.0;
+                if (_pageController.hasClients &&
+                    _pageController.positions.length == 1 &&
+                    _pageController.position.haveDimensions) {
+                  double pageOffset = _currentPage - index;
+                  scale = (1 - (pageOffset.abs() * 0.15)).clamp(0.85, 1.0);
+                } else {
+                  scale = index == 0 ? 1.0 : 0.85;
+                }
 
-              final meal = widget.meals[index];
-              final String imageUrl =
-                  placeholderImages[index % placeholderImages.length];
+                final meal = widget.meals[index];
+                final String imageUrl =
+                    placeholderImages[index % placeholderImages.length];
 
-              return _buildMovieStyleMealCard(meal, scale, imageUrl);
-            },
+                return _buildMovieStyleMealCard(meal, scale, imageUrl);
+              },
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -3076,8 +3767,6 @@ class _BlockbusterMealCarouselState extends State<BlockbusterMealCarousel> {
   }
 
   Widget _buildMovieStyleMealCard(dynamic meal, double scale, String imageUrl) {
-    final color = meal["color"] as Color;
-
     return GestureDetector(
       onTap: () => Get.toNamed('/meal-plan'),
       child: Transform.scale(
@@ -3101,29 +3790,51 @@ class _BlockbusterMealCarouselState extends State<BlockbusterMealCarousel> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ── Image section (takes ~74% of card) ──
+              // ── Image Section (74% height) with fading bottom overlay ──
               Expanded(
                 flex: 74,
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(20),
                   ),
-                  child: Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: const Color(0xff1A0030),
-                      child: const Icon(
-                        Icons.restaurant_rounded,
-                        color: Colors.white38,
-                        size: 48,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: const Color(0xff1A0030),
+                          child: const Icon(
+                            Icons.restaurant_rounded,
+                            color: Colors.white38,
+                            size: 48,
+                          ),
+                        ),
                       ),
-                    ),
+                      // Smooth gradient overlay to blend bottom of image with the black portion below it
+                      Positioned.fill(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                const Color(0xff06010F).withOpacity(0.5),
+                                const Color(0xff06010F).withOpacity(0.85),
+                              ],
+                              stops: const [0.7, 0.9, 1.0],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
 
-              // ── Text section (takes ~26% of card) ──
+              // ── Text Section (26% height) with fading bottom overlay to blend with app background ──
               Expanded(
                 flex: 26,
                 child: Container(
@@ -3137,34 +3848,14 @@ class _BlockbusterMealCarouselState extends State<BlockbusterMealCarousel> {
                       ],
                     ),
                   ),
-                  padding: const EdgeInsets.fromLTRB(14, 6, 14, 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Small meal-type label (like "BIBI KA MAQBARA, Chh...")
-                      Row(
-                        children: [
-                          Icon(
-                            meal["icon"] as IconData,
-                            size: 12,
-                            color: color,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            (meal["title"] as String).toUpperCase(),
-                            style: GoogleFonts.inter(
-                              color: color,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.8,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
                       // Big bold title
                       Text(
                         meal["title"] as String,

@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/profile_controller.dart';
 import '../../../widgets/premium_layout_components.dart';
-
+import '../../goal/views/congratulations_screen.dart';
 class SettingsView extends GetView<ProfileController> {
   const SettingsView({super.key});
 
@@ -363,6 +363,15 @@ class SettingsView extends GetView<ProfileController> {
       ),
       child: Column(
         children: [
+          buildSettingsRowItem(
+            icon: Icons.celebration_rounded,
+            title: "Test Congratulations Screen",
+            subtitle: "View the new animated screen",
+            onTap: () {
+              Get.to(() => const CongratulationsScreen(memberCode: '1234-5678-9012'));
+            },
+          ),
+          buildDivider(),
           buildSettingsRowItem(
             icon: Icons.help_outline_rounded,
             title: "Help Center",

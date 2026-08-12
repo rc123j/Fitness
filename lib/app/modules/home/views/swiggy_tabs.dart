@@ -106,12 +106,12 @@ class SwiggyTabsHeader extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Obx(() {
       final isMeal = controller.activeTab.value == 0;
-      final mealColor = const Color(0xffFD6702); // Swiggy Orange
+      final mealColor = const Color(0xff00A2FF); // Zepto-style Light Blue
       final workoutColor = const Color(0xff3F72AF); // Soft Blue
       final activeColor = isMeal ? mealColor : workoutColor;
 
       final inactiveBg = isMeal
-          ? const Color(0xffFD6702).withOpacity(0.20)
+          ? const Color(0xff00A2FF).withOpacity(0.20)
           : const Color(0xff3F72AF).withOpacity(0.20);
 
       return Container(
@@ -139,8 +139,10 @@ class SwiggyTabsHeader extends GetView<HomeController> {
                       child: GestureDetector(
                         onTap: () => controller.activeTab.value = 0,
                         child: Container(
-                          height: 80, // Always full height to ensure correct alignment
-                          color: Colors.transparent, // Detect taps anywhere in the area
+                          height:
+                              80, // Always full height to ensure correct alignment
+                          color: Colors
+                              .transparent, // Detect taps anywhere in the area
                           padding: EdgeInsets.only(
                             top: isMeal ? 0 : 6,
                             bottom: isMeal ? 6 : 0,

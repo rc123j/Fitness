@@ -1,5 +1,4 @@
-import 'dart:math';
-import 'dart:ui';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,1250 +9,500 @@ class MealDetailView extends GetView<MealController> {
 
   @override
   Widget build(BuildContext context) {
+    // Read arguments passed from meal_view.dart
+    final Map<String, dynamic> args = Get.arguments ?? {};
+    final int dietPlanMealId = args['dietPlanMealId'] ?? 0;
+    final int mealId = args['mealId'] ?? 0;
+    final String title = args['title'] ?? 'Meal Detail';
+    final List foods = args['foods'] ?? [];
+    final double targetKcal = args['targetKcal'] ?? 0.0;
+
+    // Calculate total macros from food list
+    double totalProtein = 0.0;
+    double totalCarbs = 0.0;
+    double totalFat = 0.0;
+    for (var f in foods) {
+      if (f == null) continue;
+      totalProtein += double.tryParse(f['protein']?.toString() ?? '0') ?? 0;
+      totalCarbs += double.tryParse(f['carbs']?.toString() ?? '0') ?? 0;
+      totalFat += double.tryParse(f['fat']?.toString() ?? '0') ?? 0;
+    }
+
+    // Map a network photo to make the detail screen look incredibly premium
+    String imageUrl = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
+    if (title.contains('Breakfast')) {
+      imageUrl = 'https://images.unsplash.com/photo-1493770348161-369560ae357d?auto=format&fit=crop&w=800&q=80';
+    } else if (title.contains('Lunch')) {
+      imageUrl = 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80';
+    } else if (title.contains('Dinner')) {
+      imageUrl = 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80';
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xff06010F),
-      body: Stack(
-        children: [
-          /// BACKGROUND GLOW BLOBS
-          Positioned(
-            top: -100,
-            left: -100,
-            child: Container(
-              height: 300,
-              width: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xffB100FF).withOpacity(0.08),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -50,
-            right: -50,
-            child: Container(
-              height: 300,
-              width: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xffFF00E5).withOpacity(0.08),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
+      body: Obx(() {
+        final bool isCompleted = controller.completedMealIds.contains(mealId);
 
-          /// MAIN SCREEN CONTENT
-          SafeArea(
-            child: Column(
-              children: [
-                /// HEADER
-                buildHeader(),
-
-                /// SCROLLABLE DETAILS
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    child: Column(
-                      children: [
-                        /// 1. MEAL SUMMARY TOP CARD
-                        buildMealSummaryCard(),
-                        const SizedBox(height: 14),
-
-                        /// 2. MACROS DONUT CARD
-                        buildMacrosDonutCard(),
-                        const SizedBox(height: 14),
-
-                        /// 3. MACRONUTRIENT BALANCE PROGRESS BAR
-                        buildMacronutrientBalanceCard(),
-                        const SizedBox(height: 14),
-
-                        /// 4. FOOD ITEMS LIST
-                        buildFoodItemsSection(),
-                        const SizedBox(height: 14),
-
-                        /// 5. NOTES CARD WITH NEON ICON
-                        buildNotesCard(),
-                        const SizedBox(height: 14),
-
-                        /// 6. CALORIES SUMMARY ROW
-                        buildCalorieSummaryRow(),
-                        const SizedBox(height: 20),
-
-                        /// 7. BOTTOM ACTIONS BAR
-                        buildBottomActionsBar(),
-                        const SizedBox(height: 12),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// ----------------------------------------------------
-  /// HEADER WIDGET
-  /// ----------------------------------------------------
-  Widget buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          /// Back Button
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.03),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
-                  width: 0.8,
-                ),
-              ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
-            ),
-          ),
-
-          /// Center Title
-          Text(
-            "Meal Details",
-            style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          /// More Menu
-          Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.03),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.08),
-                width: 0.8,
-              ),
-            ),
-            child: const Icon(Icons.more_horiz_rounded, color: Colors.white, size: 18),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// ----------------------------------------------------
-  /// 1. MEAL SUMMARY TOP CARD
-  /// ----------------------------------------------------
-  Widget buildMealSummaryCard() {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.0,
-        ),
-      ),
-      child: Row(
-        children: [
-          /// Glowing Food Icon Circle
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                height: 52,
-                width: 52,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xffFF7A00).withOpacity(0.20),
-                      blurRadius: 12,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                height: 56,
-                width: 56,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xffFF7A00).withOpacity(0.3),
-                    width: 1.2,
-                  ),
-                ),
-              ),
-              Container(
-                height: 44,
-                width: 44,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xff090414),
-                ),
-                child: const Icon(
-                  Icons.soup_kitchen_rounded,
-                  color: Color(0xffFF7A00),
-                  size: 20,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(width: 14),
-
-          /// Meal Title, Subtitle, and Time
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Lunch",
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  "Grilled Chicken Bowl",
-                  style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.60),
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.access_time_rounded,
-                      color: Color(0xffFF7A00),
-                      size: 13,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      "12:30 PM",
-                      style: GoogleFonts.inter(
-                        color: const Color(0xffFF7A00),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          /// Right Actions (Planned Pill & Edit Meal)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              /// Planned Badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xffFF7A00).withOpacity(0.35),
-                    width: 0.8,
-                  ),
-                  color: const Color(0xffFF7A00).withOpacity(0.04),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      height: 5,
-                      width: 5,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xffFF7A00),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      "Planned",
-                      style: GoogleFonts.inter(
-                        color: const Color(0xffFF7A00),
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              /// Edit Meal Button
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: const Color(0xffB100FF).withOpacity(0.35),
-                    width: 0.8,
-                  ),
-                  color: Colors.white.withOpacity(0.02),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.edit_outlined,
-                      color: Color(0xffB100FF),
-                      size: 11,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      "Edit Meal",
-                      style: GoogleFonts.outfit(
-                        color: const Color(0xffB100FF),
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// ----------------------------------------------------
-  /// 2. MACROS DONUT CARD
-  /// ----------------------------------------------------
-  Widget buildMacrosDonutCard() {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.0,
-        ),
-      ),
-      child: Row(
-        children: [
-          /// Macronutrients Grid
-          Expanded(
-            child: Row(
-              children: [
-                /// Col 1: Calories & Carbs
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      buildMacroItem(
-                        icon: Icons.local_fire_department_rounded,
-                        iconColor: const Color(0xffFF7A00),
-                        value: "550",
-                        unit: "kcal",
-                        label: "Calories",
-                        labelColor: const Color(0xffFF7A00),
-                      ),
-                      const SizedBox(height: 16),
-                      buildMacroItem(
-                        icon: Icons.grass_rounded,
-                        iconColor: const Color(0xffFF00E5),
-                        value: "60g",
-                        unit: "Carbs",
-                        label: "44%",
-                        labelColor: const Color(0xffFF00E5),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-
-                /// Col 2: Protein & Fat
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      buildMacroItem(
-                        icon: Icons.fitness_center_rounded,
-                        iconColor: const Color(0xffB100FF),
-                        value: "40g",
-                        unit: "Protein",
-                        label: "29%",
-                        labelColor: const Color(0xffB100FF),
-                      ),
-                      const SizedBox(height: 16),
-                      buildMacroItem(
-                        icon: Icons.water_drop_rounded,
-                        iconColor: const Color(0xffFF7A00),
-                        value: "15g",
-                        unit: "Fat",
-                        label: "27%",
-                        labelColor: const Color(0xffFF7A00),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(width: 10),
-
-          /// Right: Multi-segment Donut Chart (29% Protein, 44% Carbs, 27% Fat)
-          CustomPaint(
-            size: const Size(86, 86),
-            painter: MultiSegmentDonutPainter(
-              proteinPercent: 0.29,
-              carbsPercent: 0.44,
-              fatPercent: 0.27,
-              centerValue: "550",
-              centerUnit: "kcal\nTotal",
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildMacroItem({
-    required IconData icon,
-    required Color iconColor,
-    required String value,
-    required String unit,
-    required String label,
-    required Color labelColor,
-  }) {
-    return Row(
-      children: [
-        Icon(icon, color: iconColor, size: 18),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+        return Stack(
           children: [
-            RichText(
-              text: TextSpan(
+            // 1. Full-bleed Hero Image at the Top
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: MediaQuery.of(context).size.height * 0.45,
+              child: Stack(
+                fit: StackFit.expand,
                 children: [
-                  TextSpan(
-                    text: value,
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      height: 1.1,
+                  Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      color: const Color(0xff120D23),
+                      child: const Icon(Icons.restaurant_rounded, color: Colors.white24, size: 48),
                     ),
                   ),
-                  TextSpan(
-                    text: " $unit",
-                    style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.40),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                color: labelColor,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                height: 1.1,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  /// ----------------------------------------------------
-  /// 3. MACRONUTRIENT BALANCE PROGRESS BAR
-  /// ----------------------------------------------------
-  Widget buildMacronutrientBalanceCard() {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.0,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Macronutrient Balance",
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              /// Legend
-              Row(
-                children: [
-                  buildLegendItem(const Color(0xffB100FF), "Protein"),
-                  const SizedBox(width: 8),
-                  buildLegendItem(const Color(0xffFF00E5), "Carbs"),
-                  const SizedBox(width: 8),
-                  buildLegendItem(const Color(0xffFF7A00), "Fat"),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-
-          /// Multi-colored segmented horizontal bar
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: SizedBox(
-              height: 8,
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 29, // 29% Protein
-                    child: Container(color: const Color(0xffB100FF)),
-                  ),
-                  Expanded(
-                    flex: 44, // 44% Carbs
-                    child: Container(color: const Color(0xffFF00E5)),
-                  ),
-                  Expanded(
-                    flex: 27, // 27% Fat
-                    child: Container(color: const Color(0xffFF7A00)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildLegendItem(Color dotColor, String label) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          height: 6,
-          width: 6,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: dotColor,
-          ),
-        ),
-        const SizedBox(width: 5),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            color: Colors.white.withOpacity(0.50),
-            fontSize: 9,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// ----------------------------------------------------
-  /// 4. FOOD ITEMS LIST SECTION
-  /// ----------------------------------------------------
-  Widget buildFoodItemsSection() {
-    final List<Map<String, dynamic>> items = [
-      {
-        "name": "Grilled Chicken Breast",
-        "detail": "150g • Medium",
-        "kcal": "220",
-        "img": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=150",
-      },
-      {
-        "name": "Brown Rice",
-        "detail": "1 cup • Cooked",
-        "kcal": "180",
-        "img": "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=150",
-      },
-      {
-        "name": "Mixed Vegetables",
-        "detail": "1 cup • Steamed",
-        "kcal": "80",
-        "img": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=150",
-      },
-      {
-        "name": "Avocado",
-        "detail": "1/4 piece",
-        "kcal": "70",
-        "img": "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=150",
-      },
-    ];
-
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.0,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// Section Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Food Items",
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              /// + Add Food Button
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: const Color(0xffB100FF).withOpacity(0.35),
-                    width: 0.8,
-                  ),
-                  color: Colors.white.withOpacity(0.02),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.add_rounded,
-                      color: Color(0xffB100FF),
-                      size: 12,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      "Add Food",
-                      style: GoogleFonts.outfit(
-                        color: const Color(0xffB100FF),
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
+                  // Dark fading overlay at bottom of image
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          const Color(0xff06010F).withOpacity(0.5),
+                          const Color(0xff06010F),
+                        ],
+                        stops: const [0.6, 0.85, 1.0],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 14),
-
-          /// Food Item list
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: items.length,
-            separatorBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Divider(color: Colors.white.withOpacity(0.04), height: 0.8),
             ),
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return Row(
+
+            // 2. Custom App Bar overlay over the image
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              left: 18,
+              right: 18,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  /// Circular Image
+                  GestureDetector(
+                    onTap: () => Get.back(),
+                    child: Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.4),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.12),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
+                    ),
+                  ),
                   Container(
-                    height: 48,
-                    width: 48,
+                    height: 40,
+                    width: 40,
                     decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.4),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.08),
+                        color: Colors.white.withOpacity(0.12),
                         width: 0.8,
                       ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
-                        child: Image.network(
-                          item["img"],
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            color: Colors.white.withOpacity(0.05),
-                            child: const Icon(Icons.restaurant_menu, color: Colors.white24),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  /// Details
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          item["name"],
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          item["detail"],
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(0.45),
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  /// Calorie count
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        item["kcal"],
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        "kcal",
-                        style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.40),
-                          fontSize: 9,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Colors.white.withOpacity(0.20),
-                    size: 12,
+                    child: const Icon(Icons.more_horiz_rounded, color: Colors.white, size: 18),
                   ),
                 ],
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// ----------------------------------------------------
-  /// 5. NOTES CARD WITH NEON CUSTOM PAINT ICON
-  /// ----------------------------------------------------
-  Widget buildNotesCard() {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.0,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Notes",
-                  style: GoogleFonts.outfit(
-                    color: const Color(0xffB100FF),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "High protein, balanced meal to keep you full and energized throughout the day.",
-                  style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.70),
-                    fontSize: 11,
-                    height: 1.4,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
 
-          /// Neon notepad icon
-          CustomPaint(
-            size: const Size(48, 56),
-            painter: NeonNotepadPainter(),
-          ),
-        ],
-      ),
+            // 3. Bottom Sheet-style details content container
+            Positioned.fill(
+              top: MediaQuery.of(context).size.height * 0.38,
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title Block
+                    Text(
+                      title,
+                      style: GoogleFonts.outfit(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "A customized meal plan balanced specifically for your goals and symptoms. Loaded with essential micronutrients.",
+                      style: GoogleFonts.inter(
+                        color: Colors.white.withOpacity(0.5),
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Total Calories Summary Badge (Mockup Card style)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
+                      decoration: BoxDecoration(
+                        color: const Color(0xff0B0817).withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.04),
+                          width: 1.0,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Total calories",
+                            style: GoogleFonts.outfit(
+                              color: Colors.white.withOpacity(0.7),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            "~${targetKcal.toInt()} kcal",
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Macro Rows (Vertical table layout)
+                    Text(
+                      "Macronutrient Distribution",
+                      style: GoogleFonts.outfit(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildMacroDetailsRow("Protein", "${totalProtein.toInt()} g", const Color(0xffFFD166)),
+                    const SizedBox(height: 8),
+                    _buildMacroDetailsRow("Fat", "${totalFat.toInt()} g", const Color(0xffFF00E5)),
+                    const SizedBox(height: 8),
+                    _buildMacroDetailsRow("Carbs", "${totalCarbs.toInt()} g", const Color(0xff00FF87)),
+                    const SizedBox(height: 28),
+
+                    // Food items Section
+                    Text(
+                      "Included Items & Swaps",
+                      style: GoogleFonts.outfit(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    _buildFoodItemsSection(foods),
+                  ],
+                ),
+              ),
+            ),
+
+            // 4. Fixed Bottom Action Buttons
+            Positioned(
+              left: 18,
+              right: 18,
+              bottom: 24,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        bool success;
+                        if (isCompleted) {
+                          success = await controller.unmarkMealAsCompleted(dietPlanMealId, mealId);
+                          if (success) Get.back();
+                        } else {
+                          success = await controller.markMealAsCompleted(dietPlanMealId, mealId);
+                          if (success) {
+                            Get.back();
+                            Get.snackbar(
+                              "Meal Logged 🥗",
+                              "Awesome job! +10 FitCoins added to your wallet.",
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
+                              colorText: Colors.white,
+                              borderColor: const Color(0xff00FF87).withOpacity(0.2),
+                              borderWidth: 1,
+                            );
+                          }
+                        }
+                      },
+                      child: Container(
+                        height: 54,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          gradient: isCompleted
+                              ? null
+                              : const LinearGradient(
+                                  colors: [
+                                    Color(0xff00FF87),
+                                    Color(0xffFFD166),
+                                  ],
+                                ),
+                          color: isCompleted ? Colors.white.withOpacity(0.06) : null,
+                          border: isCompleted
+                              ? Border.all(color: Colors.white.withOpacity(0.12), width: 1.0)
+                              : null,
+                          boxShadow: isCompleted
+                              ? null
+                              : [
+                                  BoxShadow(
+                                    color: const Color(0xff00FF87).withOpacity(0.25),
+                                    blurRadius: 12,
+                                    spreadRadius: 1,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                        ),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              isCompleted ? Icons.check_circle_rounded : Icons.check_circle_outline_rounded,
+                              color: isCompleted ? const Color(0xff00FF87) : Colors.black,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              isCompleted ? "Marked as Eaten" : "Log this Meal",
+                              style: GoogleFonts.outfit(
+                                color: isCompleted ? Colors.white : Colors.black,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      }),
     );
   }
 
-  /// ----------------------------------------------------
-  /// 6. CALORIES SUMMARY ROW
-  /// ----------------------------------------------------
-  Widget buildCalorieSummaryRow() {
-    return Row(
-      children: [
-        /// Card 1: Calorie Goal
-        Expanded(
-          child: buildSummaryMiniCard(
-            title: "Calorie Goal",
-            value: "2,300",
-            unit: "kcal",
-            icon: Icons.track_changes_rounded,
-            iconColor: const Color(0xffB100FF),
-            valueColor: Colors.white,
-          ),
-        ),
-        const SizedBox(width: 8),
-
-        /// Card 2: Calories Left
-        Expanded(
-          child: buildSummaryMiniCard(
-            title: "Calories Left",
-            value: "1,150",
-            unit: "kcal",
-            icon: Icons.speed_rounded,
-            iconColor: const Color(0xff00FF87),
-            valueColor: const Color(0xff00FF87),
-          ),
-        ),
-        const SizedBox(width: 8),
-
-        /// Card 3: This Meal
-        Expanded(
-          child: buildSummaryMiniCard(
-            title: "This Meal",
-            value: "550",
-            unit: "kcal",
-            icon: Icons.dinner_dining_rounded,
-            iconColor: const Color(0xffFF7A00),
-            valueColor: const Color(0xffFF7A00),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget buildSummaryMiniCard({
-    required String title,
-    required String value,
-    required String unit,
-    required IconData icon,
-    required Color iconColor,
-    required Color valueColor,
-  }) {
+  Widget _buildMacroDetailsRow(String label, String value, Color accentColor) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: const Color(0xff0B0817).withOpacity(0.55),
+        color: const Color(0xff0B0817).withOpacity(0.4),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: Colors.white.withOpacity(0.03),
           width: 0.8,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          /// Icon Header
-          Container(
-            padding: const EdgeInsets.all(5),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: iconColor.withOpacity(0.10),
-            ),
-            child: Icon(icon, color: iconColor, size: 14),
+          Row(
+            children: [
+              Container(
+                height: 8,
+                width: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: accentColor,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-
-          /// Title
           Text(
-            title,
-            style: GoogleFonts.inter(
-              color: Colors.white.withOpacity(0.40),
-              fontSize: 8,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 4),
-
-          /// Value
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: value,
-                  style: GoogleFonts.outfit(
-                    color: valueColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextSpan(
-                  text: " $unit",
-                  style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.40),
-                    fontSize: 8,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// ----------------------------------------------------
-  /// 7. BOTTOM ACTIONS BAR (BUTTONS ROW)
-  /// ----------------------------------------------------
-  Widget buildBottomActionsBar() {
-    return Row(
-      children: [
-        /// Replace Meal (Outline)
-        Expanded(
-          flex: 4,
-          child: Container(
-            height: 52,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: const Color(0xffB100FF).withOpacity(0.40),
-                width: 1.0,
-              ),
-              color: Colors.white.withOpacity(0.01),
-            ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(18),
-              onTap: () {
-                // Mock Action
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.swap_horiz_rounded,
-                    color: Color(0xffB100FF),
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    "Replace Meal",
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 14),
-
-        /// Mark as Done (Gradient filled)
-        Expanded(
-          flex: 6,
-          child: Container(
-            height: 52,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xffFF00E5),
-                  Color(0xffFF7A00),
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xffFF00E5).withOpacity(0.30),
-                  blurRadius: 10,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(18),
-              onTap: () => Get.back(),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.check_circle_outline_rounded,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    "Mark as Done",
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// ----------------------------------------------------
-/// CUSTOM PAINTERS FOR GRAPHICS
-/// ----------------------------------------------------
-
-/// 1. Multi-segment Macro Donut Painter
-class MultiSegmentDonutPainter extends CustomPainter {
-  final double proteinPercent;
-  final double carbsPercent;
-  final double fatPercent;
-  final String centerValue;
-  final String centerUnit;
-
-  MultiSegmentDonutPainter({
-    required this.proteinPercent,
-    required this.carbsPercent,
-    required this.fatPercent,
-    required this.centerValue,
-    required this.centerUnit,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    double strokeWidth = 8.0;
-    double radius = (size.width - strokeWidth) / 2;
-    Offset center = Offset(size.width / 2, size.height / 2);
-    Rect rect = Rect.fromCircle(center: center, radius: radius);
-
-    Paint basePaint = Paint()
-      ..color = Colors.white.withOpacity(0.04)
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke;
-    canvas.drawCircle(center, radius, basePaint);
-
-    double startAngle = -pi / 2;
-
-    /// 1. Protein Segment (Purple)
-    if (proteinPercent > 0) {
-      double sweep = 2 * pi * proteinPercent;
-      Paint pPaint = Paint()
-        ..color = const Color(0xffB100FF)
-        ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke;
-      canvas.drawArc(rect, startAngle, sweep, false, pPaint);
-      startAngle += sweep;
-    }
-
-    /// 2. Carbs Segment (Pink)
-    if (carbsPercent > 0) {
-      double sweep = 2 * pi * carbsPercent;
-      Paint cPaint = Paint()
-        ..color = const Color(0xffFF00E5)
-        ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke;
-      canvas.drawArc(rect, startAngle, sweep, false, cPaint);
-      startAngle += sweep;
-    }
-
-    /// 3. Fat Segment (Yellow/Orange)
-    if (fatPercent > 0) {
-      double sweep = 2 * pi * fatPercent;
-      Paint fPaint = Paint()
-        ..color = const Color(0xffFF7A00)
-        ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke;
-      canvas.drawArc(rect, startAngle, sweep, false, fPaint);
-    }
-
-    /// Center Text (550 kcal Total)
-    TextPainter textPainter = TextPainter(
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: "$centerValue\n",
+            value,
             style: GoogleFonts.outfit(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
-              height: 1.1,
-            ),
-          ),
-          TextSpan(
-            text: centerUnit,
-            style: GoogleFonts.inter(
-              color: Colors.white.withOpacity(0.40),
-              fontSize: 8,
-              height: 1.1,
             ),
           ),
         ],
       ),
-      textAlign: TextAlign.center,
-      textDirection: TextDirection.ltr,
-    );
-
-    textPainter.layout(minWidth: 0, maxWidth: size.width);
-    textPainter.paint(
-      canvas,
-      Offset(
-        center.dx - (textPainter.width / 2),
-        center.dy - (textPainter.height / 2),
-      ),
     );
   }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-/// 2. Neon Notes Notepad & Pencil Painter
-class NeonNotepadPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    double w = size.width;
-    double h = size.height;
-
-    Paint strokePaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..strokeCap = StrokeCap.round
-      ..color = const Color(0xffB100FF);
-
-    /// Draw Notepad Outline
-    Path notepad = Path();
-    notepad.moveTo(w * 0.15, h * 0.15);
-    notepad.lineTo(w * 0.75, h * 0.15);
-    notepad.lineTo(w * 0.75, h * 0.55);
-    notepad.moveTo(w * 0.75, h * 0.75);
-    notepad.lineTo(w * 0.75, h * 0.85);
-    notepad.lineTo(w * 0.15, h * 0.85);
-    notepad.lineTo(w * 0.15, h * 0.15);
-
-    /// Top clips/rings
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTRB(w * 0.25, h * 0.08, w * 0.35, h * 0.18),
-        const Radius.circular(2),
-      ),
-      strokePaint,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTRB(w * 0.55, h * 0.08, w * 0.65, h * 0.18),
-        const Radius.circular(2),
-      ),
-      strokePaint,
-    );
-
-    /// Lines inside notepad
-    canvas.drawLine(Offset(w * 0.25, h * 0.32), Offset(w * 0.65, h * 0.32), strokePaint);
-    canvas.drawLine(Offset(w * 0.25, h * 0.48), Offset(w * 0.50, h * 0.48), strokePaint);
-    canvas.drawLine(Offset(w * 0.25, h * 0.64), Offset(w * 0.45, h * 0.64), strokePaint);
-
-    /// Draw Pencil
-    Path pencil = Path();
-    pencil.moveTo(w * 0.82, h * 0.35);
-    pencil.lineTo(w * 0.94, h * 0.42);
-    pencil.lineTo(w * 0.60, h * 0.80);
-    pencil.lineTo(w * 0.46, h * 0.80);
-    pencil.lineTo(w * 0.46, h * 0.66);
-    pencil.close();
-
-    Paint pencilPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..color = const Color(0xffFF00E5);
-
-    canvas.drawPath(notepad, strokePaint);
-    canvas.drawPath(pencil, pencilPaint);
-
-    /// Notepad & Pencil Glow Shadow - concentric lines (safe)
-    for (double i = 1; i <= 3; i++) {
-      canvas.drawPath(
-        notepad,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.8 + (i * 1.5)
-          ..strokeCap = StrokeCap.round
-          ..color = const Color(0xffB100FF).withOpacity(0.12 / i),
-      );
-      canvas.drawPath(
-        pencil,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.8 + (i * 1.5)
-          ..color = const Color(0xffFF00E5).withOpacity(0.12 / i),
+  Widget _buildFoodItemsSection(List foods) {
+    if (foods.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: const Color(0xff0B0817).withOpacity(0.4),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          "No details available.",
+          style: GoogleFonts.inter(color: Colors.white30, fontSize: 12),
+        ),
       );
     }
-  }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: foods.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final f = foods[index];
+        final String foodName = f['food_details']?['food_name'] ?? 'Food Item';
+        final double kcal = double.tryParse(f['calories']?.toString() ?? '0') ?? 0.0;
+        final double protein = double.tryParse(f['protein']?.toString() ?? '0') ?? 0.0;
+        final double carbs = double.tryParse(f['carbs']?.toString() ?? '0') ?? 0.0;
+        final double fat = double.tryParse(f['fat']?.toString() ?? '0') ?? 0.0;
+        final String portion = "${f['serving_size']} ${f['unit']}";
+
+        // Parse swap options from notes metadata if present, or suggest intelligent fallback swaps based on food type
+        String swapText = "";
+        final String? notes = f['notes']?.toString();
+        if (notes != null && notes.isNotEmpty) {
+          try {
+            final Map<String, dynamic> meta = jsonDecode(notes);
+            if (meta['swap_recommendation'] != null) {
+              swapText = meta['swap_recommendation'];
+            }
+          } catch (_) {}
+        }
+
+        // Robust fallbacks matching your PDF meal plan
+        if (swapText.isEmpty) {
+          if (foodName.toLowerCase().contains("ghee")) {
+            swapText = "Swap with: Olive Oil (1 tsp) OR Mustard Oil (1 tsp)";
+          } else if (foodName.toLowerCase().contains("oats")) {
+            swapText = "Swap with: Jowar (Sorghum) OR Bajra (Pearl Millet)";
+          } else if (foodName.toLowerCase().contains("spinach") || foodName.toLowerCase().contains("palak")) {
+            swapText = "Swap with: Cabbage OR Cauliflower (steamed)";
+          } else if (foodName.toLowerCase().contains("dal") || foodName.toLowerCase().contains("lentil")) {
+            swapText = "Swap with: Toor Dal OR Masoor Dal (½ cup cooked)";
+          } else if (foodName.toLowerCase().contains("curd") || foodName.toLowerCase().contains("yogurt")) {
+            swapText = "Swap with: Low-fat Butter Milk (1 glass)";
+          }
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xff0B0817).withOpacity(0.4),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.03),
+              width: 0.8,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          foodName,
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          portion,
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.4),
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        "${kcal.toInt()} kcal",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        "${protein.toInt()}P • ${carbs.toInt()}C • ${fat.toInt()}F",
+                        style: GoogleFonts.inter(
+                          color: Colors.white.withOpacity(0.35),
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              if (swapText.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Divider(color: Colors.white.withOpacity(0.04), height: 1.0),
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.swap_horiz_rounded, color: Color(0xffFFD166), size: 14),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        swapText,
+                        style: GoogleFonts.inter(
+                          color: const Color(0xffFFD166).withOpacity(0.85),
+                          fontSize: 10,
+                          fontStyle: FontStyle.italic,
+                          height: 1.3,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
