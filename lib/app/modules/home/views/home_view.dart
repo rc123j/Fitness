@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../controllers/home_controller.dart';
 import 'swiggy_tabs.dart';
 import '../../../widgets/app_shimmer.dart';
+import '../../../widgets/premium_meal_promo_card.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -230,7 +231,7 @@ class _HomeViewState extends State<HomeView> {
                                   child: const PremiumSearchBar(),
                                 ),
                                 const SizedBox(height: 16),
-                                const PromoBannerSection(),
+                                const PremiumMealPromoCard(),
                                 const SizedBox(height: 16),
                                 SwiggyPromoCards(),
                               ] else
