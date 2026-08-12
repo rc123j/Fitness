@@ -50,6 +50,7 @@ class HomeController extends GetxController {
 
   Future<void> fetchProfile() async {
     isLoading.value = true;
+    await Future.delayed(const Duration(seconds: 2)); // Artificial delay for shimmer
 
     try {
       // 1. Fetch member profile

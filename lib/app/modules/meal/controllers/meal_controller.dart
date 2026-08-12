@@ -54,6 +54,7 @@ class MealController extends GetxController {
 
   Future<void> fetchMealData({bool silent = false}) async {
     if (!silent) isLoading.value = true;
+    if (!silent) await Future.delayed(const Duration(seconds: 2)); // Artificial delay for shimmer
     try {
       final queryParam = selectedQueryDate.value.isNotEmpty ? "?date=${selectedQueryDate.value}" : "";
       

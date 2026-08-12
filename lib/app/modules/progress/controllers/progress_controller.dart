@@ -71,6 +71,7 @@ class ProgressController extends GetxController {
 
   Future<void> fetchProgressData() async {
     isLoading.value = true;
+    await Future.delayed(const Duration(seconds: 2)); // Artificial delay for shimmer
     try {
       // 1. Fetch weight and steps history logs
       final response = await _apiClient.get(ApiEndpoints.progressLog);

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/meal_controller.dart';
+import '../../../widgets/app_shimmer.dart';
 
 class MealView extends GetView<MealController> {
   const MealView({super.key});
@@ -77,64 +78,67 @@ class MealView extends GetView<MealController> {
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(18, 8, 18, 90),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Weekly Calendar Timeline (mocking selected Capsule design)
-                        _buildWeeklyCalendar(),
-                        const SizedBox(height: 28),
+                    child: Obx(() => AppShimmer(
+                      enabled: controller.isLoading.value,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Weekly Calendar Timeline
+                          _buildWeeklyCalendar(),
+                          const SizedBox(height: 28),
 
-                        // Today's Nutrition Section (mocking the mockups' Calories ring & Macro cards layout)
-                        _buildTodayNutritionCard(),
-                        const SizedBox(height: 24),
+                          // Today's Nutrition Section
+                          _buildTodayNutritionCard(),
+                          const SizedBox(height: 24),
 
-                        // Check Calories Search Bar
-                        _buildSearchBox(),
-                        const SizedBox(height: 28),
+                          // Check Calories Search Bar
+                          _buildSearchBox(),
+                          const SizedBox(height: 28),
 
-                        // Daily Meal Section Header
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Daily Meal",
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                          // Daily Meal Section Header
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Daily Meal",
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            GestureDetector(
-                              onTap: () => Get.toNamed('/meal-plan'),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    "Edit plan ",
-                                    style: GoogleFonts.inter(
-                                      color: Colors.white.withOpacity(0.4),
-                                      fontSize: 12,
+                              GestureDetector(
+                                onTap: () => Get.toNamed('/meal-plan'),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      "Edit plan ",
+                                      style: GoogleFonts.inter(
+                                        color: Colors.white.withOpacity(0.4),
+                                        fontSize: 12,
+                                      ),
                                     ),
-                                  ),
-                                  Icon(
-                                    Icons.edit_calendar_rounded,
-                                    size: 14,
-                                    color: Colors.white.withOpacity(0.4),
-                                  ),
-                                ],
+                                    Icon(
+                                      Icons.edit_calendar_rounded,
+                                      size: 14,
+                                      color: Colors.white.withOpacity(0.4),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
 
-                        // Promo customization Card
-                        _buildPromoCard(),
-                        const SizedBox(height: 16),
+                          // Promo customization Card
+                          _buildPromoCard(),
+                          const SizedBox(height: 16),
 
-                        // Meal Timeline Cards List
-                        _buildMealsTimeline(context),
-                      ],
-                    ),
+                          // Meal Timeline Cards List
+                          _buildMealsTimeline(context),
+                        ],
+                      ),
+                    )),
                   ),
                 ),
               ],

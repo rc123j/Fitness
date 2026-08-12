@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/home_controller.dart';
 import 'swiggy_tabs.dart';
+import '../../../widgets/app_shimmer.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -61,8 +62,8 @@ class _HomeViewState extends State<HomeView> {
               physics: const BouncingScrollPhysics(),
               child: Column(
                 children: [
-                  /// 1. TOP HEADER SECTION (Location/Profile)
-                  Obx(() {
+                /// 1. TOP HEADER SECTION (Location/Profile)
+                Obx(() {
                     final isMeal = controller.activeTab.value == 0;
                     final headerBg = isMeal
                         ? const Color(0xff00A2FF).withOpacity(0.20)
@@ -167,7 +168,10 @@ class _HomeViewState extends State<HomeView> {
                                     const SizedBox(height: 8),
 
                                     /// 2. ACTIVE PLAN CARD (Glassmorphic)
-                                    buildActivePlanCard(),
+                                    Obx(() => AppShimmer(
+                                      enabled: controller.isLoading.value,
+                                      child: buildActivePlanCard(),
+                                    )),
                                   ],
                                 ),
                               ),
@@ -237,7 +241,10 @@ class _HomeViewState extends State<HomeView> {
                                       ),
                                     ),
                                     const SizedBox(height: 16),
-                                    buildMealPlanTimeline(),
+                                    Obx(() => AppShimmer(
+                                      enabled: controller.isLoading.value,
+                                      child: buildMealPlanTimeline(),
+                                    )),
                                   ],
                                 ),
                               ),
@@ -275,7 +282,10 @@ class _HomeViewState extends State<HomeView> {
                                     /// TODAY'S MEAL PROGRESS CARD
                                     // buildMealProgressCard(),
                                     /// 3. DAILY PROGRESS DASHBOARD (Reactive)
-                                    buildDailyProgressDashboard(),
+                                    Obx(() => AppShimmer(
+                                      enabled: controller.isLoading.value,
+                                      child: buildDailyProgressDashboard(),
+                                    )),
                                     const SizedBox(height: 28),
 
                                     /// 5. AI COACH & HYDRATION GOAL (ROW)

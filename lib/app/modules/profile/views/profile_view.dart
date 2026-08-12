@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/profile_controller.dart';
+import '../../../widgets/app_shimmer.dart';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
@@ -61,39 +62,28 @@ class ProfileView extends GetView<ProfileController> {
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 10),
-
-                        /// 1. User Info Header Card
-                        buildUserInfoCard(),
-                        const SizedBox(height: 20),
-
-                        /// 2. User Stats Grid Box
-                        buildStatsGridBox(),
-                        const SizedBox(height: 20),
-
-                        /// 3. NutriFit Premium Banner
-                        buildPremiumCard(),
-                        const SizedBox(height: 20),
-
-                        /// 4. My Progress Metrics (Indicator Rings)
-                        buildProgressSection(),
-                        const SizedBox(height: 20),
-
-                        /// 5. My Achievements (Hexagonal Badges)
-                        buildAchievementsSection(),
-                        const SizedBox(height: 20),
-
-                        /// 6. Action List Options
-                        buildOptionsList(),
-                        const SizedBox(height: 16),
-
-                        /// 7. Need Help? Card
-                        buildNeedHelpCard(),
-                        const SizedBox(height: 24),
-                      ],
-                    ),
+                    child: Obx(() => AppShimmer(
+                      enabled: controller.isLoading.value,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 10),
+                          buildUserInfoCard(),
+                          const SizedBox(height: 20),
+                          buildStatsGridBox(),
+                          const SizedBox(height: 20),
+                          buildPremiumCard(),
+                          const SizedBox(height: 20),
+                          buildProgressSection(),
+                          const SizedBox(height: 20),
+                          buildAchievementsSection(),
+                          const SizedBox(height: 20),
+                          buildOptionsList(),
+                          const SizedBox(height: 16),
+                          buildNeedHelpCard(),
+                          const SizedBox(height: 24),
+                        ],
+                      ),
+                    )),
                   ),
                 ),
               ],

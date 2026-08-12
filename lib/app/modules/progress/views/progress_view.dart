@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/progress_controller.dart';
+import '../../../widgets/app_shimmer.dart';
 
 class ProgressView extends GetView<ProgressController> {
   const ProgressView({super.key});
@@ -61,27 +62,30 @@ class ProgressView extends GetView<ProgressController> {
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 10),
-                        
-                        /// 1. HEALTH SNAPSHOT CARD (BMI, TDEE, BMR, IBW)
-                        buildHealthSnapshotCard(),
-                        const SizedBox(height: 20),
+                    child: Obx(() => AppShimmer(
+                      enabled: controller.isLoading.value,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 10),
+                          
+                          /// 1. HEALTH SNAPSHOT CARD (BMI, TDEE, BMR, IBW)
+                          buildHealthSnapshotCard(),
+                          const SizedBox(height: 20),
 
-                        /// 2. WEEKLY ADHERENCE CHART (CALORIES VS TARGET)
-                        buildWeeklyAdherenceCard(),
-                        const SizedBox(height: 20),
+                          /// 2. WEEKLY ADHERENCE CHART (CALORIES VS TARGET)
+                          buildWeeklyAdherenceCard(),
+                          const SizedBox(height: 20),
 
-                        /// 3. WEIGHT TRAJECTORY GRAPH
-                        buildWeightTrajectoryCard(),
-                        const SizedBox(height: 30),
-                        
-                        /// 4. GAMIFICATION/STREAKS
-                        buildGamificationRow(),
-                        const SizedBox(height: 40),
-                      ],
-                    ),
+                          /// 3. WEIGHT TRAJECTORY GRAPH
+                          buildWeightTrajectoryCard(),
+                          const SizedBox(height: 30),
+                          
+                          /// 4. GAMIFICATION/STREAKS
+                          buildGamificationRow(),
+                          const SizedBox(height: 40),
+                        ],
+                      ),
+                    )),
                   ),
                 ),
               ],
