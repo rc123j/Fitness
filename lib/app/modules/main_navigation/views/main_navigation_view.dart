@@ -6,7 +6,7 @@ import '../controllers/main_navigation_controller.dart';
 import '../../home/views/home_view.dart';
 import '../../meal/views/meal_view.dart';
 import '../../progress/views/progress_view.dart';
-import '../../social/views/social_feed_view.dart';
+// import '../../social/views/social_feed_view.dart';
 import '../../profile/views/profile_view.dart';
 
 class MainNavigationView extends GetView<MainNavigationController> {
@@ -14,12 +14,11 @@ class MainNavigationView extends GetView<MainNavigationController> {
 
   @override
   Widget build(BuildContext context) {
-    // Core tab pages
     final List<Widget> pages = [
       const HomeView(),
       const MealView(),
       const ProgressView(),
-      const SocialFeedView(),
+      // const SocialFeedView(), // Excluded for Phase 1
       const ProfileView(),
     ];
 
@@ -65,8 +64,8 @@ class MainNavigationView extends GetView<MainNavigationController> {
                 navItem(Icons.home_outlined, Icons.home_rounded, "Dashboard", activeIndex == 0, 0),
                 navItem(Icons.restaurant_outlined, Icons.restaurant_rounded, "Meals", activeIndex == 1, 1),
                 navItem(Icons.bar_chart_outlined, Icons.bar_chart_rounded, "Progress", activeIndex == 2, 2),
-                navItem(Icons.groups_outlined, Icons.groups_rounded, "Social", activeIndex == 3, 3),
-                navItem(Icons.person_outline_rounded, Icons.person_rounded, "Profile", activeIndex == 4, 4),
+                // navItem(Icons.groups_outlined, Icons.groups_rounded, "Social", activeIndex == 3, 3), // Excluded for Phase 1
+                navItem(Icons.person_outline_rounded, Icons.person_rounded, "Profile", activeIndex == 3, 3),
               ],
             ),
           ),
