@@ -74,8 +74,7 @@ class SwiggyTabPainter extends CustomPainter {
       ..strokeWidth = 2.0;
 
     final inactiveFillPaint = Paint()
-      ..color = Colors.white
-          .withOpacity(0.03) // Very faint fill
+      ..color = Colors.black.withOpacity(0.25) // Darker fill to look like tucked card on red background
       ..style = PaintingStyle.fill;
 
     final inactiveBorderPaint = Paint()
@@ -148,12 +147,12 @@ class SwiggyTabsHeader extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Obx(() {
       final isMeal = controller.activeTab.value == 0;
-      final mealColor = const Color(0xff00A2FF); // Zepto-style Light Blue
-      final workoutColor = const Color(0xff3F72AF); // Soft Blue
+      final mealColor = const Color(0xff640F11); // Dark wine/maroon (Rakhi card)
+      final workoutColor = const Color(0xff3F72AF); // Soft Blue for Workout
       final activeColor = isMeal ? mealColor : workoutColor;
 
       final inactiveBg = isMeal
-          ? const Color(0xff00A2FF).withOpacity(0.20)
+          ? const Color(0xffB81F22).withOpacity(0.20) // Match the transparent red appbar color
           : const Color(0xff3F72AF).withOpacity(0.20);
 
       return Container(

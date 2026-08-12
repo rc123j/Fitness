@@ -66,7 +66,7 @@ class _HomeViewState extends State<HomeView> {
                 Obx(() {
                     final isMeal = controller.activeTab.value == 0;
                     final headerBg = isMeal
-                        ? const Color(0xff00A2FF).withOpacity(0.20)
+                        ? const Color(0xffB81F22).withOpacity(0.20)
                         : const Color(0xff3F72AF).withOpacity(0.20);
 
                     // Dynamically update system status bar style to match the tab theme
@@ -100,8 +100,106 @@ class _HomeViewState extends State<HomeView> {
                   Obx(() {
                     final isMeal = controller.activeTab.value == 0;
                     final bgColor = isMeal
-                        ? const Color(0xff00A2FF)
+                        ? const Color(0xff640F11)
                         : const Color(0xff3F72AF);
+
+                    if (!isMeal) {
+                      return Column(
+                        children: [
+                          // Colored Section
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: bgColor,
+                              borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(24),
+                                bottomRight: Radius.circular(24),
+                              ),
+                            ),
+                            padding: const EdgeInsets.only(
+                              left: 18,
+                              right: 18,
+                              top: 16,
+                              bottom: 18,
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(24),
+                              child: Image.asset(
+                                'assets/home/home1.png',
+                                width: double.infinity,
+                                height: 160,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          // Dark Section with Coming Soon Card
+                          Container(
+                            width: double.infinity,
+                            decoration: const BoxDecoration(
+                              color: Color(0xff06010F),
+                            ),
+                            padding: const EdgeInsets.only(top: 40, bottom: 200, left: 18, right: 18),
+                            child: Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.03),
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.08),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xff3F72AF).withOpacity(0.15),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.fitness_center_rounded,
+                                      color: Color(0xff3F72AF),
+                                      size: 40,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    "Workout Plans",
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    "Coming Soon!",
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xff3F72AF),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    "We are crafting customized AI-driven workout plans and daily routine exercises to help you crush your fitness goals.",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.white.withOpacity(0.6),
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }
 
                     return Column(
                       children: [
@@ -377,10 +475,10 @@ class _HomeViewState extends State<HomeView> {
                     bottom: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xff00A2FF),
+                    color: const Color(0xff640F11),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xff00A2FF).withOpacity(0.35),
+                        color: const Color(0xff640F11).withOpacity(0.35),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
