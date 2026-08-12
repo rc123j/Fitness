@@ -9,86 +9,128 @@ class SwiggyTabPainter extends CustomPainter {
 
   SwiggyTabPainter({required this.isMeal, required this.color});
 
+  void _addTabCurve(
+    Path path,
+    double startX,
+    double width,
+    double topY,
+    double baseY, {
+    bool leftFlare = true,
+    bool rightFlare = true,
+  }) {
+    final double R = 14.0; // Bottom flare radius
+    final double topR = 16.0; // Top corner radius
+    final double endX = startX + width;
+
+    if (leftFlare) {
+      path.lineTo(startX, baseY);
+      // Bottom left inward flare
+      path.quadraticBezierTo(startX + R, baseY, startX + R, baseY - R);
+    } else {
+      path.lineTo(startX + R, baseY);
+    }
+
+    // Straight vertical line up
+    path.lineTo(startX + R, topY + topR);
+    // Top left rounded corner
+    path.quadraticBezierTo(startX + R, topY, startX + R + topR, topY);
+
+    // Flat top
+    path.lineTo(endX - R - topR, topY);
+
+    // Top right rounded corner
+    path.quadraticBezierTo(endX - R, topY, endX - R, topY + topR);
+    // Straight vertical line down
+
+    if (rightFlare) {
+      path.lineTo(endX - R, baseY - R);
+      // Bottom right outward flare
+      path.quadraticBezierTo(endX - R, baseY, endX, baseY);
+    } else {
+      path.lineTo(endX - R, baseY);
+    }
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
 
-    final path = Path();
     final double W = size.width;
     final double H = size.height;
-    final double baseY = 60.0; // Extreme dip (60 pixels deep!)
-    final double topY = 0.0; // Top of active tab
-    final double middle = W / 2;
+    final double baseY = 60.0;
+    final double topY = 0.0;
 
-    if (isMeal) {
-      path.moveTo(0, H);
-      path.lineTo(0, baseY);
-      // Extremely sweeping S-curve from left edge of screen to active Meal tab
-      path.cubicTo(18, baseY, 36, topY, 48, topY);
-      // Top flat area of Meal tab
-      path.lineTo(middle - 36, topY);
-      // Extra-wide curve down to the right shoulder
-      path.cubicTo(middle - 14, topY, middle + 14, baseY, middle + 36, baseY);
-      // Inactive shoulder flat to the right edge
-      path.lineTo(W, baseY);
-      path.lineTo(W, H);
-      path.close();
-    } else {
-      path.moveTo(0, H);
-      path.lineTo(0, baseY);
-      // Inactive shoulder flat from left edge to middle
-      path.lineTo(middle - 36, baseY);
-      // Extra-wide curve up to the active Workout tab
-      path.cubicTo(middle - 14, baseY, middle + 14, topY, middle + 36, topY);
-      // Top flat area of Workout tab
-      path.lineTo(W - 48, topY);
-      // Curve down to right edge of screen
-      path.cubicTo(W - 36, topY, W - 18, baseY, W, baseY);
-      path.lineTo(W, H);
-      path.close();
-    }
-
-    canvas.drawPath(path, paint);
+    final double tabWidth =
+        (W / 2) +
+        12.0; // Pushes the intersection point slightly higher up the active tab's curve
+    final double mealStartX = 0.0;
+    final double workoutStartX = W - tabWidth;
 
     final activeBorderPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
+    final inactiveFillPaint = Paint()
+      ..color = Colors.white
+          .withOpacity(0.03) // Very faint fill
+      ..style = PaintingStyle.fill;
+
     final inactiveBorderPaint = Paint()
-      ..color = Colors.white.withOpacity(0.15)
+      ..color = Colors.white
+          .withOpacity(0.15) // Slightly brighter border
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
+      ..strokeWidth = 1.5;
 
     if (isMeal) {
-      // Active tab curves (Meal tab)
-      final activePath = Path()
-        ..moveTo(0, baseY)
-        ..cubicTo(18, baseY, 36, topY, 48, topY)
-        ..lineTo(middle - 36, topY)
-        ..cubicTo(middle - 14, topY, middle + 14, baseY, middle + 36, baseY);
+      // 1. Draw inactive ghost outline (Workout)
+      final inactivePath = Path();
+      inactivePath.moveTo(workoutStartX, baseY);
+      _addTabCurve(inactivePath, workoutStartX, tabWidth, topY, baseY);
+      canvas.drawPath(inactivePath, inactiveFillPaint);
+      canvas.drawPath(inactivePath, inactiveBorderPaint);
+
+      // 2. Draw active background (Meal)
+      final bgPath = Path();
+      bgPath.moveTo(0, H);
+      bgPath.lineTo(0, baseY);
+      _addTabCurve(bgPath, mealStartX, tabWidth, topY, baseY);
+      bgPath.lineTo(W, baseY);
+      bgPath.lineTo(W, H);
+      bgPath.close();
+      canvas.drawPath(bgPath, paint);
+
+      // 3. Draw active outline (Meal)
+      final activePath = Path();
+      activePath.moveTo(0, baseY);
+      _addTabCurve(activePath, mealStartX, tabWidth, topY, baseY);
+      activePath.lineTo(W, baseY);
       canvas.drawPath(activePath, activeBorderPaint);
-
-      // Inactive flat shoulder
-      final inactivePath = Path()
-        ..moveTo(middle + 36, baseY)
-        ..lineTo(W, baseY);
-      canvas.drawPath(inactivePath, inactiveBorderPaint);
     } else {
-      // Inactive flat shoulder
-      final inactivePath = Path()
-        ..moveTo(0, baseY)
-        ..lineTo(middle - 36, baseY);
+      // 1. Draw inactive ghost outline (Meal)
+      final inactivePath = Path();
+      inactivePath.moveTo(mealStartX, baseY);
+      _addTabCurve(inactivePath, mealStartX, tabWidth, topY, baseY);
+      canvas.drawPath(inactivePath, inactiveFillPaint);
       canvas.drawPath(inactivePath, inactiveBorderPaint);
 
-      // Active tab curves (Workout tab)
-      final activePath = Path()
-        ..moveTo(middle - 36, baseY)
-        ..cubicTo(middle - 14, baseY, middle + 14, topY, middle + 36, topY)
-        ..lineTo(W - 48, topY)
-        ..cubicTo(W - 36, topY, W - 18, baseY, W, baseY);
+      // 2. Draw active background (Workout)
+      final bgPath = Path();
+      bgPath.moveTo(0, H);
+      bgPath.lineTo(0, baseY);
+      _addTabCurve(bgPath, workoutStartX, tabWidth, topY, baseY);
+      bgPath.lineTo(W, baseY);
+      bgPath.lineTo(W, H);
+      bgPath.close();
+      canvas.drawPath(bgPath, paint);
+
+      // 3. Draw active outline (Workout)
+      final activePath = Path();
+      activePath.moveTo(0, baseY);
+      _addTabCurve(activePath, workoutStartX, tabWidth, topY, baseY);
+      activePath.lineTo(W, baseY);
       canvas.drawPath(activePath, activeBorderPaint);
     }
   }
