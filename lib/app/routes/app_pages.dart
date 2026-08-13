@@ -40,6 +40,8 @@ import '../modules/video_call/bindings/video_call_binding.dart';
 import '../modules/video_call/views/video_call_view.dart';
 import '../modules/main_navigation/bindings/main_navigation_binding.dart';
 import '../modules/main_navigation/views/main_navigation_view.dart';
+import '../modules/membership/bindings/membership_binding.dart';
+import '../modules/membership/views/membership_view.dart';
 
 part 'app_routes.dart';
 
@@ -162,6 +164,11 @@ class AppPages {
       name: _Paths.CALORIE_HISTORY,
       page: () => const NutritionHistoryView(),
       binding: MealBinding(),
+    ),
+    GetPage(
+      name: _Paths.MEMBERSHIP,
+      page: () => const MembershipView(),
+      binding: MembershipBinding(),
     ),
   ];
 }

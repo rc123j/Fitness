@@ -161,7 +161,7 @@ class SettingsView extends GetView<ProfileController> {
 
                 /// Upgrade Now button
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () => Get.toNamed('/membership'),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(

@@ -416,7 +416,7 @@ class ProfileView extends GetView<ProfileController> {
 
           /// Manage Plan Button
           GestureDetector(
-            onTap: () {},
+            onTap: () => Get.toNamed('/membership'),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(

@@ -63,8 +63,8 @@ class _HomeViewState extends State<HomeView> {
               physics: const BouncingScrollPhysics(),
               child: Column(
                 children: [
-                /// 1. TOP HEADER SECTION (Location/Profile)
-                Obx(() {
+                  /// 1. TOP HEADER SECTION (Location/Profile)
+                  Obx(() {
                     final isMeal = controller.activeTab.value == 0;
                     final headerBg = isMeal
                         ? const Color(0xffB81F22).withOpacity(0.20)
@@ -139,7 +139,12 @@ class _HomeViewState extends State<HomeView> {
                             decoration: const BoxDecoration(
                               color: Color(0xff06010F),
                             ),
-                            padding: const EdgeInsets.only(top: 40, bottom: 200, left: 18, right: 18),
+                            padding: const EdgeInsets.only(
+                              top: 40,
+                              bottom: 200,
+                              left: 18,
+                              right: 18,
+                            ),
                             child: Container(
                               padding: const EdgeInsets.all(24),
                               decoration: BoxDecoration(
@@ -156,7 +161,9 @@ class _HomeViewState extends State<HomeView> {
                                   Container(
                                     padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xff3F72AF).withOpacity(0.15),
+                                      color: const Color(
+                                        0xff3F72AF,
+                                      ).withOpacity(0.15),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
@@ -267,10 +274,12 @@ class _HomeViewState extends State<HomeView> {
                                     const SizedBox(height: 8),
 
                                     /// 2. ACTIVE PLAN CARD (Glassmorphic)
-                                    Obx(() => AppShimmer(
-                                      enabled: controller.isLoading.value,
-                                      child: buildActivePlanCard(),
-                                    )),
+                                    Obx(
+                                      () => AppShimmer(
+                                        enabled: controller.isLoading.value,
+                                        child: buildActivePlanCard(),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -340,10 +349,12 @@ class _HomeViewState extends State<HomeView> {
                                       ),
                                     ),
                                     const SizedBox(height: 16),
-                                    Obx(() => AppShimmer(
-                                      enabled: controller.isLoading.value,
-                                      child: buildMealPlanTimeline(),
-                                    )),
+                                    Obx(
+                                      () => AppShimmer(
+                                        enabled: controller.isLoading.value,
+                                        child: buildMealPlanTimeline(),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -381,10 +392,12 @@ class _HomeViewState extends State<HomeView> {
                                     /// TODAY'S MEAL PROGRESS CARD
                                     // buildMealProgressCard(),
                                     /// 3. DAILY PROGRESS DASHBOARD (Reactive)
-                                    Obx(() => AppShimmer(
-                                      enabled: controller.isLoading.value,
-                                      child: buildDailyProgressDashboard(),
-                                    )),
+                                    Obx(
+                                      () => AppShimmer(
+                                        enabled: controller.isLoading.value,
+                                        child: buildDailyProgressDashboard(),
+                                      ),
+                                    ),
                                     const SizedBox(height: 28),
 
                                     /// 5. AI COACH & HYDRATION GOAL (ROW)
@@ -944,17 +957,24 @@ class _HomeViewState extends State<HomeView> {
       ),
       child: Obx(() {
         final double calProgress = controller.targetCalories.value > 0
-            ? (controller.currentCalories.value / controller.targetCalories.value).clamp(0.0, 1.0)
+            ? (controller.currentCalories.value /
+                      controller.targetCalories.value)
+                  .clamp(0.0, 1.0)
             : 0.0;
-            
+
         final double pProgress = controller.targetProtein.value > 0
-            ? (controller.currentProtein.value / controller.targetProtein.value).clamp(0.0, 1.0)
+            ? (controller.currentProtein.value / controller.targetProtein.value)
+                  .clamp(0.0, 1.0)
             : 0.0;
         final double cProgress = controller.targetCarbs.value > 0
-            ? (controller.currentCarbs.value / controller.targetCarbs.value).clamp(0.0, 1.0)
+            ? (controller.currentCarbs.value / controller.targetCarbs.value)
+                  .clamp(0.0, 1.0)
             : 0.0;
         final double fProgress = controller.targetFat.value > 0
-            ? (controller.currentFat.value / controller.targetFat.value).clamp(0.0, 1.0)
+            ? (controller.currentFat.value / controller.targetFat.value).clamp(
+                0.0,
+                1.0,
+              )
             : 0.0;
 
         return Column(
@@ -972,9 +992,14 @@ class _HomeViewState extends State<HomeView> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () => Get.toNamed('/progress'), // Navigate to full Dedicated Progress Screen
+                  onTap: () => Get.toNamed(
+                    '/progress',
+                  ), // Navigate to full Dedicated Progress Screen
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xffFF7A00).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12),
@@ -992,7 +1017,7 @@ class _HomeViewState extends State<HomeView> {
               ],
             ),
             const SizedBox(height: 24),
-            
+
             // Circular Calorie Ring
             Row(
               children: [
@@ -1048,25 +1073,49 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Macro Bars
-            buildMacroBar("Protein", controller.currentProtein.value, controller.targetProtein.value, pProgress, const Color(0xff00A2FF)),
+            buildMacroBar(
+              "Protein",
+              controller.currentProtein.value,
+              controller.targetProtein.value,
+              pProgress,
+              const Color(0xff00A2FF),
+            ),
             const SizedBox(height: 12),
-            buildMacroBar("Carbs", controller.currentCarbs.value, controller.targetCarbs.value, cProgress, const Color(0xff00FF87)),
+            buildMacroBar(
+              "Carbs",
+              controller.currentCarbs.value,
+              controller.targetCarbs.value,
+              cProgress,
+              const Color(0xff00FF87),
+            ),
             const SizedBox(height: 12),
-            buildMacroBar("Fats", controller.currentFat.value, controller.targetFat.value, fProgress, const Color(0xffFF3E3E)),
+            buildMacroBar(
+              "Fats",
+              controller.currentFat.value,
+              controller.targetFat.value,
+              fProgress,
+              const Color(0xffFF3E3E),
+            ),
           ],
         );
       }),
     );
   }
 
-  Widget buildMacroBar(String title, int current, int target, double progress, Color color) {
+  Widget buildMacroBar(
+    String title,
+    int current,
+    int target,
+    double progress,
+    Color color,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1134,9 +1183,9 @@ class _HomeViewState extends State<HomeView> {
                 child: GestureDetector(
                   onTap: () => _showPremiumOfferBottomSheet(
                     context,
-                    "50% OFF",
-                    "On Annual Plan",
-                    const Color(0xffFF7A00),
+                    "Premium Access",
+                    "Unlock all features",
+                    const Color(0xffFFD166),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
@@ -1280,7 +1329,7 @@ class _HomeViewState extends State<HomeView> {
                   GestureDetector(
                     onTap: () {
                       Navigator.pop(context);
-                      Get.toNamed('/booking');
+                      Get.toNamed('/membership');
                     },
                     child: Container(
                       width: double.infinity,
