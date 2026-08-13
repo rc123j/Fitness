@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../controllers/booking_controller.dart';
 import '../../../widgets/premium_layout_components.dart';
 
@@ -67,14 +68,6 @@ class BookingView extends GetView<BookingController> {
                       children: [
                         const SizedBox(height: 10),
 
-                        /// 1. SEARCH BAR & FILTERS
-                        buildSearchBar(),
-                        const SizedBox(height: 20),
-
-                        /// 2. CIRCULAR EXPERT SELECTOR ROW
-                        buildExpertSelectorRow(),
-                        const SizedBox(height: 20),
-
                         /// 3. SELECTED EXPERT OVERVIEW CARD
                         buildExpertOverviewCard(),
                         const SizedBox(height: 20),
@@ -85,13 +78,17 @@ class BookingView extends GetView<BookingController> {
 
                         /// 5. ACTIVE TAB DYNAMIC VIEWS
                         Obx(() {
+                          final expert = controller.currentExpert;
+                          if (expert.isEmpty) {
+                            return const Center(child: CircularProgressIndicator(color: Color(0xffFF00E5)));
+                          }
                           final currentTab = controller.activeTab.value;
                           if (currentTab == "About") {
                             return buildAboutTabContent();
                           } else if (currentTab == "Services") {
-                            return buildServicesTabContent();
+                            return buildServicesSection();
                           } else if (currentTab == "Reviews") {
-                            return buildReviewsTabContent();
+                            return buildReviewsSection();
                           } else {
                             return buildGalleryTabContent();
                           }
@@ -102,8 +99,8 @@ class BookingView extends GetView<BookingController> {
                         buildBookSessionCalendar(),
                         const SizedBox(height: 24),
 
-                        /// 7. CLIENT REVIEWS SECTION
-                        buildClientReviewsTrack(),
+                        /// 8. CLIENT BOOKED APPOINTMENTS LIST
+                        buildClientAppointmentsSection(),
                         const SizedBox(height: 24),
                       ],
                     ),
@@ -266,7 +263,7 @@ class BookingView extends GetView<BookingController> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(28),
                               child: Image.network(
-                                expert["image"]!,
+                                expert["image"] ?? 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200',
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -342,6 +339,9 @@ class BookingView extends GetView<BookingController> {
         borderRadius: BorderRadius.circular(24),
         child: Obx(() {
           final expert = controller.currentExpert;
+          if (expert.isEmpty) {
+            return const Center(child: CircularProgressIndicator(color: Color(0xffFF00E5)));
+          }
 
           return Stack(
             children: [
@@ -367,7 +367,7 @@ class BookingView extends GetView<BookingController> {
                           width: 96,
                           height: 96,
                           child: Image.network(
-                            expert["image"]!,
+                            expert["image"] ?? 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200',
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -594,7 +594,7 @@ class BookingView extends GetView<BookingController> {
   /// 4. TAB CONTROLS (ABOUT, SERVICES, REVIEWS, GALLERY)
   /// ----------------------------------------------------
   Widget buildTabSelector() {
-    final tabs = ["About", "Services", "Reviews", "Gallery"];
+    final tabs = ["About", "Services", "Reviews"];
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -650,6 +650,39 @@ class BookingView extends GetView<BookingController> {
   /// ----------------------------------------------------
   /// 5. DYNAMIC TAB: ABOUT DOCK
   /// ----------------------------------------------------
+  Widget buildStatsRow() {
+    return Obx(() {
+      final expert = controller.currentExpert;
+      if (expert.isEmpty) return const SizedBox.shrink();
+      return Row(
+        children: [
+          /// Experience
+          buildStatBadge(
+            Icons.emoji_events_rounded,
+            expert["experience"]!,
+            "Experience",
+          ),
+          const SizedBox(width: 10),
+
+          /// Clients
+          buildStatBadge(
+            Icons.people_rounded,
+            expert["clients"]!,
+            "Helped",
+          ),
+          const SizedBox(width: 10),
+
+          /// Location
+          buildStatBadge(
+            Icons.location_on_rounded,
+            expert["location"]!.split(",")[0],
+            "Online",
+          ),
+        ],
+      );
+    });
+  }
+
   Widget buildAboutTabContent() {
     final expert = controller.currentExpert;
     return Column(
@@ -721,135 +754,138 @@ class BookingView extends GetView<BookingController> {
         const SizedBox(height: 20),
 
         /// Services List inside About
-        buildServicesTabContent(),
+        buildServicesSection(),
       ],
     );
   }
 
   /// DYNAMIC TAB: SERVICES DOCK
-  Widget buildServicesTabContent() {
-    final expert = controller.currentExpert;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(color: Colors.white.withOpacity(0.03), width: 0.8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Services & Pricing",
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                "View All",
-                style: GoogleFonts.inter(
-                  color: const Color(0xffFF00E5),
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          /// List of items
-          Column(
-            children: (expert["services"] as List<Map<String, dynamic>>).map((
-              srv,
-            ) {
-              IconData icon = Icons.videocam_rounded;
-              Color clr = const Color(0xffB100FF);
-
-              if (srv["type"] == "chat") {
-                icon = Icons.chat_bubble_rounded;
-                clr = const Color(0xffFF7A00);
-              } else if (srv["type"] == "plan") {
-                icon = Icons.calendar_month_rounded;
-                clr = const Color(0xffFF00E5);
-              }
-
-              return Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.white.withOpacity(0.01),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.03),
-                    width: 0.8,
+  Widget buildServicesSection() {
+    return Obx(() {
+      final expert = controller.currentExpert;
+      if (expert.isEmpty || expert["services"] == null) return const SizedBox.shrink();
+      return Container(
+        padding: const EdgeInsets.all(16),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: const Color(0xff0B0817).withOpacity(0.55),
+          border: Border.all(color: Colors.white.withOpacity(0.03), width: 0.8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Services & Pricing",
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: clr.withOpacity(0.12),
-                      ),
-                      child: Icon(icon, color: clr, size: 14),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            srv["title"],
-                            style: GoogleFonts.outfit(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 1),
-                          Text(
-                            srv["duration"],
-                            style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.40),
-                              fontSize: 8,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      "₹${srv["price"]}",
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                Text(
+                  "View All",
+                  style: GoogleFonts.inter(
+                    color: const Color(0xffFF00E5),
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            /// List of items
+            Column(
+              children: (expert["services"] as List<Map<String, dynamic>>).map((
+                srv,
+              ) {
+                IconData icon = Icons.videocam_rounded;
+                Color clr = const Color(0xffB100FF);
+
+                if (srv["type"] == "chat") {
+                  icon = Icons.chat_bubble_rounded;
+                  clr = const Color(0xffFF7A00);
+                } else if (srv["type"] == "plan") {
+                  icon = Icons.calendar_month_rounded;
+                  clr = const Color(0xffFF00E5);
+                }
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white.withOpacity(0.01),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.03),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: clr.withOpacity(0.12),
+                        ),
+                        child: Icon(icon, color: clr, size: 14),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              srv["title"],
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 1),
+                            Text(
+                              srv["duration"],
+                              style: GoogleFonts.inter(
+                                color: Colors.white.withOpacity(0.40),
+                                fontSize: 8,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        "₹${srv["price"]}",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   /// DYNAMIC TAB: REVIEWS DOCK
-  Widget buildReviewsTabContent() {
-    final expert = controller.currentExpert;
-    return Column(
-      children: (expert["reviews"] as List<Map<String, dynamic>>).map((rev) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(14),
+  Widget buildReviewsSection() {
+    return Obx(() {
+      final expert = controller.currentExpert;
+      if (expert.isEmpty || expert["reviews"] == null) return const SizedBox.shrink();
+      return Column(
+        children: (expert["reviews"] as List<Map<String, dynamic>>).map((rev) {
+          return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             color: const Color(0xff0B0817).withOpacity(0.55),
@@ -864,7 +900,7 @@ class BookingView extends GetView<BookingController> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.network(
-                  rev["image"]!,
+                  rev["image"] ?? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150',
                   height: 32,
                   width: 32,
                   fit: BoxFit.cover,
@@ -914,7 +950,8 @@ class BookingView extends GetView<BookingController> {
         );
       }).toList(),
     );
-  }
+  });
+}
 
   /// DYNAMIC TAB: GALLERY DOCK
   Widget buildGalleryTabContent() {
@@ -944,28 +981,72 @@ class BookingView extends GetView<BookingController> {
   /// 6. BOOK A SESSION CALENDAR (DATE/TIME GRID SELECTOR)
   /// ----------------------------------------------------
   Widget buildBookSessionCalendar() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Book a Session",
-          style: GoogleFonts.outfit(
-            color: Colors.white,
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 12),
+    return Obx(() {
+      final dates = controller.dates;
+      final expert = controller.currentExpert;
+      final expertName = expert["name"] ?? 'Expert';
 
-        /// Horizontal Dates Row
-        SizedBox(
-          height: 72,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: controller.dates.length,
-            itemBuilder: (context, index) {
-              final item = controller.dates[index];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Book a Session",
+            style: GoogleFonts.outfit(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          if (dates.isEmpty) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xff0B0817).withOpacity(0.55),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white.withOpacity(0.03), width: 0.8),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.calendar_today_rounded,
+                    color: Colors.white.withOpacity(0.2),
+                    size: 28,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "No Available Slots",
+                    style: GoogleFonts.outfit(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "$expertName hasn't added any slots yet. Check back soon!",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      color: Colors.white.withOpacity(0.4),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ] else ...[
+            /// Horizontal Dates Row
+            SizedBox(
+              height: 72,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: dates.length,
+                itemBuilder: (context, index) {
+                  final item = dates[index];
               return Obx(() {
                 final isActive = index == controller.selectedDateIndex.value;
                 Color borderClr = isActive
@@ -1082,6 +1163,9 @@ class BookingView extends GetView<BookingController> {
         /// Gradient Book Now button
         Obx(() {
           final expert = controller.currentExpert;
+          if (expert.isEmpty || expert["services"] == null || (expert["services"] as List).isEmpty) {
+            return const SizedBox.shrink();
+          }
           final price = (expert["services"] as List)[0]["price"];
           final duration = (expert["services"] as List)[0]["duration"];
 
@@ -1137,9 +1221,10 @@ class BookingView extends GetView<BookingController> {
             ),
           );
         }),
-      ],
+      ]],
     );
-  }
+  });
+}
 
   /// ----------------------------------------------------
   /// 7. CLIENT REVIEWS SECTION
@@ -1174,6 +1259,7 @@ class BookingView extends GetView<BookingController> {
         /// Row item of reviews
         Obx(() {
           final expert = controller.currentExpert;
+          if (expert.isEmpty || expert["reviews"] == null) return const SizedBox.shrink();
           return SizedBox(
             height: 98,
             child: ListView.builder(
@@ -1257,6 +1343,263 @@ class BookingView extends GetView<BookingController> {
           );
         }),
       ],
+    );
+  }
+
+  Widget buildClientAppointmentsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Your Booked Sessions",
+          style: GoogleFonts.outfit(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Obx(() {
+          if (controller.clientAppointments.isEmpty) {
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xff090414),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withOpacity(0.04)),
+              ),
+              child: Center(
+                child: Text(
+                  "No upcoming booked sessions",
+                  style: GoogleFonts.inter(color: Colors.white30, fontSize: 12),
+                ),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: controller.clientAppointments.length,
+            itemBuilder: (context, index) {
+              final apt = controller.clientAppointments[index];
+              final consultant = apt['consultant'] ?? {};
+              final slot = apt['slot'] ?? {};
+              final dateStr = slot['start_time'] ?? '';
+              
+              DateTime? startTime;
+              if (dateStr.isNotEmpty) {
+                startTime = DateTime.parse(dateStr).toLocal();
+              }
+
+              final formattedDate = startTime != null
+                  ? DateFormat('EEEE, dd MMM').format(startTime)
+                  : 'N/A';
+              final formattedTime = startTime != null
+                  ? DateFormat('hh:mm a').format(startTime)
+                  : 'N/A';
+              final status = apt['status'] as String? ?? 'PENDING';
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xff090414),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withOpacity(0.04)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          "Consultation with ${consultant['first_name'] ?? 'Coach'} ${consultant['last_name'] ?? ''}",
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: (status == 'APPROVED' ? const Color(0xff00FF87) : Colors.amber).withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: (status == 'APPROVED' ? const Color(0xff00FF87) : Colors.amber).withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            status,
+                            style: GoogleFonts.inter(
+                              color: status == 'APPROVED' ? const Color(0xff00FF87) : Colors.amber,
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(Icons.calendar_month_rounded, color: Color(0xff00E5FF), size: 14),
+                        const SizedBox(width: 6),
+                        Text(
+                          "$formattedDate at $formattedTime",
+                          style: GoogleFonts.inter(color: Colors.white70, fontSize: 11),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => _showRescheduleDialog(context, apt),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xffFF00E5),
+                              side: const BorderSide(color: Color(0xffFF00E5)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                            ),
+                            child: Text(
+                              "Reschedule",
+                              style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                        if (status == 'APPROVED') ...[
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => Get.toNamed('/video-call', arguments: apt),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xff00FF87),
+                                foregroundColor: Colors.black,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.videocam_rounded, size: 14),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    "Join Call",
+                                    style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ]
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        }),
+      ],
+    );
+  }
+
+  void _showRescheduleDialog(BuildContext context, Map<String, dynamic> appointment) {
+    final consultant = appointment['consultant'] ?? {};
+    final consultantId = consultant['id'];
+
+    Get.dialog(
+      Dialog(
+        backgroundColor: const Color(0xff090414),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Reschedule Session",
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                "Select a new available slot with this coach.",
+                style: GoogleFonts.inter(
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 11,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Obx(() {
+                final slots = controller.allAvailableSlots.where((s) => s['consultant_id'] == consultantId).toList();
+                if (slots.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Center(
+                      child: Text(
+                        "No other available slots at the moment.",
+                        style: GoogleFonts.inter(color: Colors.white30, fontSize: 12),
+                      ),
+                    ),
+                  );
+                }
+
+                return Container(
+                  constraints: const BoxConstraints(maxHeight: 250),
+                  width: double.maxFinite,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: slots.length,
+                    itemBuilder: (context, index) {
+                      final slot = slots[index];
+                      final start = DateTime.parse(slot['start_time']).toLocal();
+                      final formatted = DateFormat('dd MMM, hh:mm a').format(start);
+
+                      return ListTile(
+                        title: Text(
+                          formatted,
+                          style: GoogleFonts.outfit(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                        ),
+                        trailing: const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xffFF00E5), size: 14),
+                        onTap: () {
+                          controller.rescheduleAppointment(appointment['id'], slot['id']);
+                          Get.back();
+                        },
+                      );
+                    },
+                  ),
+                );
+              }),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Get.back(),
+                  child: Text(
+                    "Cancel",
+                    style: GoogleFonts.outfit(color: Colors.white.withOpacity(0.6)),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

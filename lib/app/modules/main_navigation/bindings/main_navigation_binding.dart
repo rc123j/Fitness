@@ -5,6 +5,7 @@ import '../../meal/controllers/meal_controller.dart';
 import '../../progress/controllers/progress_controller.dart';
 import '../../social/controllers/social_controller.dart';
 import '../../profile/controllers/profile_controller.dart';
+import '../../booking/controllers/booking_controller.dart';
 
 class MainNavigationBinding extends Bindings {
   @override
@@ -29,6 +30,9 @@ class MainNavigationBinding extends Bindings {
     );
     Get.lazyPut<ProfileController>(
       () => ProfileController(),
+    );
+    Get.lazyPut<BookingController>(
+      () => BookingController(),
     );
   }
 }

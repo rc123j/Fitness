@@ -6,21 +6,30 @@ import '../controllers/main_navigation_controller.dart';
 import '../../home/views/home_view.dart';
 import '../../meal/views/meal_view.dart';
 import '../../progress/views/progress_view.dart';
-// import '../../social/views/social_feed_view.dart';
 import '../../profile/views/profile_view.dart';
+import '../../../services/auth_service.dart';
+import '../../booking/views/expert_dashboard_view.dart';
+import '../../booking/views/expert_slots_view.dart';
 
 class MainNavigationView extends GetView<MainNavigationController> {
   const MainNavigationView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      const HomeView(),
-      const MealView(),
-      const ProgressView(),
-      // const SocialFeedView(), // Excluded for Phase 1
-      const ProfileView(),
-    ];
+    final authService = Get.find<AuthService>();
+    final isExpert = authService.userRole == 'CONSULTANT' || authService.userRole == 'ADMIN';
+
+    final List<Widget> pages = isExpert
+        ? [
+            const ExpertDashboardView(),
+            const ExpertSlotsView(),
+          ]
+        : [
+            const HomeView(),
+            const MealView(),
+            const ProgressView(),
+            const ProfileView(),
+          ];
 
     return Scaffold(
       backgroundColor: const Color(0xff06010F),
@@ -33,11 +42,11 @@ class MainNavigationView extends GetView<MainNavigationController> {
               )),
         ],
       ),
-      bottomNavigationBar: buildBottomNavigationBar(),
+      bottomNavigationBar: buildBottomNavigationBar(isExpert),
     );
   }
 
-  Widget buildBottomNavigationBar() {
+  Widget buildBottomNavigationBar(bool isExpert) {
     return Obx(() {
       final activeIndex = controller.selectedIndex.value;
 
@@ -60,13 +69,17 @@ class MainNavigationView extends GetView<MainNavigationController> {
             filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                navItem(Icons.home_outlined, Icons.home_rounded, "Dashboard", activeIndex == 0, 0),
-                navItem(Icons.restaurant_outlined, Icons.restaurant_rounded, "Meals", activeIndex == 1, 1),
-                navItem(Icons.bar_chart_outlined, Icons.bar_chart_rounded, "Progress", activeIndex == 2, 2),
-                // navItem(Icons.groups_outlined, Icons.groups_rounded, "Social", activeIndex == 3, 3), // Excluded for Phase 1
-                navItem(Icons.person_outline_rounded, Icons.person_rounded, "Profile", activeIndex == 3, 3),
-              ],
+              children: isExpert
+                  ? [
+                      navItem(Icons.dashboard_outlined, Icons.dashboard_rounded, "Sessions", activeIndex == 0, 0),
+                      navItem(Icons.calendar_month_outlined, Icons.calendar_month_rounded, "Slots", activeIndex == 1, 1),
+                    ]
+                  : [
+                      navItem(Icons.home_outlined, Icons.home_rounded, "Dashboard", activeIndex == 0, 0),
+                      navItem(Icons.restaurant_outlined, Icons.restaurant_rounded, "Meals", activeIndex == 1, 1),
+                      navItem(Icons.bar_chart_outlined, Icons.bar_chart_rounded, "Progress", activeIndex == 2, 2),
+                      navItem(Icons.person_outline_rounded, Icons.person_rounded, "Profile", activeIndex == 3, 3),
+                    ],
             ),
           ),
         ),

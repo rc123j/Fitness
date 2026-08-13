@@ -70,7 +70,7 @@ class LoginController extends GetxController {
         isOnboarded: data['user']['isOnboarded'] ?? false,
       );
 
-      if (_authService.isOnboardingDone) {
+      if (_authService.isOnboardingDone || _authService.userRole == 'CONSULTANT' || _authService.userRole == 'ADMIN') {
         Get.offAllNamed('/main-navigation');
       } else {
         Get.offAllNamed('/goal-selection');

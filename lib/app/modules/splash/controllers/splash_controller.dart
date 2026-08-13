@@ -42,6 +42,12 @@ class SplashController extends GetxController {
       return;
     }
 
+    if (_authService.userRole == 'CONSULTANT' || _authService.userRole == 'ADMIN') {
+      _authService.setOnboardingDone(true);
+      Get.offAllNamed('/main-navigation');
+      return;
+    }
+
     if (_authService.isOnboardingDone) {
       Get.offAllNamed('/main-navigation');
     } else {

@@ -1280,6 +1280,7 @@ class _HomeViewState extends State<HomeView> {
                   GestureDetector(
                     onTap: () {
                       Navigator.pop(context);
+                      Get.toNamed('/booking');
                     },
                     child: Container(
                       width: double.infinity,
@@ -1436,6 +1437,7 @@ class _HomeViewState extends State<HomeView> {
               GestureDetector(
                 onTap: () {
                   Navigator.pop(context);
+                  Get.toNamed('/booking');
                 },
                 child: Container(
                   width: double.infinity,
