@@ -6,104 +6,509 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../controllers/booking_controller.dart';
 import '../../../widgets/premium_layout_components.dart';
+import 'booking_date_time_view.dart';
+import 'my_sessions_view.dart';
 
 class BookingView extends GetView<BookingController> {
-  const BookingView({super.key});
+  BookingView({super.key});
+
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xff06010F),
-      body: Stack(
-        children: [
-          /// BACKGROUND BLUR BLOBS
-          Positioned(
-            top: -100,
-            left: -100,
-            child: Container(
-              height: 320,
-              width: 320,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xffB100FF).withOpacity(0.08),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
+      bottomNavigationBar: _buildBottomBookButton(),
+      body: Obx(() {
+        final expert = controller.currentExpert;
+        if (expert.isEmpty) {
+          return const Center(
+            child: CircularProgressIndicator(
+              color: Color(0xffFF00E5),
             ),
-          ),
-          Positioned(
-            bottom: -80,
-            right: -100,
-            child: Container(
-              height: 350,
-              width: 350,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xffFF00E5).withOpacity(0.08),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
+          );
+        }
 
-          /// SCROLLABLE VIEW PORT
-          SafeArea(
-            child: Column(
-              children: [
-                /// HEADER
-                buildHeader(),
-
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+        return Stack(
+          children: [
+            /// 1. SCROLLABLE CONTENT PORTION
+            Positioned.fill(
+              child: Scrollbar(
+                controller: _scrollController,
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      /// COVER IMAGE & GRADIENT & BADGE STACKED INSIDE SCROLLVIEW
+                    Stack(
                       children: [
-                        const SizedBox(height: 10),
-
-                        /// 3. SELECTED EXPERT OVERVIEW CARD
-                        buildExpertOverviewCard(),
-                        const SizedBox(height: 20),
-
-                        /// 4. TAB CONTROLS (ABOUT, SERVICES, REVIEWS, GALLERY)
-                        buildTabSelector(),
-                        const SizedBox(height: 20),
-
-                        /// 5. ACTIVE TAB DYNAMIC VIEWS
-                        Obx(() {
-                          final expert = controller.currentExpert;
-                          if (expert.isEmpty) {
-                            return const Center(child: CircularProgressIndicator(color: Color(0xffFF00E5)));
-                          }
-                          final currentTab = controller.activeTab.value;
-                          if (currentTab == "About") {
-                            return buildAboutTabContent();
-                          } else if (currentTab == "Services") {
-                            return buildServicesSection();
-                          } else if (currentTab == "Reviews") {
-                            return buildReviewsSection();
-                          } else {
-                            return buildGalleryTabContent();
-                          }
-                        }),
-                        const SizedBox(height: 24),
-
-                        /// 6. BOOK A SESSION DATE/TIME CALENDAR SELECTOR
-                        buildBookSessionCalendar(),
-                        const SizedBox(height: 24),
-
-                        /// 8. CLIENT BOOKED APPOINTMENTS LIST
-                        buildClientAppointmentsSection(),
-                        const SizedBox(height: 24),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.38,
+                          width: double.infinity,
+                          child: Image.network(
+                            expert["image"] ?? 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=600',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        /// Dark gradient overlay at top of image (for floating buttons visibility)
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.black.withOpacity(0.4),
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        /// Gallery count badge (bottom right of cover photo)
+                        Positioned(
+                          bottom: 50, // high enough to not get fully overlapped by floating card
+                          right: 16,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.photo_library_outlined,
+                                  color: Colors.white,
+                                  size: 12,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "1/5",
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
+
+                    /// OVERLAPPING SHIFTED COLUMN
+                    Transform.translate(
+                      offset: const Offset(0, -40),
+                      child: Column(
+                        children: [
+                          /// FLOATING CARD (White background, Zomato style)
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                /// Name & Rating row
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        expert["name"] ?? '',
+                                        style: GoogleFonts.outfit(
+                                          color: Colors.black,
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xff24963F), // Zomato green
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                "${expert["rating"] ?? 4.9}",
+                                                style: GoogleFonts.inter(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 2),
+                                              const Icon(
+                                                Icons.star_rounded,
+                                                color: Colors.white,
+                                                size: 12,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          "${expert["reviewsCount"] ?? 150} ratings",
+                                          style: GoogleFonts.inter(
+                                            color: Colors.black.withOpacity(0.4),
+                                            fontSize: 9,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+
+                                /// Distance / Location Row
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.location_on_outlined,
+                                      color: Colors.black.withOpacity(0.6),
+                                      size: 14,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      "${expert["location"] ?? 'Online'} · Verified Coach",
+                                      style: GoogleFonts.inter(
+                                        color: Colors.black.withOpacity(0.6),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Icon(
+                                      Icons.arrow_drop_down,
+                                      color: Colors.black.withOpacity(0.6),
+                                      size: 16,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+
+                                /// Role / Price Info
+                                Text(
+                                  "${expert["role"] ?? 'Fitness Specialist'} | ₹500 for Session",
+                                  style: GoogleFonts.inter(
+                                    color: Colors.black.withOpacity(0.5),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Divider(color: Colors.black.withOpacity(0.08), height: 1),
+                                const SizedBox(height: 12),
+
+                                /// Bottom Buttons inside card (Open, Directions, Call)
+                                Row(
+                                  children: [
+                                    /// Open/Available tag
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.03),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            "Available",
+                                            style: GoogleFonts.inter(
+                                              color: const Color(0xff24963F),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            " Today",
+                                            style: GoogleFonts.inter(
+                                              color: Colors.black,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          const Icon(
+                                            Icons.keyboard_arrow_down_rounded,
+                                            color: Colors.black54,
+                                            size: 14,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Spacer(),
+
+                                    /// Chat Button
+                                    GestureDetector(
+                                      onTap: () {
+                                        Get.snackbar(
+                                          "Chat Initiated",
+                                          "Start chatting with ${expert["name"]}",
+                                          snackPosition: SnackPosition.BOTTOM,
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.03),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.chat_bubble_outline_rounded,
+                                          color: Colors.black87,
+                                          size: 18,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+
+                                    /// Call Button
+                                    GestureDetector(
+                                      onTap: () {
+                                        Get.snackbar(
+                                          "Calling...",
+                                          "Calling ${expert["name"]}",
+                                          snackPosition: SnackPosition.BOTTOM,
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.03),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.phone_outlined,
+                                          color: Colors.black87,
+                                          size: 18,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          /// ABOUT, SERVICES, FEATURES
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                buildAboutTabContent(),
+                                const SizedBox(height: 24),
+                                _buildFeaturesSection(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20), // Bottom padding to compensate for translation
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+            /// 2. FLOATING FIXED TOP ACTIONS (Back button, Share, Favorite)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 10,
+              left: 16,
+              child: GestureDetector(
+                onTap: () => Get.back(),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.black,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 10,
+              right: 16,
+              child: Row(
+                children: [
+                  /// Favorite Icon
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.favorite_border_rounded,
+                      color: Colors.black,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+
+                  /// Share Icon
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.share_outlined,
+                      color: Colors.black,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildFeaturesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "What You'll Get",
+          style: GoogleFonts.outfit(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          childAspectRatio: 0.75,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          children: [
+            _buildFeatureCard(
+              "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=500&q=80",
+              "Personalized Plan",
+              "Fitness | Nutrition",
+            ),
+            _buildFeatureCard(
+              "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&q=80",
+              "1-on-1 Video",
+              "Live | Guidance",
+            ),
+            _buildFeatureCard(
+              "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=500&q=80",
+              "Ongoing Support",
+              "24/7 | Chat",
+            ),
+            _buildFeatureCard(
+              "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=500&q=80",
+              "Nutrition Guide",
+              "Meals | Diet",
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeatureCard(String image, String title, String subtitle) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xff121212),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+              child: Image.network(
+                image,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: GoogleFonts.inter(
+                          color: Colors.white.withOpacity(0.5),
+                          fontSize: 10,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.bookmark_border_rounded,
+                    color: Colors.white,
+                    size: 16,
                   ),
                 ),
               ],
@@ -114,29 +519,37 @@ class BookingView extends GetView<BookingController> {
     );
   }
 
-  /// ----------------------------------------------------
-  /// HEADER WIDGET
-  /// ----------------------------------------------------
-  Widget buildHeader() {
-    return PremiumAppBar(
-      title: "Experts & Booking",
-      subtitle: "Find expert guidance. Book. Get results.",
-      trailing: Container(
-        height: 40,
-        width: 40,
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.03),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.08), width: 0.8),
-        ),
-        child: const Icon(
-          Icons.calendar_today_rounded,
-          color: Colors.white,
-          size: 16,
+  Widget _buildBottomBookButton() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xff06010F),
+        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.05))),
+      ),
+      child: SafeArea(
+        child: ElevatedButton(
+          onPressed: () => Get.to(() => const BookingDateTimeView()),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xffFF00E5),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          child: Text(
+            "Book a Session",
+            style: GoogleFonts.outfit(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ),
     );
   }
+
+  // Removed buildHeader
 
   /// ----------------------------------------------------
   /// 1. SEARCH BAR & FILTERS
@@ -263,7 +676,8 @@ class BookingView extends GetView<BookingController> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(28),
                               child: Image.network(
-                                expert["image"] ?? 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200',
+                                expert["image"] ??
+                                    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200',
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -324,364 +738,15 @@ class BookingView extends GetView<BookingController> {
     );
   }
 
-  /// ----------------------------------------------------
-  /// 3. SELECTED EXPERT OVERVIEW CARD
-  /// ----------------------------------------------------
-  Widget buildExpertOverviewCard() {
-    return Container(
-      height: 194,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Obx(() {
-          final expert = controller.currentExpert;
-          if (expert.isEmpty) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xffFF00E5)));
-          }
-
-          return Stack(
-            children: [
-              /// Circular Avatar with Glowing Ring (Option A / Premium)
-              Positioned(
-                left: 14,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      /// Glowing border ring painter
-                      CustomPaint(
-                        size: const Size(116, 116),
-                        painter: ExpertBackdropPainter(),
-                      ),
-
-                      /// Circular Expert Image fitting perfectly inside the ring
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(48),
-                        child: SizedBox(
-                          width: 96,
-                          height: 96,
-                          child: Image.network(
-                            expert["image"] ?? 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200',
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              /// Right details list
-              Positioned(
-                left: 134,
-                top: 14,
-                right: 12,
-                bottom: 12,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    /// Verification & Rating row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: const Color(0xffB100FF).withOpacity(0.12),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.verified_user_rounded,
-                                color: Color(0xffB100FF),
-                                size: 10,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                "Verified Expert",
-                                style: GoogleFonts.outfit(
-                                  color: const Color(0xffB100FF),
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.star_rounded,
-                              color: Color(0xffFFD700),
-                              size: 12,
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              "${expert["rating"]} (${expert["reviewsCount"]} reviews)",
-                              style: GoogleFonts.inter(
-                                color: Colors.white.withOpacity(0.50),
-                                fontSize: 8,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                    /// Coach name & role
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              expert["name"]!,
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-                            const Icon(
-                              Icons.verified_rounded,
-                              color: Color(0xffFF00E5),
-                              size: 14,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          expert["role"]!,
-                          style: GoogleFonts.outfit(
-                            color: const Color(0xffFF00E5),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    /// Stats Row
-                    Row(
-                      children: [
-                        /// Experience
-                        buildStatBadge(
-                          Icons.emoji_events_rounded,
-                          expert["experience"]!,
-                          "Experience",
-                        ),
-                        const SizedBox(width: 10),
-
-                        /// Clients
-                        buildStatBadge(
-                          Icons.people_rounded,
-                          expert["clients"]!,
-                          "Helped",
-                        ),
-                        const SizedBox(width: 10),
-
-                        /// Location
-                        buildStatBadge(
-                          Icons.location_on_rounded,
-                          expert["location"]!.split(",")[0],
-                          "Online",
-                        ),
-                      ],
-                    ),
-
-                    /// Bio Description snippet
-                    Text(
-                      expert["bio"]!,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.50),
-                        fontSize: 8,
-                        height: 1.25,
-                      ),
-                    ),
-
-                    /// Scrollable Tags Row
-                    SizedBox(
-                      height: 18,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        children: (expert["tags"] as List<String>).map((tag) {
-                          Color activeColor =
-                              tag.contains("Weight") || tag.contains("Recomp")
-                              ? const Color(0xffFF7A00)
-                              : const Color(0xffB100FF);
-                          return Container(
-                            margin: const EdgeInsets.only(right: 6),
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(6),
-                              color: activeColor.withOpacity(0.05),
-                              border: Border.all(
-                                color: activeColor.withOpacity(0.20),
-                                width: 0.8,
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                tag,
-                                style: GoogleFonts.inter(
-                                  color: activeColor,
-                                  fontSize: 7,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget buildStatBadge(IconData icon, String title, String sub) {
-    return Row(
-      children: [
-        Icon(icon, color: const Color(0xffFF00E5).withOpacity(0.60), size: 10),
-        const SizedBox(width: 4),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              title,
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 8,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              sub,
-              style: GoogleFonts.inter(
-                color: Colors.white.withOpacity(0.35),
-                fontSize: 6,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+  // Removed buildExpertOverviewCard and buildStatBadge
 
   /// ----------------------------------------------------
-  /// 4. TAB CONTROLS (ABOUT, SERVICES, REVIEWS, GALLERY)
-  /// ----------------------------------------------------
-  Widget buildTabSelector() {
-    final tabs = ["About", "Services", "Reviews"];
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
-      ),
-      child: Obx(() {
-        final active = controller.activeTab.value;
-        return Row(
-          children: tabs.map((tab) {
-            final isActive = tab == active;
-            return Expanded(
-              child: GestureDetector(
-                onTap: () => controller.activeTab.value = tab,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: isActive
-                        ? const Color(0xffB100FF).withOpacity(0.08)
-                        : Colors.transparent,
-                    border: Border.all(
-                      color: isActive
-                          ? const Color(0xffB100FF)
-                          : Colors.transparent,
-                      width: 1.0,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      tab,
-                      style: GoogleFonts.outfit(
-                        color: isActive
-                            ? Colors.white
-                            : Colors.white.withOpacity(0.40),
-                        fontSize: 11,
-                        fontWeight: isActive
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        );
-      }),
-    );
-  }
+  // Removed Tab Selector Navigation Cards
 
   /// ----------------------------------------------------
   /// 5. DYNAMIC TAB: ABOUT DOCK
   /// ----------------------------------------------------
-  Widget buildStatsRow() {
-    return Obx(() {
-      final expert = controller.currentExpert;
-      if (expert.isEmpty) return const SizedBox.shrink();
-      return Row(
-        children: [
-          /// Experience
-          buildStatBadge(
-            Icons.emoji_events_rounded,
-            expert["experience"]!,
-            "Experience",
-          ),
-          const SizedBox(width: 10),
-
-          /// Clients
-          buildStatBadge(
-            Icons.people_rounded,
-            expert["clients"]!,
-            "Helped",
-          ),
-          const SizedBox(width: 10),
-
-          /// Location
-          buildStatBadge(
-            Icons.location_on_rounded,
-            expert["location"]!.split(",")[0],
-            "Online",
-          ),
-        ],
-      );
-    });
-  }
+  // Removed buildStatsRow
 
   Widget buildAboutTabContent() {
     final expert = controller.currentExpert;
@@ -763,7 +828,8 @@ class BookingView extends GetView<BookingController> {
   Widget buildServicesSection() {
     return Obx(() {
       final expert = controller.currentExpert;
-      if (expert.isEmpty || expert["services"] == null) return const SizedBox.shrink();
+      if (expert.isEmpty || expert["services"] == null)
+        return const SizedBox.shrink();
       return Container(
         padding: const EdgeInsets.all(16),
         width: double.infinity,
@@ -878,104 +944,7 @@ class BookingView extends GetView<BookingController> {
     });
   }
 
-  /// DYNAMIC TAB: REVIEWS DOCK
-  Widget buildReviewsSection() {
-    return Obx(() {
-      final expert = controller.currentExpert;
-      if (expert.isEmpty || expert["reviews"] == null) return const SizedBox.shrink();
-      return Column(
-        children: (expert["reviews"] as List<Map<String, dynamic>>).map((rev) {
-          return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            color: const Color(0xff0B0817).withOpacity(0.55),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.03),
-              width: 0.8,
-            ),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  rev["image"] ?? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150',
-                  height: 32,
-                  width: 32,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          rev["name"]!,
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Row(
-                          children: List.generate(5, (index) {
-                            return const Icon(
-                              Icons.star_rounded,
-                              color: Color(0xffFFD700),
-                              size: 10,
-                            );
-                          }),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      rev["comment"]!,
-                      style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.50),
-                        fontSize: 9,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  });
-}
-
-  /// DYNAMIC TAB: GALLERY DOCK
-  Widget buildGalleryTabContent() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 1.0,
-      ),
-      itemCount: 6,
-      itemBuilder: (context, index) {
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(14),
-          child: Image.network(
-            "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=200",
-            fit: BoxFit.cover,
-          ),
-        );
-      },
-    );
-  }
+  // Removed Reviews and Gallery sections
 
   /// ----------------------------------------------------
   /// 6. BOOK A SESSION CALENDAR (DATE/TIME GRID SELECTOR)
@@ -1006,7 +975,10 @@ class BookingView extends GetView<BookingController> {
               decoration: BoxDecoration(
                 color: const Color(0xff0B0817).withOpacity(0.55),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withOpacity(0.03), width: 0.8),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.03),
+                  width: 0.8,
+                ),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1047,184 +1019,189 @@ class BookingView extends GetView<BookingController> {
                 itemCount: dates.length,
                 itemBuilder: (context, index) {
                   final item = dates[index];
-              return Obx(() {
-                final isActive = index == controller.selectedDateIndex.value;
-                Color borderClr = isActive
-                    ? const Color(0xffB100FF)
-                    : Colors.white.withOpacity(0.04);
-                Color fillClr = isActive
-                    ? const Color(0xffB100FF).withOpacity(0.08)
-                    : Colors.white.withOpacity(0.01);
+                  return Obx(() {
+                    final isActive =
+                        index == controller.selectedDateIndex.value;
+                    Color borderClr = isActive
+                        ? const Color(0xffB100FF)
+                        : Colors.white.withOpacity(0.04);
+                    Color fillClr = isActive
+                        ? const Color(0xffB100FF).withOpacity(0.08)
+                        : Colors.white.withOpacity(0.01);
 
-                return GestureDetector(
-                  onTap: () => controller.selectedDateIndex.value = index,
-                  child: Container(
-                    width: 68,
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      color: fillClr,
-                      border: Border.all(
-                        color: borderClr,
-                        width: isActive ? 1.5 : 0.8,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Text(
-                          item["day"]!,
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(0.40),
-                            fontSize: 8,
+                    return GestureDetector(
+                      onTap: () => controller.selectedDateIndex.value = index,
+                      child: Container(
+                        width: 68,
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          color: fillClr,
+                          border: Border.all(
+                            color: borderClr,
+                            width: isActive ? 1.5 : 0.8,
                           ),
                         ),
-                        Text(
-                          item["date"]!,
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          item["slots"]!,
-                          style: GoogleFonts.inter(
-                            color: isActive
-                                ? const Color(0xffB100FF)
-                                : Colors.white.withOpacity(0.30),
-                            fontSize: 7,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              });
-            },
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        /// Horizontal Time slots Row
-        SizedBox(
-          height: 38,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: controller.timeSlots.length,
-            itemBuilder: (context, index) {
-              final slot = controller.timeSlots[index];
-              return Obx(() {
-                final isActive =
-                    index == controller.selectedTimeSlotIndex.value;
-                Color borderClr = isActive
-                    ? const Color(0xffB100FF)
-                    : Colors.white.withOpacity(0.04);
-                Color fillClr = isActive
-                    ? const Color(0xffB100FF).withOpacity(0.08)
-                    : Colors.white.withOpacity(0.01);
-
-                return GestureDetector(
-                  onTap: () => controller.selectedTimeSlotIndex.value = index,
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: fillClr,
-                      border: Border.all(
-                        color: borderClr,
-                        width: isActive ? 1.5 : 0.8,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        slot,
-                        style: GoogleFonts.outfit(
-                          color: isActive
-                              ? Colors.white
-                              : Colors.white.withOpacity(0.50),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Text(
+                              item["day"]!,
+                              style: GoogleFonts.inter(
+                                color: Colors.white.withOpacity(0.40),
+                                fontSize: 8,
+                              ),
+                            ),
+                            Text(
+                              item["date"]!,
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              item["slots"]!,
+                              style: GoogleFonts.inter(
+                                color: isActive
+                                    ? const Color(0xffB100FF)
+                                    : Colors.white.withOpacity(0.30),
+                                fontSize: 7,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ),
-                );
-              });
-            },
-          ),
-        ),
-        const SizedBox(height: 20),
-
-        /// Gradient Book Now button
-        Obx(() {
-          final expert = controller.currentExpert;
-          if (expert.isEmpty || expert["services"] == null || (expert["services"] as List).isEmpty) {
-            return const SizedBox.shrink();
-          }
-          final price = (expert["services"] as List)[0]["price"];
-          final duration = (expert["services"] as List)[0]["duration"];
-
-          return Container(
-            width: double.infinity,
-            height: 52,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              gradient: const LinearGradient(
-                colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
+                    );
+                  });
+                },
               ),
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => controller.bookSession(),
-                borderRadius: BorderRadius.circular(14),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Book Now - ₹$price",
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
+            const SizedBox(height: 12),
+
+            /// Horizontal Time slots Row
+            SizedBox(
+              height: 38,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: controller.timeSlots.length,
+                itemBuilder: (context, index) {
+                  final slot = controller.timeSlots[index];
+                  return Obx(() {
+                    final isActive =
+                        index == controller.selectedTimeSlotIndex.value;
+                    Color borderClr = isActive
+                        ? const Color(0xffB100FF)
+                        : Colors.white.withOpacity(0.04);
+                    Color fillClr = isActive
+                        ? const Color(0xffB100FF).withOpacity(0.08)
+                        : Colors.white.withOpacity(0.01);
+
+                    return GestureDetector(
+                      onTap: () =>
+                          controller.selectedTimeSlotIndex.value = index,
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: fillClr,
+                          border: Border.all(
+                            color: borderClr,
+                            width: isActive ? 1.5 : 0.8,
+                          ),
                         ),
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            "$duration Video Call",
-                            style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.85),
-                              fontSize: 9,
-                              fontWeight: FontWeight.w600,
+                        child: Center(
+                          child: Text(
+                            slot,
+                            style: GoogleFonts.outfit(
+                              color: isActive
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.50),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          const Icon(
-                            Icons.videocam_rounded,
-                            color: Colors.white,
-                            size: 16,
+                        ),
+                      ),
+                    );
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            /// Gradient Book Now button
+            Obx(() {
+              final expert = controller.currentExpert;
+              if (expert.isEmpty ||
+                  expert["services"] == null ||
+                  (expert["services"] as List).isEmpty) {
+                return const SizedBox.shrink();
+              }
+              final price = (expert["services"] as List)[0]["price"];
+              final duration = (expert["services"] as List)[0]["duration"];
+
+              return Container(
+                width: double.infinity,
+                height: 52,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
+                  ),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => controller.bookSession(),
+                    borderRadius: BorderRadius.circular(14),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Book Now - ₹$price",
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                "$duration Video Call",
+                                style: GoogleFonts.inter(
+                                  color: Colors.white.withOpacity(0.85),
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(
+                                Icons.videocam_rounded,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
-          );
-        }),
-      ]],
-    );
-  });
-}
+              );
+            }),
+          ],
+        ],
+      );
+    });
+  }
 
   /// ----------------------------------------------------
   /// 7. CLIENT REVIEWS SECTION
@@ -1259,7 +1236,8 @@ class BookingView extends GetView<BookingController> {
         /// Row item of reviews
         Obx(() {
           final expert = controller.currentExpert;
-          if (expert.isEmpty || expert["reviews"] == null) return const SizedBox.shrink();
+          if (expert.isEmpty || expert["reviews"] == null)
+            return const SizedBox.shrink();
           return SizedBox(
             height: 98,
             child: ListView.builder(
@@ -1387,7 +1365,7 @@ class BookingView extends GetView<BookingController> {
               final consultant = apt['consultant'] ?? {};
               final slot = apt['slot'] ?? {};
               final dateStr = slot['start_time'] ?? '';
-              
+
               DateTime? startTime;
               if (dateStr.isNotEmpty) {
                 startTime = DateTime.parse(dateStr).toLocal();
@@ -1424,34 +1402,54 @@ class BookingView extends GetView<BookingController> {
                         ),
                         const Spacer(),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            color: (status == 'APPROVED' ? const Color(0xff00FF87) : Colors.amber).withOpacity(0.12),
+                            color:
+                                (status == 'APPROVED'
+                                        ? const Color(0xff00FF87)
+                                        : Colors.amber)
+                                    .withOpacity(0.12),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: (status == 'APPROVED' ? const Color(0xff00FF87) : Colors.amber).withOpacity(0.3),
+                              color:
+                                  (status == 'APPROVED'
+                                          ? const Color(0xff00FF87)
+                                          : Colors.amber)
+                                      .withOpacity(0.3),
                               width: 1,
                             ),
                           ),
                           child: Text(
                             status,
                             style: GoogleFonts.inter(
-                              color: status == 'APPROVED' ? const Color(0xff00FF87) : Colors.amber,
+                              color: status == 'APPROVED'
+                                  ? const Color(0xff00FF87)
+                                  : Colors.amber,
                               fontSize: 8,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        )
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.calendar_month_rounded, color: Color(0xff00E5FF), size: 14),
+                        const Icon(
+                          Icons.calendar_month_rounded,
+                          color: Color(0xff00E5FF),
+                          size: 14,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           "$formattedDate at $formattedTime",
-                          style: GoogleFonts.inter(color: Colors.white70, fontSize: 11),
+                          style: GoogleFonts.inter(
+                            color: Colors.white70,
+                            fontSize: 11,
+                          ),
                         ),
                       ],
                     ),
@@ -1460,7 +1458,8 @@ class BookingView extends GetView<BookingController> {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: () => _showRescheduleDialog(context, apt),
+                            onPressed: () =>
+                                _showRescheduleDialog(context, apt),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xffFF00E5),
                               side: const BorderSide(color: Color(0xffFF00E5)),
@@ -1471,7 +1470,10 @@ class BookingView extends GetView<BookingController> {
                             ),
                             child: Text(
                               "Reschedule",
-                              style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold),
+                              style: GoogleFonts.outfit(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -1479,14 +1481,17 @@ class BookingView extends GetView<BookingController> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: ElevatedButton(
-                              onPressed: () => Get.toNamed('/video-call', arguments: apt),
+                              onPressed: () =>
+                                  Get.toNamed('/video-call', arguments: apt),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xff00FF87),
                                 foregroundColor: Colors.black,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1495,13 +1500,16 @@ class BookingView extends GetView<BookingController> {
                                   const SizedBox(width: 4),
                                   Text(
                                     "Join Call",
-                                    style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold),
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                        ]
+                        ],
                       ],
                     ),
                   ],
@@ -1514,7 +1522,10 @@ class BookingView extends GetView<BookingController> {
     );
   }
 
-  void _showRescheduleDialog(BuildContext context, Map<String, dynamic> appointment) {
+  void _showRescheduleDialog(
+    BuildContext context,
+    Map<String, dynamic> appointment,
+  ) {
     final consultant = appointment['consultant'] ?? {};
     final consultantId = consultant['id'];
 
@@ -1546,14 +1557,19 @@ class BookingView extends GetView<BookingController> {
               ),
               const SizedBox(height: 16),
               Obx(() {
-                final slots = controller.allAvailableSlots.where((s) => s['consultant_id'] == consultantId).toList();
+                final slots = controller.allAvailableSlots
+                    .where((s) => s['consultant_id'] == consultantId)
+                    .toList();
                 if (slots.isEmpty) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20),
                     child: Center(
                       child: Text(
                         "No other available slots at the moment.",
-                        style: GoogleFonts.inter(color: Colors.white30, fontSize: 12),
+                        style: GoogleFonts.inter(
+                          color: Colors.white30,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   );
@@ -1567,17 +1583,32 @@ class BookingView extends GetView<BookingController> {
                     itemCount: slots.length,
                     itemBuilder: (context, index) {
                       final slot = slots[index];
-                      final start = DateTime.parse(slot['start_time']).toLocal();
-                      final formatted = DateFormat('dd MMM, hh:mm a').format(start);
+                      final start = DateTime.parse(
+                        slot['start_time'],
+                      ).toLocal();
+                      final formatted = DateFormat(
+                        'dd MMM, hh:mm a',
+                      ).format(start);
 
                       return ListTile(
                         title: Text(
                           formatted,
-                          style: GoogleFonts.outfit(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        trailing: const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xffFF00E5), size: 14),
+                        trailing: const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          color: Color(0xffFF00E5),
+                          size: 14,
+                        ),
                         onTap: () {
-                          controller.rescheduleAppointment(appointment['id'], slot['id']);
+                          controller.rescheduleAppointment(
+                            appointment['id'],
+                            slot['id'],
+                          );
                           Get.back();
                         },
                       );
@@ -1592,10 +1623,12 @@ class BookingView extends GetView<BookingController> {
                   onPressed: () => Get.back(),
                   child: Text(
                     "Cancel",
-                    style: GoogleFonts.outfit(color: Colors.white.withOpacity(0.6)),
+                    style: GoogleFonts.outfit(
+                      color: Colors.white.withOpacity(0.6),
+                    ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),

@@ -234,7 +234,7 @@ class WalletView extends GetView<WalletController> {
                             ),
                             const SizedBox(height: 2),
                             Obx(() => Text(
-                                  "≈ \$${controller.fitPointsValue.value.toStringAsFixed(2)} Value",
+                                  "≈ ₹${controller.cashBalance.toStringAsFixed(2)} Value",
                                   style: GoogleFonts.inter(
                                     color: Colors.white.withOpacity(0.40),
                                     fontSize: 8,
@@ -299,7 +299,7 @@ class WalletView extends GetView<WalletController> {
                             ),
                             const SizedBox(height: 6),
                             Obx(() => Text(
-                                  "\$${controller.cashBalance.value.toStringAsFixed(2)}",
+                                  "₹${controller.cashBalance.toStringAsFixed(2)}",
                                   style: GoogleFonts.outfit(
                                     color: Colors.white,
                                     fontSize: 26,

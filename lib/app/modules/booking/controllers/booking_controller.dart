@@ -139,6 +139,26 @@ class BookingController extends GetxController {
     }
   }
 
+  Future<void> cancelAppointment(int appointmentId) async {
+    try {
+      await _apiClient.put('/api/bookings/appointments/$appointmentId/cancel');
+      
+      Get.snackbar(
+        "Cancelled",
+        "Your booking has been cancelled successfully.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xffFF00E5).withOpacity(0.2),
+        colorText: Colors.white,
+      );
+
+      // Refresh data
+      fetchAvailableSlots();
+      fetchClientAppointments();
+    } catch (e) {
+      Get.snackbar("Error", "Failed to cancel booking: $e", snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
   Future<void> addAvailabilitySlot(DateTime start, DateTime end) async {
     isLoadingSlots.value = true;
     try {
@@ -266,7 +286,7 @@ class BookingController extends GetxController {
   List<Map<String, dynamic>> get currentDateTimeSlots {
     final slots = currentExpertSlots;
     final dateList = dates;
-    if (slots.isEmpty || dateList.isEmpty || selectedDateIndex.value >= dateList.length) return [];
+    if (slots.isEmpty || dateList.isEmpty || selectedDateIndex.value < 0 || selectedDateIndex.value >= dateList.length) return [];
 
     final selectedRawDate = dateList[selectedDateIndex.value]['rawDate'];
     final daySlots = slots.where((s) {

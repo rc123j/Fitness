@@ -3,8 +3,7 @@ import 'package:get/get.dart';
 class WalletController extends GetxController {
   // Balance Observables
   final fitPoints = 2450.obs;
-  final fitPointsValue = 24.50.obs;
-  final cashBalance = 45.60.obs;
+  double get cashBalance => fitPoints.value.toDouble();
 
   // Level & XP Details
   final currentLevel = "Gold".obs;
@@ -14,9 +13,9 @@ class WalletController extends GetxController {
   // Earnable Tasks List
   final earnTasks = <Map<String, dynamic>>[
     {"title": "Daily Check-in", "points": 20, "icon": "flame"},
-    {"title": "Complete Workout", "points": 50, "icon": "dumbbell"},
-    {"title": "Log a Meal", "points": 20, "icon": "bowl"},
-    {"title": "Achieve Goal", "points": 100, "icon": "target"},
+    {"title": "Log your first meal", "points": 50, "icon": "bowl"},
+    {"title": "3-Day Meal Streak", "points": 100, "icon": "flame"},
+    {"title": "7-Day Meal Streak", "points": 300, "icon": "target"},
     {"title": "Refer a Friend", "points": 200, "icon": "users"},
   ].obs;
 
@@ -51,20 +50,12 @@ class WalletController extends GetxController {
   // Transactions History
   final transactions = <Map<String, dynamic>>[
     {
-      "title": "Workout Completed",
-      "desc": "Strength Training",
-      "points": 50,
+      "title": "3-Day Meal Streak",
+      "desc": "Consistency reward",
+      "points": 100,
       "isAddition": true,
       "time": "Today, 8:30 AM",
-      "icon": "workout"
-    },
-    {
-      "title": "Referral Bonus",
-      "desc": "Your friend joined NutriFit",
-      "points": 200,
-      "isAddition": true,
-      "time": "Yesterday, 6:15 PM",
-      "icon": "referral"
+      "icon": "flame"
     },
     {
       "title": "Amazon Gift Card",
@@ -73,6 +64,14 @@ class WalletController extends GetxController {
       "isAddition": false,
       "time": "12 May, 11:20 AM",
       "icon": "amazon"
+    },
+    {
+      "title": "Signup Bonus",
+      "desc": "Welcome to NutriFit",
+      "points": 100,
+      "isAddition": true,
+      "time": "Just now",
+      "icon": "referral"
     },
   ].obs;
 
