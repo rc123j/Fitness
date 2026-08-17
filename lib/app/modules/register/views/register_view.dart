@@ -258,20 +258,32 @@ class RegisterView extends GetView<RegisterController> {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xffFF3B30).withOpacity(0.15),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xffFF3B30).withOpacity(0.3)),
+                            border: Border.all(
+                              color: const Color(0xffFF3B30).withOpacity(0.3),
+                            ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline, color: Color(0xffFF3B30), size: 18),
+                              const Icon(
+                                Icons.error_outline,
+                                color: Color(0xffFF3B30),
+                                size: 18,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   msg,
-                                  style: GoogleFonts.inter(color: Color(0xffFF3B30), fontSize: 13),
+                                  style: GoogleFonts.inter(
+                                    color: Color(0xffFF3B30),
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ),
                             ],
@@ -433,7 +445,9 @@ class RegisterView extends GetView<RegisterController> {
                           color: Colors.transparent,
                           child: InkWell(
                             borderRadius: BorderRadius.circular(28),
-                            onTap: controller.isLoading.value ? null : () => controller.register(),
+                            onTap: controller.isLoading.value
+                                ? null
+                                : () => controller.register(),
                             child: Center(
                               child: controller.isLoading.value
                                   ? const SizedBox(
@@ -445,7 +459,8 @@ class RegisterView extends GetView<RegisterController> {
                                       ),
                                     )
                                   : Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Text(
                                           'Create Account',
@@ -552,7 +567,7 @@ class RegisterView extends GetView<RegisterController> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: 'Already have an account? ',
+                                // text: 'Already have an account? ',
                                 style: GoogleFonts.inter(
                                   color: Colors.white.withOpacity(0.65),
                                   fontSize: 14,
@@ -560,7 +575,7 @@ class RegisterView extends GetView<RegisterController> {
                                 ),
                               ),
                               TextSpan(
-                                text: 'Log In',
+                                // text: 'Log In',
                                 style: GoogleFonts.inter(
                                   color: const Color(0xffFF00E5),
                                   fontSize: 14,
@@ -598,7 +613,7 @@ class RegisterView extends GetView<RegisterController> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         color: Colors.white.withOpacity(0.04),
-        border: Border.all(color: Colors.white.withOpacity(0.05), width: 0.8),
+        border: Border.all(color: Colors.white.withOpacity(0.25), width: 1.0),
       ),
       child: Material(
         color: Colors.transparent,
@@ -677,10 +692,8 @@ class _PremiumTextFieldState extends State<PremiumTextField> {
               ? Colors.black.withOpacity(0.4)
               : Colors.white.withOpacity(0.06),
           border: Border.all(
-            color: _isFocused
-                ? highlightColor
-                : Colors.white.withOpacity(0.05),
-            width: _isFocused ? 1.5 : 0.8,
+            color: _isFocused ? Colors.white : Colors.white.withOpacity(0.25),
+            width: _isFocused ? 1.5 : 1.0,
           ),
           boxShadow: _isFocused
               ? [
@@ -688,7 +701,7 @@ class _PremiumTextFieldState extends State<PremiumTextField> {
                     color: highlightColor.withOpacity(0.12),
                     blurRadius: 10,
                     spreadRadius: 1,
-                  )
+                  ),
                 ]
               : [],
         ),
@@ -696,7 +709,9 @@ class _PremiumTextFieldState extends State<PremiumTextField> {
           children: [
             Icon(
               widget.icon,
-              color: _isFocused ? highlightColor : Colors.white.withOpacity(0.40),
+              color: _isFocused
+                  ? highlightColor
+                  : Colors.white.withOpacity(0.40),
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -721,7 +736,9 @@ class _PremiumTextFieldState extends State<PremiumTextField> {
                 onTap: widget.onSuffixTap,
                 child: Icon(
                   widget.suffix,
-                  color: _isFocused ? highlightColor : Colors.white.withOpacity(0.55),
+                  color: _isFocused
+                      ? highlightColor
+                      : Colors.white.withOpacity(0.55),
                   size: 20,
                 ),
               ),

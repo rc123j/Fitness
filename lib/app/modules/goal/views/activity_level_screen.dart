@@ -201,7 +201,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen>
                             Text(
                               "STEP 6 OF 10",
                               style: GoogleFonts.outfit(
-                                color: const Color(0xffFF00E5).withOpacity(0.9),
+                                color: Colors.white,
                                 fontSize: 11,
                                 letterSpacing: 1.5,
                                 fontWeight: FontWeight.w700,
@@ -405,7 +405,12 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen>
         curve: Curves.easeInOut,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.12), width: 0.8),
+          border: Border.all(
+            color: isSelected
+                ? Colors.transparent
+                : Colors.white.withOpacity(0.25),
+            width: 1.0,
+          ),
           gradient: isSelected
               ? const LinearGradient(
                   begin: Alignment.topLeft,
@@ -476,36 +481,13 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          activity["title"] as String,
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 5,
-                            vertical: 1.5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: themeColor.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            "x${_getMultiplier(activity["id"] as int)}",
-                            style: GoogleFonts.outfit(
-                              color: themeColor,
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
+                    Text(
+                      activity["title"] as String,
+                      style: GoogleFonts.outfit(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(

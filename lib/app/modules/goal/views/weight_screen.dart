@@ -174,7 +174,7 @@ class _WeightScreenState extends State<WeightScreen> {
                             Text(
                               "STEP 5 OF 10",
                               style: GoogleFonts.outfit(
-                                color: const Color(0xffFF00E5).withOpacity(0.9),
+                                color: Colors.white,
                                 fontSize: 11,
                                 letterSpacing: 1.5,
                                 fontWeight: FontWeight.w700,
@@ -240,7 +240,7 @@ class _WeightScreenState extends State<WeightScreen> {
                                   const LinearGradient(
                                     colors: [
                                       Color(0xffFF00E5),
-                                      Color(0xff7B61FF),
+                                      Color(0xffFF7A00),
                                     ],
                                   ).createShader(
                                     const Rect.fromLTWH(0.0, 0.0, 200.0, 50.0),

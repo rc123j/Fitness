@@ -212,9 +212,7 @@ class _GenderScreenState extends State<GenderScreen> {
                                 Text(
                                   "STEP 2 OF 10",
                                   style: GoogleFonts.outfit(
-                                    color: const Color(
-                                      0xffFF00E5,
-                                    ).withOpacity(0.9),
+                                    color: Colors.white,
                                     fontSize: 11,
                                     letterSpacing: 1.5,
                                     fontWeight: FontWeight.w700,
@@ -282,7 +280,7 @@ class _GenderScreenState extends State<GenderScreen> {
                                       const LinearGradient(
                                         colors: [
                                           Color(0xffFF00E5),
-                                          Color(0xff7B61FF),
+                                          Color(0xffFF7A00),
                                         ],
                                       ).createShader(
                                         const Rect.fromLTWH(
@@ -339,7 +337,11 @@ class _GenderScreenState extends State<GenderScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(24),
                           gradient: const LinearGradient(
-                            colors: [Color(0xffB100FF), Color(0xffFF7A00)],
+                            colors: [
+                              Color(0xffB100FF),
+                              Color(0xffFF5F6D),
+                              Color(0xffFF7A00),
+                            ],
                           ),
                           boxShadow: [
                             BoxShadow(
@@ -400,53 +402,64 @@ class _GenderScreenState extends State<GenderScreen> {
         height: 72,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: isSelected
-              ? Colors.white.withOpacity(0.04)
-              : Colors.transparent,
           border: Border.all(
-            color: isSelected ? color : Colors.white.withOpacity(0.08),
-            width: 1.5,
+            color: isSelected ? Colors.transparent : Colors.white.withOpacity(0.25),
+            width: 1.2,
           ),
+          gradient: isSelected
+              ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
+                )
+              : null,
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: color.withOpacity(0.18),
-                    blurRadius: 16,
+                    color: const Color(0xffFF00E5).withOpacity(0.15),
+                    blurRadius: 10,
                     spreadRadius: 1,
                   ),
                 ]
               : [],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Transform.translate(
-              offset: const Offset(-4, 0),
-              child: Opacity(
-                opacity: isSelected ? 1.0 : 0.5,
-                child: SizedBox(
-                  width: 36,
-                  height: 36,
-                  child: OverflowBox(
-                    maxWidth: 56,
-                    maxHeight: 56,
-                    child: Image.asset(imagePath, fit: BoxFit.contain),
+        child: Container(
+          margin: const EdgeInsets.all(1.2),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14.8),
+            color: const Color(0xff151520),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Transform.translate(
+                offset: const Offset(-4, 0),
+                child: Opacity(
+                  opacity: isSelected ? 1.0 : 0.5,
+                  child: SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: OverflowBox(
+                      maxWidth: 56,
+                      maxHeight: 56,
+                      child: Image.asset(imagePath, fit: BoxFit.contain),
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              gender,
-              style: GoogleFonts.outfit(
-                color: isSelected
-                    ? Colors.white
-                    : Colors.white.withOpacity(0.50),
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              const SizedBox(width: 8),
+              Text(
+                gender,
+                style: GoogleFonts.outfit(
+                  color: isSelected
+                      ? Colors.white
+                      : Colors.white.withOpacity(0.50),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

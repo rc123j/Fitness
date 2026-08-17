@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:get/get.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
@@ -88,31 +89,33 @@ class MealController extends GetxController {
 
           for (var meal in mealsList) {
             if (meal == null) continue;
+            final int dietPlanMealId = int.tryParse(meal['id']?.toString() ?? '') ?? 0;
+            selectedOptions.putIfAbsent(dietPlanMealId, () => 1);
+
             final mealTypeName = meal['meal_type']?['name'] ?? 'Meal';
             final List foods = meal['foods'] ?? [];
-            final String foodDesc = foods.map((f) => f['food_details']?['food_name'] ?? '').join(', ');
 
-            double protein = 0.0;
-            double carbs = 0.0;
-            double fat = 0.0;
-            double calories = 0.0;
-
+            // Group foods by option index (1, 2, 3) parsed from notes JSON
+            final Map<int, List<dynamic>> optionFoods = {1: [], 2: [], 3: []};
             for (var f in foods) {
               if (f == null) continue;
-              calories += double.tryParse(f['calories']?.toString() ?? '0') ?? 0;
-              protein += double.tryParse(f['protein']?.toString() ?? '0') ?? 0;
-              carbs += double.tryParse(f['carbs']?.toString() ?? '0') ?? 0;
-              fat += double.tryParse(f['fat']?.toString() ?? '0') ?? 0;
+              int opt = 1;
+              final String? notes = f['notes']?.toString();
+              if (notes != null && notes.isNotEmpty) {
+                try {
+                  final Map<String, dynamic> meta = jsonDecode(notes);
+                  opt = int.tryParse(meta['option']?.toString() ?? '1') ?? 1;
+                } catch (_) {}
+              }
+              optionFoods.putIfAbsent(opt, () => []).add(f);
             }
 
             timelineTemp.add({
-              "id": int.tryParse(meal['id']?.toString() ?? '') ?? 0, // diet_plan_meal_id
+              "id": dietPlanMealId,
               "meal_id": int.tryParse(meal['meal_id']?.toString() ?? '') ?? 1, // meal_type ID
               "title": mealTypeName,
-              "desc": foodDesc.isNotEmpty ? foodDesc : "No foods assigned",
-              "details": "${calories.toInt()} kcal  •  ${protein.toInt()}P  •  ${carbs.toInt()}C  •  ${fat.toInt()}F",
+              "optionFoods": optionFoods,
               "target_calories": double.tryParse(meal['target_calories']?.toString() ?? '') ?? 0.0,
-              "foods": foods
             });
           }
 

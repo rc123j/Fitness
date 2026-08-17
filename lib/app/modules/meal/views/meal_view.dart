@@ -669,15 +669,39 @@ class MealView extends GetView<MealController> {
         itemBuilder: (context, index) {
           final meal = controller.mealTimeline[index];
           final int mealTypeId = meal['meal_id'] ?? 0;
+          final int dietPlanMealId = meal['id'] ?? 0;
           final bool isCompleted = controller.completedMealIds.contains(mealTypeId);
 
-          // Get total foods details and clean names
-          final List foods = meal['foods'] ?? [];
-          final String foodDesc = foods.isNotEmpty
-              ? foods.map((f) => f['food_details']?['food_name'] ?? '').join(', ')
+          // Get selected option foods
+          final int selectedOpt = controller.selectedOptions[dietPlanMealId] ?? 1;
+          final Map<int, List<dynamic>> optionFoods = Map<int, List<dynamic>>.from(meal['optionFoods'] ?? {});
+          final List foodsOfSelectedOption = optionFoods[selectedOpt] ?? [];
+
+          // Get option name from first food Notes metadata
+          String optionName = "Option $selectedOpt";
+          if (foodsOfSelectedOption.isNotEmpty) {
+            final firstFood = foodsOfSelectedOption.first;
+            final String? notes = firstFood['notes']?.toString();
+            if (notes != null && notes.isNotEmpty) {
+              try {
+                final Map<String, dynamic> meta = jsonDecode(notes);
+                if (meta['option_name'] != null && meta['option_name'].toString().isNotEmpty) {
+                  optionName = meta['option_name'];
+                }
+              } catch (_) {}
+            }
+          }
+
+          final String foodDesc = foodsOfSelectedOption.isNotEmpty
+              ? foodsOfSelectedOption.map((f) => f['food_details']?['food_name'] ?? '').join(', ')
               : 'Tap to configure foods';
 
-          final double targetKcal = double.tryParse(meal['target_calories']?.toString() ?? '') ?? 300.0;
+          double calories = 0.0;
+          for (var f in foodsOfSelectedOption) {
+            calories += double.tryParse(f['calories']?.toString() ?? '0') ?? 0;
+          }
+
+          final double targetKcal = calories > 0 ? calories : (double.tryParse(meal['target_calories']?.toString() ?? '') ?? 300.0);
 
           // Placeholder illustration based on meal slot
           String emoji = "🥗";
@@ -693,10 +717,10 @@ class MealView extends GetView<MealController> {
 
           return GestureDetector(
             onTap: () => Get.toNamed('/meal-detail', arguments: {
-              "dietPlanMealId": meal['id'],
+              "dietPlanMealId": dietPlanMealId,
               "mealId": mealTypeId,
               "title": meal['title'],
-              "foods": foods,
+              "optionFoods": optionFoods,
               "isCompleted": isCompleted,
               "targetKcal": targetKcal,
             }),
@@ -718,9 +742,9 @@ class MealView extends GetView<MealController> {
                   GestureDetector(
                     onTap: () {
                       if (isCompleted) {
-                        controller.unmarkMealAsCompleted(meal['id'], mealTypeId);
+                        controller.unmarkMealAsCompleted(dietPlanMealId, mealTypeId);
                       } else {
-                        controller.markMealAsCompleted(meal['id'], mealTypeId);
+                        controller.markMealAsCompleted(dietPlanMealId, mealTypeId, selectedOption: selectedOpt);
                       }
                     },
                     child: Container(
@@ -749,7 +773,7 @@ class MealView extends GetView<MealController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "15 min • ${targetKcal.toInt()} kcal",
+                          "$optionName • ${targetKcal.toInt()} kcal",
                           style: GoogleFonts.inter(
                             color: Colors.white.withOpacity(0.4),
                             fontSize: 11,

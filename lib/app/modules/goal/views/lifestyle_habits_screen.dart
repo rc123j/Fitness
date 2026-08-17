@@ -148,7 +148,7 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
                             Text(
                               'STEP 9 OF 10',
                               style: GoogleFonts.outfit(
-                                color: const Color(0xffFF00E5).withOpacity(0.9),
+                                color: Colors.white,
                                 fontSize: 11,
                                 letterSpacing: 1.5,
                                 fontWeight: FontWeight.w700,
@@ -428,52 +428,72 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xffB100FF).withOpacity(0.12)
-              : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
-                ? const Color(0xffB100FF).withOpacity(0.4)
-                : Colors.white.withOpacity(0.06),
-            width: 1,
+                ? Colors.transparent
+                : Colors.white.withOpacity(0.25),
+            width: 1.0,
           ),
+          gradient: isSelected
+              ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
+                )
+              : null,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xffFF00E5).withOpacity(0.15),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : [],
         ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.white : Colors.white.withOpacity(0.4),
-              size: 20,
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Text(
-                label,
-                style: GoogleFonts.outfit(
-                  color: isSelected
-                      ? Colors.white
-                      : Colors.white.withOpacity(0.7),
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+        child: Container(
+          margin: const EdgeInsets.all(1.2),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14.8),
+            color: const Color(0xff151520),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                color: isSelected ? Colors.white : Colors.white.withOpacity(0.4),
+                size: 20,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  label,
+                  style: GoogleFonts.outfit(
+                    color: isSelected
+                        ? Colors.white
+                        : Colors.white.withOpacity(0.7),
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+                  ),
                 ),
               ),
-            ),
-            if (isSelected)
-              Container(
-                height: 22,
-                width: 22,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
+              if (isSelected)
+                Container(
+                  height: 22,
+                  width: 22,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.check, color: Colors.black, size: 15),
+                  ),
                 ),
-                child: const Center(
-                  child: Icon(Icons.check, color: Colors.black, size: 15),
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

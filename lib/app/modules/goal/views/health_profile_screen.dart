@@ -234,9 +234,9 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              'STEP 5 OF 7',
+                              'STEP 8 OF 10',
                               style: GoogleFonts.outfit(
-                                color: const Color(0xffFF00E5).withOpacity(0.9),
+                                color: Colors.white,
                                 fontSize: 11,
                                 letterSpacing: 1.5,
                                 fontWeight: FontWeight.w700,
@@ -244,12 +244,12 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
                             ),
                             const SizedBox(height: 6),
                             Row(
-                              children: List.generate(7, (index) {
-                                final active = index <= 4; // Steps 1-5 active
+                              children: List.generate(10, (index) {
+                                final active = index <= 7; // Steps 1-8 active
                                 return Expanded(
                                   child: Container(
                                     margin: EdgeInsets.only(
-                                      right: index == 6 ? 0 : 4,
+                                      right: index == 9 ? 0 : 4,
                                     ),
                                     height: 3.5,
                                     decoration: BoxDecoration(
@@ -412,67 +412,89 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          color: isSelected
-              ? color.withOpacity(0.12)
-              : Colors.white.withOpacity(0.05),
           border: Border.all(
             color: isSelected
-                ? color.withOpacity(0.6)
-                : Colors.white.withOpacity(0.08),
-            width: isSelected ? 1.2 : 0.8,
+                ? Colors.transparent
+                : Colors.white.withOpacity(0.25),
+            width: 1.0,
           ),
+          gradient: isSelected
+              ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
+                )
+              : null,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xffFF00E5).withOpacity(0.15),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : [],
         ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                condition['icon'] as IconData,
-                color: color,
-                size: 18,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                condition['label'] as String,
-                style: GoogleFonts.outfit(
+        child: Container(
+          margin: const EdgeInsets.all(1.2),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.8),
+            color: const Color(0xff151520),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
                   color: isSelected
-                      ? Colors.white
-                      : Colors.white.withOpacity(0.7),
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
+                      ? const Color(0xffFF00E5).withOpacity(0.12)
+                      : Colors.white.withOpacity(0.04),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  condition['icon'] as IconData,
+                  color: isSelected ? const Color(0xffFF00E5) : Colors.white.withOpacity(0.50),
+                  size: 18,
                 ),
               ),
-            ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              height: 20,
-              width: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isSelected ? color : Colors.transparent,
-                border: Border.all(
-                  color: isSelected ? color : Colors.white.withOpacity(0.2),
-                  width: 1.2,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  condition['label'] as String,
+                  style: GoogleFonts.outfit(
+                    color: isSelected
+                        ? Colors.white
+                        : Colors.white.withOpacity(0.7),
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              child: isSelected
-                  ? const Icon(
-                      Icons.check_rounded,
-                      color: Colors.white,
-                      size: 12,
-                    )
-                  : null,
-            ),
-          ],
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                height: 20,
+                width: 20,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected ? const Color(0xffFF00E5) : Colors.transparent,
+                  border: Border.all(
+                    color: isSelected ? const Color(0xffFF00E5) : Colors.white.withOpacity(0.2),
+                    width: 1.2,
+                  ),
+                ),
+                child: isSelected
+                    ? const Icon(
+                        Icons.check_rounded,
+                        color: Colors.white,
+                        size: 12,
+                      )
+                    : null,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -483,71 +505,93 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
       onTap: () => _setNoConditions(!noConditions),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          color: noConditions
-              ? const Color(0xffFF7A00).withOpacity(0.12)
-              : Colors.white.withOpacity(0.05),
           border: Border.all(
             color: noConditions
-                ? const Color(0xffFF7A00).withOpacity(0.6)
-                : Colors.white.withOpacity(0.08),
-            width: noConditions ? 1.2 : 0.8,
+                ? Colors.transparent
+                : Colors.white.withOpacity(0.25),
+            width: 1.0,
           ),
+          gradient: noConditions
+              ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
+                )
+              : null,
+          boxShadow: noConditions
+              ? [
+                  BoxShadow(
+                    color: const Color(0xffFF00E5).withOpacity(0.15),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : [],
         ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xffFF7A00).withOpacity(0.12),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_circle_outline_rounded,
-                color: Color(0xffFF7A00),
-                size: 18,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                "None — I have no conditions",
-                style: GoogleFonts.outfit(
+        child: Container(
+          margin: const EdgeInsets.all(1.2),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.8),
+            color: const Color(0xff151520),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
                   color: noConditions
-                      ? Colors.white
-                      : Colors.white.withOpacity(0.7),
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
+                      ? const Color(0xffFF00E5).withOpacity(0.12)
+                      : Colors.white.withOpacity(0.04),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.check_circle_outline_rounded,
+                  color: noConditions ? const Color(0xffFF00E5) : Colors.white.withOpacity(0.50),
+                  size: 18,
                 ),
               ),
-            ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              height: 20,
-              width: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: noConditions
-                    ? const Color(0xffFF7A00)
-                    : Colors.transparent,
-                border: Border.all(
-                  color: noConditions
-                      ? const Color(0xffFF7A00)
-                      : Colors.white.withOpacity(0.2),
-                  width: 1.2,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  "None — I have no conditions",
+                  style: GoogleFonts.outfit(
+                    color: noConditions
+                        ? Colors.white
+                        : Colors.white.withOpacity(0.7),
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              child: noConditions
-                  ? const Icon(
-                      Icons.check_rounded,
-                      color: Colors.white,
-                      size: 12,
-                    )
-                  : null,
-            ),
-          ],
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                height: 20,
+                width: 20,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: noConditions
+                      ? const Color(0xffFF00E5)
+                      : Colors.transparent,
+                  border: Border.all(
+                    color: noConditions
+                        ? const Color(0xffFF00E5)
+                        : Colors.white.withOpacity(0.2),
+                    width: 1.2,
+                  ),
+                ),
+                child: noConditions
+                    ? const Icon(
+                        Icons.check_rounded,
+                        color: Colors.white,
+                        size: 12,
+                      )
+                    : null,
+              ),
+            ],
+          ),
         ),
       ),
     );

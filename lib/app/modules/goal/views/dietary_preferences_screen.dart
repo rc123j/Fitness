@@ -307,7 +307,7 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
                             Text(
                               'STEP 7 OF 10',
                               style: GoogleFonts.outfit(
-                                color: const Color(0xffFF00E5).withOpacity(0.9),
+                                color: Colors.white,
                                 fontSize: 11,
                                 letterSpacing: 1.5,
                                 fontWeight: FontWeight.w700,
@@ -525,109 +525,113 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
         height: 96, // Fixed height keeps cards uniform
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          gradient: isSelected
-              ? LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [color.withOpacity(0.18), Colors.transparent],
-                )
-              : null,
-          color: isSelected
-              ? const Color(0xff1A1325)
-              : Colors.white.withOpacity(0.03),
           border: Border.all(
             color: isSelected
-                ? color.withOpacity(0.8)
-                : Colors.white.withOpacity(0.08),
-            width: isSelected ? 1.5 : 1.0,
+                ? Colors.transparent
+                : Colors.white.withOpacity(0.25),
+            width: 1.0,
           ),
+          gradient: isSelected
+              ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
+                )
+              : null,
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: color.withOpacity(0.2),
-                    blurRadius: 12,
+                    color: const Color(0xffFF00E5).withOpacity(0.15),
+                    blurRadius: 10,
                     spreadRadius: 1,
                   ),
                 ]
               : [],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16.5),
-          child: Row(
-            children: [
-              const SizedBox(width: 16),
-              // Left Radio Circle
-              Container(
-                height: 22,
-                width: 22,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isSelected ? Colors.white : Colors.transparent,
-                  border: isSelected
-                      ? null
-                      : Border.all(
-                          color: Colors.white.withOpacity(0.35),
-                          width: 1.2,
+        child: Container(
+          margin: const EdgeInsets.all(1.2),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16.8),
+            color: const Color(0xff151520),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16.8),
+            child: Row(
+              children: [
+                const SizedBox(width: 16),
+                // Left Radio Circle
+                Container(
+                  height: 22,
+                  width: 22,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isSelected ? Colors.white : Colors.transparent,
+                    border: isSelected
+                        ? null
+                        : Border.all(
+                            color: Colors.white.withOpacity(0.35),
+                            width: 1.2,
+                          ),
+                  ),
+                  child: isSelected
+                      ? const Icon(
+                          Icons.check_rounded,
+                          color: Colors.black,
+                          size: 15,
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 16),
+
+                // Middle Text
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        diet['label'] as String,
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
                         ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        diet['desc'] as String,
+                        style: GoogleFonts.inter(
+                          color: Colors.white.withOpacity(0.60),
+                          fontSize: 11.5,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: isSelected
-                    ? const Icon(
-                        Icons.check_rounded,
-                        color: Colors.black,
-                        size: 15,
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 16),
 
-              // Middle Text
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      diet['label'] as String,
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
+                // Right Image
+                SizedBox(
+                  width: 110,
+                  height: double.infinity,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.centerRight,
+                    children: [
+                      Positioned(
+                        right: -25, // Bleed off the right edge intentionally
+                        child: Image.asset(
+                          diet['image'] as String,
+                          width: 160, // Significantly larger image
+                          height: 160,
+                          fit: BoxFit.contain,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      diet['desc'] as String,
-                      style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.60),
-                        fontSize: 11.5,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-
-              // Right Image
-              SizedBox(
-                width: 110,
-                height: double.infinity,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  alignment: Alignment.centerRight,
-                  children: [
-                    Positioned(
-                      right: -25, // Bleed off the right edge intentionally
-                      child: Image.asset(
-                        diet['image'] as String,
-                        width: 160, // Significantly larger image
-                        height: 160,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

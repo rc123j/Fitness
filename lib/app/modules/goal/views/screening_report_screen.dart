@@ -483,7 +483,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                             Text(
                               "STEP 10 OF 10",
                               style: GoogleFonts.outfit(
-                                color: const Color(0xffFF00E5).withOpacity(0.9),
+                                color: Colors.white,
                                 fontSize: 11,
                                 letterSpacing: 1.5,
                                 fontWeight: FontWeight.w700,

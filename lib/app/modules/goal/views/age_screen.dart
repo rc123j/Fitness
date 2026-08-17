@@ -206,7 +206,7 @@ class _AgeScreenState extends State<AgeScreen> {
                             Text(
                               "STEP 3 OF 10",
                               style: GoogleFonts.outfit(
-                                color: themeColor.withOpacity(0.9),
+                                color: Colors.white,
                                 fontSize: 11,
                                 letterSpacing: 1.5,
                                 fontWeight: FontWeight.w700,

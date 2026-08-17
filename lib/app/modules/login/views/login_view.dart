@@ -570,7 +570,7 @@ class LoginView extends GetView<LoginController> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: Colors.black.withOpacity(0.28),
-        border: Border.all(color: Colors.white.withOpacity(0.06), width: 0.8),
+        border: Border.all(color: Colors.white.withOpacity(0.25), width: 1.0),
       ),
       child: Material(
         color: Colors.transparent,
@@ -649,8 +649,8 @@ class _PremiumTextFieldState extends State<PremiumTextField> {
               ? Colors.black.withOpacity(0.4)
               : Colors.white.withOpacity(0.06),
           border: Border.all(
-            color: _isFocused ? highlightColor : Colors.white.withOpacity(0.12),
-            width: _isFocused ? 1.5 : 0.8,
+            color: _isFocused ? Colors.white : Colors.white.withOpacity(0.25),
+            width: _isFocused ? 1.5 : 1.0,
           ),
           boxShadow: _isFocused
               ? [

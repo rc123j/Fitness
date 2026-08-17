@@ -368,7 +368,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen>
           border: Border.all(
             color: isSelected
                 ? Colors.transparent
-                : Colors.white.withOpacity(0.06),
+                : Colors.white.withOpacity(0.25),
             width: 1,
           ),
           gradient: isSelected
