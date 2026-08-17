@@ -293,6 +293,9 @@ class MealView extends GetView<MealController> {
                 final bool hasLoggedMeals = controller.calorieHistoryList.any((day) =>
                     day['date'] == dateStr && (day['meals_logged'] as List?)?.isNotEmpty == true);
 
+                // Detect if this calendar cell is a future date
+                final bool isFuture = date.isAfter(DateTime(now.year, now.month, now.day));
+
                 return GestureDetector(
                   onTap: isSelected ? null : () => controller.selectDate(dateStr),
                   child: SizedBox(
@@ -303,46 +306,80 @@ class MealView extends GetView<MealController> {
                         Text(
                           dayName.toUpperCase(),
                           style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(isSelected ? 0.7 : 0.35),
+                            color: Colors.white.withOpacity(isSelected ? 0.7 : isFuture ? 0.2 : 0.35),
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.4,
                           ),
                         ),
                         const SizedBox(height: 10),
-                        Container(
-                          height: 40,
-                          width: 40,
+                        Stack(
                           alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isSelected ? const Color(0xffFF5A5F) : Colors.transparent,
-                            border: isSelected
-                                ? null
-                                : Border.all(
-                                    color: hasLoggedMeals
-                                        ? const Color(0xff00FF87).withOpacity(0.6)
-                                        : Colors.white.withOpacity(0.14),
-                                    width: hasLoggedMeals ? 1.6 : 1.0,
-                                  ),
-                            boxShadow: isSelected
-                                ? [
-                                    BoxShadow(
-                                      color: const Color(0xffFF5A5F).withOpacity(0.35),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ]
-                                : null,
-                          ),
-                          child: Text(
-                            dayNum,
-                            style: GoogleFonts.outfit(
-                              color: isSelected ? Colors.white : Colors.white.withOpacity(0.85),
-                              fontSize: 14,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                          children: [
+                            Container(
+                              height: 40,
+                              width: 40,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isSelected
+                                    ? const Color(0xffFF5A5F)
+                                    : isFuture
+                                        ? const Color(0xffB100FF).withOpacity(0.06)
+                                        : Colors.transparent,
+                                border: isSelected
+                                    ? null
+                                    : Border.all(
+                                        color: isFuture
+                                            ? const Color(0xffB100FF).withOpacity(0.18)
+                                            : hasLoggedMeals
+                                                ? const Color(0xff00FF87).withOpacity(0.6)
+                                                : Colors.white.withOpacity(0.14),
+                                        width: hasLoggedMeals && !isFuture ? 1.6 : 1.0,
+                                      ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: const Color(0xffFF5A5F).withOpacity(0.35),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Text(
+                                dayNum,
+                                style: GoogleFonts.outfit(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : isFuture
+                                          ? Colors.white.withOpacity(0.3)
+                                          : Colors.white.withOpacity(0.85),
+                                  fontSize: 14,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                ),
+                              ),
                             ),
-                          ),
+                            // Small lock badge on future dates
+                            if (isFuture && !isSelected)
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: Container(
+                                  width: 14,
+                                  height: 14,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xffB100FF).withOpacity(0.8),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.lock_rounded,
+                                    color: Colors.white,
+                                    size: 8,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ],
                     ),
@@ -727,6 +764,107 @@ class MealView extends GetView<MealController> {
   // 6. CONSOLIDATED MEAL TIMELINE
   Widget _buildMealsTimeline(BuildContext context) {
     return Obx(() {
+      // ── FUTURE DATE: Show lock screen ──────────────────────────────────────
+      if (controller.isFutureDate) {
+        final int days = controller.daysUntilSelected;
+        final String unlockMsg = days == 1
+            ? "Unlocks Tomorrow"
+            : "Unlocks in $days days";
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xff0B0817).withOpacity(0.8),
+                const Color(0xff1A0533).withOpacity(0.85),
+              ],
+            ),
+            border: Border.all(
+              color: const Color(0xffB100FF).withOpacity(0.15),
+              width: 1.2,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Animated glow lock icon
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xffB100FF).withOpacity(0.25),
+                      const Color(0xffB100FF).withOpacity(0.0),
+                    ],
+                  ),
+                  border: Border.all(
+                    color: const Color(0xffB100FF).withOpacity(0.3),
+                    width: 1.5,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.lock_rounded,
+                  color: Color(0xffB100FF),
+                  size: 30,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                unlockMsg,
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Your meal plan for this day hasn't been\nrevealed yet. Focus on today's meals\nand come back when it unlocks! 💪",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: Colors.white.withOpacity(0.45),
+                  fontSize: 13,
+                  height: 1.6,
+                ),
+              ),
+              const SizedBox(height: 28),
+              // Day countdown chips
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffB100FF).withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: const Color(0xffB100FF).withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      days == 1 ? "🗓  1 day to go" : "🗓  $days days to go",
+                      style: GoogleFonts.inter(
+                        color: const Color(0xffB100FF),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      }
+
+      // ── NO PLAN FOUND ──────────────────────────────────────────────────────
       if (controller.mealTimeline.isEmpty) {
         return Container(
           width: double.infinity,
@@ -1085,12 +1223,19 @@ class MealView extends GetView<MealController> {
       ),
       itemBuilder: (context, index) {
         final f = foods[index];
-        final String foodName = f['food_details']?['food_name'] ?? 'Food Item';
+        final foodDetails = f['food_details'] as Map<String, dynamic>? ?? {};
+        final String foodName = foodDetails['food_name']?.toString() ?? f['food_name']?.toString() ?? 'Food Item';
         final double kcal = double.tryParse(f['calories']?.toString() ?? '0') ?? 0.0;
-        final double protein = double.tryParse(f['protein']?.toString() ?? '0') ?? 0.0;
-        final double carbs = double.tryParse(f['carbs']?.toString() ?? '0') ?? 0.0;
-        final double fat = double.tryParse(f['fat']?.toString() ?? '0') ?? 0.0;
-        final String portion = "${f['serving_size']} ${f['serving_unit'] ?? f['unit'] ?? ''}";
+        // Portion: prefer household_measure from food_details, then exchange_amount, then quantity+unit
+        final String householdMeasure = foodDetails['household_measure']?.toString() ?? '';
+        final String exchangeAmount = foodDetails['exchange_amount']?.toString() ?? '';
+        final String qtyStr = f['quantity']?.toString() ?? '';
+        final String unitStr = foodDetails['serving_unit']?.toString() ?? f['serving_unit']?.toString() ?? 'g';
+        final String portion = householdMeasure.isNotEmpty
+            ? householdMeasure
+            : exchangeAmount.isNotEmpty
+                ? exchangeAmount
+                : (qtyStr.isNotEmpty ? '$qtyStr $unitStr' : '');
 
         // Construct swaps from Option 2 and Option 3 at the same index
         final List<String> swaps = [];
@@ -1150,11 +1295,11 @@ class MealView extends GetView<MealController> {
                   ),
                 ),
                 Text(
-                  "${kcal.toInt()} kcal • P ${protein.toInt()}g C ${carbs.toInt()}g F ${fat.toInt()}g",
+                  "${kcal.toInt()} kcal",
                   style: GoogleFonts.inter(
                     color: const Color(0xff00FF87),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],

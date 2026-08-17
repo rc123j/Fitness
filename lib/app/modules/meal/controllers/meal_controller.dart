@@ -127,9 +127,14 @@ class MealController extends GetxController {
             });
           }
 
-          // Sort timeline by meal_id to display Breakfast, Mid Meal, Lunch, Snack, Dinner in order
-          timelineTemp.sort((a, b) => (int.tryParse(a['meal_id']?.toString() ?? '') ?? 1)
-              .compareTo(int.tryParse(b['meal_id']?.toString() ?? '') ?? 1));
+          // Sort timeline by logical meal display order:
+          // Breakfast(1) → Mid Meal(2) → Lunch(3) → Pre-Workout(6) → Post-Workout(7) → Evening Snack(4) → Dinner(5)
+          const mealDisplayOrder = {1: 0, 2: 1, 3: 2, 6: 3, 7: 4, 4: 5, 5: 6};
+          timelineTemp.sort((a, b) {
+            final aOrder = mealDisplayOrder[a['meal_id'] ?? 1] ?? 99;
+            final bOrder = mealDisplayOrder[b['meal_id'] ?? 1] ?? 99;
+            return aOrder.compareTo(bOrder);
+          });
           mealTimeline.value = timelineTemp;
         }
       }
@@ -240,6 +245,33 @@ class MealController extends GetxController {
 
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     return "${target.day} ${months[target.month - 1]}";
+  }
+
+  /// Returns true when the currently selected date is strictly in the future (after today).
+  bool get isFutureDate {
+    if (selectedQueryDate.value.isEmpty) return false;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final parts = selectedQueryDate.value.split('-');
+    if (parts.length != 3) return false;
+    final y = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    final d = int.tryParse(parts[2]);
+    if (y == null || m == null || d == null) return false;
+    final selected = DateTime(y, m, d);
+    return selected.isAfter(today);
+  }
+
+  /// How many days until the selected future date (0 if today or past).
+  int get daysUntilSelected {
+    if (!isFutureDate) return 0;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final parts = selectedQueryDate.value.split('-');
+    final y = int.tryParse(parts[0])!;
+    final m = int.tryParse(parts[1])!;
+    final d = int.tryParse(parts[2])!;
+    return DateTime(y, m, d).difference(today).inDays;
   }
 
   Future<void> addWater(double amountLiters) async {
