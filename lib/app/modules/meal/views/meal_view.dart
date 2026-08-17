@@ -96,66 +96,32 @@ class MealView extends GetView<MealController> {
 
                 // 2. MAIN SCROLLABLE BODY
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(18, 16, 18, 100),
+                  padding: const EdgeInsets.only(top: 16, bottom: 100),
                   sliver: SliverToBoxAdapter(
                     child: Obx(() => AppShimmer(
                       enabled: controller.isLoading.value,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Weekly Calendar Timeline
-                          _buildWeeklyCalendar(),
-                          const SizedBox(height: 28),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 18),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Weekly Calendar Timeline
+                                _buildWeeklyCalendar(),
+                                const SizedBox(height: 28),
 
-                          // Today's Nutrition Section
-                          _buildTodayNutritionCard(),
+                                // Today's Nutrition Section
+                                _buildTodayNutritionCard(),
+                              ],
+                            ),
+                          ),
                           const SizedBox(height: 24),
 
-                          // Check Calories Search Bar
-                          _buildSearchBox(),
-                          const SizedBox(height: 28),
-
-                          // Daily Meal Section Header
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Daily Meals",
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () => Get.toNamed('/meal-plan'),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "Edit plan ",
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white.withOpacity(0.4),
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    Icon(
-                                      Icons.edit_calendar_rounded,
-                                      size: 14,
-                                      color: Colors.white.withOpacity(0.4),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Promo customization Card
-                          _buildPromoCard(),
-                          const SizedBox(height: 20),
-
-                          // Consolidated Meal Timeline List
-                          _buildMealsTimeline(context),
+                          // Daily Meals — full-bleed gradient section (same style as
+                          // the "Today's Meal Plan" block on the home screen)
+                          _buildDailyMealsSection(context),
                         ],
                       ),
                     )),
@@ -615,36 +581,69 @@ class MealView extends GetView<MealController> {
     return val.toString();
   }
 
-  // 4. CHECK CALORIES SEARCH BOX
-  Widget _buildSearchBox() {
+  // 4. DAILY MEALS — full-bleed gradient section (matches the "Today's Meal
+  // Plan" block on the home screen: same background gradient + title style).
+  // The gradient spans the whole section — title, promo card and meal
+  // timeline all sit on it. The meal cards inside are otherwise unchanged.
+  Widget _buildDailyMealsSection(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.0,
+      width: double.infinity,
+      padding: const EdgeInsets.only(top: 30, bottom: 26),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xff06010F), // match background
+            Color(0xff3B0E6B), // rich deep purple
+            Color(0xff9B4DE0), // light purple center glow
+            Color(0xff2C0A55), // dark purple transition
+            Color(0xff06010F), // match background
+          ],
+          stops: [0.0, 0.25, 0.55, 0.85, 1.0],
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.search_rounded, color: Colors.white.withOpacity(0.3), size: 20),
-              const SizedBox(width: 12),
-              Text(
-                "Check calories",
-                style: GoogleFonts.inter(
-                  color: Colors.white.withOpacity(0.3),
-                  fontSize: 14,
-                ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: () => Get.toNamed('/meal-plan'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Daily Meals",
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      height: 1.15,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Edit Plan →",
+                    style: GoogleFonts.inter(
+                      color: Colors.white.withOpacity(0.6),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          Icon(Icons.qr_code_scanner_rounded, color: Colors.white.withOpacity(0.4), size: 20),
-        ],
+            ),
+            const SizedBox(height: 16),
+
+            // Promo customization Card
+            _buildPromoCard(),
+            const SizedBox(height: 20),
+
+            // Consolidated Meal Timeline List
+            _buildMealsTimeline(context),
+          ],
+        ),
       ),
     );
   }

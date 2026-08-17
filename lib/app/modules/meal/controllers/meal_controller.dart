@@ -98,6 +98,7 @@ class MealController extends GetxController {
             if (meal == null) continue;
             final int dietPlanMealId = int.tryParse(meal['id']?.toString() ?? '') ?? 0;
             selectedOptions.putIfAbsent(dietPlanMealId, () => 1);
+            expandedMealIds.add(dietPlanMealId); // meal cards are expanded by default
 
             final mealTypeName = meal['meal_type']?['name'] ?? 'Meal';
             final List foods = meal['foods'] ?? [];
