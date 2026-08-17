@@ -9,6 +9,10 @@ class MealController extends GetxController {
   final selectedQueryDate = "".obs;
   final selectedDate = "Today".obs;
   final isLoading = true.obs;
+
+  // Offset (in weeks) of the calendar strip from the week containing today.
+  // 0 = current week, 1 = next week, -1 = previous week, etc.
+  final weekOffset = 0.obs;
   
   // Progress states
   final currentCalories = 0.obs;
@@ -189,6 +193,52 @@ class MealController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void goToPreviousWeek() {
+    if (weekOffset.value > -4) weekOffset.value -= 1;
+  }
+
+  void goToNextWeek() {
+    if (weekOffset.value < 4) weekOffset.value += 1;
+  }
+
+  void jumpToToday() {
+    weekOffset.value = 0;
+    selectedQueryDate.value = "";
+    fetchMealData();
+  }
+
+  void selectDate(String dateStr) {
+    selectedQueryDate.value = dateStr;
+    fetchMealData();
+  }
+
+  // Human-readable label for whichever date is currently selected
+  // (falls back to today when nothing is explicitly selected).
+  String get dayLabel {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    DateTime target = today;
+
+    if (selectedQueryDate.value.isNotEmpty) {
+      final parts = selectedQueryDate.value.split('-');
+      if (parts.length == 3) {
+        final y = int.tryParse(parts[0]);
+        final m = int.tryParse(parts[1]);
+        final d = int.tryParse(parts[2]);
+        if (y != null && m != null && d != null) target = DateTime(y, m, d);
+      }
+    }
+
+    final diff = target.difference(today).inDays;
+    if (diff == 0) return "Today";
+    if (diff == 1) return "Tomorrow";
+    if (diff == 2) return "Day After Tomorrow";
+    if (diff == -1) return "Yesterday";
+
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return "${target.day} ${months[target.month - 1]}";
   }
 
   Future<void> addWater(double amountLiters) async {

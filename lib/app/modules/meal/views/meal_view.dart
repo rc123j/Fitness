@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -249,109 +250,179 @@ class MealView extends GetView<MealController> {
 
   // 2. WEEKLY CALENDAR
   Widget _buildWeeklyCalendar() {
-    final now = DateTime.now();
-    final int currentWeekday = now.weekday; // 1 = Monday, 7 = Sunday
-    final List<DateTime> weekDates = List.generate(7, (index) {
-      return now.subtract(Duration(days: currentWeekday - 1 - index));
-    });
+    return Obx(() {
+      final now = DateTime.now();
+      final DateTime anchor = now.add(Duration(days: 7 * controller.weekOffset.value));
+      final int anchorWeekday = anchor.weekday; // 1 = Monday, 7 = Sunday
+      final List<DateTime> weekDates = List.generate(7, (index) {
+        return anchor.subtract(Duration(days: anchorWeekday - 1 - index));
+      });
 
-    final List<String> weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+      // Matches weekDates, which always starts on Monday.
+      final List<String> weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(7, (index) {
-        final DateTime date = weekDates[index];
-        final String dayName = weekdays[index];
-        final String dayNum = date.day.toString();
-        final String dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+      final bool isCurrentWeek = controller.weekOffset.value == 0;
+      final bool hasCustomSelection = controller.selectedQueryDate.value.isNotEmpty;
 
-        return Obx(() {
-          final isSelected = controller.selectedQueryDate.value == dateStr ||
-              (controller.selectedQueryDate.value.isEmpty &&
-                  date.day == now.day &&
-                  date.month == now.month &&
-                  date.year == now.year);
-
-          if (isSelected) {
-            return Container(
-              height: 72,
-              width: 46,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.15),
-                  width: 1.0,
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                isCurrentWeek ? "This Week" : _formatWeekRange(weekDates),
+                style: GoogleFonts.outfit(
+                  color: Colors.white.withOpacity(0.85),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Row(
                 children: [
-                  Text(
-                    dayName,
-                    style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.5),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                  if (!isCurrentWeek || hasCustomSelection)
+                    GestureDetector(
+                      onTap: controller.jumpToToday,
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xffFF00E5).withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xffFF00E5).withOpacity(0.25), width: 0.8),
+                        ),
+                        child: Text(
+                          "Today",
+                          style: GoogleFonts.inter(
+                            color: const Color(0xffFF00E5),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    dayNum,
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  _weekNavButton(Icons.chevron_left_rounded, controller.goToPreviousWeek),
+                  const SizedBox(width: 6),
+                  _weekNavButton(Icons.chevron_right_rounded, controller.goToNextWeek),
                 ],
               ),
-            );
-          } else {
-            return GestureDetector(
-              onTap: () {
-                controller.selectedQueryDate.value = dateStr;
-                controller.fetchMealData();
-              },
-              child: Container(
-                height: 72,
-                width: 44,
-                color: Colors.transparent,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      dayName,
-                      style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.4),
-                        fontSize: 12,
-                      ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(7, (index) {
+              final DateTime date = weekDates[index];
+              final String dayName = weekdays[index];
+              final String dayNum = date.day.toString();
+              final String dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+
+              return Obx(() {
+                final isSelected = controller.selectedQueryDate.value == dateStr ||
+                    (controller.selectedQueryDate.value.isEmpty &&
+                        date.day == now.day &&
+                        date.month == now.month &&
+                        date.year == now.year);
+
+                final bool hasLoggedMeals = controller.calorieHistoryList.any((day) =>
+                    day['date'] == dateStr && (day['meals_logged'] as List?)?.isNotEmpty == true);
+
+                return GestureDetector(
+                  onTap: isSelected ? null : () => controller.selectDate(dateStr),
+                  child: SizedBox(
+                    width: 40,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          dayName.toUpperCase(),
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(isSelected ? 0.7 : 0.35),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          height: 40,
+                          width: 40,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isSelected ? const Color(0xffFF5A5F) : Colors.transparent,
+                            border: isSelected
+                                ? null
+                                : Border.all(
+                                    color: hasLoggedMeals
+                                        ? const Color(0xff00FF87).withOpacity(0.6)
+                                        : Colors.white.withOpacity(0.14),
+                                    width: hasLoggedMeals ? 1.6 : 1.0,
+                                  ),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: const Color(0xffFF5A5F).withOpacity(0.35),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Text(
+                            dayNum,
+                            style: GoogleFonts.outfit(
+                              color: isSelected ? Colors.white : Colors.white.withOpacity(0.85),
+                              fontSize: 14,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      dayNum,
-                      style: GoogleFonts.outfit(
-                        color: Colors.white.withOpacity(0.85),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-        });
-      }),
+                  ),
+                );
+              });
+            }),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _weekNavButton(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 28,
+        width: 28,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white.withOpacity(0.08), width: 0.8),
+        ),
+        child: Icon(icon, color: Colors.white.withOpacity(0.6), size: 18),
+      ),
     );
   }
 
+  String _formatWeekRange(List<DateTime> weekDates) {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    final start = weekDates.first;
+    final end = weekDates.last;
+    if (start.month == end.month) {
+      return "${start.day} - ${end.day} ${months[start.month - 1]}";
+    }
+    return "${start.day} ${months[start.month - 1]} - ${end.day} ${months[end.month - 1]}";
+  }
+
   // 3. TODAY'S NUTRITION CARD
+  static const Color _proteinColor = Color(0xffFFD166);
+  static const Color _carbsColor = Color(0xff00FF87);
+  static const Color _fatColor = Color(0xffB100FF);
+
   Widget _buildTodayNutritionCard() {
     return Obx(() {
-      final double kcalProgress = controller.targetCalories.value > 0
-          ? (controller.currentCalories.value / controller.targetCalories.value).clamp(0.0, 1.0)
-          : 0.0;
       final double proteinProgress = controller.targetProtein.value > 0
           ? (controller.consumedProtein.value / controller.targetProtein.value).clamp(0.0, 1.0)
           : 0.0;
@@ -362,10 +433,8 @@ class MealView extends GetView<MealController> {
           ? (controller.consumedFat.value / controller.targetFat.value).clamp(0.0, 1.0)
           : 0.0;
 
-      final int calPercentage = (kcalProgress * 100).toInt();
-
       return Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: const Color(0xff0B0817).withOpacity(0.6),
           borderRadius: BorderRadius.circular(24),
@@ -380,113 +449,52 @@ class MealView extends GetView<MealController> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Today's Nutrition",
-                      style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.4),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          _formatNumber(controller.currentCalories.value),
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 34,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        Text(
-                          " /${_formatNumber(controller.targetCalories.value)} kcal",
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(0.4),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                Text(
+                  _nutritionHeading(controller.dayLabel),
+                  style: GoogleFonts.inter(
+                    color: Colors.white.withOpacity(0.4),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.2,
+                  ),
                 ),
-                
-                // Ring with Fire Icon
-                Container(
-                  height: 60,
-                  width: 60,
-                  alignment: Alignment.center,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox(
-                        height: 52,
-                        width: 52,
-                        child: CircularProgressIndicator(
-                          value: kcalProgress,
-                          backgroundColor: Colors.white.withOpacity(0.05),
-                          valueColor: const AlwaysStoppedAnimation<Color>(Color(0xffFF00E5)),
-                          strokeWidth: 4.5,
-                        ),
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text("🔥", style: TextStyle(fontSize: 11)),
-                          const SizedBox(width: 1),
-                          Text(
-                            "$calPercentage%",
-                            style: GoogleFonts.outfit(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                Text(
+                  "${_formatNumber(controller.currentCalories.value)}/${_formatNumber(controller.targetCalories.value)} kcal",
+                  style: GoogleFonts.inter(
+                    color: Colors.white.withOpacity(0.4),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 22),
 
-            // 3 Horizontal Macro Cards
+            // Segmented macro ring + legend
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Expanded(
-                  child: _buildMacroCard(
-                    label: "Protein",
-                    consumed: controller.consumedProtein.value,
-                    target: controller.targetProtein.value,
-                    progress: proteinProgress,
-                    color: const Color(0xffFF00E5),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: _buildMacroRing(
+                    currentCalories: controller.currentCalories.value,
+                    proteinProgress: proteinProgress,
+                    carbsProgress: carbsProgress,
+                    fatProgress: fatProgress,
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildMacroCard(
-                    label: "Carbs",
-                    consumed: controller.consumedCarbs.value,
-                    target: controller.targetCarbs.value,
-                    progress: carbsProgress,
-                    color: const Color(0xff00FF87),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildMacroCard(
-                    label: "Fats",
-                    consumed: controller.consumedFat.value,
-                    target: controller.targetFat.value,
-                    progress: fatProgress,
-                    color: const Color(0xffFFD166),
+                Flexible(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _buildLegendRow("${controller.consumedCarbs.value}g", "Carbs", _carbsColor),
+                      const SizedBox(height: 24),
+                      _buildLegendRow("${controller.consumedProtein.value}g", "Protein", _proteinColor),
+                      const SizedBox(height: 24),
+                      _buildLegendRow("${controller.consumedFat.value}g", "Fat", _fatColor),
+                    ],
                   ),
                 ),
               ],
@@ -497,57 +505,105 @@ class MealView extends GetView<MealController> {
     });
   }
 
-  Widget _buildMacroCard({
-    required String label,
-    required int consumed,
-    required int target,
-    required double progress,
-    required Color color,
+  // Builds a heading like "Today's Nutrition", "Tomorrow's Nutrition" or
+  // "Nutrition • 19 Aug" depending on which calendar date is selected.
+  String _nutritionHeading(String label) {
+    if (label == "Today" || label == "Tomorrow" || label == "Yesterday") {
+      return "$label's Nutrition";
+    }
+    if (label == "Day After Tomorrow") {
+      return "Day After Tomorrow's Nutrition";
+    }
+    return "Nutrition • $label";
+  }
+
+  // Ring split into three 120°-ish arcs (Carbs, Protein, Fat), each filled
+  // according to that macro's own progress toward its target.
+  Widget _buildMacroRing({
+    required int currentCalories,
+    required double proteinProgress,
+    required double carbsProgress,
+    required double fatProgress,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.035),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.06),
-          width: 0.8,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return SizedBox(
+      height: 188,
+      width: 188,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.outfit(
-              color: Colors.white.withOpacity(0.45),
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
+          CustomPaint(
+            size: const Size(188, 188),
+            painter: _MacroRingPainter(
+              carbsProgress: carbsProgress,
+              proteinProgress: proteinProgress,
+              fatProgress: fatProgress,
+              carbsColor: _carbsColor,
+              proteinColor: _proteinColor,
+              fatColor: _fatColor,
             ),
           ),
-          const SizedBox(height: 5),
-          Text(
-            "$consumed / ${target}g",
-            style: GoogleFonts.inter(
-              color: Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(2),
-            child: SizedBox(
-              height: 3,
-              child: LinearProgressIndicator(
-                value: progress,
-                backgroundColor: Colors.white.withOpacity(0.05),
-                valueColor: AlwaysStoppedAnimation<Color>(color),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _formatNumber(currentCalories),
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 36,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
-            ),
+              Text(
+                "kcal",
+                style: GoogleFonts.inter(
+                  color: Colors.white.withOpacity(0.4),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLegendRow(String value, String label, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              value,
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                color: Colors.white.withOpacity(0.45),
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(width: 10),
+        Container(
+          height: 10,
+          width: 10,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(3),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1181,5 +1237,73 @@ class MealView extends GetView<MealController> {
         ),
       ),
     );
+  }
+}
+
+// Paints a ring split into three rounded arcs (Carbs, Protein, Fat), each
+// filled clockwise from the top according to that macro's own progress.
+class _MacroRingPainter extends CustomPainter {
+  final double carbsProgress;
+  final double proteinProgress;
+  final double fatProgress;
+  final Color carbsColor;
+  final Color proteinColor;
+  final Color fatColor;
+
+  static const double _strokeWidth = 14.0;
+  static const double _gapDegrees = 10.0;
+  static const double _segmentDegrees = 120.0 - _gapDegrees;
+
+  _MacroRingPainter({
+    required this.carbsProgress,
+    required this.proteinProgress,
+    required this.fatProgress,
+    required this.carbsColor,
+    required this.proteinColor,
+    required this.fatColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (math.min(size.width, size.height) - _strokeWidth) / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+
+    final segments = [
+      (progress: carbsProgress, color: carbsColor),
+      (progress: proteinProgress, color: proteinColor),
+      (progress: fatProgress, color: fatColor),
+    ];
+
+    for (int i = 0; i < segments.length; i++) {
+      final startDeg = -90.0 + (i * 120.0) + (_gapDegrees / 2);
+      final startRad = startDeg * math.pi / 180;
+      final sweepRad = _segmentDegrees * math.pi / 180;
+      final color = segments[i].color;
+      final progress = segments[i].progress.clamp(0.0, 1.0);
+
+      final bgPaint = Paint()
+        ..color = color.withOpacity(0.14)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = _strokeWidth
+        ..strokeCap = StrokeCap.round;
+      canvas.drawArc(rect, startRad, sweepRad, false, bgPaint);
+
+      if (progress > 0) {
+        final fgPaint = Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = _strokeWidth
+          ..strokeCap = StrokeCap.round;
+        canvas.drawArc(rect, startRad, sweepRad * progress, false, fgPaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _MacroRingPainter oldDelegate) {
+    return oldDelegate.carbsProgress != carbsProgress ||
+        oldDelegate.proteinProgress != proteinProgress ||
+        oldDelegate.fatProgress != fatProgress;
   }
 }
