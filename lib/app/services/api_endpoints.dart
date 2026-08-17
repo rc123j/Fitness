@@ -14,6 +14,8 @@ class ApiEndpoints {
   static const String logout = '/api/auth/logout';
   static const String onboarding = '/api/members/onboarding';
   static const String profile = '/api/members/profile';
+  static const String changePassword = '/api/auth/change-password';
+  static const String deleteAccount = '/api/members/account';
   static const String status = '/status';
 
   // Diet & Meal logs

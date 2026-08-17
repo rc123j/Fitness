@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/profile_controller.dart';
 import '../../../widgets/app_shimmer.dart';
+import 'coming_soon_view.dart';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
@@ -73,13 +74,7 @@ class ProfileView extends GetView<ProfileController> {
                           const SizedBox(height: 20),
                           buildPremiumCard(),
                           const SizedBox(height: 20),
-                          buildProgressSection(),
-                          const SizedBox(height: 20),
-                          buildAchievementsSection(),
-                          const SizedBox(height: 20),
                           buildOptionsList(),
-                          const SizedBox(height: 16),
-                          buildNeedHelpCard(),
                           const SizedBox(height: 24),
                         ],
                       ),
@@ -103,13 +98,22 @@ class ProfileView extends GetView<ProfileController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            "Profile",
-            style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () => Get.back(),
+                child: const Icon(Icons.arrow_back, color: Colors.white),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                "Profile",
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
           Row(
             children: [
@@ -442,245 +446,7 @@ class ProfileView extends GetView<ProfileController> {
   }
 
   /// ----------------------------------------------------
-  /// 4. MY PROGRESS SECTION
-  /// ----------------------------------------------------
-  Widget buildProgressSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "My Progress",
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            GestureDetector(
-              onTap: () => Get.toNamed('/progress'),
-              child: Row(
-                children: [
-                  Text(
-                    "View All",
-                    style: GoogleFonts.inter(
-                      color: const Color(0xffFF00E5),
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xffFF00E5), size: 10),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
-
-        /// Row of Progress Indicators
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            buildProgressIndicatorRing(
-              value: "72.8 kg",
-              label: "Weight",
-              progress: 0.728,
-              color: const Color(0xffFF7A00),
-              icon: Icons.scale_rounded,
-            ),
-            buildProgressIndicatorRing(
-              value: "16.2%",
-              label: "Body Fat",
-              progress: 0.55,
-              color: const Color(0xffFF00E5),
-              icon: Icons.accessibility_new_rounded,
-            ),
-            buildProgressIndicatorRing(
-              value: "34.5 kg",
-              label: "Muscle Mass",
-              progress: 0.65,
-              color: const Color(0xffB100FF),
-              icon: Icons.fitness_center_rounded,
-            ),
-            buildProgressIndicatorRing(
-              value: "23.4",
-              label: "BMI",
-              progress: 0.45,
-              color: const Color(0xff00E5FF),
-              icon: Icons.person_outline_rounded,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget buildProgressIndicatorRing({
-    required String value,
-    required String label,
-    required double progress,
-    required Color color,
-    required IconData icon,
-  }) {
-    return Expanded(
-      child: Column(
-        children: [
-          CustomPaint(
-            size: const Size(60, 60),
-            painter: ProgressRingPainter(progress: progress, color: color),
-            child: SizedBox(
-              height: 60,
-              width: 60,
-              child: Center(
-                child: Icon(icon, color: color, size: 16),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              color: Colors.white.withOpacity(0.40),
-              fontSize: 9,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// ----------------------------------------------------
-  /// 5. MY ACHIEVEMENTS SECTION
-  /// ----------------------------------------------------
-  Widget buildAchievementsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "My Achievements",
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            GestureDetector(
-              onTap: () => Get.toNamed('/rewards-hub'),
-              child: Row(
-                children: [
-                  Text(
-                    "View All",
-                    style: GoogleFonts.inter(
-                      color: const Color(0xffFF00E5),
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xffFF00E5), size: 10),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
-
-        /// Row of Hexagonal Badges
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            buildHexagonBadgeItem(
-              title: "First Step",
-              subtitle: "Complete\nYour Profile",
-              color: const Color(0xffB100FF),
-              icon: Icons.person_add_rounded,
-            ),
-            buildHexagonBadgeItem(
-              title: "Consistent",
-              subtitle: "7 Days\nStreak",
-              color: const Color(0xffFF7A00),
-              icon: Icons.whatshot_rounded,
-            ),
-            buildHexagonBadgeItem(
-              title: "Dedicated",
-              subtitle: "25 Workouts\nCompleted",
-              color: const Color(0xffFF00E5),
-              icon: Icons.fitness_center_rounded,
-            ),
-            buildHexagonBadgeItem(
-              title: "Champion",
-              subtitle: "50 Days\nStreak",
-              color: const Color(0xffFFC700),
-              icon: Icons.emoji_events_rounded,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget buildHexagonBadgeItem({
-    required String title,
-    required String subtitle,
-    required Color color,
-    required IconData icon,
-  }) {
-    return Expanded(
-      child: Column(
-        children: [
-          CustomPaint(
-            size: const Size(54, 60),
-            painter: HexagonBadgePainter(color: color),
-            child: SizedBox(
-              height: 60,
-              width: 54,
-              child: Center(
-                child: Icon(icon, color: color, size: 18),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              color: Colors.white.withOpacity(0.40),
-              fontSize: 7,
-              height: 1.2,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// ----------------------------------------------------
-  /// 6. OPTIONS LIST
+  /// OPTIONS LIST
   /// ----------------------------------------------------
   Widget buildOptionsList() {
     return Container(
@@ -688,17 +454,24 @@ class ProfileView extends GetView<ProfileController> {
         color: const Color(0xff0B0817).withOpacity(0.55),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.white.withOpacity(0.04),
+          color: Colors.white.withOpacity(0.12),
           width: 1.0,
         ),
       ),
       child: Column(
         children: [
           buildOptionRowItem(
-            icon: Icons.shopping_bag_outlined,
-            title: "My Orders",
-            subtitle: "View your plans, orders & history",
-            onTap: () {},
+            icon: Icons.trending_up_rounded,
+            title: "My Progress",
+            subtitle: "Track your fitness journey",
+            onTap: () => Get.toNamed('/progress'),
+          ),
+          buildDivider(),
+          buildOptionRowItem(
+            icon: Icons.emoji_events_rounded,
+            title: "My Achievements",
+            subtitle: "View your badges and rewards",
+            onTap: () => Get.toNamed('/rewards-hub'),
           ),
           buildDivider(),
           buildOptionRowItem(
@@ -709,17 +482,10 @@ class ProfileView extends GetView<ProfileController> {
           ),
           buildDivider(),
           buildOptionRowItem(
-            icon: Icons.bookmark_border_rounded,
-            title: "Saved Posts",
-            subtitle: "Posts you've saved",
-            onTap: () {},
-          ),
-          buildDivider(),
-          buildOptionRowItem(
             icon: Icons.straighten_rounded,
             title: "My Measurements",
             subtitle: "Track your body measurements",
-            onTap: () {},
+            onTap: () => Get.to(() => const ComingSoonView(title: "My Measurements")),
           ),
           buildDivider(),
           buildOptionRowItem(
@@ -736,7 +502,7 @@ class ProfileView extends GetView<ProfileController> {
   Widget buildDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Divider(color: Colors.white.withOpacity(0.04), height: 1),
+      child: Divider(color: Colors.white.withOpacity(0.12), height: 1),
     );
   }
 
@@ -755,7 +521,7 @@ class ProfileView extends GetView<ProfileController> {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           child: Row(
             children: [
-              Icon(icon, color: const Color(0xffFF00E5), size: 18),
+              Icon(icon, color: Colors.white, size: 18),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -792,67 +558,7 @@ class ProfileView extends GetView<ProfileController> {
       ),
     );
   }
-
-  /// ----------------------------------------------------
-  /// 7. NEED HELP? CARD
-  /// ----------------------------------------------------
-  Widget buildNeedHelpCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.04),
-          width: 1.0,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {},
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                const Icon(Icons.headset_mic_outlined, color: Color(0xffFF00E5), size: 18),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "Need Help?",
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        "Visit our Help Center",
-                        style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.40),
-                          fontSize: 8,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  color: Colors.white.withOpacity(0.20),
-                  size: 11,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }}
+}
 
 /// ----------------------------------------------------
 /// AVATAR GLOW PAINTER
@@ -885,112 +591,6 @@ class AvatarGlowPainter extends CustomPainter {
       );
     }
     canvas.drawCircle(center, radius, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// ----------------------------------------------------
-/// PROGRESS RING PAINTER
-/// ----------------------------------------------------
-class ProgressRingPainter extends CustomPainter {
-  final double progress; // 0.0 to 1.0
-  final Color color;
-
-  ProgressRingPainter({required this.progress, required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    double stroke = 3.0;
-    double radius = (size.width - stroke) / 2;
-    Offset center = Offset(size.width / 2, size.height / 2);
-    Rect rect = Rect.fromCircle(center: center, radius: radius);
-
-    // Track ring
-    canvas.drawCircle(
-      center,
-      radius,
-      Paint()
-        ..color = Colors.white.withOpacity(0.04)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = stroke,
-    );
-
-    // Progress segment
-    Paint arcPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(rect, -pi / 2, 2 * pi * progress, false, arcPaint);
-
-    // Concentric glow arcs
-    for (double i = 1; i <= 2; i++) {
-      canvas.drawArc(
-        rect,
-        -pi / 2,
-        2 * pi * progress,
-        false,
-        Paint()
-          ..color = color.withOpacity(0.12 / i)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = stroke + (i * 2.0)
-          ..strokeCap = StrokeCap.round,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// ----------------------------------------------------
-/// HEXAGON BADGE PAINTER
-/// ----------------------------------------------------
-class HexagonBadgePainter extends CustomPainter {
-  final Color color;
-
-  HexagonBadgePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    double w = size.width;
-    double h = size.height;
-
-    Path path = Path();
-    path.moveTo(w * 0.5, 2);
-    path.lineTo(w - 2, h * 0.25 + 1);
-    path.lineTo(w - 2, h * 0.75 - 1);
-    path.lineTo(w * 0.5, h - 2);
-    path.lineTo(2, h * 0.75 - 1);
-    path.lineTo(2, h * 0.25 + 1);
-    path.close();
-
-    // Background fill
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = color.withOpacity(0.06)
-        ..style = PaintingStyle.fill,
-    );
-
-    // Glowing border outline
-    Paint borderPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    for (double i = 1; i <= 2; i++) {
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = color.withOpacity(0.12 / i)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5 + (i * 2.0),
-      );
-    }
-    canvas.drawPath(path, borderPaint);
   }
 
   @override

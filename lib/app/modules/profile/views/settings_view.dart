@@ -4,6 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../controllers/profile_controller.dart';
 import '../../../widgets/premium_layout_components.dart';
 import '../../goal/views/congratulations_screen.dart';
+import 'edit_profile_view.dart';
+import 'change_password_view.dart';
+import 'coming_soon_view.dart';
 class SettingsView extends GetView<ProfileController> {
   const SettingsView({super.key});
 
@@ -71,7 +74,9 @@ class SettingsView extends GetView<ProfileController> {
                         buildSupportGroup(),
                         const SizedBox(height: 24),
 
-                        /// 5. Log Out Button
+                        /// 5. Danger Zone
+                        buildDeleteAccountBtn(),
+                        const SizedBox(height: 12),
                         buildLogoutBtn(),
                         const SizedBox(height: 24),
                       ],
@@ -232,7 +237,7 @@ class SettingsView extends GetView<ProfileController> {
         color: const Color(0xff0B0817).withOpacity(0.55),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.white.withOpacity(0.04),
+          color: Colors.white.withOpacity(0.12),
           width: 1.0,
         ),
       ),
@@ -242,28 +247,22 @@ class SettingsView extends GetView<ProfileController> {
             icon: Icons.person_outline_rounded,
             title: "Personal Information",
             subtitle: "Update your personal details",
-            onTap: () {},
+            onTap: () => Get.to(() => EditProfileView()),
           ),
           buildDivider(),
           buildSettingsRowItem(
             icon: Icons.lock_outline_rounded,
             title: "Change Password",
             subtitle: "Update your account password",
-            onTap: () {},
+            onTap: () => Get.to(() => ChangePasswordView()),
           ),
           buildDivider(),
-          buildSettingsRowItem(
-            icon: Icons.mail_outline_rounded,
-            title: "Email & Phone",
-            subtitle: "Manage your contact details",
-            onTap: () {},
-          ),
-          buildDivider(),
+
           buildSettingsRowItem(
             icon: Icons.link_rounded,
             title: "Connected Accounts",
             subtitle: "Manage Google, Apple & more",
-            onTap: () {},
+            onTap: () => Get.to(() => const ComingSoonView(title: "Connected Accounts")),
           ),
         ],
       ),
@@ -279,30 +278,13 @@ class SettingsView extends GetView<ProfileController> {
         color: const Color(0xff0B0817).withOpacity(0.55),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.white.withOpacity(0.04),
+          color: Colors.white.withOpacity(0.12),
           width: 1.0,
         ),
       ),
       child: Column(
         children: [
-          /// Units
-          Obx(() {
-            return buildSettingsRowItem(
-              icon: Icons.straighten_rounded,
-              title: "Units",
-              subtitle: "Choose between Metric & Imperial",
-              trailing: Text(
-                controller.isMetric.value ? "Metric" : "Imperial",
-                style: GoogleFonts.outfit(
-                  color: const Color(0xffFF00E5),
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              onTap: () => controller.toggleMetricImperial(),
-            );
-          }),
-          buildDivider(),
+
 
           /// Notifications
           Obx(() {
@@ -341,7 +323,7 @@ class SettingsView extends GetView<ProfileController> {
             icon: Icons.security_rounded,
             title: "Privacy",
             subtitle: "Manage your privacy settings",
-            onTap: () {},
+            onTap: () => Get.to(() => const ComingSoonView(title: "Privacy")),
           ),
         ],
       ),
@@ -357,56 +339,90 @@ class SettingsView extends GetView<ProfileController> {
         color: const Color(0xff0B0817).withOpacity(0.55),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.white.withOpacity(0.04),
+          color: Colors.white.withOpacity(0.12),
           width: 1.0,
         ),
       ),
       child: Column(
         children: [
-          buildSettingsRowItem(
-            icon: Icons.celebration_rounded,
-            title: "Test Congratulations Screen",
-            subtitle: "View the new animated screen",
-            onTap: () {
-              Get.to(() => const CongratulationsScreen(memberCode: '1234-5678-9012'));
-            },
-          ),
-          buildDivider(),
-          buildSettingsRowItem(
-            icon: Icons.help_outline_rounded,
-            title: "Help Center",
-            subtitle: "Get help and support",
-            onTap: () {},
-          ),
-          buildDivider(),
+
           buildSettingsRowItem(
             icon: Icons.mail_outline_rounded,
             title: "Contact Us",
             subtitle: "We're here to help",
-            onTap: () {},
+            onTap: () => Get.to(() => const ComingSoonView(title: "Contact Us")),
           ),
           buildDivider(),
           buildSettingsRowItem(
             icon: Icons.star_border_rounded,
             title: "Rate NutriFit",
             subtitle: "Share your feedback",
-            onTap: () {},
+            onTap: () => Get.to(() => const ComingSoonView(title: "Rate Us")),
           ),
-          buildDivider(),
-          buildSettingsRowItem(
-            icon: Icons.info_outline_rounded,
-            title: "About NutriFit",
-            subtitle: "Version 2.3.1",
-            onTap: () {},
-          ),
+
         ],
       ),
     );
   }
 
   /// ----------------------------------------------------
-  /// 5. LOG OUT BUTTON
+  /// 5. DANGER ZONE (DELETE & LOGOUT)
   /// ----------------------------------------------------
+  Widget buildDeleteAccountBtn() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xff0B0817).withOpacity(0.55),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.red.withOpacity(0.25),
+          width: 1.0,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Get.defaultDialog(
+              title: "Delete Account",
+              titleStyle: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+              middleText: "Are you sure you want to delete your account? This action cannot be undone.",
+              middleTextStyle: GoogleFonts.inter(color: Colors.white70),
+              backgroundColor: const Color(0xff120D23),
+              textConfirm: "Delete",
+              textCancel: "Cancel",
+              confirmTextColor: Colors.white,
+              cancelTextColor: Colors.white,
+              buttonColor: Colors.red,
+              onConfirm: () {
+                Get.back();
+                controller.deleteAccount();
+              },
+            );
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
+                const SizedBox(width: 12),
+                Text(
+                  "Delete Account",
+                  style: GoogleFonts.outfit(
+                    color: Colors.red,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget buildLogoutBtn() {
     return Container(
       decoration: BoxDecoration(
@@ -423,33 +439,18 @@ class SettingsView extends GetView<ProfileController> {
           onTap: () => controller.logout(),
           borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(Icons.logout_rounded, color: Colors.red, size: 20),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "Log Out",
-                        style: GoogleFonts.outfit(
-                          color: Colors.red,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        "Sign out from your account",
-                        style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.30),
-                          fontSize: 8,
-                        ),
-                      ),
-                    ],
+                const SizedBox(width: 12),
+                Text(
+                  "Log Out",
+                  style: GoogleFonts.outfit(
+                    color: Colors.red,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
@@ -463,7 +464,7 @@ class SettingsView extends GetView<ProfileController> {
   Widget buildDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Divider(color: Colors.white.withOpacity(0.04), height: 1),
+      child: Divider(color: Colors.white.withOpacity(0.12), height: 1),
     );
   }
 
@@ -483,7 +484,7 @@ class SettingsView extends GetView<ProfileController> {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           child: Row(
             children: [
-              Icon(icon, color: const Color(0xffB100FF), size: 18),
+              Icon(icon, color: Colors.white, size: 18),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
