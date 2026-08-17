@@ -11,7 +11,6 @@ import '../modules/splash/views/splash_view.dart';
 import '../modules/goal/views/goal_selection_screen.dart';
 import '../modules/meal/bindings/meal_binding.dart';
 import '../modules/meal/views/meal_view.dart';
-import '../modules/meal/views/meal_detail_view.dart';
 import '../modules/meal/views/nutrition_history_view.dart';
 import '../modules/progress/bindings/progress_binding.dart';
 import '../modules/progress/views/progress_view.dart';
@@ -78,11 +77,6 @@ class AppPages {
     GetPage(
       name: _Paths.MEAL_PLAN,
       page: () => const MealView(),
-      binding: MealBinding(),
-    ),
-    GetPage(
-      name: _Paths.MEAL_DETAIL,
-      page: () => const MealDetailView(),
       binding: MealBinding(),
     ),
     GetPage(

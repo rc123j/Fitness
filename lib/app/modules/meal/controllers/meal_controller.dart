@@ -40,6 +40,9 @@ class MealController extends GetxController {
   // Set of completed meal_ids (1=Breakfast, etc.) for today
   final completedMealIds = <int>{}.obs;
 
+  // Track expanded state for each meal slot (dietPlanMealId)
+  final expandedMealIds = <int>{}.obs;
+
   // Calorie & Nutrition history logging
   final calorieHistoryList = <Map<String, dynamic>>[].obs;
   final historyTargetCalories = 2000.obs;

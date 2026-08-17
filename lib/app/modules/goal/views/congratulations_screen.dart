@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
@@ -15,11 +16,11 @@ class _CongratulationsScreenState extends State<CongratulationsScreen> {
   bool _isLoading = false;
 
   Future<void> _generateMealPlan() async {
+    debugPrint("[CongratulationsScreen] _generateMealPlan started!");
     setState(() => _isLoading = true);
     try {
       final apiClient = Get.find<ApiClient>();
-      
-      // We pass mock/default Health Report metrics here for now to generate the baseline plan
+      debugPrint("[CongratulationsScreen] Making API call to generate plan...");
       await apiClient.post('/api/diet-plans/generate', data: {
         "target_calories": 2150,
         "protein_target": 150,
@@ -30,10 +31,11 @@ class _CongratulationsScreenState extends State<CongratulationsScreen> {
         "tdee": 2550,
         "ibw": 70.0
       });
-      
+      debugPrint("[CongratulationsScreen] API call finished successfully!");
     } catch (e) {
-      debugPrint("Error generating plan: $e");
+      debugPrint("[CongratulationsScreen] Error generating plan: $e");
     } finally {
+      debugPrint("[CongratulationsScreen] Navigating to /main-navigation...");
       setState(() => _isLoading = false);
       Get.offAllNamed('/main-navigation');
     }
@@ -146,10 +148,13 @@ class _BouncingSwipeButtonState extends State<BouncingSwipeButton>
   bool _isDragging = false;
   late AnimationController _bounceController;
   late Animation<double> _bounceAnimation;
+  Timer? _autoSwipeTimer;
+  double _maxDragPosition = 0.0;
 
   @override
   void initState() {
     super.initState();
+    debugPrint("[BouncingSwipeButton] initState: starting 7s auto-swipe timer...");
     _bounceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -158,11 +163,40 @@ class _BouncingSwipeButtonState extends State<BouncingSwipeButton>
     _bounceAnimation = Tween<double>(begin: 0, end: 15).animate(
       CurvedAnimation(parent: _bounceController, curve: Curves.easeInOutSine),
     );
+
+    // Auto-swipe after 7 seconds
+    _autoSwipeTimer = Timer(const Duration(seconds: 7), () {
+      _triggerAutoSwipe();
+    });
+  }
+
+  void _triggerAutoSwipe() {
+    debugPrint("[BouncingSwipeButton] _triggerAutoSwipe fired. mounted=$mounted, _isCompleted=$_isCompleted");
+    if (_isCompleted || !mounted) return;
+    _autoSwipeTimer?.cancel();
+
+    debugPrint("[BouncingSwipeButton] Auto-swiping to end position: $_maxDragPosition");
+    setState(() {
+      _isDragging = false;
+      _dragPosition = _maxDragPosition > 0 ? _maxDragPosition : 200.0; // fallback if W is not set
+      _isCompleted = true;
+    });
+
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (mounted) {
+        debugPrint("[BouncingSwipeButton] Auto-swipe delay finished. Triggering onSwipeComplete...");
+        widget.onSwipeComplete();
+      } else {
+        debugPrint("[BouncingSwipeButton] Auto-swipe delay finished, but widget no longer mounted!");
+      }
+    });
   }
 
   @override
   void dispose() {
+    debugPrint("[BouncingSwipeButton] dispose: cancelling auto-swipe timer.");
     _bounceController.dispose();
+    _autoSwipeTimer?.cancel();
     super.dispose();
   }
 
@@ -174,6 +208,7 @@ class _BouncingSwipeButtonState extends State<BouncingSwipeButton>
         const double thumbWidth = 64.0;
         final double maxDragPosition =
             containerWidth - thumbWidth - 10; // 5 padding on each side
+        _maxDragPosition = maxDragPosition;
 
         return Container(
           height: 74,
@@ -234,17 +269,23 @@ class _BouncingSwipeButtonState extends State<BouncingSwipeButton>
                 ),
               ),
 
-              // Draggable Thumb (Smooth Snap Back)
-              AnimatedPositioned(
-                duration: _isDragging
-                    ? Duration.zero
-                    : const Duration(milliseconds: 400),
-                curve: Curves
-                    .easeOutBack, // Gives a playful spring effect when it snaps back
-                left: 5 + _dragPosition,
+              // Draggable Thumb (Smooth Snap Back + Bouncing visual cue)
+              AnimatedBuilder(
+                animation: _bounceAnimation,
+                builder: (context, child) {
+                  return AnimatedPositioned(
+                    duration: _isDragging
+                        ? Duration.zero
+                        : const Duration(milliseconds: 400),
+                    curve: Curves.easeOutBack,
+                    left: 5 + _dragPosition + (_isDragging || _isCompleted ? 0.0 : _bounceAnimation.value),
+                    child: child!,
+                  );
+                },
                 child: GestureDetector(
                   onHorizontalDragStart: (details) {
                     if (_isCompleted) return;
+                    _autoSwipeTimer?.cancel();
                     setState(() {
                       _isDragging = true;
                     });
@@ -269,6 +310,7 @@ class _BouncingSwipeButtonState extends State<BouncingSwipeButton>
                         _dragPosition = maxDragPosition;
                         _isCompleted = true;
                       });
+                      _autoSwipeTimer?.cancel();
                       Future.delayed(const Duration(milliseconds: 200), () {
                         widget.onSwipeComplete();
                       });
@@ -284,10 +326,14 @@ class _BouncingSwipeButtonState extends State<BouncingSwipeButton>
                     width: 64,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white,
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: const Color(0xffFF00E5).withOpacity(0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -296,7 +342,7 @@ class _BouncingSwipeButtonState extends State<BouncingSwipeButton>
                     child: const Center(
                       child: Icon(
                         Icons.shopping_basket_rounded,
-                        color: Colors.black,
+                        color: Colors.white,
                         size: 26,
                       ),
                     ),

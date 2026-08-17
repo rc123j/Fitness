@@ -8,13 +8,31 @@ import '../../../widgets/app_shimmer.dart';
 class MealView extends GetView<MealController> {
   const MealView({super.key});
 
+  // Hero image based on user's progress or generic healthy lifestyle theme
+  String _getHeroImageUrl() {
+    return 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1200&q=80';
+  }
+
+  String _getMealImageUrl(String title) {
+    final t = title.toLowerCase();
+    if (t.contains('breakfast')) {
+      return 'https://images.unsplash.com/photo-1493770348161-369560ae357d?auto=format&fit=crop&w=600&q=80';
+    } else if (t.contains('lunch')) {
+      return 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80';
+    } else if (t.contains('dinner')) {
+      return 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80';
+    } else {
+      return 'https://images.unsplash.com/photo-1490885578174-acda8905c2c6?auto=format&fit=crop&w=600&q=80';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xff06010F),
       body: Stack(
         children: [
-          // Background Glow Blobs (mocking the purple design shade on appbars side)
+          // Background Glow Blobs
           Positioned(
             top: -120,
             left: -80,
@@ -67,17 +85,18 @@ class MealView extends GetView<MealController> {
             ),
           ),
 
-          SafeArea(
-            child: Column(
-              children: [
-                // 1. App Bar
-                _buildAppBar(),
+          // Main scrollable content
+          Positioned.fill(
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                // 1. COLLAPSIBLE APP BAR
+                _buildSliverAppBar(),
 
-                // 2. Scrollable Body
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(18, 8, 18, 90),
+                // 2. MAIN SCROLLABLE BODY
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(18, 16, 18, 100),
+                  sliver: SliverToBoxAdapter(
                     child: Obx(() => AppShimmer(
                       enabled: controller.isLoading.value,
                       child: Column(
@@ -100,7 +119,7 @@ class MealView extends GetView<MealController> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Daily Meal",
+                                "Daily Meals",
                                 style: GoogleFonts.outfit(
                                   color: Colors.white,
                                   fontSize: 20,
@@ -132,9 +151,9 @@ class MealView extends GetView<MealController> {
 
                           // Promo customization Card
                           _buildPromoCard(),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
 
-                          // Meal Timeline Cards List
+                          // Consolidated Meal Timeline List
                           _buildMealsTimeline(context),
                         ],
                       ),
@@ -149,59 +168,88 @@ class MealView extends GetView<MealController> {
     );
   }
 
-  // 1. APP BAR
-  Widget _buildAppBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              height: 40,
-              width: 40,
+  // 1. SLIVER APP BAR
+  Widget _buildSliverAppBar() {
+    return SliverAppBar(
+      expandedHeight: 200,
+      pinned: true,
+      backgroundColor: const Color(0xff06010F),
+      elevation: 0,
+      leading: GestureDetector(
+        onTap: () => Get.back(),
+        child: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.4),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withOpacity(0.12),
+              width: 0.8,
+            ),
+          ),
+          child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
+        ),
+      ),
+      actions: [
+        Container(
+          margin: const EdgeInsets.all(8),
+          width: 40,
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.4),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withOpacity(0.12),
+              width: 0.8,
+            ),
+          ),
+          child: const Icon(Icons.more_horiz_rounded, color: Colors.white, size: 18),
+        ),
+        const SizedBox(width: 8),
+      ],
+      flexibleSpace: FlexibleSpaceBar(
+        stretchModes: const [
+          StretchMode.zoomBackground,
+        ],
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.network(
+              _getHeroImageUrl(),
+              fit: BoxFit.cover,
+            ),
+            // Gradient Overlay
+            Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.03),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
-                  width: 0.8,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.2),
+                    const Color(0xff06010F).withOpacity(0.6),
+                    const Color(0xff06010F),
+                  ],
+                  stops: const [0.4, 0.8, 1.0],
                 ),
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
             ),
+          ],
+        ),
+        title: Text(
+          "Nutrition Plan",
+          style: GoogleFonts.outfit(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
-          Text(
-            "Nutrition",
-            style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.03),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.08),
-                width: 0.8,
-              ),
-            ),
-            child: const Icon(Icons.more_horiz_rounded, color: Colors.white, size: 18),
-          ),
-        ],
+        ),
+        titlePadding: const EdgeInsets.only(left: 18, bottom: 16),
       ),
     );
   }
 
-  // 2. WEEKLY CALENDAR (mocking Capsule design from mockup)
+  // 2. WEEKLY CALENDAR
   Widget _buildWeeklyCalendar() {
     final now = DateTime.now();
-    // Generate dates for current week (Monday to Sunday)
     final int currentWeekday = now.weekday; // 1 = Monday, 7 = Sunday
     final List<DateTime> weekDates = List.generate(7, (index) {
       return now.subtract(Duration(days: currentWeekday - 1 - index));
@@ -225,7 +273,6 @@ class MealView extends GetView<MealController> {
                   date.year == now.year);
 
           if (isSelected) {
-            // Selected Day: Dark capsule container card with subtle borders
             return Container(
               height: 72,
               width: 46,
@@ -261,7 +308,6 @@ class MealView extends GetView<MealController> {
               ),
             );
           } else {
-            // Unselected Day: Plain text items
             return GestureDetector(
               onTap: () {
                 controller.selectedQueryDate.value = dateStr;
@@ -300,7 +346,7 @@ class MealView extends GetView<MealController> {
     );
   }
 
-  // 3. TODAY'S NUTRITION CARD (mocking left mockup screen)
+  // 3. TODAY'S NUTRITION CARD
   Widget _buildTodayNutritionCard() {
     return Obx(() {
       final double kcalProgress = controller.targetCalories.value > 0
@@ -331,7 +377,6 @@ class MealView extends GetView<MealController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Row 1: Calorie numeric info (left) vs flame percentage ring (right)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -412,7 +457,7 @@ class MealView extends GetView<MealController> {
             ),
             const SizedBox(height: 22),
 
-            // Row 2: 3 Horizontal Macro Cards
+            // 3 Horizontal Macro Cards
             Row(
               children: [
                 Expanded(
@@ -490,7 +535,6 @@ class MealView extends GetView<MealController> {
             ),
           ),
           const SizedBox(height: 10),
-          // Small horizontal progress indicator
           ClipRRect(
             borderRadius: BorderRadius.circular(2),
             child: SizedBox(
@@ -549,7 +593,7 @@ class MealView extends GetView<MealController> {
     );
   }
 
-  // 5. PROMO CARD (Customize Grocery List)
+  // 5. PROMO CARD
   Widget _buildPromoCard() {
     return Container(
       width: double.infinity,
@@ -576,7 +620,7 @@ class MealView extends GetView<MealController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "It's time to customize your\nGrocery list & Recipes ➔",
+                  "Customize Grocery List &\nexplore clinical recipes ➔",
                   style: GoogleFonts.outfit(
                     color: Colors.white,
                     fontSize: 16,
@@ -605,7 +649,6 @@ class MealView extends GetView<MealController> {
               ],
             ),
           ),
-          // Floating graphics (apples, broccolis) on the right
           Positioned(
             right: 12,
             bottom: 8,
@@ -626,20 +669,9 @@ class MealView extends GetView<MealController> {
     );
   }
 
-  // 6. MEALS LIST TIMELINE
+  // 6. CONSOLIDATED MEAL TIMELINE
   Widget _buildMealsTimeline(BuildContext context) {
     return Obx(() {
-      if (controller.isLoading.value) {
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(32.0),
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xff00FF87)),
-            ),
-          ),
-        );
-      }
-
       if (controller.mealTimeline.isEmpty) {
         return Container(
           width: double.infinity,
@@ -670,163 +702,484 @@ class MealView extends GetView<MealController> {
           final meal = controller.mealTimeline[index];
           final int mealTypeId = meal['meal_id'] ?? 0;
           final int dietPlanMealId = meal['id'] ?? 0;
-          final bool isCompleted = controller.completedMealIds.contains(mealTypeId);
-
-          // Get selected option foods
-          final int selectedOpt = controller.selectedOptions[dietPlanMealId] ?? 1;
           final Map<int, List<dynamic>> optionFoods = Map<int, List<dynamic>>.from(meal['optionFoods'] ?? {});
-          final List foodsOfSelectedOption = optionFoods[selectedOpt] ?? [];
+          final String mealTitle = meal['title'] ?? 'Meal Slot';
 
-          // Get option name from first food Notes metadata
-          String optionName = "Option $selectedOpt";
-          if (foodsOfSelectedOption.isNotEmpty) {
-            final firstFood = foodsOfSelectedOption.first;
-            final String? notes = firstFood['notes']?.toString();
-            if (notes != null && notes.isNotEmpty) {
-              try {
-                final Map<String, dynamic> meta = jsonDecode(notes);
-                if (meta['option_name'] != null && meta['option_name'].toString().isNotEmpty) {
-                  optionName = meta['option_name'];
-                }
-              } catch (_) {}
+          return Obx(() {
+            final int selectedOpt = controller.selectedOptions[dietPlanMealId] ?? 1;
+            final bool isCompleted = controller.completedMealIds.contains(mealTypeId);
+            final bool isExpanded = controller.expandedMealIds.contains(dietPlanMealId);
+            final List foodsOfSelectedOption = optionFoods[selectedOpt] ?? [];
+
+            // Calculate option macros
+            double totalProtein = 0.0;
+            double totalCarbs = 0.0;
+            double totalFat = 0.0;
+            double activeKcal = 0.0;
+
+            for (var f in foodsOfSelectedOption) {
+              if (f == null) continue;
+              totalProtein += double.tryParse(f['protein']?.toString() ?? '0') ?? 0;
+              totalCarbs += double.tryParse(f['carbs']?.toString() ?? '0') ?? 0;
+              totalFat += double.tryParse(f['fat']?.toString() ?? '0') ?? 0;
+              activeKcal += double.tryParse(f['calories']?.toString() ?? '0') ?? 0;
             }
-          }
 
-          final String foodDesc = foodsOfSelectedOption.isNotEmpty
-              ? foodsOfSelectedOption.map((f) => f['food_details']?['food_name'] ?? '').join(', ')
-              : 'Tap to configure foods';
+            final double targetKcal = activeKcal > 0 ? activeKcal : (double.tryParse(meal['target_calories']?.toString() ?? '') ?? 300.0);
 
-          double calories = 0.0;
-          for (var f in foodsOfSelectedOption) {
-            calories += double.tryParse(f['calories']?.toString() ?? '0') ?? 0;
-          }
+            // Get option name from first food Notes metadata
+            String optionName = "Option $selectedOpt";
+            if (foodsOfSelectedOption.isNotEmpty) {
+              final firstFood = foodsOfSelectedOption.first;
+              final String? notes = firstFood['notes']?.toString();
+              if (notes != null && notes.isNotEmpty) {
+                try {
+                  final Map<String, dynamic> meta = jsonDecode(notes);
+                  if (meta['option_name'] != null && meta['option_name'].toString().isNotEmpty) {
+                    optionName = meta['option_name'];
+                  }
+                } catch (_) {}
+              }
+            }
 
-          final double targetKcal = calories > 0 ? calories : (double.tryParse(meal['target_calories']?.toString() ?? '') ?? 300.0);
+            final String foodDesc = foodsOfSelectedOption.isNotEmpty
+                ? foodsOfSelectedOption.map((f) => f['food_details']?['food_name'] ?? '').join(', ')
+                : 'Tap to configure foods';
 
-          // Placeholder illustration based on meal slot
-          String emoji = "🥗";
-          if (meal['title'] == 'Breakfast') {
-            emoji = "🥣";
-          } else if (meal['title'] == 'Lunch') {
-            emoji = "🍱";
-          } else if (meal['title'] == 'Dinner') {
-            emoji = "🍲";
-          } else if (meal['title'] == 'Pre-Workout' || meal['title'] == 'Post-Workout') {
-            emoji = "🍌";
-          }
+            String emoji = "🥗";
+            final titleString = mealTitle.toLowerCase();
+            if (titleString.contains('breakfast')) {
+              emoji = "🥣";
+            } else if (titleString.contains('lunch')) {
+              emoji = "🍱";
+            } else if (titleString.contains('dinner')) {
+              emoji = "🍲";
+            } else if (titleString.contains('snack') || titleString.contains('mid meal')) {
+              emoji = "🍇";
+            } else if (titleString.contains('workout')) {
+              emoji = "🥤";
+            }
 
-          return GestureDetector(
-            onTap: () => Get.toNamed('/meal-detail', arguments: {
-              "dietPlanMealId": dietPlanMealId,
-              "mealId": mealTypeId,
-              "title": meal['title'],
-              "optionFoods": optionFoods,
-              "isCompleted": isCompleted,
-              "targetKcal": targetKcal,
-            }),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(22),
-                color: const Color(0xff0B0817).withOpacity(0.55),
-                border: Border.all(
-                  color: isCompleted
-                      ? const Color(0xff00FF87).withOpacity(0.15)
-                      : Colors.white.withOpacity(0.04),
-                  width: 1.0,
+            final String mealImageUrl = _getMealImageUrl(mealTitle);
+
+            return AnimatedSize(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              alignment: Alignment.topCenter,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  color: const Color(0xff0B0817).withOpacity(0.55),
+                  border: Border.all(
+                    color: isCompleted
+                        ? const Color(0xff00FF87).withOpacity(0.15)
+                        : Colors.white.withOpacity(0.04),
+                    width: 1.0,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // --- HEADER ROW (ALWAYS VISIBLE) ---
+                    GestureDetector(
+                      onTap: () {
+                        if (isExpanded) {
+                          controller.expandedMealIds.remove(dietPlanMealId);
+                        } else {
+                          controller.expandedMealIds.add(dietPlanMealId);
+                        }
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        color: Colors.transparent,
+                        child: Row(
+                          children: [
+                            // Status checkmark indicator
+                            GestureDetector(
+                              onTap: () {
+                                if (isCompleted) {
+                                  controller.unmarkMealAsCompleted(dietPlanMealId, mealTypeId);
+                                } else {
+                                  controller.markMealAsCompleted(dietPlanMealId, mealTypeId, selectedOption: selectedOpt);
+                                }
+                              },
+                              child: Container(
+                                height: 24,
+                                width: 24,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: isCompleted ? const Color(0xff00FF87) : Colors.transparent,
+                                  border: Border.all(
+                                    color: isCompleted
+                                        ? Colors.transparent
+                                        : Colors.white.withOpacity(0.2),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: isCompleted
+                                    ? const Icon(Icons.check, color: Colors.black, size: 14)
+                                    : null,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+
+                            // Text Info
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    mealTitle,
+                                    style: GoogleFonts.outfit(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  if (isExpanded) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      "${targetKcal.toInt()} kcal • P ${totalProtein.toInt()}g C ${totalCarbs.toInt()}g F ${totalFat.toInt()}g",
+                                      style: GoogleFonts.inter(
+                                        color: const Color(0xff00FF87),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ]
+                                ],
+                              ),
+                            ),
+
+                            // Expand Icon Indicator
+                            Icon(
+                              isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                              color: Colors.white.withOpacity(0.4),
+                              size: 24,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // --- EXPANDED DETAILS BODY ---
+                    if (isExpanded) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Divider(color: Colors.white.withOpacity(0.08), height: 1),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 1. Image Header inside card
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Stack(
+                                children: [
+                                  SizedBox(
+                                    height: 110,
+                                    width: double.infinity,
+                                    child: Image.network(
+                                      mealImageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Container(
+                                        color: const Color(0xff120D23),
+                                        child: Center(child: Text(emoji, style: const TextStyle(fontSize: 32))),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 110,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Colors.black.withOpacity(0.1),
+                                          Colors.black.withOpacity(0.6),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    left: 14,
+                                    bottom: 12,
+                                    child: Row(
+                                      children: [
+                                        Text(emoji, style: const TextStyle(fontSize: 18)),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          "Exchange Options",
+                                          style: GoogleFonts.outfit(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // 2. Macronutrient distributes chips
+                            _buildMacroSummaryChips(totalProtein, totalCarbs, totalFat),
+                            const SizedBox(height: 18),
+
+                            // 3. Detailed Included items and swaps
+                            Text(
+                              "Included Items & Swaps",
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            _buildFoodItemsSection(foodsOfSelectedOption, optionFoods),
+                            const SizedBox(height: 20),
+
+                            // 4. Action Log Button
+                            _buildLogButton(dietPlanMealId, mealTypeId, isCompleted, selectedOpt),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              child: Row(
-                children: [
-                  // Log status Checkbox
-                  GestureDetector(
-                    onTap: () {
-                      if (isCompleted) {
-                        controller.unmarkMealAsCompleted(dietPlanMealId, mealTypeId);
-                      } else {
-                        controller.markMealAsCompleted(dietPlanMealId, mealTypeId, selectedOption: selectedOpt);
-                      }
-                    },
-                    child: Container(
-                      height: 24,
-                      width: 24,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isCompleted ? const Color(0xff00FF87) : Colors.transparent,
-                        border: Border.all(
-                          color: isCompleted
-                              ? Colors.transparent
-                              : Colors.white.withOpacity(0.2),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: isCompleted
-                          ? const Icon(Icons.check, color: Colors.black, size: 14)
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-
-                  // Meal details
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "$optionName • ${targetKcal.toInt()} kcal",
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(0.4),
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          meal['title'],
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          foodDesc,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(0.5),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Rounded image box on right
-                  Container(
-                    height: 54,
-                    width: 54,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.04),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.06),
-                        width: 0.8,
-                      ),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      emoji,
-                      style: const TextStyle(fontSize: 26),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
+            );
+          });
         },
       );
     });
+  }
+
+
+
+  // Macro Summary Chips Row
+  Widget _buildMacroSummaryChips(double protein, double carbs, double fat) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(child: _buildMiniMacroChip("Protein", "${protein.toInt()}g", const Color(0xffFFD166))),
+        const SizedBox(width: 6),
+        Expanded(child: _buildMiniMacroChip("Carbs", "${carbs.toInt()}g", const Color(0xff00FF87))),
+        const SizedBox(width: 6),
+        Expanded(child: _buildMiniMacroChip("Fat", "${fat.toInt()}g", const Color(0xffFF00E5))),
+      ],
+    );
+  }
+
+  Widget _buildMiniMacroChip(String label, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.02),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white.withOpacity(0.04), width: 0.8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            height: 6,
+            width: 6,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            "$label: $value",
+            style: GoogleFonts.inter(
+              color: Colors.white.withOpacity(0.65),
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Foods and Swaps List
+  Widget _buildFoodItemsSection(List foods, Map<int, List<dynamic>> optionFoods) {
+    if (foods.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        alignment: Alignment.center,
+        child: Text(
+          "No details available.",
+          style: GoogleFonts.inter(color: Colors.white30, fontSize: 11),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: foods.length,
+      separatorBuilder: (context, index) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Divider(color: Colors.white.withOpacity(0.06), height: 1.0),
+      ),
+      itemBuilder: (context, index) {
+        final f = foods[index];
+        final String foodName = f['food_details']?['food_name'] ?? 'Food Item';
+        final double kcal = double.tryParse(f['calories']?.toString() ?? '0') ?? 0.0;
+        final double protein = double.tryParse(f['protein']?.toString() ?? '0') ?? 0.0;
+        final double carbs = double.tryParse(f['carbs']?.toString() ?? '0') ?? 0.0;
+        final double fat = double.tryParse(f['fat']?.toString() ?? '0') ?? 0.0;
+        final String portion = "${f['serving_size']} ${f['serving_unit'] ?? f['unit'] ?? ''}";
+
+        // Construct swaps from Option 2 and Option 3 at the same index
+        final List<String> swaps = [];
+        final List option2Foods = optionFoods[2] ?? [];
+        final List option3Foods = optionFoods[3] ?? [];
+
+        if (index < option2Foods.length) {
+          final f2 = option2Foods[index];
+          final String name2 = f2['food_details']?['food_name'] ?? '';
+          final String portion2 = "${f2['serving_size']} ${f2['serving_unit'] ?? f2['unit'] ?? ''}";
+          if (name2.isNotEmpty) {
+            swaps.add("$name2 ($portion2)");
+          }
+        }
+
+        if (index < option3Foods.length) {
+          final f3 = option3Foods[index];
+          final String name3 = f3['food_details']?['food_name'] ?? '';
+          final String portion3 = "${f3['serving_size']} ${f3['serving_unit'] ?? f3['unit'] ?? ''}";
+          if (name3.isNotEmpty) {
+            swaps.add("$name3 ($portion3)");
+          }
+        }
+
+        String swapText = "";
+        if (swaps.isNotEmpty) {
+          swapText = "Swap: " + swaps.join(" OR ");
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        foodName,
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        portion,
+                        style: GoogleFonts.inter(
+                          color: Colors.white.withOpacity(0.55),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  "${kcal.toInt()} kcal • P ${protein.toInt()}g C ${carbs.toInt()}g F ${fat.toInt()}g",
+                  style: GoogleFonts.inter(
+                    color: const Color(0xff00FF87),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            if (swapText.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                swapText,
+                style: GoogleFonts.inter(
+                  color: Colors.white.withOpacity(0.35),
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  // Inline action Log Button
+  Widget _buildLogButton(int dietPlanMealId, int mealTypeId, bool isCompleted, int activeOpt) {
+    return GestureDetector(
+      onTap: () async {
+        if (isCompleted) {
+          await controller.unmarkMealAsCompleted(dietPlanMealId, mealTypeId);
+        } else {
+          final success = await controller.markMealAsCompleted(dietPlanMealId, mealTypeId, selectedOption: activeOpt);
+          if (success) {
+            Get.snackbar(
+              "Meal Logged 🥗",
+              "Awesome job! +10 FitCoins added to your wallet.",
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
+              colorText: Colors.white,
+              borderColor: const Color(0xff00FF87).withOpacity(0.2),
+              borderWidth: 1,
+            );
+          }
+        }
+      },
+      child: Container(
+        height: 48,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: isCompleted
+              ? null
+              : const LinearGradient(
+                  colors: [
+                    Color(0xff00FF87),
+                    Color(0xffFFD166),
+                  ],
+                ),
+          color: isCompleted ? Colors.white.withOpacity(0.06) : null,
+          border: isCompleted
+              ? Border.all(color: Colors.white.withOpacity(0.12), width: 1.0)
+              : null,
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isCompleted ? Icons.check_circle_rounded : Icons.check_circle_outline_rounded,
+              color: isCompleted ? const Color(0xff00FF87) : Colors.black,
+              size: 18,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              isCompleted ? "Marked as Eaten" : "Log this Meal",
+              style: GoogleFonts.outfit(
+                color: isCompleted ? Colors.white : Colors.black,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
