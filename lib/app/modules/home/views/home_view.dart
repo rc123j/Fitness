@@ -16,7 +16,8 @@ class HomeView extends StatefulWidget {
   State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _HomeViewState extends State<HomeView>
+    with SingleTickerProviderStateMixin {
   final HomeController controller = Get.find<HomeController>();
   final ScrollController _scrollController = ScrollController();
   bool _showStickySearch = false;
@@ -25,10 +26,28 @@ class _HomeViewState extends State<HomeView> {
   /// Header (~80) + tabs (~80) + search bar top padding (16) ≈ 176px.
   static const double _stickyThreshold = 176.0;
 
+  late AnimationController _shineController;
+  late Animation<double> _shineAnimation;
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _shineController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2600),
+    );
+    _shineAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: -1.5,
+          end: 2.5,
+        ).chain(CurveTween(curve: Curves.easeInOutSine)),
+        weight: 35,
+      ),
+      TweenSequenceItem(tween: ConstantTween<double>(2.5), weight: 65),
+    ]).animate(_shineController);
+    _shineController.repeat();
   }
 
   void _onScroll() {
@@ -44,6 +63,7 @@ class _HomeViewState extends State<HomeView> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _shineController.dispose();
     super.dispose();
   }
 
@@ -561,30 +581,65 @@ class _HomeViewState extends State<HomeView> {
           children: [
             // FitCoins Wallet Widget
             Obx(() {
-              return Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: const Color(0xffFFD166).withOpacity(0.25),
-                    width: 0.8,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Stack(
                   children: [
-                    const Text("🪙", style: TextStyle(fontSize: 13)),
-                    const SizedBox(width: 4),
-                    Text(
-                      "${controller.fitPoints.value}",
-                      style: GoogleFonts.outfit(
-                        color: const Color(0xffFFD166),
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: const Color(0xffFFD166).withOpacity(0.25),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text("🪙", style: TextStyle(fontSize: 13)),
+                          const SizedBox(width: 4),
+                          Text(
+                            "${controller.fitPoints.value}",
+                            style: GoogleFonts.outfit(
+                              color: const Color(0xffFFD166),
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Shine sweep drawn as its own layer so it lights up
+                    // the card's background too, not just icon/text.
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: AnimatedBuilder(
+                          animation: _shineAnimation,
+                          builder: (context, child) {
+                            final x = _shineAnimation.value;
+                            return DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment(x - 1.5, -1.0),
+                                  end: Alignment(x + 1.5, 1.0),
+                                  colors: [
+                                    Colors.white.withOpacity(0.0),
+                                    Colors.white.withOpacity(0.25),
+                                    const Color(0xffFFE8A0).withOpacity(0.55),
+                                    Colors.white.withOpacity(0.25),
+                                    Colors.white.withOpacity(0.0),
+                                  ],
+                                  stops: const [0.0, 0.4, 0.5, 0.6, 1.0],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ],
