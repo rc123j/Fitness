@@ -8,7 +8,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../controllers/home_controller.dart';
 import 'swiggy_tabs.dart';
 import '../../../widgets/app_shimmer.dart';
-import '../../../widgets/premium_meal_promo_card.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -67,7 +66,7 @@ class _HomeViewState extends State<HomeView> {
                   Obx(() {
                     final isMeal = controller.activeTab.value == 0;
                     final headerBg = isMeal
-                        ? const Color(0xffB81F22).withOpacity(0.20)
+                        ? const Color(0xff3A5224).withOpacity(0.20)
                         : const Color(0xff3F72AF).withOpacity(0.20);
 
                     // Dynamically update system status bar style to match the tab theme
@@ -101,7 +100,7 @@ class _HomeViewState extends State<HomeView> {
                   Obx(() {
                     final isMeal = controller.activeTab.value == 0;
                     final bgColor = isMeal
-                        ? const Color(0xff640F11)
+                        ? const Color(0xff243516)
                         : const Color(0xff3F72AF);
 
                     if (!isMeal) {
@@ -215,7 +214,17 @@ class _HomeViewState extends State<HomeView> {
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           decoration: BoxDecoration(
-                            color: bgColor,
+                            gradient: isMeal
+                                ? const LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Color(0xff3A5224), // Lighter green at top
+                                      Color(0xff1C2A11), // Darker green at bottom
+                                    ],
+                                  )
+                                : null,
+                            color: isMeal ? null : bgColor,
                             borderRadius: const BorderRadius.only(
                               bottomLeft: Radius.circular(24),
                               bottomRight: Radius.circular(24),
@@ -238,7 +247,14 @@ class _HomeViewState extends State<HomeView> {
                                   child: const PremiumSearchBar(),
                                 ),
                                 const SizedBox(height: 16),
-                                const PremiumMealPromoCard(),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Image.asset(
+                                    'assets/home/advertisemt_home.png',
+                                    width: double.infinity,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
                                 const SizedBox(height: 16),
                                 SwiggyPromoCards(),
                               ] else
@@ -411,27 +427,7 @@ class _HomeViewState extends State<HomeView> {
                                     // ),`
                                     // const SizedBox(height: 28),
 
-                                    /// 6. PROGRESS & STREAK SECTION
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () => Get.toNamed('/progress'),
-                                          child: sectionTitle(
-                                            "YOUR PROGRESS",
-                                            "View All",
-                                          ),
-                                        ),
-                                        const SizedBox(height: 14),
-                                        GestureDetector(
-                                          onTap: () => Get.toNamed('/progress'),
-                                          child: buildWeightProgressCard(),
-                                        ),
-                                      ],
-                                    ),
 
-                                    const SizedBox(height: 28),
 
                                     /*
                                   Column(
@@ -489,10 +485,10 @@ class _HomeViewState extends State<HomeView> {
                     bottom: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xff640F11),
+                    color: const Color(0xff3A5224),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xff640F11).withOpacity(0.35),
+                        color: const Color(0xff3A5224).withOpacity(0.35),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -3675,136 +3671,36 @@ class _PremiumSearchBarState extends State<PremiumSearchBar> {
 /// SWIGGY STYLE PROMO CARDS WIDGET
 /// ----------------------------------------------------
 class SwiggyPromoCards extends StatelessWidget {
-  SwiggyPromoCards({super.key});
-
-  final HomeController controller = Get.find<HomeController>();
+  const SwiggyPromoCards({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final double kcalProgress = controller.targetCalories.value > 0
-          ? (controller.currentCalories.value / controller.targetCalories.value)
-                .clamp(0.0, 1.0)
-          : 0.0;
-      final double proteinProgress = controller.targetProtein.value > 0
-          ? (controller.currentProtein.value / controller.targetProtein.value)
-                .clamp(0.0, 1.0)
-          : 0.0;
-      final double carbsProgress = controller.targetCarbs.value > 0
-          ? (controller.currentCarbs.value / controller.targetCarbs.value)
-                .clamp(0.0, 1.0)
-          : 0.0;
-      final double fatProgress = controller.targetFat.value > 0
-          ? (controller.currentFat.value / controller.targetFat.value).clamp(
-              0.0,
-              1.0,
-            )
-          : 0.0;
+    const double rowHeight = 100;
+    const double gap = 8;
 
-      return Row(
+    return SizedBox(
+      height: rowHeight,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
-            child: _buildMacroCard(
-              title: "Calories",
-              consumed: "${controller.currentCalories.value}",
-              target: "${controller.targetCalories.value} kcal",
-              progress: kcalProgress,
-              color: const Color(0xffFF7A00),
+            child: Image.asset(
+              "assets/home/protien_meal_section.png",
+              fit: BoxFit.contain,
             ),
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: gap),
           Expanded(
-            child: _buildMacroCard(
-              title: "Protein",
-              consumed: "${controller.currentProtein.value}g",
-              target: "${controller.targetProtein.value}g",
-              progress: proteinProgress,
-              color: const Color(0xff00FF87),
+            child: Image.asset(
+              "assets/home/carbs_meal_section.png",
+              fit: BoxFit.contain,
             ),
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: gap),
           Expanded(
-            child: _buildMacroCard(
-              title: "Carbs",
-              consumed: "${controller.currentCarbs.value}g",
-              target: "${controller.targetCarbs.value}g",
-              progress: carbsProgress,
-              color: const Color(0xff00A3FF),
-            ),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: _buildMacroCard(
-              title: "Fat",
-              consumed: "${controller.currentFat.value}g",
-              target: "${controller.targetFat.value}g",
-              progress: fatProgress,
-              color: const Color(0xffB100FF),
-            ),
-          ),
-        ],
-      );
-    });
-  }
-
-  Widget _buildMacroCard({
-    required String title,
-    required String consumed,
-    required String target,
-    required double progress,
-    required Color color,
-  }) {
-    return Container(
-      height: 90,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.09),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.12), width: 0.8),
-      ),
-      padding: const EdgeInsets.all(6),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: GoogleFonts.outfit(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                consumed,
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 1),
-              Text(
-                target,
-                style: GoogleFonts.inter(
-                  color: Colors.white.withOpacity(0.4),
-                  fontSize: 9,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-
-          // Small horizontal progress bar at bottom of card
-          ClipRRect(
-            borderRadius: BorderRadius.circular(2),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: Colors.white.withOpacity(0.05),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-              minHeight: 3,
+            child: Image.asset(
+              "assets/home/fats_meal_section.png",
+              fit: BoxFit.contain,
             ),
           ),
         ],

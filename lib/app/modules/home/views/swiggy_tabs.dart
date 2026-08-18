@@ -147,12 +147,12 @@ class SwiggyTabsHeader extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Obx(() {
       final isMeal = controller.activeTab.value == 0;
-      final mealColor = const Color(0xff640F11); // Dark wine/maroon (Rakhi card)
+      final mealColor = const Color(0xff3A5224); // Matching Light Green at top of gradient
       final workoutColor = const Color(0xff3F72AF); // Soft Blue for Workout
       final activeColor = isMeal ? mealColor : workoutColor;
 
       final inactiveBg = isMeal
-          ? const Color(0xffB81F22).withOpacity(0.20) // Match the transparent red appbar color
+          ? const Color(0xff3A5224).withOpacity(0.20) // Match the transparent dark green appbar color
           : const Color(0xff3F72AF).withOpacity(0.20);
 
       return Container(
