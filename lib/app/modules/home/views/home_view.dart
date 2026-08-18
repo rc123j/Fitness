@@ -87,7 +87,7 @@ class _HomeViewState extends State<HomeView>
                     final isMeal = controller.activeTab.value == 0;
                     final headerBg = isMeal
                         ? const Color(0xff3A5224).withOpacity(0.20)
-                        : const Color(0xff3F72AF).withOpacity(0.20);
+                        : Colors.transparent;
 
                     // Dynamically update system status bar style to match the tab theme
                     SystemChrome.setSystemUIOverlayStyle(
@@ -121,110 +121,24 @@ class _HomeViewState extends State<HomeView>
                     final isMeal = controller.activeTab.value == 0;
                     final bgColor = isMeal
                         ? const Color(0xff243516)
-                        : const Color(0xff3F72AF);
+                        : Colors.transparent;
 
                     if (!isMeal) {
-                      return Column(
-                        children: [
-                          // Colored Section
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: bgColor,
-                              borderRadius: const BorderRadius.only(
-                                bottomLeft: Radius.circular(24),
-                                bottomRight: Radius.circular(24),
-                              ),
-                            ),
-                            padding: const EdgeInsets.only(
-                              left: 18,
-                              right: 18,
-                              top: 16,
-                              bottom: 18,
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(24),
-                              child: Image.asset(
-                                'assets/home/home1.png',
-                                width: double.infinity,
-                                height: 160,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          // Dark Section with Coming Soon Card
-                          Container(
-                            width: double.infinity,
-                            decoration: const BoxDecoration(
-                              color: Color(0xff06010F),
-                            ),
-                            padding: const EdgeInsets.only(
-                              top: 40,
-                              bottom: 200,
-                              left: 18,
-                              right: 18,
-                            ),
-                            child: Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.03),
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.08),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: const Color(
-                                        0xff3F72AF,
-                                      ).withOpacity(0.15),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.fitness_center_rounded,
-                                      color: Color(0xff3F72AF),
-                                      size: 40,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  Text(
-                                    "Workout Plans",
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    "Coming Soon!",
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: const Color(0xff3F72AF),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    "We are crafting customized AI-driven workout plans and daily routine exercises to help you crush your fitness goals.",
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.white.withOpacity(0.6),
-                                      height: 1.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                      return Container(
+                        width: double.infinity,
+                        alignment: Alignment.topCenter,
+                        padding: const EdgeInsets.only(
+                          top: 40,
+                          left: 32,
+                          right: 32,
+                          bottom: 40,
+                        ),
+                        color: Colors.transparent,
+                        child: Image.asset(
+                          'assets/home/coming_soon.png',
+                          height: 630,
+                          fit: BoxFit.contain,
+                        ),
                       );
                     }
 
@@ -240,7 +154,9 @@ class _HomeViewState extends State<HomeView>
                                     end: Alignment.bottomCenter,
                                     colors: [
                                       Color(0xff3A5224), // Lighter green at top
-                                      Color(0xff1C2A11), // Darker green at bottom
+                                      Color(
+                                        0xff1C2A11,
+                                      ), // Darker green at bottom
                                     ],
                                   )
                                 : null,
@@ -446,8 +362,6 @@ class _HomeViewState extends State<HomeView>
                                     //   ],
                                     // ),`
                                     // const SizedBox(height: 28),
-
-
 
                                     /*
                                   Column(
@@ -3730,35 +3644,122 @@ class SwiggyPromoCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double rowHeight = 100;
-    const double gap = 8;
+    final HomeController controller = Get.find<HomeController>();
+    const double gap = 10;
 
-    return SizedBox(
-      height: rowHeight,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Image.asset(
-              "assets/home/protien_meal_section.png",
-              fit: BoxFit.contain,
-            ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Expanded(
+          child: _MacroCard(
+            title: "Protein",
+            current: controller.currentProtein,
+            target: controller.targetProtein,
+            image: "assets/home/protien_meal_section.png",
           ),
-          const SizedBox(width: gap),
-          Expanded(
-            child: Image.asset(
-              "assets/home/carbs_meal_section.png",
-              fit: BoxFit.contain,
-            ),
+        ),
+        const SizedBox(width: gap),
+        Expanded(
+          child: _MacroCard(
+            title: "Carbs",
+            current: controller.currentCarbs,
+            target: controller.targetCarbs,
+            image: "assets/home/carbs_meal_section.png",
           ),
-          const SizedBox(width: gap),
-          Expanded(
-            child: Image.asset(
-              "assets/home/fats_meal_section.png",
-              fit: BoxFit.contain,
-            ),
+        ),
+        const SizedBox(width: gap),
+        Expanded(
+          child: _MacroCard(
+            title: "Fats",
+            current: controller.currentFat,
+            target: controller.targetFat,
+            image: "assets/home/fats_meal_section.png",
           ),
-        ],
+        ),
+      ],
+    );
+  }
+}
+
+class _MacroCard extends StatelessWidget {
+  const _MacroCard({
+    required this.title,
+    required this.current,
+    required this.target,
+    required this.image,
+  });
+
+  final String title;
+  final RxInt current;
+  final RxInt target;
+  final String image;
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 0.82,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xff3C6B2E), Color(0xff12280D)],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.08), width: 0.8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Obx(() {
+              final int c = current.value;
+              final int t = target.value;
+              final double progress = t > 0 ? (c / t).clamp(0.0, 1.0) : 0.0;
+              return Column(
+                children: [
+                  Text(
+                    "${c}g / ${t}g",
+                    style: GoogleFonts.outfit(
+                      color: Colors.white.withOpacity(0.85),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      backgroundColor: Colors.white.withOpacity(0.12),
+                      color: Colors.white,
+                      minHeight: 6,
+                    ),
+                  ),
+                ],
+              );
+            }),
+            const SizedBox(height: 10),
+            Expanded(child: Image.asset(image, fit: BoxFit.contain)),
+          ],
+        ),
       ),
     );
   }

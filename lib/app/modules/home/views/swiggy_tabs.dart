@@ -115,17 +115,9 @@ class SwiggyTabPainter extends CustomPainter {
       canvas.drawPath(inactivePath, inactiveFillPaint);
       canvas.drawPath(inactivePath, inactiveBorderPaint);
 
-      // 2. Draw active background (Workout)
-      final bgPath = Path();
-      bgPath.moveTo(0, H);
-      bgPath.lineTo(0, baseY);
-      _addTabCurve(bgPath, workoutStartX, tabWidth, topY, baseY);
-      bgPath.lineTo(W, baseY);
-      bgPath.lineTo(W, H);
-      bgPath.close();
-      canvas.drawPath(bgPath, paint);
+      // 2. NO background fill for Workout — keep it fully transparent
 
-      // 3. Draw active outline (Workout)
+      // 3. Draw active outline (Workout) only — no fill
       final activePath = Path();
       activePath.moveTo(0, baseY);
       _addTabCurve(activePath, workoutStartX, tabWidth, topY, baseY);
@@ -148,12 +140,12 @@ class SwiggyTabsHeader extends GetView<HomeController> {
     return Obx(() {
       final isMeal = controller.activeTab.value == 0;
       final mealColor = const Color(0xff3A5224); // Matching Light Green at top of gradient
-      final workoutColor = const Color(0xff3F72AF); // Soft Blue for Workout
+      final workoutColor = Colors.transparent; // Transparent for Workout
       final activeColor = isMeal ? mealColor : workoutColor;
 
       final inactiveBg = isMeal
           ? const Color(0xff3A5224).withOpacity(0.20) // Match the transparent dark green appbar color
-          : const Color(0xff3F72AF).withOpacity(0.20);
+          : Colors.transparent;
 
       return Container(
         color: inactiveBg,
