@@ -74,7 +74,10 @@ class SwiggyTabPainter extends CustomPainter {
       ..strokeWidth = 2.0;
 
     final inactiveFillPaint = Paint()
-      ..color = Colors.black.withOpacity(0.25) // Darker fill to look like tucked card on red background
+      ..color = Colors.black
+          .withOpacity(
+            0.25,
+          ) // Darker fill to look like tucked card on red background
       ..style = PaintingStyle.fill;
 
     final inactiveBorderPaint = Paint()
@@ -139,12 +142,16 @@ class SwiggyTabsHeader extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Obx(() {
       final isMeal = controller.activeTab.value == 0;
-      final mealColor = const Color(0xff3A5224); // Matching Light Green at top of gradient
+      final mealColor = const Color(
+        0xff3A5224,
+      ); // Matching Light Green at top of gradient
       final workoutColor = Colors.transparent; // Transparent for Workout
       final activeColor = isMeal ? mealColor : workoutColor;
 
       final inactiveBg = isMeal
-          ? const Color(0xff3A5224).withOpacity(0.20) // Match the transparent dark green appbar color
+          ? const Color(0xff3A5224).withOpacity(
+              0.20,
+            ) // Match the transparent dark green appbar color
           : Colors.transparent;
 
       return Container(
@@ -160,47 +167,28 @@ class SwiggyTabsHeader extends GetView<HomeController> {
               ),
             ),
 
-            // 2. The Interactive Labels & Icons
+            // 2. The Interactive Labels & Images
             Positioned.fill(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // MEAL TAB
                     Expanded(
                       child: GestureDetector(
                         onTap: () => controller.activeTab.value = 0,
                         child: Container(
-                          height:
-                              80, // Always full height to ensure correct alignment
-                          color: Colors
-                              .transparent, // Detect taps anywhere in the area
-                          padding: EdgeInsets.only(
-                            top: isMeal ? 0 : 6,
-                            bottom: isMeal ? 6 : 0,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: isMeal
-                                ? MainAxisAlignment.end
-                                : MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                "🍔",
-                                style: TextStyle(fontSize: isMeal ? 18 : 14),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                "Meal",
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontWeight: isMeal
-                                      ? FontWeight.bold
-                                      : FontWeight.w500,
-                                  fontSize: isMeal ? 14 : 12,
-                                ),
-                              ),
-                            ],
+                          height: 80,
+                          color: Colors.transparent,
+                          padding: const EdgeInsets.only(bottom: 30),
+                          alignment: Alignment.bottomCenter,
+                          child: SizedBox(
+                            height: 38,
+                            child: Image.asset(
+                              "assets/home/meal_card.png",
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                       ),
@@ -213,33 +201,16 @@ class SwiggyTabsHeader extends GetView<HomeController> {
                       child: GestureDetector(
                         onTap: () => controller.activeTab.value = 1,
                         child: Container(
-                          height: 80, // Always full height
+                          height: 80,
                           color: Colors.transparent,
-                          padding: EdgeInsets.only(
-                            top: !isMeal ? 0 : 6,
-                            bottom: !isMeal ? 6 : 0,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: !isMeal
-                                ? MainAxisAlignment.end
-                                : MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                "💪",
-                                style: TextStyle(fontSize: !isMeal ? 18 : 14),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                "Workout",
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontWeight: !isMeal
-                                      ? FontWeight.bold
-                                      : FontWeight.w500,
-                                  fontSize: !isMeal ? 14 : 12,
-                                ),
-                              ),
-                            ],
+                          padding: const EdgeInsets.only(bottom: 30),
+                          alignment: Alignment.bottomCenter,
+                          child: SizedBox(
+                            height: 38,
+                            child: Image.asset(
+                              "assets/home/workout_card.png",
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                       ),
