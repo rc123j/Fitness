@@ -89,6 +89,7 @@ class MealView extends GetView<MealController> {
           // Main scrollable content
           Positioned.fill(
             child: CustomScrollView(
+              controller: controller.scrollController,
               physics: const BouncingScrollPhysics(),
               slivers: [
                 // 1. COLLAPSIBLE APP BAR
@@ -98,33 +99,37 @@ class MealView extends GetView<MealController> {
                 SliverPadding(
                   padding: const EdgeInsets.only(top: 16, bottom: 100),
                   sliver: SliverToBoxAdapter(
-                    child: Obx(() => AppShimmer(
-                      enabled: controller.isLoading.value,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 18),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Weekly Calendar Timeline
-                                _buildWeeklyCalendar(),
-                                const SizedBox(height: 28),
+                    child: Obx(
+                      () => AppShimmer(
+                        enabled: controller.isLoading.value,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Weekly Calendar Timeline
+                                  _buildWeeklyCalendar(),
+                                  const SizedBox(height: 28),
 
-                                // Today's Nutrition Section
-                                _buildTodayNutritionCard(),
-                              ],
+                                  // Today's Nutrition Section
+                                  _buildTodayNutritionCard(),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 24),
+                            const SizedBox(height: 24),
 
-                          // Daily Meals — full-bleed gradient section (same style as
-                          // the "Today's Meal Plan" block on the home screen)
-                          _buildDailyMealsSection(context),
-                        ],
+                            // Daily Meals — full-bleed gradient section (same style as
+                            // the "Today's Meal Plan" block on the home screen)
+                            _buildDailyMealsSection(context),
+                          ],
+                        ),
                       ),
-                    )),
+                    ),
                   ),
                 ),
               ],
@@ -154,7 +159,11 @@ class MealView extends GetView<MealController> {
               width: 0.8,
             ),
           ),
-          child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
+          child: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+            size: 14,
+          ),
         ),
       ),
       actions: [
@@ -169,21 +178,20 @@ class MealView extends GetView<MealController> {
               width: 0.8,
             ),
           ),
-          child: const Icon(Icons.more_horiz_rounded, color: Colors.white, size: 18),
+          child: const Icon(
+            Icons.more_horiz_rounded,
+            color: Colors.white,
+            size: 18,
+          ),
         ),
         const SizedBox(width: 8),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        stretchModes: const [
-          StretchMode.zoomBackground,
-        ],
+        stretchModes: const [StretchMode.zoomBackground],
         background: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(
-              _getHeroImageUrl(),
-              fit: BoxFit.cover,
-            ),
+            Image.network(_getHeroImageUrl(), fit: BoxFit.cover),
             // Gradient Overlay
             Container(
               decoration: BoxDecoration(
@@ -218,7 +226,9 @@ class MealView extends GetView<MealController> {
   Widget _buildWeeklyCalendar() {
     return Obx(() {
       final now = DateTime.now();
-      final DateTime anchor = now.add(Duration(days: 7 * controller.weekOffset.value));
+      final DateTime anchor = now.add(
+        Duration(days: 7 * controller.weekOffset.value),
+      );
       final int anchorWeekday = anchor.weekday; // 1 = Monday, 7 = Sunday
       final List<DateTime> weekDates = List.generate(7, (index) {
         return anchor.subtract(Duration(days: anchorWeekday - 1 - index));
@@ -228,7 +238,8 @@ class MealView extends GetView<MealController> {
       final List<String> weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
       final bool isCurrentWeek = controller.weekOffset.value == 0;
-      final bool hasCustomSelection = controller.selectedQueryDate.value.isNotEmpty;
+      final bool hasCustomSelection =
+          controller.selectedQueryDate.value.isNotEmpty;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,11 +262,17 @@ class MealView extends GetView<MealController> {
                       onTap: controller.jumpToToday,
                       child: Container(
                         margin: const EdgeInsets.only(right: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xffFF00E5).withOpacity(0.12),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: const Color(0xffFF00E5).withOpacity(0.25), width: 0.8),
+                          border: Border.all(
+                            color: const Color(0xffFF00E5).withOpacity(0.25),
+                            width: 0.8,
+                          ),
                         ),
                         child: Text(
                           "Today",
@@ -267,9 +284,15 @@ class MealView extends GetView<MealController> {
                         ),
                       ),
                     ),
-                  _weekNavButton(Icons.chevron_left_rounded, controller.goToPreviousWeek),
+                  _weekNavButton(
+                    Icons.chevron_left_rounded,
+                    controller.goToPreviousWeek,
+                  ),
                   const SizedBox(width: 6),
-                  _weekNavButton(Icons.chevron_right_rounded, controller.goToNextWeek),
+                  _weekNavButton(
+                    Icons.chevron_right_rounded,
+                    controller.goToNextWeek,
+                  ),
                 ],
               ),
             ],
@@ -281,23 +304,32 @@ class MealView extends GetView<MealController> {
               final DateTime date = weekDates[index];
               final String dayName = weekdays[index];
               final String dayNum = date.day.toString();
-              final String dateStr = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+              final String dateStr =
+                  "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
               return Obx(() {
-                final isSelected = controller.selectedQueryDate.value == dateStr ||
+                final isSelected =
+                    controller.selectedQueryDate.value == dateStr ||
                     (controller.selectedQueryDate.value.isEmpty &&
                         date.day == now.day &&
                         date.month == now.month &&
                         date.year == now.year);
 
-                final bool hasLoggedMeals = controller.calorieHistoryList.any((day) =>
-                    day['date'] == dateStr && (day['meals_logged'] as List?)?.isNotEmpty == true);
+                final bool hasLoggedMeals = controller.calorieHistoryList.any(
+                  (day) =>
+                      day['date'] == dateStr &&
+                      (day['meals_logged'] as List?)?.isNotEmpty == true,
+                );
 
                 // Detect if this calendar cell is a future date
-                final bool isFuture = date.isAfter(DateTime(now.year, now.month, now.day));
+                final bool isFuture = date.isAfter(
+                  DateTime(now.year, now.month, now.day),
+                );
 
                 return GestureDetector(
-                  onTap: isSelected ? null : () => controller.selectDate(dateStr),
+                  onTap: isSelected
+                      ? null
+                      : () => controller.selectDate(dateStr),
                   child: SizedBox(
                     width: 40,
                     child: Column(
@@ -306,7 +338,13 @@ class MealView extends GetView<MealController> {
                         Text(
                           dayName.toUpperCase(),
                           style: GoogleFonts.inter(
-                            color: Colors.white.withOpacity(isSelected ? 0.7 : isFuture ? 0.2 : 0.35),
+                            color: Colors.white.withOpacity(
+                              isSelected
+                                  ? 0.7
+                                  : isFuture
+                                  ? 0.2
+                                  : 0.35,
+                            ),
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.4,
@@ -325,22 +363,30 @@ class MealView extends GetView<MealController> {
                                 color: isSelected
                                     ? const Color(0xffFF5A5F)
                                     : isFuture
-                                        ? const Color(0xffB100FF).withOpacity(0.06)
-                                        : Colors.transparent,
+                                    ? const Color(0xffB100FF).withOpacity(0.06)
+                                    : Colors.transparent,
                                 border: isSelected
                                     ? null
                                     : Border.all(
                                         color: isFuture
-                                            ? const Color(0xffB100FF).withOpacity(0.18)
+                                            ? const Color(
+                                                0xffB100FF,
+                                              ).withOpacity(0.18)
                                             : hasLoggedMeals
-                                                ? const Color(0xff00FF87).withOpacity(0.6)
-                                                : Colors.white.withOpacity(0.14),
-                                        width: hasLoggedMeals && !isFuture ? 1.6 : 1.0,
+                                            ? const Color(
+                                                0xff00FF87,
+                                              ).withOpacity(0.6)
+                                            : Colors.white.withOpacity(0.14),
+                                        width: hasLoggedMeals && !isFuture
+                                            ? 1.6
+                                            : 1.0,
                                       ),
                                 boxShadow: isSelected
                                     ? [
                                         BoxShadow(
-                                          color: const Color(0xffFF5A5F).withOpacity(0.35),
+                                          color: const Color(
+                                            0xffFF5A5F,
+                                          ).withOpacity(0.35),
                                           blurRadius: 12,
                                           offset: const Offset(0, 4),
                                         ),
@@ -353,10 +399,12 @@ class MealView extends GetView<MealController> {
                                   color: isSelected
                                       ? Colors.white
                                       : isFuture
-                                          ? Colors.white.withOpacity(0.3)
-                                          : Colors.white.withOpacity(0.85),
+                                      ? Colors.white.withOpacity(0.3)
+                                      : Colors.white.withOpacity(0.85),
                                   fontSize: 14,
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.w600,
                                 ),
                               ),
                             ),
@@ -369,7 +417,9 @@ class MealView extends GetView<MealController> {
                                   width: 14,
                                   height: 14,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xffB100FF).withOpacity(0.8),
+                                    color: const Color(
+                                      0xffB100FF,
+                                    ).withOpacity(0.8),
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(
@@ -410,7 +460,20 @@ class MealView extends GetView<MealController> {
   }
 
   String _formatWeekRange(List<DateTime> weekDates) {
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     final start = weekDates.first;
     final end = weekDates.last;
     if (start.month == end.month) {
@@ -427,13 +490,18 @@ class MealView extends GetView<MealController> {
   Widget _buildTodayNutritionCard() {
     return Obx(() {
       final double proteinProgress = controller.targetProtein.value > 0
-          ? (controller.consumedProtein.value / controller.targetProtein.value).clamp(0.0, 1.0)
+          ? (controller.consumedProtein.value / controller.targetProtein.value)
+                .clamp(0.0, 1.0)
           : 0.0;
       final double carbsProgress = controller.targetCarbs.value > 0
-          ? (controller.consumedCarbs.value / controller.targetCarbs.value).clamp(0.0, 1.0)
+          ? (controller.consumedCarbs.value / controller.targetCarbs.value)
+                .clamp(0.0, 1.0)
           : 0.0;
       final double fatProgress = controller.targetFat.value > 0
-          ? (controller.consumedFat.value / controller.targetFat.value).clamp(0.0, 1.0)
+          ? (controller.consumedFat.value / controller.targetFat.value).clamp(
+              0.0,
+              1.0,
+            )
           : 0.0;
 
       return Container(
@@ -441,10 +509,7 @@ class MealView extends GetView<MealController> {
         decoration: BoxDecoration(
           color: const Color(0xff0B0817).withOpacity(0.6),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.04),
-            width: 1.0,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -492,11 +557,23 @@ class MealView extends GetView<MealController> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      _buildLegendRow("${controller.consumedCarbs.value}g", "Carbs", _carbsColor),
+                      _buildLegendRow(
+                        "${controller.consumedCarbs.value}g",
+                        "Carbs",
+                        _carbsColor,
+                      ),
                       const SizedBox(height: 24),
-                      _buildLegendRow("${controller.consumedProtein.value}g", "Protein", _proteinColor),
+                      _buildLegendRow(
+                        "${controller.consumedProtein.value}g",
+                        "Protein",
+                        _proteinColor,
+                      ),
                       const SizedBox(height: 24),
-                      _buildLegendRow("${controller.consumedFat.value}g", "Fat", _fatColor),
+                      _buildLegendRow(
+                        "${controller.consumedFat.value}g",
+                        "Fat",
+                        _fatColor,
+                      ),
                     ],
                   ),
                 ),
@@ -839,7 +916,10 @@ class MealView extends GetView<MealController> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xffB100FF).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(30),
@@ -895,13 +975,19 @@ class MealView extends GetView<MealController> {
           final meal = controller.mealTimeline[index];
           final int mealTypeId = meal['meal_id'] ?? 0;
           final int dietPlanMealId = meal['id'] ?? 0;
-          final Map<int, List<dynamic>> optionFoods = Map<int, List<dynamic>>.from(meal['optionFoods'] ?? {});
+          final Map<int, List<dynamic>> optionFoods =
+              Map<int, List<dynamic>>.from(meal['optionFoods'] ?? {});
           final String mealTitle = meal['title'] ?? 'Meal Slot';
 
           return Obx(() {
-            final int selectedOpt = controller.selectedOptions[dietPlanMealId] ?? 1;
-            final bool isCompleted = controller.completedMealIds.contains(mealTypeId);
-            final bool isExpanded = controller.expandedMealIds.contains(dietPlanMealId);
+            final int selectedOpt =
+                controller.selectedOptions[dietPlanMealId] ?? 1;
+            final bool isCompleted = controller.completedMealIds.contains(
+              mealTypeId,
+            );
+            final bool isExpanded = controller.expandedMealIds.contains(
+              dietPlanMealId,
+            );
             final List foodsOfSelectedOption = optionFoods[selectedOpt] ?? [];
 
             // Calculate option macros
@@ -912,13 +998,18 @@ class MealView extends GetView<MealController> {
 
             for (var f in foodsOfSelectedOption) {
               if (f == null) continue;
-              totalProtein += double.tryParse(f['protein']?.toString() ?? '0') ?? 0;
+              totalProtein +=
+                  double.tryParse(f['protein']?.toString() ?? '0') ?? 0;
               totalCarbs += double.tryParse(f['carbs']?.toString() ?? '0') ?? 0;
               totalFat += double.tryParse(f['fat']?.toString() ?? '0') ?? 0;
-              activeKcal += double.tryParse(f['calories']?.toString() ?? '0') ?? 0;
+              activeKcal +=
+                  double.tryParse(f['calories']?.toString() ?? '0') ?? 0;
             }
 
-            final double targetKcal = activeKcal > 0 ? activeKcal : (double.tryParse(meal['target_calories']?.toString() ?? '') ?? 300.0);
+            final double targetKcal = activeKcal > 0
+                ? activeKcal
+                : (double.tryParse(meal['target_calories']?.toString() ?? '') ??
+                      300.0);
 
             // Get option name from first food Notes metadata
             String optionName = "Option $selectedOpt";
@@ -928,7 +1019,8 @@ class MealView extends GetView<MealController> {
               if (notes != null && notes.isNotEmpty) {
                 try {
                   final Map<String, dynamic> meta = jsonDecode(notes);
-                  if (meta['option_name'] != null && meta['option_name'].toString().isNotEmpty) {
+                  if (meta['option_name'] != null &&
+                      meta['option_name'].toString().isNotEmpty) {
                     optionName = meta['option_name'];
                   }
                 } catch (_) {}
@@ -936,7 +1028,9 @@ class MealView extends GetView<MealController> {
             }
 
             final String foodDesc = foodsOfSelectedOption.isNotEmpty
-                ? foodsOfSelectedOption.map((f) => f['food_details']?['food_name'] ?? '').join(', ')
+                ? foodsOfSelectedOption
+                      .map((f) => f['food_details']?['food_name'] ?? '')
+                      .join(', ')
                 : 'Tap to configure foods';
 
             String emoji = "🥗";
@@ -947,7 +1041,8 @@ class MealView extends GetView<MealController> {
               emoji = "🍱";
             } else if (titleString.contains('dinner')) {
               emoji = "🍲";
-            } else if (titleString.contains('snack') || titleString.contains('mid meal')) {
+            } else if (titleString.contains('snack') ||
+                titleString.contains('mid meal')) {
               emoji = "🍇";
             } else if (titleString.contains('workout')) {
               emoji = "🥤";
@@ -992,9 +1087,16 @@ class MealView extends GetView<MealController> {
                             GestureDetector(
                               onTap: () {
                                 if (isCompleted) {
-                                  controller.unmarkMealAsCompleted(dietPlanMealId, mealTypeId);
+                                  controller.unmarkMealAsCompleted(
+                                    dietPlanMealId,
+                                    mealTypeId,
+                                  );
                                 } else {
-                                  controller.markMealAsCompleted(dietPlanMealId, mealTypeId, selectedOption: selectedOpt);
+                                  controller.markMealAsCompleted(
+                                    dietPlanMealId,
+                                    mealTypeId,
+                                    selectedOption: selectedOpt,
+                                  );
                                 }
                               },
                               child: Container(
@@ -1002,7 +1104,9 @@ class MealView extends GetView<MealController> {
                                 width: 24,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: isCompleted ? const Color(0xff00FF87) : Colors.transparent,
+                                  color: isCompleted
+                                      ? const Color(0xff00FF87)
+                                      : Colors.transparent,
                                   border: Border.all(
                                     color: isCompleted
                                         ? Colors.transparent
@@ -1011,7 +1115,11 @@ class MealView extends GetView<MealController> {
                                   ),
                                 ),
                                 child: isCompleted
-                                    ? const Icon(Icons.check, color: Colors.black, size: 14)
+                                    ? const Icon(
+                                        Icons.check,
+                                        color: Colors.black,
+                                        size: 14,
+                                      )
                                     : null,
                               ),
                             ),
@@ -1041,14 +1149,16 @@ class MealView extends GetView<MealController> {
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                  ]
+                                  ],
                                 ],
                               ),
                             ),
 
                             // Expand Icon Indicator
                             Icon(
-                              isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                              isExpanded
+                                  ? Icons.keyboard_arrow_up_rounded
+                                  : Icons.keyboard_arrow_down_rounded,
                               color: Colors.white.withOpacity(0.4),
                               size: 24,
                             ),
@@ -1061,7 +1171,10 @@ class MealView extends GetView<MealController> {
                     if (isExpanded) ...[
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Divider(color: Colors.white.withOpacity(0.08), height: 1),
+                        child: Divider(
+                          color: Colors.white.withOpacity(0.08),
+                          height: 1,
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(16),
@@ -1081,7 +1194,14 @@ class MealView extends GetView<MealController> {
                                       fit: BoxFit.cover,
                                       errorBuilder: (_, __, ___) => Container(
                                         color: const Color(0xff120D23),
-                                        child: Center(child: Text(emoji, style: const TextStyle(fontSize: 32))),
+                                        child: Center(
+                                          child: Text(
+                                            emoji,
+                                            style: const TextStyle(
+                                              fontSize: 32,
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -1103,7 +1223,10 @@ class MealView extends GetView<MealController> {
                                     bottom: 12,
                                     child: Row(
                                       children: [
-                                        Text(emoji, style: const TextStyle(fontSize: 18)),
+                                        Text(
+                                          emoji,
+                                          style: const TextStyle(fontSize: 18),
+                                        ),
                                         const SizedBox(width: 8),
                                         Text(
                                           "Exchange Options",
@@ -1122,7 +1245,11 @@ class MealView extends GetView<MealController> {
                             const SizedBox(height: 16),
 
                             // 2. Macronutrient distributes chips
-                            _buildMacroSummaryChips(totalProtein, totalCarbs, totalFat),
+                            _buildMacroSummaryChips(
+                              totalProtein,
+                              totalCarbs,
+                              totalFat,
+                            ),
                             const SizedBox(height: 18),
 
                             // 3. Detailed Included items and swaps
@@ -1135,11 +1262,19 @@ class MealView extends GetView<MealController> {
                               ),
                             ),
                             const SizedBox(height: 10),
-                            _buildFoodItemsSection(foodsOfSelectedOption, optionFoods),
+                            _buildFoodItemsSection(
+                              foodsOfSelectedOption,
+                              optionFoods,
+                            ),
                             const SizedBox(height: 20),
 
                             // 4. Action Log Button
-                            _buildLogButton(dietPlanMealId, mealTypeId, isCompleted, selectedOpt),
+                            _buildLogButton(
+                              dietPlanMealId,
+                              mealTypeId,
+                              isCompleted,
+                              selectedOpt,
+                            ),
                           ],
                         ),
                       ),
@@ -1154,18 +1289,34 @@ class MealView extends GetView<MealController> {
     });
   }
 
-
-
   // Macro Summary Chips Row
   Widget _buildMacroSummaryChips(double protein, double carbs, double fat) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(child: _buildMiniMacroChip("Protein", "${protein.toInt()}g", const Color(0xffFFD166))),
+        Expanded(
+          child: _buildMiniMacroChip(
+            "Protein",
+            "${protein.toInt()}g",
+            const Color(0xffFFD166),
+          ),
+        ),
         const SizedBox(width: 6),
-        Expanded(child: _buildMiniMacroChip("Carbs", "${carbs.toInt()}g", const Color(0xff00FF87))),
+        Expanded(
+          child: _buildMiniMacroChip(
+            "Carbs",
+            "${carbs.toInt()}g",
+            const Color(0xff00FF87),
+          ),
+        ),
         const SizedBox(width: 6),
-        Expanded(child: _buildMiniMacroChip("Fat", "${fat.toInt()}g", const Color(0xffFF00E5))),
+        Expanded(
+          child: _buildMiniMacroChip(
+            "Fat",
+            "${fat.toInt()}g",
+            const Color(0xffFF00E5),
+          ),
+        ),
       ],
     );
   }
@@ -1201,7 +1352,10 @@ class MealView extends GetView<MealController> {
   }
 
   // Foods and Swaps List
-  Widget _buildFoodItemsSection(List foods, Map<int, List<dynamic>> optionFoods) {
+  Widget _buildFoodItemsSection(
+    List foods,
+    Map<int, List<dynamic>> optionFoods,
+  ) {
     if (foods.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(12),
@@ -1224,18 +1378,27 @@ class MealView extends GetView<MealController> {
       itemBuilder: (context, index) {
         final f = foods[index];
         final foodDetails = f['food_details'] as Map<String, dynamic>? ?? {};
-        final String foodName = foodDetails['food_name']?.toString() ?? f['food_name']?.toString() ?? 'Food Item';
-        final double kcal = double.tryParse(f['calories']?.toString() ?? '0') ?? 0.0;
+        final String foodName =
+            foodDetails['food_name']?.toString() ??
+            f['food_name']?.toString() ??
+            'Food Item';
+        final double kcal =
+            double.tryParse(f['calories']?.toString() ?? '0') ?? 0.0;
         // Portion: prefer household_measure from food_details, then exchange_amount, then quantity+unit
-        final String householdMeasure = foodDetails['household_measure']?.toString() ?? '';
-        final String exchangeAmount = foodDetails['exchange_amount']?.toString() ?? '';
+        final String householdMeasure =
+            foodDetails['household_measure']?.toString() ?? '';
+        final String exchangeAmount =
+            foodDetails['exchange_amount']?.toString() ?? '';
         final String qtyStr = f['quantity']?.toString() ?? '';
-        final String unitStr = foodDetails['serving_unit']?.toString() ?? f['serving_unit']?.toString() ?? 'g';
+        final String unitStr =
+            foodDetails['serving_unit']?.toString() ??
+            f['serving_unit']?.toString() ??
+            'g';
         final String portion = householdMeasure.isNotEmpty
             ? householdMeasure
             : exchangeAmount.isNotEmpty
-                ? exchangeAmount
-                : (qtyStr.isNotEmpty ? '$qtyStr $unitStr' : '');
+            ? exchangeAmount
+            : (qtyStr.isNotEmpty ? '$qtyStr $unitStr' : '');
 
         // Construct swaps from Option 2 and Option 3 at the same index
         final List<String> swaps = [];
@@ -1245,7 +1408,8 @@ class MealView extends GetView<MealController> {
         if (index < option2Foods.length) {
           final f2 = option2Foods[index];
           final String name2 = f2['food_details']?['food_name'] ?? '';
-          final String portion2 = "${f2['serving_size']} ${f2['serving_unit'] ?? f2['unit'] ?? ''}";
+          final String portion2 =
+              "${f2['serving_size']} ${f2['serving_unit'] ?? f2['unit'] ?? ''}";
           if (name2.isNotEmpty) {
             swaps.add("$name2 ($portion2)");
           }
@@ -1254,7 +1418,8 @@ class MealView extends GetView<MealController> {
         if (index < option3Foods.length) {
           final f3 = option3Foods[index];
           final String name3 = f3['food_details']?['food_name'] ?? '';
-          final String portion3 = "${f3['serving_size']} ${f3['serving_unit'] ?? f3['unit'] ?? ''}";
+          final String portion3 =
+              "${f3['serving_size']} ${f3['serving_unit'] ?? f3['unit'] ?? ''}";
           if (name3.isNotEmpty) {
             swaps.add("$name3 ($portion3)");
           }
@@ -1322,13 +1487,22 @@ class MealView extends GetView<MealController> {
   }
 
   // Inline action Log Button
-  Widget _buildLogButton(int dietPlanMealId, int mealTypeId, bool isCompleted, int activeOpt) {
+  Widget _buildLogButton(
+    int dietPlanMealId,
+    int mealTypeId,
+    bool isCompleted,
+    int activeOpt,
+  ) {
     return GestureDetector(
       onTap: () async {
         if (isCompleted) {
           await controller.unmarkMealAsCompleted(dietPlanMealId, mealTypeId);
         } else {
-          final success = await controller.markMealAsCompleted(dietPlanMealId, mealTypeId, selectedOption: activeOpt);
+          final success = await controller.markMealAsCompleted(
+            dietPlanMealId,
+            mealTypeId,
+            selectedOption: activeOpt,
+          );
           if (success) {
             Get.snackbar(
               "Meal Logged 🥗",
@@ -1349,10 +1523,7 @@ class MealView extends GetView<MealController> {
           gradient: isCompleted
               ? null
               : const LinearGradient(
-                  colors: [
-                    Color(0xff00FF87),
-                    Color(0xffFFD166),
-                  ],
+                  colors: [Color(0xff00FF87), Color(0xffFFD166)],
                 ),
           color: isCompleted ? Colors.white.withOpacity(0.06) : null,
           border: isCompleted
@@ -1364,7 +1535,9 @@ class MealView extends GetView<MealController> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              isCompleted ? Icons.check_circle_rounded : Icons.check_circle_outline_rounded,
+              isCompleted
+                  ? Icons.check_circle_rounded
+                  : Icons.check_circle_outline_rounded,
               color: isCompleted ? const Color(0xff00FF87) : Colors.black,
               size: 18,
             ),

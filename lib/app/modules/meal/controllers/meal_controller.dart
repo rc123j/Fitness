@@ -1,10 +1,16 @@
 import 'dart:convert';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
+import '../../main_navigation/controllers/main_navigation_controller.dart';
 
 class MealController extends GetxController {
   final _apiClient = Get.find<ApiClient>();
+
+  // Hides/shows the shared bottom nav bar as this screen scrolls.
+  final ScrollController scrollController = ScrollController();
+  double _lastScrollOffset = 0;
 
   final selectedQueryDate = "".obs;
   final selectedDate = "Today".obs;
@@ -13,13 +19,13 @@ class MealController extends GetxController {
   // Offset (in weeks) of the calendar strip from the week containing today.
   // 0 = current week, 1 = next week, -1 = previous week, etc.
   final weekOffset = 0.obs;
-  
+
   // Progress states
   final currentCalories = 0.obs;
   final targetCalories = 2000.obs;
   final currentWater = 0.0.obs; // In Liters
-  final targetWater = 3.0.obs;  // In Liters
-  
+  final targetWater = 3.0.obs; // In Liters
+
   // Target Macros
   final targetProtein = 0.obs;
   final targetCarbs = 0.obs;
@@ -34,13 +40,13 @@ class MealController extends GetxController {
 
   // Diet Plan Meals Timeline data
   final mealTimeline = <Map<String, dynamic>>[].obs;
-  
+
   // Track selected option (1, 2, 3, 4) for each meal slot (key is dietPlanMealId)
   final selectedOptions = <int, int>{}.obs;
-  
+
   // Track current day in the 30-day rotation
   final currentDay = 1.obs;
-  
+
   // Set of completed meal_ids (1=Breakfast, etc.) for today
   final completedMealIds = <int>{}.obs;
 
@@ -58,30 +64,84 @@ class MealController extends GetxController {
     super.onInit();
     fetchMealData();
     fetchCalorieHistory();
+    scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void onClose() {
+    scrollController.removeListener(_onScroll);
+    scrollController.dispose();
+    super.onClose();
+  }
+
+  void _onScroll() {
+    final double offset = scrollController.offset;
+    final navController = Get.find<MainNavigationController>();
+
+    final double delta = offset - _lastScrollOffset;
+    if (delta.abs() > 4) {
+      if (delta > 0 && offset > 20) {
+        navController.isNavBarVisible.value = false;
+      } else if (delta < 0) {
+        navController.isNavBarVisible.value = true;
+      }
+      _lastScrollOffset = offset;
+    }
+
+    if (offset <= 0) {
+      navController.isNavBarVisible.value = true;
+    }
   }
 
   Future<void> fetchMealData({bool silent = false}) async {
     if (!silent) isLoading.value = true;
-    if (!silent) await Future.delayed(const Duration(seconds: 2)); // Artificial delay for shimmer
+    if (!silent)
+      await Future.delayed(
+        const Duration(seconds: 2),
+      ); // Artificial delay for shimmer
     try {
-      final queryParam = selectedQueryDate.value.isNotEmpty ? "?date=${selectedQueryDate.value}" : "";
-      
+      final queryParam = selectedQueryDate.value.isNotEmpty
+          ? "?date=${selectedQueryDate.value}"
+          : "";
+
       // 1. Fetch current diet plan details (target macros & meal prescriptions)
-      final planRes = await _apiClient.get("${ApiEndpoints.currentDietPlan}$queryParam");
-      
+      final planRes = await _apiClient.get(
+        "${ApiEndpoints.currentDietPlan}$queryParam",
+      );
+
       if (planRes.data != null) {
         currentDay.value = planRes.data['current_day'] ?? 1;
-        
+
         final planData = planRes.data['diet_plan'];
         if (planData != null) {
           final metrics = planData['metric_snapshot'];
-          
-          targetCalories.value = double.tryParse(planData['target_calories']?.toString() ?? '')?.toInt() ?? 2000;
+
+          targetCalories.value =
+              double.tryParse(
+                planData['target_calories']?.toString() ?? '',
+              )?.toInt() ??
+              2000;
           if (metrics != null) {
-            targetProtein.value = double.tryParse(metrics['protein_target_g']?.toString() ?? '')?.toInt() ?? 140;
-            targetCarbs.value = double.tryParse(metrics['carbs_target_g']?.toString() ?? '')?.toInt() ?? 200;
-            targetFat.value = double.tryParse(metrics['fat_target_g']?.toString() ?? '')?.toInt() ?? 60;
-            targetFiber.value = double.tryParse(metrics['fiber_target_g']?.toString() ?? '')?.toInt() ?? 30;
+            targetProtein.value =
+                double.tryParse(
+                  metrics['protein_target_g']?.toString() ?? '',
+                )?.toInt() ??
+                140;
+            targetCarbs.value =
+                double.tryParse(
+                  metrics['carbs_target_g']?.toString() ?? '',
+                )?.toInt() ??
+                200;
+            targetFat.value =
+                double.tryParse(
+                  metrics['fat_target_g']?.toString() ?? '',
+                )?.toInt() ??
+                60;
+            targetFiber.value =
+                double.tryParse(
+                  metrics['fiber_target_g']?.toString() ?? '',
+                )?.toInt() ??
+                30;
           } else {
             // Default targets if metrics snapshot is missing
             targetProtein.value = 140;
@@ -96,9 +156,12 @@ class MealController extends GetxController {
 
           for (var meal in mealsList) {
             if (meal == null) continue;
-            final int dietPlanMealId = int.tryParse(meal['id']?.toString() ?? '') ?? 0;
+            final int dietPlanMealId =
+                int.tryParse(meal['id']?.toString() ?? '') ?? 0;
             selectedOptions.putIfAbsent(dietPlanMealId, () => 1);
-            expandedMealIds.add(dietPlanMealId); // meal cards are expanded by default
+            expandedMealIds.add(
+              dietPlanMealId,
+            ); // meal cards are expanded by default
 
             final mealTypeName = meal['meal_type']?['name'] ?? 'Meal';
             final List foods = meal['foods'] ?? [];
@@ -120,10 +183,14 @@ class MealController extends GetxController {
 
             timelineTemp.add({
               "id": dietPlanMealId,
-              "meal_id": int.tryParse(meal['meal_id']?.toString() ?? '') ?? 1, // meal_type ID
+              "meal_id":
+                  int.tryParse(meal['meal_id']?.toString() ?? '') ??
+                  1, // meal_type ID
               "title": mealTypeName,
               "optionFoods": optionFoods,
-              "target_calories": double.tryParse(meal['target_calories']?.toString() ?? '') ?? 0.0,
+              "target_calories":
+                  double.tryParse(meal['target_calories']?.toString() ?? '') ??
+                  0.0,
             });
           }
 
@@ -141,28 +208,60 @@ class MealController extends GetxController {
 
       // Update selected date header dynamically with Day info
       final now = DateTime.now();
-      final months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      
+      final months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+
       if (selectedQueryDate.value.isNotEmpty) {
         final parts = selectedQueryDate.value.split('-');
-        final dayVal = parts.length == 3 ? int.tryParse(parts[2]) ?? now.day : now.day;
-        final monthVal = parts.length == 3 ? int.tryParse(parts[1]) ?? now.month : now.month;
-        selectedDate.value = "Day ${currentDay.value} of 30 • $dayVal ${months[monthVal - 1]}";
+        final dayVal = parts.length == 3
+            ? int.tryParse(parts[2]) ?? now.day
+            : now.day;
+        final monthVal = parts.length == 3
+            ? int.tryParse(parts[1]) ?? now.month
+            : now.month;
+        selectedDate.value =
+            "Day ${currentDay.value} of 30 • $dayVal ${months[monthVal - 1]}";
       } else {
-        selectedDate.value = "Day ${currentDay.value} of 30 • ${now.day} ${months[now.month - 1]}";
+        selectedDate.value =
+            "Day ${currentDay.value} of 30 • ${now.day} ${months[now.month - 1]}";
       }
 
       // 2. Fetch today's logged nutrition (consumed calories/macros) & list of logged meals
       try {
-        final nutRes = await _apiClient.get("${ApiEndpoints.todayNutritionLog}$queryParam");
+        final nutRes = await _apiClient.get(
+          "${ApiEndpoints.todayNutritionLog}$queryParam",
+        );
         if (nutRes.data != null) {
           final nutData = nutRes.data;
           final consumed = nutData['consumed'] ?? {};
-          currentCalories.value = double.tryParse(consumed['calories']?.toString() ?? '')?.toInt() ?? 0;
-          consumedProtein.value = double.tryParse(consumed['protein']?.toString() ?? '')?.toInt() ?? 0;
-          consumedCarbs.value = double.tryParse(consumed['carbs']?.toString() ?? '')?.toInt() ?? 0;
-          consumedFat.value = double.tryParse(consumed['fat']?.toString() ?? '')?.toInt() ?? 0;
-          consumedFiber.value = double.tryParse(consumed['fiber']?.toString() ?? '')?.toInt() ?? 0;
+          currentCalories.value =
+              double.tryParse(
+                consumed['calories']?.toString() ?? '',
+              )?.toInt() ??
+              0;
+          consumedProtein.value =
+              double.tryParse(consumed['protein']?.toString() ?? '')?.toInt() ??
+              0;
+          consumedCarbs.value =
+              double.tryParse(consumed['carbs']?.toString() ?? '')?.toInt() ??
+              0;
+          consumedFat.value =
+              double.tryParse(consumed['fat']?.toString() ?? '')?.toInt() ?? 0;
+          consumedFiber.value =
+              double.tryParse(consumed['fiber']?.toString() ?? '')?.toInt() ??
+              0;
 
           final List loggedIds = nutData['logged_meal_ids'] ?? [];
           completedMealIds.clear();
@@ -179,18 +278,22 @@ class MealController extends GetxController {
 
       // 3. Fetch today's logged water
       try {
-        final waterRes = await _apiClient.get("${ApiEndpoints.todayWaterLog}$queryParam");
+        final waterRes = await _apiClient.get(
+          "${ApiEndpoints.todayWaterLog}$queryParam",
+        );
         if (waterRes.data != null) {
           final waterData = waterRes.data;
-          final ml = double.tryParse(waterData['amount_ml']?.toString() ?? '') ?? 0.0;
-          final tgtMl = double.tryParse(waterData['target_ml']?.toString() ?? '') ?? 3000.0;
+          final ml =
+              double.tryParse(waterData['amount_ml']?.toString() ?? '') ?? 0.0;
+          final tgtMl =
+              double.tryParse(waterData['target_ml']?.toString() ?? '') ??
+              3000.0;
           currentWater.value = ml / 1000.0;
           targetWater.value = tgtMl / 1000.0;
         }
       } catch (e) {
         print("Error fetching logged water: $e");
       }
-
     } catch (e, stack) {
       print("===== MEAL CONTROLLER FETCH ERROR =====");
       print("Error: $e");
@@ -243,7 +346,20 @@ class MealController extends GetxController {
     if (diff == 2) return "Day After Tomorrow";
     if (diff == -1) return "Yesterday";
 
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     return "${target.day} ${months[target.month - 1]}";
   }
 
@@ -277,9 +393,14 @@ class MealController extends GetxController {
   Future<void> addWater(double amountLiters) async {
     try {
       final amountMl = (amountLiters * 1000).toInt();
-      await _apiClient.post(ApiEndpoints.logWater, data: {'amount_ml': amountMl});
+      await _apiClient.post(
+        ApiEndpoints.logWater,
+        data: {'amount_ml': amountMl},
+      );
       final newVal = currentWater.value + amountLiters;
-      currentWater.value = newVal > targetWater.value ? targetWater.value : newVal;
+      currentWater.value = newVal > targetWater.value
+          ? targetWater.value
+          : newVal;
     } catch (_) {}
   }
 
@@ -289,7 +410,11 @@ class MealController extends GetxController {
     } catch (_) {}
   }
 
-  Future<bool> markMealAsCompleted(int dietPlanMealId, int mealId, {int selectedOption = 1}) async {
+  Future<bool> markMealAsCompleted(
+    int dietPlanMealId,
+    int mealId, {
+    int selectedOption = 1,
+  }) async {
     try {
       await _apiClient.post(
         ApiEndpoints.markMealComplete,
@@ -309,7 +434,9 @@ class MealController extends GetxController {
 
   Future<bool> unmarkMealAsCompleted(int dietPlanMealId, int mealId) async {
     try {
-      final dateParam = selectedQueryDate.value.isNotEmpty ? selectedQueryDate.value : null;
+      final dateParam = selectedQueryDate.value.isNotEmpty
+          ? selectedQueryDate.value
+          : null;
       await _apiClient.post(
         ApiEndpoints.unmarkMealComplete,
         data: {
@@ -330,27 +457,30 @@ class MealController extends GetxController {
     try {
       final res = await _apiClient.get(ApiEndpoints.calorieHistory);
       final data = res.data;
-      
-      historyTargetCalories.value = double.tryParse(data['target_calories']?.toString() ?? '')?.toInt() ?? 2000;
-      
+
+      historyTargetCalories.value =
+          double.tryParse(data['target_calories']?.toString() ?? '')?.toInt() ??
+          2000;
+
       final List rawHistory = data['history'] ?? [];
       final List<Map<String, dynamic>> tempHistory = [];
-      
+
       double totalCal = 0.0;
       int daysAdherent = 0;
-      
+
       for (var day in rawHistory) {
         final List mealsLogged = day['meals_logged'] ?? [];
-        final double cal = double.tryParse(day['calories']?.toString() ?? '0.0') ?? 0.0;
-        
+        final double cal =
+            double.tryParse(day['calories']?.toString() ?? '0.0') ?? 0.0;
+
         totalCal += cal;
         if (mealsLogged.isNotEmpty) {
           daysAdherent += 1;
         }
-        
+
         tempHistory.add(Map<String, dynamic>.from(day));
       }
-      
+
       calorieHistoryList.value = tempHistory;
       historyAverageCalories.value = (totalCal / 7).round();
       historyAdherenceRate.value = ((daysAdherent / 7.0) * 100).round();

@@ -1,9 +1,15 @@
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
+import '../../main_navigation/controllers/main_navigation_controller.dart';
 
 class ProgressController extends GetxController {
   final _apiClient = Get.find<ApiClient>();
+
+  // Hides/shows the shared bottom nav bar as this screen scrolls.
+  final ScrollController scrollController = ScrollController();
+  double _lastScrollOffset = 0;
 
   final isLoading = false.obs;
 
@@ -12,7 +18,7 @@ class ProgressController extends GetxController {
 
   // Progress photos timeframe: "30 Days", "90 Days", "All Time"
   final selectedPhotoTimeframe = "30 Days".obs;
-  
+
   // Selected index in the transformation timeline (0 = Day 1, 1 = Day 15, 2 = Day 30, etc.)
   final activeTimelineIndex = 2.obs;
 
@@ -54,8 +60,8 @@ class ProgressController extends GetxController {
 
   // Body Composition Values
   final muscleMassKg = 32.6.obs; // 48.7%
-  final bodyFatKg = 18.7.obs;   // 18.7%
-  final otherKg = 16.1.obs;     // 32.6%
+  final bodyFatKg = 18.7.obs; // 18.7%
+  final otherKg = 16.1.obs; // 32.6%
 
   // Achievements Count
   final achievementsCount = 12.obs;
@@ -67,18 +73,50 @@ class ProgressController extends GetxController {
   void onInit() {
     super.onInit();
     fetchProgressData();
+    scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void onClose() {
+    scrollController.removeListener(_onScroll);
+    scrollController.dispose();
+    super.onClose();
+  }
+
+  void _onScroll() {
+    final double offset = scrollController.offset;
+    final navController = Get.find<MainNavigationController>();
+
+    final double delta = offset - _lastScrollOffset;
+    if (delta.abs() > 4) {
+      if (delta > 0 && offset > 20) {
+        navController.isNavBarVisible.value = false;
+      } else if (delta < 0) {
+        navController.isNavBarVisible.value = true;
+      }
+      _lastScrollOffset = offset;
+    }
+
+    if (offset <= 0) {
+      navController.isNavBarVisible.value = true;
+    }
   }
 
   Future<void> fetchProgressData() async {
     isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 2)); // Artificial delay for shimmer
+    await Future.delayed(
+      const Duration(seconds: 2),
+    ); // Artificial delay for shimmer
     try {
       // 1. Fetch weight and steps history logs
       final response = await _apiClient.get(ApiEndpoints.progressLog);
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data;
-        weight.value = (data['current_weight'] as num?)?.toDouble() ?? weight.value;
-        weightChange.value = (data['weight_difference_kg'] as num?)?.toDouble() ?? weightChange.value;
+        weight.value =
+            (data['current_weight'] as num?)?.toDouble() ?? weight.value;
+        weightChange.value =
+            (data['weight_difference_kg'] as num?)?.toDouble() ??
+            weightChange.value;
 
         final logsList = data['logs'] as List?;
         if (logsList != null && logsList.isNotEmpty) {
@@ -86,13 +124,26 @@ class ProgressController extends GetxController {
           for (var item in logsList) {
             final double wt = (item['weight_kg'] as num?)?.toDouble() ?? 0.0;
             final String dateStr = item['logged_date']?.toString() ?? "";
-            
+
             // Format "2026-07-21" to "21 Jul"
             String formattedDate = dateStr;
             if (dateStr.length >= 10) {
               try {
                 final date = DateTime.parse(dateStr);
-                final months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                final months = [
+                  "Jan",
+                  "Feb",
+                  "Mar",
+                  "Apr",
+                  "May",
+                  "Jun",
+                  "Jul",
+                  "Aug",
+                  "Sep",
+                  "Oct",
+                  "Nov",
+                  "Dec",
+                ];
                 formattedDate = "${date.day} ${months[date.month - 1]}";
               } catch (_) {}
             }
@@ -104,7 +155,7 @@ class ProgressController extends GetxController {
             weightTrendData.value = trend;
           }
         }
-        
+
         // Setup mock 7-day adherence data (Calories vs Target)
         final List<Map<String, dynamic>> adherence = [];
         final today = DateTime.now();
@@ -112,7 +163,7 @@ class ProgressController extends GetxController {
         for (int i = 6; i >= 0; i--) {
           final d = today.subtract(Duration(days: i));
           // Mock data: sometimes hitting target, sometimes over
-          int cal = 1900 + (d.day * 50) % 600; 
+          int cal = 1900 + (d.day * 50) % 600;
           adherence.add({
             "day": days[d.weekday - 1],
             "calories": cal,
@@ -120,7 +171,6 @@ class ProgressController extends GetxController {
           });
         }
         weeklyAdherenceData.value = adherence;
-
       }
     } catch (_) {
       // Fallback gracefully on network failures
@@ -135,7 +185,8 @@ class ProgressController extends GetxController {
         final latestMetrics = data['latest_metrics'];
 
         if (profile != null) {
-          weight.value = (profile['weight_kg'] as num?)?.toDouble() ?? weight.value;
+          weight.value =
+              (profile['weight_kg'] as num?)?.toDouble() ?? weight.value;
         }
 
         if (latestMetrics != null) {
@@ -143,20 +194,29 @@ class ProgressController extends GetxController {
           tdee.value = (latestMetrics['tdee'] as num?)?.toInt() ?? tdee.value;
           bmr.value = (latestMetrics['bmr'] as num?)?.toInt() ?? bmr.value;
           ibw.value = (latestMetrics['ibw'] as num?)?.toDouble() ?? ibw.value;
-          
-          final double fatPct = (latestMetrics['body_fat_pct'] as num?)?.toDouble() ?? 0.0;
-          final double musclePct = (latestMetrics['muscle_mass_pct'] as num?)?.toDouble() ?? 0.0;
-          
+
+          final double fatPct =
+              (latestMetrics['body_fat_pct'] as num?)?.toDouble() ?? 0.0;
+          final double musclePct =
+              (latestMetrics['muscle_mass_pct'] as num?)?.toDouble() ?? 0.0;
+
           if (fatPct > 0) {
             bodyFat.value = fatPct;
-            bodyFatKg.value = double.parse((weight.value * (fatPct / 100)).toStringAsFixed(1));
+            bodyFatKg.value = double.parse(
+              (weight.value * (fatPct / 100)).toStringAsFixed(1),
+            );
           }
           if (musclePct > 0) {
-            muscleMass.value = double.parse((weight.value * (musclePct / 100)).toStringAsFixed(1));
+            muscleMass.value = double.parse(
+              (weight.value * (musclePct / 100)).toStringAsFixed(1),
+            );
             muscleMassKg.value = muscleMass.value;
           }
 
-          otherKg.value = double.parse((weight.value - bodyFatKg.value - muscleMassKg.value).toStringAsFixed(1));
+          otherKg.value = double.parse(
+            (weight.value - bodyFatKg.value - muscleMassKg.value)
+                .toStringAsFixed(1),
+          );
         }
       }
     } catch (_) {}

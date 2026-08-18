@@ -4,10 +4,15 @@ import 'package:get/get.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
 import '../../../services/auth_service.dart';
+import '../../main_navigation/controllers/main_navigation_controller.dart';
 
 class ProfileController extends GetxController {
   final _apiClient = Get.find<ApiClient>();
   final _authService = Get.find<AuthService>();
+
+  // Hides/shows the shared bottom nav bar as this screen scrolls.
+  final ScrollController scrollController = ScrollController();
+  double _lastScrollOffset = 0;
 
   final isLoading = true.obs;
   final username = ''.obs;
@@ -34,11 +39,40 @@ class ProfileController extends GetxController {
   void onInit() {
     super.onInit();
     fetchProfile();
+    scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void onClose() {
+    scrollController.removeListener(_onScroll);
+    scrollController.dispose();
+    super.onClose();
+  }
+
+  void _onScroll() {
+    final double offset = scrollController.offset;
+    final navController = Get.find<MainNavigationController>();
+
+    final double delta = offset - _lastScrollOffset;
+    if (delta.abs() > 4) {
+      if (delta > 0 && offset > 20) {
+        navController.isNavBarVisible.value = false;
+      } else if (delta < 0) {
+        navController.isNavBarVisible.value = true;
+      }
+      _lastScrollOffset = offset;
+    }
+
+    if (offset <= 0) {
+      navController.isNavBarVisible.value = true;
+    }
   }
 
   Future<void> fetchProfile() async {
     isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 2)); // Artificial delay for shimmer
+    await Future.delayed(
+      const Duration(seconds: 2),
+    ); // Artificial delay for shimmer
 
     try {
       final response = await _apiClient.get(ApiEndpoints.profile);
@@ -88,7 +122,8 @@ class ProfileController extends GetxController {
     } on DioException catch (e) {
       Get.snackbar(
         "Error",
-        e.response?.data['message'] ?? "Failed to delete account. Please try again.",
+        e.response?.data['message'] ??
+            "Failed to delete account. Please try again.",
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -98,18 +133,22 @@ class ProfileController extends GetxController {
     }
   }
 
-  Future<bool> changePassword(String currentPassword, String newPassword) async {
+  Future<bool> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
     isLoading.value = true;
     try {
-      await _apiClient.post(ApiEndpoints.changePassword, data: {
-        'currentPassword': currentPassword,
-        'newPassword': newPassword,
-      });
+      await _apiClient.post(
+        ApiEndpoints.changePassword,
+        data: {'currentPassword': currentPassword, 'newPassword': newPassword},
+      );
       return true;
     } on DioException catch (e) {
       Get.snackbar(
         "Error",
-        e.response?.data['message'] ?? "Failed to change password. Please try again.",
+        e.response?.data['message'] ??
+            "Failed to change password. Please try again.",
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -127,23 +166,23 @@ class ProfileController extends GetxController {
   }) async {
     isLoading.value = true;
     try {
-      final response = await _apiClient.put(ApiEndpoints.profile, data: {
-        'first_name': firstName,
-        'last_name': lastName,
-        'phone': phone,
-      });
-      
+      final response = await _apiClient.put(
+        ApiEndpoints.profile,
+        data: {'first_name': firstName, 'last_name': lastName, 'phone': phone},
+      );
+
       // Update local values
       final profile = response.data['profile'];
       final user = profile['user'];
       username.value = '${user['first_name']} ${user['last_name']}';
       email.value = user['email'] ?? '';
-      
+
       return true;
     } on DioException catch (e) {
       Get.snackbar(
         "Error",
-        e.response?.data['message'] ?? "Failed to update profile. Please try again.",
+        e.response?.data['message'] ??
+            "Failed to update profile. Please try again.",
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

@@ -60,32 +60,35 @@ class ProgressView extends GetView<ProgressController> {
                 /// BODY CONTENT
                 Expanded(
                   child: SingleChildScrollView(
+                    controller: controller.scrollController,
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Obx(() => AppShimmer(
-                      enabled: controller.isLoading.value,
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 10),
-                          
-                          /// 1. HEALTH SNAPSHOT CARD (BMI, TDEE, BMR, IBW)
-                          buildHealthSnapshotCard(),
-                          const SizedBox(height: 20),
+                    child: Obx(
+                      () => AppShimmer(
+                        enabled: controller.isLoading.value,
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 10),
 
-                          /// 2. WEEKLY ADHERENCE CHART (CALORIES VS TARGET)
-                          buildWeeklyAdherenceCard(),
-                          const SizedBox(height: 20),
+                            /// 1. HEALTH SNAPSHOT CARD (BMI, TDEE, BMR, IBW)
+                            buildHealthSnapshotCard(),
+                            const SizedBox(height: 20),
 
-                          /// 3. WEIGHT TRAJECTORY GRAPH
-                          buildWeightTrajectoryCard(),
-                          const SizedBox(height: 30),
-                          
-                          /// 4. GAMIFICATION/STREAKS
-                          buildGamificationRow(),
-                          const SizedBox(height: 40),
-                        ],
+                            /// 2. WEEKLY ADHERENCE CHART (CALORIES VS TARGET)
+                            buildWeeklyAdherenceCard(),
+                            const SizedBox(height: 20),
+
+                            /// 3. WEIGHT TRAJECTORY GRAPH
+                            buildWeightTrajectoryCard(),
+                            const SizedBox(height: 30),
+
+                            /// 4. GAMIFICATION/STREAKS
+                            buildGamificationRow(),
+                            const SizedBox(height: 40),
+                          ],
+                        ),
                       ),
-                    )),
+                    ),
                   ),
                 ),
               ],
@@ -165,7 +168,7 @@ class ProgressView extends GetView<ProgressController> {
           ),
         ),
         const SizedBox(height: 16),
-        
+
         // Top Row: BMI & TDEE
         Row(
           children: [
@@ -174,10 +177,16 @@ class ProgressView extends GetView<ProgressController> {
               child: buildImageCard(
                 imagePath: 'assets/new_images1/weight ratio.png',
                 title: 'BMI Ratio',
-                value: Obx(() => Text(
-                  controller.bmi.value.toStringAsFixed(1),
-                  style: GoogleFonts.outfit(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
-                )),
+                value: Obx(
+                  () => Text(
+                    controller.bmi.value.toStringAsFixed(1),
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
                 color: const Color(0xff00A2FF),
               ),
             ),
@@ -187,18 +196,24 @@ class ProgressView extends GetView<ProgressController> {
               child: buildImageCard(
                 imagePath: 'assets/new_images1/daily_tdeee.png',
                 title: 'Daily TDEE',
-                value: Obx(() => Text(
-                  "${controller.tdee.value} kcal",
-                  style: GoogleFonts.outfit(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-                )),
+                value: Obx(
+                  () => Text(
+                    "${controller.tdee.value} kcal",
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
                 color: const Color(0xffFF7A00),
               ),
             ),
           ],
         ),
-        
+
         const SizedBox(height: 12),
-        
+
         // Bottom Row: BMR & IBW
         Row(
           children: [
@@ -207,10 +222,16 @@ class ProgressView extends GetView<ProgressController> {
               child: buildImageCard(
                 imagePath: 'assets/new_images1/bmr.png',
                 title: 'Resting BMR',
-                value: Obx(() => Text(
-                  "${controller.bmr.value} kcal",
-                  style: GoogleFonts.outfit(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-                )),
+                value: Obx(
+                  () => Text(
+                    "${controller.bmr.value} kcal",
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
                 color: const Color(0xffB100FF),
               ),
             ),
@@ -220,15 +241,21 @@ class ProgressView extends GetView<ProgressController> {
               child: buildImageCard(
                 imagePath: 'assets/new_images1/ideal_weight.png',
                 title: 'Ideal Weight',
-                value: Obx(() => Text(
-                  "${controller.ibw.value} kg",
-                  style: GoogleFonts.outfit(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-                )),
+                value: Obx(
+                  () => Text(
+                    "${controller.ibw.value} kg",
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
                 color: const Color(0xff00FF87),
               ),
             ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -280,7 +307,7 @@ class ProgressView extends GetView<ProgressController> {
               ),
             ),
           ),
-          
+
           // Content on top
           Positioned(
             bottom: 16,
@@ -370,14 +397,16 @@ class ProgressView extends GetView<ProgressController> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              Obx(() => Text(
-                "${controller.weight.value} kg",
-                style: GoogleFonts.outfit(
-                  color: const Color(0xffB100FF),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Obx(
+                () => Text(
+                  "${controller.weight.value} kg",
+                  style: GoogleFonts.outfit(
+                    color: const Color(0xffB100FF),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              )),
+              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -410,20 +439,32 @@ class ProgressView extends GetView<ProgressController> {
             decoration: BoxDecoration(
               color: const Color(0xff00FF87).withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xff00FF87).withOpacity(0.2)),
+              border: Border.all(
+                color: const Color(0xff00FF87).withOpacity(0.2),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.check_circle_outline, color: Color(0xff00FF87)),
+                const Icon(
+                  Icons.check_circle_outline,
+                  color: Color(0xff00FF87),
+                ),
                 const SizedBox(height: 8),
                 Text(
                   "85%",
-                  style: GoogleFonts.outfit(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 Text(
                   "Diet Compliance",
-                  style: GoogleFonts.outfit(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                  style: GoogleFonts.outfit(
+                    color: Colors.white.withOpacity(0.6),
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
@@ -436,20 +477,32 @@ class ProgressView extends GetView<ProgressController> {
             decoration: BoxDecoration(
               color: const Color(0xffFF7A00).withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xffFF7A00).withOpacity(0.2)),
+              border: Border.all(
+                color: const Color(0xffFF7A00).withOpacity(0.2),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.local_fire_department_outlined, color: Color(0xffFF7A00)),
+                const Icon(
+                  Icons.local_fire_department_outlined,
+                  color: Color(0xffFF7A00),
+                ),
                 const SizedBox(height: 8),
                 Text(
                   "14 Days",
-                  style: GoogleFonts.outfit(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 Text(
                   "Current Streak",
-                  style: GoogleFonts.outfit(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                  style: GoogleFonts.outfit(
+                    color: Colors.white.withOpacity(0.6),
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
@@ -517,68 +570,80 @@ class BMIArcPainter extends CustomPainter {
 class WeeklyAdherencePainter extends CustomPainter {
   final List<Map<String, dynamic>> data;
   final int targetCalories;
-  
+
   WeeklyAdherencePainter({required this.data, required this.targetCalories});
 
   @override
   void paint(Canvas canvas, Size size) {
     if (data.isEmpty) return;
-    
+
     final int maxCal = data.map((e) => e['calories'] as int).reduce(max);
-    final int maxValue = max(maxCal, targetCalories) + 200; // Add padding to top
-    
+    final int maxValue =
+        max(maxCal, targetCalories) + 200; // Add padding to top
+
     final double barWidth = (size.width / data.length) * 0.4;
     final double spacing = size.width / data.length;
-    
+
     // Draw target dotted line
-    final double targetY = size.height - (targetCalories / maxValue) * size.height;
-    
+    final double targetY =
+        size.height - (targetCalories / maxValue) * size.height;
+
     final dashPaint = Paint()
       ..color = Colors.white.withOpacity(0.3)
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
-      
+
     const double dashWidth = 5;
     const double dashSpace = 5;
     double startX = 0;
     while (startX < size.width) {
-      canvas.drawLine(Offset(startX, targetY), Offset(startX + dashWidth, targetY), dashPaint);
+      canvas.drawLine(
+        Offset(startX, targetY),
+        Offset(startX + dashWidth, targetY),
+        dashPaint,
+      );
       startX += dashWidth + dashSpace;
     }
-    
+
     // Draw bars
     for (int i = 0; i < data.length; i++) {
       final cal = data[i]['calories'] as int;
       final double barHeight = (cal / maxValue) * size.height;
-      
+
       final double x = (i * spacing) + (spacing / 2) - (barWidth / 2);
       final double y = size.height - barHeight;
-      
+
       Color barColor = const Color(0xff00FF87);
       if (cal > targetCalories + 100) {
         barColor = const Color(0xffFF3E3E); // Over target
       } else if (cal < targetCalories - 300) {
         barColor = const Color(0xffFF7A00); // Under target
       }
-      
+
       final barRect = RRect.fromRectAndRadius(
         Rect.fromLTWH(x, y, barWidth, barHeight),
         const Radius.circular(4),
       );
-      
+
       canvas.drawRRect(barRect, Paint()..color = barColor);
-      
+
       // Draw labels
       final textSpan = TextSpan(
         text: data[i]['day'],
-        style: GoogleFonts.outfit(color: Colors.white.withOpacity(0.6), fontSize: 10),
+        style: GoogleFonts.outfit(
+          color: Colors.white.withOpacity(0.6),
+          fontSize: 10,
+        ),
       );
       final textPainter = TextPainter(
         text: textSpan,
         textDirection: TextDirection.ltr,
       );
       textPainter.layout();
-      textPainter.paint(canvas, Offset(x + (barWidth / 2) - (textPainter.width / 2), size.height + 8));
+      textPainter.paint(
+        canvas,
+        Offset(x + (barWidth / 2) - (textPainter.width / 2), size.height + 8),
+      );
     }
   }
 
@@ -596,9 +661,13 @@ class WeightTrajectoryPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (data.length < 2) return;
 
-    final double maxW = data.map((e) => (e['weight'] as num).toDouble()).reduce(max);
-    final double minW = data.map((e) => (e['weight'] as num).toDouble()).reduce(min);
-    
+    final double maxW = data
+        .map((e) => (e['weight'] as num).toDouble())
+        .reduce(max);
+    final double minW = data
+        .map((e) => (e['weight'] as num).toDouble())
+        .reduce(min);
+
     final double upperBounds = max(maxW, goalWeight) + 2.0;
     final double lowerBounds = min(minW, goalWeight) - 2.0;
     final double range = upperBounds - lowerBounds;
@@ -606,15 +675,20 @@ class WeightTrajectoryPainter extends CustomPainter {
     final double xStep = size.width / (data.length - 1);
 
     // Draw goal line
-    final double goalY = size.height - ((goalWeight - lowerBounds) / range) * size.height;
+    final double goalY =
+        size.height - ((goalWeight - lowerBounds) / range) * size.height;
     final goalPaint = Paint()
       ..color = const Color(0xff00FF87).withOpacity(0.5)
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
-    
+
     double startX = 0;
     while (startX < size.width) {
-      canvas.drawLine(Offset(startX, goalY), Offset(startX + 5, goalY), goalPaint);
+      canvas.drawLine(
+        Offset(startX, goalY),
+        Offset(startX + 5, goalY),
+        goalPaint,
+      );
       startX += 10;
     }
 

@@ -61,24 +61,27 @@ class ProfileView extends GetView<ProfileController> {
                 /// Body Content
                 Expanded(
                   child: SingleChildScrollView(
+                    controller: controller.scrollController,
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Obx(() => AppShimmer(
-                      enabled: controller.isLoading.value,
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 10),
-                          buildUserInfoCard(),
-                          const SizedBox(height: 20),
-                          buildStatsGridBox(),
-                          const SizedBox(height: 20),
-                          buildPremiumCard(),
-                          const SizedBox(height: 20),
-                          buildOptionsList(),
-                          const SizedBox(height: 24),
-                        ],
+                    child: Obx(
+                      () => AppShimmer(
+                        enabled: controller.isLoading.value,
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 10),
+                            buildUserInfoCard(),
+                            const SizedBox(height: 20),
+                            buildStatsGridBox(),
+                            const SizedBox(height: 20),
+                            buildPremiumCard(),
+                            const SizedBox(height: 20),
+                            buildOptionsList(),
+                            const SizedBox(height: 24),
+                          ],
+                        ),
                       ),
-                    )),
+                    ),
                   ),
                 ),
               ],
@@ -131,7 +134,11 @@ class ProfileView extends GetView<ProfileController> {
                       width: 0.8,
                     ),
                   ),
-                  child: const Icon(Icons.notifications_none_rounded, color: Colors.white, size: 20),
+                  child: const Icon(
+                    Icons.notifications_none_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -150,7 +157,11 @@ class ProfileView extends GetView<ProfileController> {
                       width: 0.8,
                     ),
                   ),
-                  child: const Icon(Icons.settings_outlined, color: Colors.white, size: 20),
+                  child: const Icon(
+                    Icons.settings_outlined,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ),
             ],
@@ -178,9 +189,7 @@ class ProfileView extends GetView<ProfileController> {
                 child: Container(
                   height: 86,
                   width: 86,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: const BoxDecoration(shape: BoxShape.circle),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(43),
                     child: Image.network(
@@ -207,11 +216,7 @@ class ProfileView extends GetView<ProfileController> {
                 ),
               ),
               const SizedBox(width: 6),
-              const Icon(
-                Icons.verified,
-                color: Color(0xffB100FF),
-                size: 16,
-              ),
+              const Icon(Icons.verified, color: Color(0xffB100FF), size: 16),
             ],
           ),
           const SizedBox(height: 4),
@@ -241,10 +246,7 @@ class ProfileView extends GetView<ProfileController> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  "🔥",
-                  style: TextStyle(fontSize: 12),
-                ),
+                const Text("🔥", style: TextStyle(fontSize: 12)),
                 const SizedBox(width: 6),
                 Text(
                   "${controller.streakCount.value} Days Streak",
@@ -272,10 +274,7 @@ class ProfileView extends GetView<ProfileController> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: const Color(0xff0B0817).withOpacity(0.55),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.04),
-            width: 1.0,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -304,9 +303,9 @@ class ProfileView extends GetView<ProfileController> {
             buildSingleStatItem(
               icon: Icons.emoji_events_rounded,
               value: controller.fitPoints.value.toString().replaceAllMapped(
-                    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                    (Match m) => '${m[1]},',
-                  ),
+                RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                (Match m) => '${m[1]},',
+              ),
               label: "FitPoints",
               color: const Color(0xff00FF87),
             ),
@@ -453,10 +452,7 @@ class ProfileView extends GetView<ProfileController> {
       decoration: BoxDecoration(
         color: const Color(0xff0B0817).withOpacity(0.55),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.12),
-          width: 1.0,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.0),
       ),
       child: Column(
         children: [
@@ -485,7 +481,8 @@ class ProfileView extends GetView<ProfileController> {
             icon: Icons.straighten_rounded,
             title: "My Measurements",
             subtitle: "Track your body measurements",
-            onTap: () => Get.to(() => const ComingSoonView(title: "My Measurements")),
+            onTap: () =>
+                Get.to(() => const ComingSoonView(title: "My Measurements")),
           ),
           buildDivider(),
           buildOptionRowItem(

@@ -17,13 +17,11 @@ class MainNavigationView extends GetView<MainNavigationController> {
   @override
   Widget build(BuildContext context) {
     final authService = Get.find<AuthService>();
-    final isExpert = authService.userRole == 'CONSULTANT' || authService.userRole == 'ADMIN';
+    final isExpert =
+        authService.userRole == 'CONSULTANT' || authService.userRole == 'ADMIN';
 
     final List<Widget> pages = isExpert
-        ? [
-            const ExpertDashboardView(),
-            const ExpertSlotsView(),
-          ]
+        ? [const ExpertDashboardView(), const ExpertSlotsView()]
         : [
             const HomeView(),
             const MealView(),
@@ -36,10 +34,12 @@ class MainNavigationView extends GetView<MainNavigationController> {
       body: Stack(
         children: [
           // Render active tab page
-          Obx(() => IndexedStack(
-                index: controller.selectedIndex.value,
-                children: pages,
-              )),
+          Obx(
+            () => IndexedStack(
+              index: controller.selectedIndex.value,
+              children: pages,
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: buildBottomNavigationBar(isExpert),
@@ -49,37 +49,93 @@ class MainNavigationView extends GetView<MainNavigationController> {
   Widget buildBottomNavigationBar(bool isExpert) {
     return Obx(() {
       final activeIndex = controller.selectedIndex.value;
+      final visible = controller.isNavBarVisible.value;
 
-      return Container(
-        height: 76,
-        decoration: BoxDecoration(
-          color: const Color(0xff090414).withOpacity(0.85),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(28),
-            topRight: Radius.circular(28),
-          ),
-          border: Border.all(color: Colors.white.withOpacity(0.04), width: 1),
-        ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(28),
-            topRight: Radius.circular(28),
-          ),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: isExpert
-                  ? [
-                      navItem(Icons.dashboard_outlined, Icons.dashboard_rounded, "Sessions", activeIndex == 0, 0),
-                      navItem(Icons.calendar_month_outlined, Icons.calendar_month_rounded, "Slots", activeIndex == 1, 1),
-                    ]
-                  : [
-                      navItem(Icons.home_outlined, Icons.home_rounded, "Dashboard", activeIndex == 0, 0),
-                      navItem(Icons.restaurant_outlined, Icons.restaurant_rounded, "Meals", activeIndex == 1, 1),
-                      navItem(Icons.bar_chart_outlined, Icons.bar_chart_rounded, "Progress", activeIndex == 2, 2),
-                      navItem(Icons.person_outline_rounded, Icons.person_rounded, "Profile", activeIndex == 3, 3),
-                    ],
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOutCubic,
+        height: visible ? 76 : 0,
+        clipBehavior: Clip.antiAlias,
+        decoration: const BoxDecoration(),
+        child: OverflowBox(
+          minHeight: 76,
+          maxHeight: 76,
+          alignment: Alignment.topCenter,
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 200),
+            opacity: visible ? 1.0 : 0.0,
+            child: Container(
+              height: 76,
+              decoration: BoxDecoration(
+                color: const Color(0xff090414).withOpacity(0.85),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(28),
+                  topRight: Radius.circular(28),
+                ),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.04),
+                  width: 1,
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(28),
+                  topRight: Radius.circular(28),
+                ),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: isExpert
+                        ? [
+                            navItem(
+                              Icons.dashboard_outlined,
+                              Icons.dashboard_rounded,
+                              "Sessions",
+                              activeIndex == 0,
+                              0,
+                            ),
+                            navItem(
+                              Icons.calendar_month_outlined,
+                              Icons.calendar_month_rounded,
+                              "Slots",
+                              activeIndex == 1,
+                              1,
+                            ),
+                          ]
+                        : [
+                            navItem(
+                              Icons.home_outlined,
+                              Icons.home_rounded,
+                              "Dashboard",
+                              activeIndex == 0,
+                              0,
+                            ),
+                            navItem(
+                              Icons.restaurant_outlined,
+                              Icons.restaurant_rounded,
+                              "Meals",
+                              activeIndex == 1,
+                              1,
+                            ),
+                            navItem(
+                              Icons.bar_chart_outlined,
+                              Icons.bar_chart_rounded,
+                              "Progress",
+                              activeIndex == 2,
+                              2,
+                            ),
+                            navItem(
+                              Icons.person_outline_rounded,
+                              Icons.person_rounded,
+                              "Profile",
+                              activeIndex == 3,
+                              3,
+                            ),
+                          ],
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -87,7 +143,13 @@ class MainNavigationView extends GetView<MainNavigationController> {
     });
   }
 
-  Widget navItem(IconData outlineIcon, IconData filledIcon, String label, bool active, int index) {
+  Widget navItem(
+    IconData outlineIcon,
+    IconData filledIcon,
+    String label,
+    bool active,
+    int index,
+  ) {
     Color activeColor = const Color(0xffFF00E5);
     Color inactiveColor = Colors.white.withOpacity(0.40);
 
@@ -194,7 +256,9 @@ class MainNavigationView extends GetView<MainNavigationController> {
                           "Water Logged",
                           "You logged +250ml of water. Stay hydrated! 💧",
                           snackPosition: SnackPosition.TOP,
-                          backgroundColor: const Color(0xff00E5FF).withOpacity(0.15),
+                          backgroundColor: const Color(
+                            0xff00E5FF,
+                          ).withOpacity(0.15),
                           colorText: Colors.white,
                           borderColor: const Color(0xff00E5FF).withOpacity(0.3),
                           borderWidth: 1,
@@ -213,7 +277,9 @@ class MainNavigationView extends GetView<MainNavigationController> {
                           "Progress Tracker",
                           "Redirected to Progress tab. View weight trend! 📈",
                           snackPosition: SnackPosition.TOP,
-                          backgroundColor: const Color(0xffFF7A00).withOpacity(0.15),
+                          backgroundColor: const Color(
+                            0xffFF7A00,
+                          ).withOpacity(0.15),
                           colorText: Colors.white,
                           borderColor: const Color(0xffFF7A00).withOpacity(0.3),
                           borderWidth: 1,
@@ -294,10 +360,7 @@ class MainNavigationView extends GetView<MainNavigationController> {
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.03),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.05),
-            width: 1,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.05), width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
