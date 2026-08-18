@@ -494,72 +494,75 @@ class _HomeViewState extends State<HomeView>
         Row(
           children: [
             // FitCoins Wallet Widget
-            Obx(() {
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Stack(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: const Color(0xffFFD166).withOpacity(0.25),
-                          width: 0.8,
+            GestureDetector(
+              onTap: () => _showPointsBottomSheet(context),
+              child: Obx(() {
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Stack(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
                         ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text("🪙", style: TextStyle(fontSize: 13)),
-                          const SizedBox(width: 4),
-                          Text(
-                            "${controller.fitPoints.value}",
-                            style: GoogleFonts.outfit(
-                              color: const Color(0xffFFD166),
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xffFFD166).withOpacity(0.25),
+                            width: 0.8,
                           ),
-                        ],
-                      ),
-                    ),
-                    // Shine sweep drawn as its own layer so it lights up
-                    // the card's background too, not just icon/text.
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: AnimatedBuilder(
-                          animation: _shineAnimation,
-                          builder: (context, child) {
-                            final x = _shineAnimation.value;
-                            return DecoratedBox(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment(x - 1.5, -1.0),
-                                  end: Alignment(x + 1.5, 1.0),
-                                  colors: [
-                                    Colors.white.withOpacity(0.0),
-                                    Colors.white.withOpacity(0.25),
-                                    const Color(0xffFFE8A0).withOpacity(0.55),
-                                    Colors.white.withOpacity(0.25),
-                                    Colors.white.withOpacity(0.0),
-                                  ],
-                                  stops: const [0.0, 0.4, 0.5, 0.6, 1.0],
-                                ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text("🪙", style: TextStyle(fontSize: 13)),
+                            const SizedBox(width: 4),
+                            Text(
+                              "${controller.fitPoints.value}",
+                              style: GoogleFonts.outfit(
+                                color: const Color(0xffFFD166),
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
                               ),
-                            );
-                          },
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            }),
+                      // Shine sweep drawn as its own layer so it lights up
+                      // the card's background too, not just icon/text.
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: AnimatedBuilder(
+                            animation: _shineAnimation,
+                            builder: (context, child) {
+                              final x = _shineAnimation.value;
+                              return DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment(x - 1.5, -1.0),
+                                    end: Alignment(x + 1.5, 1.0),
+                                    colors: [
+                                      Colors.white.withOpacity(0.0),
+                                      Colors.white.withOpacity(0.25),
+                                      const Color(0xffFFE8A0).withOpacity(0.55),
+                                      Colors.white.withOpacity(0.25),
+                                      Colors.white.withOpacity(0.0),
+                                    ],
+                                    stops: const [0.0, 0.4, 0.5, 0.6, 1.0],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
             const SizedBox(width: 10),
             GestureDetector(
               onTap: () => Get.toNamed('/notifications'),
@@ -1180,6 +1183,204 @@ class _HomeViewState extends State<HomeView>
           ),
         ),
         const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  void _showPointsBottomSheet(BuildContext context) {
+    const int monthlyPrice = 499;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 8,
+            bottom: 32,
+          ),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xff9D4EDD), Color(0xff3A0CA3)],
+            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border.all(color: Colors.white.withOpacity(0.05)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.8),
+                blurRadius: 40,
+                spreadRadius: 10,
+              ),
+            ],
+          ),
+          child: Obx(() {
+            final int points = controller.fitPoints.value;
+            final int discount = points > monthlyPrice ? monthlyPrice : points;
+            final int finalPrice = monthlyPrice - discount;
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Drag handle
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xffFFD166).withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Text("🪙", style: TextStyle(fontSize: 32)),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  "$points FitCoins",
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  "Use your FitCoins for an instant discount on your subscription",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Breakdown card
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withOpacity(0.08)),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildPointsRow("Monthly Plan", "₹$monthlyPrice"),
+                      const SizedBox(height: 10),
+                      _buildPointsRow(
+                        "FitCoins Discount",
+                        "- ₹$discount",
+                        valueColor: const Color(0xffFFD166),
+                      ),
+                      const SizedBox(height: 12),
+                      Divider(color: Colors.white.withOpacity(0.12), height: 1),
+                      const SizedBox(height: 12),
+                      _buildPointsRow(
+                        "You Pay",
+                        "₹$finalPrice / month",
+                        isTotal: true,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  "1 FitCoin = ₹1 off your subscription",
+                  style: GoogleFonts.inter(
+                    color: Colors.white.withOpacity(0.5),
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // CTA Button
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    Get.toNamed('/membership');
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xffFFD166), Color(0xffF7931A)],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xffF7931A).withOpacity(0.3),
+                          blurRadius: 15,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Redeem & Subscribe",
+                          style: GoogleFonts.outfit(
+                            color: const Color(0xff3E2000),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Color(0xff3E2000),
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
+        );
+      },
+    );
+  }
+
+  Widget _buildPointsRow(
+    String label,
+    String value, {
+    Color? valueColor,
+    bool isTotal = false,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.outfit(
+            color: Colors.white.withOpacity(isTotal ? 1 : 0.7),
+            fontSize: isTotal ? 16 : 13,
+            fontWeight: isTotal ? FontWeight.w700 : FontWeight.w500,
+          ),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.outfit(
+            color: valueColor ?? Colors.white,
+            fontSize: isTotal ? 18 : 14,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ],
     );
   }

@@ -179,12 +179,12 @@ class SwiggyTabsHeader extends GetView<HomeController> {
                       child: GestureDetector(
                         onTap: () => controller.activeTab.value = 0,
                         child: Container(
-                          height: 80,
+                          height: 90,
                           color: Colors.transparent,
-                          padding: const EdgeInsets.only(bottom: 30),
+                          padding: const EdgeInsets.only(bottom: 25),
                           alignment: Alignment.bottomCenter,
                           child: SizedBox(
-                            height: 38,
+                            height: 43,
                             child: Image.asset(
                               "assets/home/meal_card.png",
                               fit: BoxFit.contain,
@@ -203,10 +203,10 @@ class SwiggyTabsHeader extends GetView<HomeController> {
                         child: Container(
                           height: 80,
                           color: Colors.transparent,
-                          padding: const EdgeInsets.only(bottom: 30),
+                          padding: const EdgeInsets.only(bottom: 25),
                           alignment: Alignment.bottomCenter,
                           child: SizedBox(
-                            height: 38,
+                            height: 45,
                             child: Image.asset(
                               "assets/home/workout_card.png",
                               fit: BoxFit.contain,
