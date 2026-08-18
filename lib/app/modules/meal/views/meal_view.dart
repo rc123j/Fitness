@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/meal_controller.dart';
 import '../../../widgets/app_shimmer.dart';
+import '../../../widgets/scroll_nav_bar_binder.dart';
 
 class MealView extends GetView<MealController> {
   const MealView({super.key});
@@ -88,51 +89,53 @@ class MealView extends GetView<MealController> {
 
           // Main scrollable content
           Positioned.fill(
-            child: CustomScrollView(
-              controller: controller.scrollController,
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                // 1. COLLAPSIBLE APP BAR
-                _buildSliverAppBar(),
+            child: ScrollNavBarBinder(
+              builder: (context, scrollController) => CustomScrollView(
+                controller: scrollController,
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  // 1. COLLAPSIBLE APP BAR
+                  _buildSliverAppBar(),
 
-                // 2. MAIN SCROLLABLE BODY
-                SliverPadding(
-                  padding: const EdgeInsets.only(top: 16, bottom: 100),
-                  sliver: SliverToBoxAdapter(
-                    child: Obx(
-                      () => AppShimmer(
-                        enabled: controller.isLoading.value,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
+                  // 2. MAIN SCROLLABLE BODY
+                  SliverPadding(
+                    padding: const EdgeInsets.only(top: 16, bottom: 100),
+                    sliver: SliverToBoxAdapter(
+                      child: Obx(
+                        () => AppShimmer(
+                          enabled: controller.isLoading.value,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Weekly Calendar Timeline
+                                    _buildWeeklyCalendar(),
+                                    const SizedBox(height: 28),
+
+                                    // Today's Nutrition Section
+                                    _buildTodayNutritionCard(),
+                                  ],
+                                ),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Weekly Calendar Timeline
-                                  _buildWeeklyCalendar(),
-                                  const SizedBox(height: 28),
+                              const SizedBox(height: 24),
 
-                                  // Today's Nutrition Section
-                                  _buildTodayNutritionCard(),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-
-                            // Daily Meals — full-bleed gradient section (same style as
-                            // the "Today's Meal Plan" block on the home screen)
-                            _buildDailyMealsSection(context),
-                          ],
+                              // Daily Meals — full-bleed gradient section (same style as
+                              // the "Today's Meal Plan" block on the home screen)
+                              _buildDailyMealsSection(context),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -509,7 +512,7 @@ class MealView extends GetView<MealController> {
         decoration: BoxDecoration(
           color: const Color(0xff0B0817).withOpacity(0.6),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
+          border: Border.all(color: Colors.white.withOpacity(0.18), width: 1.2),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -695,9 +698,11 @@ class MealView extends GetView<MealController> {
     return val.toString();
   }
 
-  // 4. DAILY MEALS — full-bleed gradient section (matches the "Today's Meal
-  // Plan" block on the home screen: same background gradient + title style).
-  // The gradient spans the whole section — title, promo card and meal
+  // 4. DAILY MEALS — full-bleed section (matches the "Today's Meal Plan"
+  // block on the home screen: same background + title style). The purple
+  // fill eases in from the background at the top and eases back out at the
+  // bottom, instead of cutting hard into the section — flat solid purple
+  // through the middle, no lighter glow. Title, promo card and meal
   // timeline all sit on it. The meal cards inside are otherwise unchanged.
   Widget _buildDailyMealsSection(BuildContext context) {
     return Container(
@@ -710,11 +715,10 @@ class MealView extends GetView<MealController> {
           colors: [
             Color(0xff06010F), // match background
             Color(0xff3B0E6B), // rich deep purple
-            Color(0xff9B4DE0), // light purple center glow
-            Color(0xff2C0A55), // dark purple transition
+            Color(0xff3B0E6B), // rich deep purple
             Color(0xff06010F), // match background
           ],
-          stops: [0.0, 0.25, 0.55, 0.85, 1.0],
+          stops: [0.0, 0.08, 0.92, 1.0],
         ),
       ),
       child: Padding(
@@ -722,30 +726,13 @@ class MealView extends GetView<MealController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
-              onTap: () => Get.toNamed('/meal-plan'),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Daily Meals",
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      height: 1.15,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Edit Plan →",
-                    style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.6),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+            Text(
+              "Daily Meals",
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                height: 1.15,
               ),
             ),
             const SizedBox(height: 16),
@@ -796,24 +783,6 @@ class MealView extends GetView<MealController> {
                     fontWeight: FontWeight.bold,
                     height: 1.3,
                   ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_today_rounded,
-                      color: Colors.white.withOpacity(0.4),
-                      size: 12,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      "Nov 26 - Nov 30",
-                      style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.4),
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),

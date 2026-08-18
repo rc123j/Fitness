@@ -1,15 +1,9 @@
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
-import '../../main_navigation/controllers/main_navigation_controller.dart';
 
 class ProgressController extends GetxController {
   final _apiClient = Get.find<ApiClient>();
-
-  // Hides/shows the shared bottom nav bar as this screen scrolls.
-  final ScrollController scrollController = ScrollController();
-  double _lastScrollOffset = 0;
 
   final isLoading = false.obs;
 
@@ -73,33 +67,6 @@ class ProgressController extends GetxController {
   void onInit() {
     super.onInit();
     fetchProgressData();
-    scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void onClose() {
-    scrollController.removeListener(_onScroll);
-    scrollController.dispose();
-    super.onClose();
-  }
-
-  void _onScroll() {
-    final double offset = scrollController.offset;
-    final navController = Get.find<MainNavigationController>();
-
-    final double delta = offset - _lastScrollOffset;
-    if (delta.abs() > 4) {
-      if (delta > 0 && offset > 20) {
-        navController.isNavBarVisible.value = false;
-      } else if (delta < 0) {
-        navController.isNavBarVisible.value = true;
-      }
-      _lastScrollOffset = offset;
-    }
-
-    if (offset <= 0) {
-      navController.isNavBarVisible.value = true;
-    }
   }
 
   Future<void> fetchProgressData() async {

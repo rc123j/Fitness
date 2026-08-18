@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/progress_controller.dart';
 import '../../../widgets/app_shimmer.dart';
+import '../../../widgets/scroll_nav_bar_binder.dart';
 
 class ProgressView extends GetView<ProgressController> {
   const ProgressView({super.key});
@@ -59,33 +60,35 @@ class ProgressView extends GetView<ProgressController> {
 
                 /// BODY CONTENT
                 Expanded(
-                  child: SingleChildScrollView(
-                    controller: controller.scrollController,
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Obx(
-                      () => AppShimmer(
-                        enabled: controller.isLoading.value,
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 10),
+                  child: ScrollNavBarBinder(
+                    builder: (context, scrollController) => SingleChildScrollView(
+                      controller: scrollController,
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Obx(
+                        () => AppShimmer(
+                          enabled: controller.isLoading.value,
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 10),
 
-                            /// 1. HEALTH SNAPSHOT CARD (BMI, TDEE, BMR, IBW)
-                            buildHealthSnapshotCard(),
-                            const SizedBox(height: 20),
+                              /// 1. HEALTH SNAPSHOT CARD (BMI, TDEE, BMR, IBW)
+                              buildHealthSnapshotCard(),
+                              const SizedBox(height: 20),
 
-                            /// 2. WEEKLY ADHERENCE CHART (CALORIES VS TARGET)
-                            buildWeeklyAdherenceCard(),
-                            const SizedBox(height: 20),
+                              /// 2. WEEKLY ADHERENCE CHART (CALORIES VS TARGET)
+                              buildWeeklyAdherenceCard(),
+                              const SizedBox(height: 20),
 
-                            /// 3. WEIGHT TRAJECTORY GRAPH
-                            buildWeightTrajectoryCard(),
-                            const SizedBox(height: 30),
+                              /// 3. WEIGHT TRAJECTORY GRAPH
+                              buildWeightTrajectoryCard(),
+                              const SizedBox(height: 30),
 
-                            /// 4. GAMIFICATION/STREAKS
-                            buildGamificationRow(),
-                            const SizedBox(height: 40),
-                          ],
+                              /// 4. GAMIFICATION/STREAKS
+                              buildGamificationRow(),
+                              const SizedBox(height: 40),
+                            ],
+                          ),
                         ),
                       ),
                     ),

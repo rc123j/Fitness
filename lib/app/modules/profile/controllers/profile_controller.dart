@@ -4,15 +4,10 @@ import 'package:get/get.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
 import '../../../services/auth_service.dart';
-import '../../main_navigation/controllers/main_navigation_controller.dart';
 
 class ProfileController extends GetxController {
   final _apiClient = Get.find<ApiClient>();
   final _authService = Get.find<AuthService>();
-
-  // Hides/shows the shared bottom nav bar as this screen scrolls.
-  final ScrollController scrollController = ScrollController();
-  double _lastScrollOffset = 0;
 
   final isLoading = true.obs;
   final username = ''.obs;
@@ -39,33 +34,6 @@ class ProfileController extends GetxController {
   void onInit() {
     super.onInit();
     fetchProfile();
-    scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void onClose() {
-    scrollController.removeListener(_onScroll);
-    scrollController.dispose();
-    super.onClose();
-  }
-
-  void _onScroll() {
-    final double offset = scrollController.offset;
-    final navController = Get.find<MainNavigationController>();
-
-    final double delta = offset - _lastScrollOffset;
-    if (delta.abs() > 4) {
-      if (delta > 0 && offset > 20) {
-        navController.isNavBarVisible.value = false;
-      } else if (delta < 0) {
-        navController.isNavBarVisible.value = true;
-      }
-      _lastScrollOffset = offset;
-    }
-
-    if (offset <= 0) {
-      navController.isNavBarVisible.value = true;
-    }
   }
 
   Future<void> fetchProfile() async {

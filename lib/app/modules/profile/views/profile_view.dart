@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/profile_controller.dart';
 import '../../../widgets/app_shimmer.dart';
+import '../../../widgets/scroll_nav_bar_binder.dart';
 import 'coming_soon_view.dart';
 
 class ProfileView extends GetView<ProfileController> {
@@ -60,28 +61,31 @@ class ProfileView extends GetView<ProfileController> {
 
                 /// Body Content
                 Expanded(
-                  child: SingleChildScrollView(
-                    controller: controller.scrollController,
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Obx(
-                      () => AppShimmer(
-                        enabled: controller.isLoading.value,
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 10),
-                            buildUserInfoCard(),
-                            const SizedBox(height: 20),
-                            buildStatsGridBox(),
-                            const SizedBox(height: 20),
-                            buildPremiumCard(),
-                            const SizedBox(height: 20),
-                            buildOptionsList(),
-                            const SizedBox(height: 24),
-                          ],
+                  child: ScrollNavBarBinder(
+                    builder: (context, scrollController) =>
+                        SingleChildScrollView(
+                          controller: scrollController,
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Obx(
+                            () => AppShimmer(
+                              enabled: controller.isLoading.value,
+                              child: Column(
+                                children: [
+                                  const SizedBox(height: 10),
+                                  buildUserInfoCard(),
+                                  const SizedBox(height: 20),
+                                  buildStatsGridBox(),
+                                  const SizedBox(height: 20),
+                                  buildPremiumCard(),
+                                  const SizedBox(height: 20),
+                                  buildOptionsList(),
+                                  const SizedBox(height: 24),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
                   ),
                 ),
               ],
