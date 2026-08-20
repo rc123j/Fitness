@@ -46,95 +46,104 @@ class MainNavigationView extends GetView<MainNavigationController> {
     );
   }
 
+  // Extra height reserved above the flat bar so the top edge can arc
+  // upward into a smooth curve instead of a straight line.
+  static const double _navBarHeight = 76;
+  static const double _navBarBulge = 18;
+
   Widget buildBottomNavigationBar(bool isExpert) {
     return Obx(() {
       final activeIndex = controller.selectedIndex.value;
       final visible = controller.isNavBarVisible.value;
+      const double totalHeight = _navBarHeight + _navBarBulge;
 
       return AnimatedContainer(
         duration: const Duration(milliseconds: 260),
         curve: Curves.easeOutCubic,
-        height: visible ? 76 : 0,
+        height: visible ? totalHeight : 0,
         clipBehavior: Clip.antiAlias,
         decoration: const BoxDecoration(),
         child: OverflowBox(
-          minHeight: 76,
-          maxHeight: 76,
+          minHeight: totalHeight,
+          maxHeight: totalHeight,
           alignment: Alignment.topCenter,
           child: AnimatedOpacity(
             duration: const Duration(milliseconds: 200),
             opacity: visible ? 1.0 : 0.0,
-            child: Container(
-              height: 76,
-              decoration: BoxDecoration(
-                color: const Color(0xff090414).withOpacity(0.85),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(28),
-                  topRight: Radius.circular(28),
-                ),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.04),
-                  width: 1,
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(28),
-                  topRight: Radius.circular(28),
-                ),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: isExpert
-                        ? [
-                            navItem(
-                              Icons.dashboard_outlined,
-                              Icons.dashboard_rounded,
-                              "Sessions",
-                              activeIndex == 0,
-                              0,
+            child: SizedBox(
+              height: totalHeight,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  ClipPath(
+                    clipper: const _CurvedNavBarClipper(bulge: _navBarBulge),
+                    child: Container(
+                      color: const Color(0xff090414).withOpacity(0.85),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: SizedBox(
+                            height: _navBarHeight,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: isExpert
+                                  ? [
+                                      navItem(
+                                        Icons.dashboard_outlined,
+                                        Icons.dashboard_rounded,
+                                        "Sessions",
+                                        activeIndex == 0,
+                                        0,
+                                      ),
+                                      navItem(
+                                        Icons.calendar_month_outlined,
+                                        Icons.calendar_month_rounded,
+                                        "Slots",
+                                        activeIndex == 1,
+                                        1,
+                                      ),
+                                    ]
+                                  : [
+                                      navItem(
+                                        Icons.home_outlined,
+                                        Icons.home_rounded,
+                                        "Dashboard",
+                                        activeIndex == 0,
+                                        0,
+                                      ),
+                                      navItem(
+                                        Icons.restaurant_outlined,
+                                        Icons.restaurant_rounded,
+                                        "Meals",
+                                        activeIndex == 1,
+                                        1,
+                                      ),
+                                      navItem(
+                                        Icons.bar_chart_outlined,
+                                        Icons.bar_chart_rounded,
+                                        "Progress",
+                                        activeIndex == 2,
+                                        2,
+                                      ),
+                                    ],
                             ),
-                            navItem(
-                              Icons.calendar_month_outlined,
-                              Icons.calendar_month_rounded,
-                              "Slots",
-                              activeIndex == 1,
-                              1,
-                            ),
-                          ]
-                        : [
-                            navItem(
-                              Icons.home_outlined,
-                              Icons.home_rounded,
-                              "Dashboard",
-                              activeIndex == 0,
-                              0,
-                            ),
-                            navItem(
-                              Icons.restaurant_outlined,
-                              Icons.restaurant_rounded,
-                              "Meals",
-                              activeIndex == 1,
-                              1,
-                            ),
-                            navItem(
-                              Icons.bar_chart_outlined,
-                              Icons.bar_chart_rounded,
-                              "Progress",
-                              activeIndex == 2,
-                              2,
-                            ),
-                            navItem(
-                              Icons.person_outline_rounded,
-                              Icons.person_rounded,
-                              "Profile",
-                              activeIndex == 3,
-                              3,
-                            ),
-                          ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  // Glowing curved accent line tracing the top edge.
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: CustomPaint(
+                        painter: const _CurvedNavBarLinePainter(
+                          bulge: _navBarBulge,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -401,4 +410,76 @@ class MainNavigationView extends GetView<MainNavigationController> {
       ),
     );
   }
+}
+
+/// Traces the top edge of the bottom nav bar: rounded corners on the left
+/// and right that rise into a single smooth arc across the middle, instead
+/// of a straight line.
+// A single smooth arc spans the entire width, left edge to right edge —
+// peaking at the horizontal center, touching the very top of the reserved
+// bulge area — instead of only bulging in the middle with flat corners.
+Path _curvedNavBarTopPath(Size size, double bulge) {
+  final double w = size.width;
+  final double curveTop = bulge;
+  final double peakY = curveTop - 2 * bulge;
+
+  return Path()
+    ..moveTo(0, curveTop)
+    ..quadraticBezierTo(w * 0.5, peakY, w, curveTop);
+}
+
+class _CurvedNavBarClipper extends CustomClipper<Path> {
+  const _CurvedNavBarClipper({required this.bulge});
+
+  final double bulge;
+
+  @override
+  Path getClip(Size size) {
+    final path = _curvedNavBarTopPath(size, bulge)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant _CurvedNavBarClipper oldClipper) =>
+      oldClipper.bulge != bulge;
+}
+
+class _CurvedNavBarLinePainter extends CustomPainter {
+  const _CurvedNavBarLinePainter({required this.bulge});
+
+  final double bulge;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = _curvedNavBarTopPath(size, bulge);
+
+    final gradient = LinearGradient(
+      colors: [
+        const Color(0xff3B82F6).withOpacity(0.0),
+        const Color(0xff60A5FA),
+        const Color(0xff3B82F6).withOpacity(0.0),
+      ],
+    ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    final glowPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..shader = gradient
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+
+    final linePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4
+      ..shader = gradient;
+
+    canvas.drawPath(path, glowPaint);
+    canvas.drawPath(path, linePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _CurvedNavBarLinePainter oldDelegate) =>
+      oldDelegate.bulge != bulge;
 }
