@@ -6,7 +6,29 @@ import '../../../services/api_client.dart';
 
 class CongratulationsScreen extends StatefulWidget {
   final String memberCode;
-  const CongratulationsScreen({super.key, required this.memberCode});
+  final int targetCalories;
+  final int proteinTarget;
+  final int carbsTarget;
+  final int fatTarget;
+  final double bmi;
+  final double bmr;
+  final double tdee;
+  final double ibw;
+  final bool lactoseIntolerant;
+
+  const CongratulationsScreen({
+    super.key,
+    required this.memberCode,
+    required this.targetCalories,
+    required this.proteinTarget,
+    required this.carbsTarget,
+    required this.fatTarget,
+    required this.bmi,
+    required this.bmr,
+    required this.tdee,
+    required this.ibw,
+    required this.lactoseIntolerant,
+  });
 
   @override
   State<CongratulationsScreen> createState() => _CongratulationsScreenState();
@@ -22,14 +44,15 @@ class _CongratulationsScreenState extends State<CongratulationsScreen> {
       final apiClient = Get.find<ApiClient>();
       debugPrint("[CongratulationsScreen] Making API call to generate plan...");
       await apiClient.post('/api/diet-plans/generate', data: {
-        "target_calories": 2150,
-        "protein_target": 150,
-        "carbs_target": 215,
-        "fat_target": 60,
-        "bmi": 24.2,
-        "bmr": 1850,
-        "tdee": 2550,
-        "ibw": 70.0
+        "target_calories": widget.targetCalories,
+        "protein_target": widget.proteinTarget,
+        "carbs_target": widget.carbsTarget,
+        "fat_target": widget.fatTarget,
+        "bmi": widget.bmi,
+        "bmr": widget.bmr,
+        "tdee": widget.tdee,
+        "ibw": widget.ibw,
+        "lactose_intolerant": widget.lactoseIntolerant
       });
       debugPrint("[CongratulationsScreen] API call finished successfully!");
     } catch (e) {

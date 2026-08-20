@@ -226,6 +226,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
           'weight_kg': widget.weight,
           'activity_level_id': widget.activityLevelId,
           'goal_id': widget.goalId,
+          'goal_title': widget.goalTitle,
           'taste_preference_ids': widget.tastePreferenceIds,
           'medical_condition_ids': widget.medicalConditionIds,
           'symptom_ids': widget.symptomIds,
@@ -247,7 +248,18 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
       });
 
       Get.off(
-        () => CongratulationsScreen(memberCode: _memberCode ?? ''),
+        () => CongratulationsScreen(
+          memberCode: _memberCode ?? '',
+          targetCalories: targetCalories,
+          proteinTarget: proteinTargetG,
+          carbsTarget: carbsTargetG,
+          fatTarget: fatTargetG,
+          bmi: bmi,
+          bmr: bmr,
+          tdee: tdee,
+          ibw: ibw,
+          lactoseIntolerant: widget.foodExclusions.contains('no_lactose') || widget.foodExclusions.contains('no_dairy'),
+        ),
         transition: Transition.cupertino,
       );
     } on DioException catch (e) {

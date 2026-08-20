@@ -50,21 +50,21 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen>
       "color": const Color(0xffFF5F6D),
     },
     {
-      "id": 5,
+      "id": 12, // Weight Gain (mapped from 5 to avoid CKD database conflict)
       "title": "Weight Gain",
       "subtitle": "Gain healthy mass and increase body weight.",
       "image": "assets/new_images/weight_gain.png",
       "color": const Color(0xff00E5FF),
     },
     {
-      "id": 3,
+      "id": 10, // Fitness (mapped from 3 to avoid Diabetes database conflict)
       "title": "Fitness",
       "subtitle": "Improve overall fitness and daily energy.",
       "image": "assets/new_images/fitness.png",
       "color": const Color(0xffC026D3),
     },
     {
-      "id": 4,
+      "id": 11, // Athletic Performance (mapped from 4 to avoid PCOS database conflict)
       "title": "Athletic Performance",
       "subtitle": "Enhance endurance, speed and performance.",
       "image": "assets/new_images/athelitcperformance.png",

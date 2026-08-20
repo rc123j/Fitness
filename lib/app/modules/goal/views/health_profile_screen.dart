@@ -41,18 +41,11 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
   final Set<int> selectedConditionIds = {};
   bool noConditions = false;
 
-  // Expanded master medical conditions
+  // Expanded master medical conditions (Aligned exactly with backend DB IDs)
   final List<Map<String, dynamic>> medicalConditions = [
     {
       'id': 1,
       'label': 'Diabetes',
-      'icon': Icons.water_drop_rounded,
-      'color': const Color(0xff00E5FF),
-      'note': 'Restricts high-GI foods & refined sugars',
-    },
-    {
-      'id': 4,
-      'label': 'Pre-Diabetes',
       'icon': Icons.water_drop_rounded,
       'color': const Color(0xff00E5FF),
       'note': 'Restricts high-GI foods & refined sugars',

@@ -40,7 +40,7 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
   // Secondary: food exclusions (multi-select)
   final Set<String> selectedExclusions = {};
 
-  // Diet type options
+  // Diet type options (Only backend-supported categories)
   final List<Map<String, dynamic>> dietTypes = [
     {
       'id': null, // Non-Veg has no taste_preference row
@@ -70,95 +70,28 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
       'desc': 'No animal products\nwhatsoever',
       'color': const Color(0xff00E5FF),
     },
-    {
-      'id': 3, // Keto
-      'label': 'Keto / Low-Carb',
-      'image': 'assets/new_images/keto.png',
-      'desc': 'High fat, very low\ncarbohydrate intake',
-      'color': const Color(0xffC026D3),
-    },
   ];
 
-  // Conditional food exclusions based on diet selection (localized for India - no beef/pork)
+  // Conditional food exclusions based on diet selection
   List<Map<String, dynamic>> get exclusionOptions {
     if (selectedDietLabel == null) return [];
 
     final List<Map<String, dynamic>> options = [];
 
-    if (selectedDietLabel == 'Non-Vegetarian' ||
-        selectedDietLabel == 'Eggitarian') {
-      options.addAll([
-        {
-          'key': 'no_seafood',
-          'label': 'No Seafood / Fish',
-          'icon': Icons.water_rounded,
-        },
-        {
-          'key': 'no_mutton',
-          'label': 'No Mutton',
-          'icon': Icons.no_meals_outlined,
-        },
-        {
-          'key': 'no_poultry',
-          'label': 'No Chicken / Poultry',
-          'icon': Icons.block_rounded,
-        },
-      ]);
-    } else if (selectedDietLabel == 'Vegetarian' || selectedDietLabel == 'Vegan') {
-      options.addAll([
-        {
-          'key': 'no_egg',
-          'label': 'No Egg (Strict Veg)',
-          'icon': Icons.egg_rounded,
-        },
-        {
-          'key': 'no_gluten',
-          'label': 'Gluten Intolerant',
-          'icon': Icons.grain_rounded,
-        },
-        {
-          'key': 'no_nuts',
-          'label': 'Nut Allergy',
-          'icon': Icons.dangerous_rounded,
-        },
-        {
-          'key': 'no_lactose',
-          'label': 'Lactose Intolerant',
-          'icon': Icons.no_drinks_rounded,
-        },
-        {
-          'key': 'no_soy',
-          'label': 'No Soy / Tofu',
-          'icon': Icons.block_rounded,
-        },
-      ]);
-    } else if (selectedDietLabel == 'Keto / Low-Carb') {
-      options.addAll([
-        {
-          'key': 'no_seafood',
-          'label': 'No Seafood / Fish',
-          'icon': Icons.water_rounded,
-        },
-        {
-          'key': 'no_dairy',
-          'label': 'No Dairy',
-          'icon': Icons.no_drinks_rounded,
-        },
-        {
-          'key': 'no_nuts',
-          'label': 'Nut Allergy',
-          'icon': Icons.dangerous_rounded,
-        },
-      ]);
-    }
-
-    if (options.isNotEmpty) {
+    // Lactose intolerance is applicable to Non-Veg, Eggitarian, and Vegetarian (since Vegan has no dairy)
+    if (selectedDietLabel != 'Vegan') {
       options.add({
-        'key': 'none',
-        'label': 'None / No Exclusions',
-        'icon': Icons.check_circle_outline_rounded,
+        'key': 'no_lactose',
+        'label': 'Lactose Intolerant',
+        'icon': Icons.no_drinks_rounded,
       });
     }
+
+    options.add({
+      'key': 'none',
+      'label': 'None / No Exclusions',
+      'icon': Icons.check_circle_outline_rounded,
+    });
 
     return options;
   }
