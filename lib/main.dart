@@ -23,7 +23,7 @@ void main() async {
 
   runApp(
     GetMaterialApp(
-      title: "NutriFit",
+      title: "Nutri Shape",
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
       debugShowCheckedModeBanner: false,

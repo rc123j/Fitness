@@ -401,7 +401,7 @@ class ProfileView extends GetView<ProfileController> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "NutriFit Premium",
+                  "Nutri Shape Premium",
                   style: GoogleFonts.outfit(
                     color: Colors.white,
                     fontSize: 13,

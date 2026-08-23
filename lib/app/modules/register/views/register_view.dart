@@ -126,7 +126,7 @@ class RegisterView extends GetView<RegisterController> {
                           },
                           blendMode: BlendMode.srcIn,
                           child: Text(
-                            'F',
+                            'N',
                             style: GoogleFonts.satisfy(
                               fontSize: 54,
                               fontWeight: FontWeight.bold,
@@ -145,7 +145,7 @@ class RegisterView extends GetView<RegisterController> {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: 'FITWITH\n',
+                            text: 'NUTRI\n',
                             style: GoogleFonts.outfit(
                               color: Colors.white,
                               fontSize: 24,
@@ -155,7 +155,7 @@ class RegisterView extends GetView<RegisterController> {
                             ),
                           ),
                           TextSpan(
-                            text: 'DEVELOPER',
+                            text: 'SHAPE',
                             style: GoogleFonts.outfit(
                               color: const Color(0xffFF00E5),
                               fontSize: 24,
@@ -240,7 +240,7 @@ class RegisterView extends GetView<RegisterController> {
 
                     // SUBTITLE
                     Text(
-                      'Join Nutrifit and start your\nfitness transformation journey.',
+                      'Join Nutri Shape and start your\nfitness transformation journey.',
                       style: GoogleFonts.inter(
                         color: Colors.white.withOpacity(0.75),
                         fontSize: 15,

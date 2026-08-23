@@ -355,7 +355,7 @@ class SettingsView extends GetView<ProfileController> {
           buildDivider(),
           buildSettingsRowItem(
             icon: Icons.star_border_rounded,
-            title: "Rate NutriFit",
+            title: "Rate Nutri Shape",
             subtitle: "Share your feedback",
             onTap: () => Get.to(() => const ComingSoonView(title: "Rate Us")),
           ),

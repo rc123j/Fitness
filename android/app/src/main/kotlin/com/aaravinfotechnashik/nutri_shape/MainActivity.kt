@@ -1,4 +1,4 @@
-package com.fitfuel.nutrition.fitness
+package com.aaravinfotechnashik.nutri_shape
 
 import io.flutter.embedding.android.FlutterActivity
 

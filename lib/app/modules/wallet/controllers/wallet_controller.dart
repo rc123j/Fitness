@@ -67,7 +67,7 @@ class WalletController extends GetxController {
     },
     {
       "title": "Signup Bonus",
-      "desc": "Welcome to NutriFit",
+      "desc": "Welcome to Nutri Shape",
       "points": 100,
       "isAddition": true,
       "time": "Just now",

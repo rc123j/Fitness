@@ -11,7 +11,7 @@ class ProfileController extends GetxController {
 
   final isLoading = true.obs;
   final username = ''.obs;
-  final userClass = 'NutriFit Member'.obs;
+  final userClass = 'Nutri Shape Member'.obs;
   final email = ''.obs;
   final phone = ''.obs;
   final memberCode = ''.obs;

@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.fitfuel.nutrition" "\0"
-            VALUE "FileDescription", "fitness" "\0"
+            VALUE "CompanyName", "com.aaravinfotechnashik" "\0"
+            VALUE "FileDescription", "Nutri Shape" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "fitness" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.fitfuel.nutrition. All rights reserved." "\0"
-            VALUE "OriginalFilename", "fitness.exe" "\0"
-            VALUE "ProductName", "fitness" "\0"
+            VALUE "InternalName", "nutri_shape" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.aaravinfotechnashik. All rights reserved." "\0"
+            VALUE "OriginalFilename", "nutri_shape.exe" "\0"
+            VALUE "ProductName", "Nutri Shape" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -2,7 +2,7 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   // Set to true to connect to production server, false for local development
-  static const bool isProduction = false;
+  static const bool isProduction = true;
 
   static const String baseUrl = isProduction
       ? 'https://api.fitwithdeveloper.com'

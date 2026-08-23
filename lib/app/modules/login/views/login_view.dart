@@ -148,7 +148,7 @@ class LoginView extends GetView<LoginController> {
                           },
                           blendMode: BlendMode.srcIn,
                           child: Text(
-                            'F',
+                            'N',
                             style: GoogleFonts.satisfy(
                               fontSize: 54,
                               fontWeight: FontWeight.bold,
@@ -167,7 +167,7 @@ class LoginView extends GetView<LoginController> {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: 'FITWITH\n',
+                            text: 'NUTRI\n',
                             style: GoogleFonts.outfit(
                               color: Colors.white,
                               fontSize: 24,
@@ -177,7 +177,7 @@ class LoginView extends GetView<LoginController> {
                             ),
                           ),
                           TextSpan(
-                            text: 'DEVELOPER',
+                            text: 'SHAPE',
                             style: GoogleFonts.outfit(
                               color: const Color(
                                 0xffFF00E5,
@@ -450,65 +450,6 @@ class LoginView extends GetView<LoginController> {
                           ),
                         ),
                       ),
-                    ),
-
-                    const SizedBox(height: 28),
-
-                    Center(
-                      child: Text(
-                        'OR CONTINUE WITH',
-                        style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.45),
-                          letterSpacing: 2,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // SOCIAL BUTTONS
-                    Row(
-                      children: [
-                        Expanded(
-                          child: socialButton(
-                            title: 'Google',
-                            logoWidget: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Standard colored Google G icon
-                                Image.network(
-                                  'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png',
-                                  height: 20,
-                                  width: 20,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Text(
-                                      'G',
-                                      style: GoogleFonts.outfit(
-                                        color: Colors.redAccent,
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: socialButton(
-                            title: 'Apple',
-                            logoWidget: const Icon(
-                              Icons.apple_rounded,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
 
                     const SizedBox(height: 28),
