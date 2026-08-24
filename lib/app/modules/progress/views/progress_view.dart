@@ -80,11 +80,6 @@ class ProgressView extends GetView<ProgressController> {
                         return _buildLoadingState();
                       }
 
-                      // Corner Case: Locked State if no active plan
-                      if (!controller.hasActivePlan.value) {
-                        return _buildLockedState();
-                      }
-
                       return SingleChildScrollView(
                         controller: scrollController,
                         physics: const BouncingScrollPhysics(),

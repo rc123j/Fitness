@@ -125,6 +125,17 @@ class MealView extends GetView<MealController> {
                               ),
                               const SizedBox(height: 24),
 
+                              // AI Insights Section
+                              Obx(() {
+                                if (controller.aiInsights.isNotEmpty) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 24.0),
+                                    child: _buildAIInsightsSection(context),
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              }),
+
                               // Daily Meals — full-bleed gradient section (same style as
                               // the "Today's Meal Plan" block on the home screen)
                               _buildDailyMealsSection(context),
@@ -697,6 +708,84 @@ class MealView extends GetView<MealController> {
   // 4. DAILY MEALS — full-bleed section (matches the "Today's Meal Plan"
   // block on the home screen: same background + title style). The purple
   // fill eases in from the background at the top and eases back out at the
+  Widget _buildAIInsightsSection(BuildContext context) {
+    final insights = controller.aiInsights;
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 18),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xff151520),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xffFF00E5).withOpacity(0.3), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xffFF00E5).withOpacity(0.08),
+            blurRadius: 20,
+            spreadRadius: 2,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xffFF00E5).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.auto_awesome, color: Color(0xffFF00E5), size: 20),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                "Clinical AI Insights",
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          
+          if (insights['advice'] != null) ...[
+            Text("General Guidance", style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text(
+              insights['advice'].toString(),
+              style: GoogleFonts.outfit(color: Colors.white, fontSize: 14, height: 1.4),
+            ),
+            const SizedBox(height: 16),
+          ],
+          
+          if (insights['suggested_protein_powder'] != null) ...[
+            Text("Suggested Supplement", style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text(
+              insights['suggested_protein_powder'].toString(),
+              style: GoogleFonts.outfit(color: Colors.white, fontSize: 14, height: 1.4),
+            ),
+            const SizedBox(height: 16),
+          ],
+          
+          if (insights['disease_guidance'] != null) ...[
+            Text("Clinical Notes", style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text(
+              insights['disease_guidance'].toString(),
+              style: GoogleFonts.outfit(color: Colors.white, fontSize: 14, height: 1.4),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   // bottom, instead of cutting hard into the section — flat solid purple
   // through the middle, no lighter glow. Title, promo card and meal
   // timeline all sit on it. The meal cards inside are otherwise unchanged.

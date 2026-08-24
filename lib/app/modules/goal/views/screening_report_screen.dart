@@ -28,6 +28,11 @@ class ScreeningReportScreen extends StatefulWidget {
   final List<String> customConditions;
   final String? smokingHabit;
   final String? alcoholHabit;
+  final String? workoutStyle;
+  final String? workoutTime;
+  final double? waistCm;
+  final double? hipCm;
+  final List<String> deficiencies;
 
   const ScreeningReportScreen({
     super.key,
@@ -47,6 +52,11 @@ class ScreeningReportScreen extends StatefulWidget {
     required this.customConditions,
     this.smokingHabit,
     this.alcoholHabit,
+    this.workoutStyle,
+    this.workoutTime,
+    this.waistCm,
+    this.hipCm,
+    this.deficiencies = const [],
   });
 
   @override
@@ -234,6 +244,11 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
           'custom_medical_conditions': widget.customConditions,
           'smoking_habit': widget.smokingHabit ?? 'No, never',
           'alcohol_habit': widget.alcoholHabit ?? 'No, never',
+          'workout_style': widget.workoutStyle,
+          'workout_time': widget.workoutTime,
+          'waist_cm': widget.waistCm,
+          'hip_cm': widget.hipCm,
+          'deficiencies': widget.deficiencies,
         },
       );
 
@@ -259,6 +274,11 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
           tdee: tdee,
           ibw: ibw,
           lactoseIntolerant: widget.foodExclusions.contains('no_lactose') || widget.foodExclusions.contains('no_dairy'),
+          workoutStyle: widget.workoutStyle,
+          workoutTime: widget.workoutTime,
+          waistCm: widget.waistCm,
+          hipCm: widget.hipCm,
+          deficiencies: widget.deficiencies,
         ),
         transition: Transition.cupertino,
       );

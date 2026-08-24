@@ -15,6 +15,11 @@ class CongratulationsScreen extends StatefulWidget {
   final double tdee;
   final double ibw;
   final bool lactoseIntolerant;
+  final String? workoutStyle;
+  final String? workoutTime;
+  final double? waistCm;
+  final double? hipCm;
+  final List<String> deficiencies;
 
   const CongratulationsScreen({
     super.key,
@@ -28,6 +33,11 @@ class CongratulationsScreen extends StatefulWidget {
     required this.tdee,
     required this.ibw,
     required this.lactoseIntolerant,
+    this.workoutStyle,
+    this.workoutTime,
+    this.waistCm,
+    this.hipCm,
+    this.deficiencies = const [],
   });
 
   @override
@@ -52,7 +62,12 @@ class _CongratulationsScreenState extends State<CongratulationsScreen> {
         "bmr": widget.bmr,
         "tdee": widget.tdee,
         "ibw": widget.ibw,
-        "lactose_intolerant": widget.lactoseIntolerant
+        "lactose_intolerant": widget.lactoseIntolerant,
+        "workout_style": widget.workoutStyle,
+        "workout_time": widget.workoutTime,
+        "waist_cm": widget.waistCm,
+        "hip_cm": widget.hipCm,
+        "deficiencies": widget.deficiencies,
       });
       debugPrint("[CongratulationsScreen] API call finished successfully!");
     } catch (e) {

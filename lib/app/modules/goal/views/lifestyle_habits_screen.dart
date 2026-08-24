@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../../../services/onboarding_draft_service.dart';
-import 'screening_report_screen.dart';
+import 'optional_metrics_screen.dart';
 
 class LifestyleHabitsScreen extends StatefulWidget {
   final String goalTitle;
@@ -49,7 +49,7 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
       alcoholHabit: selectedAlcohol,
     );
     Get.to(
-      () => ScreeningReportScreen(
+      () => OptionalMetricsScreen(
         goalTitle: widget.goalTitle,
         goalId: widget.goalId,
         gender: widget.gender,
@@ -62,8 +62,6 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
         dietLabel: widget.dietLabel,
         foodExclusions: widget.foodExclusions,
         medicalConditionIds: widget.medicalConditionIds,
-        symptomIds: const [],
-        customConditions: const [],
         smokingHabit: selectedSmoking,
         alcoholHabit: selectedAlcohol,
       ),

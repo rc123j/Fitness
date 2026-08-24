@@ -62,7 +62,7 @@ class ProgressController extends GetxController {
         if (planData != null && activationData != null) {
           hasActivePlan.value = true;
           targetCalories.value =
-              (planData['target_calories'] as num?)?.toInt() ?? 2000;
+              double.tryParse(planData['target_calories']?.toString() ?? '')?.toInt() ?? 2000;
 
           // Calculate days remaining based on activation date
           final activatedAtStr = activationData['activated_at'];
@@ -103,14 +103,14 @@ class ProgressController extends GetxController {
 
         if (profile != null) {
           startingWeight.value =
-              (profile['weight_kg'] as num?)?.toDouble() ?? 0.0;
+              double.tryParse(profile['weight_kg']?.toString() ?? '') ?? 0.0;
         }
 
         if (latestMetrics != null) {
-          bmi.value = (latestMetrics['bmi'] as num?)?.toDouble() ?? 0.0;
-          tdee.value = (latestMetrics['tdee'] as num?)?.toInt() ?? 0;
-          bmr.value = (latestMetrics['bmr'] as num?)?.toInt() ?? 0;
-          ibw.value = (latestMetrics['ibw'] as num?)?.toDouble() ?? 0.0;
+          bmi.value = double.tryParse(latestMetrics['bmi']?.toString() ?? '') ?? 0.0;
+          tdee.value = double.tryParse(latestMetrics['tdee']?.toString() ?? '')?.toInt() ?? 0;
+          bmr.value = double.tryParse(latestMetrics['bmr']?.toString() ?? '')?.toInt() ?? 0;
+          ibw.value = double.tryParse(latestMetrics['ibw']?.toString() ?? '') ?? 0.0;
         }
       }
     } catch (e) {

@@ -35,6 +35,9 @@ class MealController extends GetxController {
   // Diet Plan Meals Timeline data
   final mealTimeline = <Map<String, dynamic>>[].obs;
 
+  // AI Insights
+  final aiInsights = <String, dynamic>{}.obs;
+
   // Track selected option (1, 2, 3, 4) for each meal slot (key is dietPlanMealId)
   final selectedOptions = <int, int>{}.obs;
 
@@ -81,6 +84,20 @@ class MealController extends GetxController {
 
         final planData = planRes.data['diet_plan'];
         if (planData != null) {
+          
+          if (planData['ai_insights_json'] != null) {
+            try {
+              final parsed = planData['ai_insights_json'] is String
+                  ? jsonDecode(planData['ai_insights_json'])
+                  : planData['ai_insights_json'];
+              aiInsights.value = Map<String, dynamic>.from(parsed);
+            } catch (e) {
+              aiInsights.clear();
+            }
+          } else {
+            aiInsights.clear();
+          }
+
           final metrics = planData['metric_snapshot'];
 
           targetCalories.value =
