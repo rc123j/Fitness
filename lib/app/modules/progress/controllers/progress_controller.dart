@@ -4,10 +4,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart' as dio;
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
-import '../../../services/api_endpoints.dart';
+import '../../main_navigation/controllers/main_navigation_controller.dart';
+
+// Index of the Progress tab inside MainNavigationView's IndexedStack.
+const int _kProgressTabIndex = 2;
 
 class ProgressController extends GetxController {
   final _apiClient = Get.find<ApiClient>();
+  Worker? _tabWorker;
 
   final isLoading = false.obs;
 
@@ -47,6 +51,25 @@ class ProgressController extends GetxController {
   void onInit() {
     super.onInit();
     fetchProgressData();
+
+    // The Progress tab is kept alive inside an IndexedStack, so it never
+    // rebuilds/re-fetches on its own when the user switches back to it.
+    // Re-fetch whenever it becomes the active tab so meals logged elsewhere
+    // (e.g. the Meal tab) are reflected here without needing an app restart.
+    if (Get.isRegistered<MainNavigationController>()) {
+      _tabWorker = ever<int>(
+        Get.find<MainNavigationController>().selectedIndex,
+        (index) {
+          if (index == _kProgressTabIndex) fetchProgressData();
+        },
+      );
+    }
+  }
+
+  @override
+  void onClose() {
+    _tabWorker?.dispose();
+    super.onClose();
   }
 
   Future<void> fetchProgressData() async {
@@ -56,10 +79,14 @@ class ProgressController extends GetxController {
       // 1. Check Active Plan Status & Metrics
       final planRes = await _apiClient.get(ApiEndpoints.currentDietPlan);
       if (planRes.statusCode == 200 && planRes.data != null) {
-        final planData = planRes.data['plan'];
-        final activationData = planRes.data['activation'];
+        // The endpoint returns { activation_id, activated_at, expires_at,
+        // current_day, days_remaining, diet_plan: {...} } — activation
+        // fields are flattened at the top level, not nested under an
+        // "activation" key, and the plan itself is "diet_plan" not "plan".
+        final planData = planRes.data['diet_plan'];
+        final activationData = planRes.data;
 
-        if (planData != null && activationData != null) {
+        if (planData != null) {
           hasActivePlan.value = true;
           targetCalories.value =
               double.tryParse(planData['target_calories']?.toString() ?? '')?.toInt() ?? 2000;
@@ -132,6 +159,10 @@ class ProgressController extends GetxController {
         int daysAdherent = 0;
         int streakCounter = 0;
         bool streakBroken = false;
+        
+        // We only evaluate streak/compliance for days they were actually enrolled.
+        int activeDaysInHistory = currentDay.value.clamp(1, 7);
+        int evaluatedDays = 0;
 
         // The API returns the last 7 days. We parse it to calculate compliance and streak.
         for (var day in rawHistory.reversed) {
@@ -153,21 +184,25 @@ class ProgressController extends GetxController {
             "target": targetCalories.value,
           });
 
-          // Check adherence: They MUST hit at least 85% of their target to maintain the streak.
-          final double minimumRequiredCalories = targetCalories.value * 0.85;
+          // Only evaluate adherence for days they were actually active
+          if (evaluatedDays < activeDaysInHistory) {
+            final double minimumRequiredCalories = targetCalories.value - 300;
+            final double maximumAllowedCalories = targetCalories.value + 100;
 
-          if (cal >= minimumRequiredCalories) { 
-            daysAdherent++;
-            if (!streakBroken) streakCounter++;
-          } else {
-            // They missed meals or fell short. Streak breaks!
-            streakBroken = true;
+            if (cal >= minimumRequiredCalories && cal <= maximumAllowedCalories) {
+              daysAdherent++;
+              if (!streakBroken) streakCounter++;
+            } else {
+              // They fell short or overshot their target. Streak breaks!
+              streakBroken = true;
+            }
+            evaluatedDays++;
           }
         }
         
         weeklyAdherenceData.value = tempHistory;
         currentStreak.value = streakCounter;
-        dietCompliance.value = rawHistory.isNotEmpty ? ((daysAdherent / rawHistory.length) * 100).round() : 0;
+        dietCompliance.value = activeDaysInHistory > 0 ? ((daysAdherent / activeDaysInHistory) * 100).round() : 0;
       }
     } catch (e) {
       debugPrint("Error fetching real history: $e");

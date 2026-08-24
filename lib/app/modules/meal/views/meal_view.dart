@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math' as math;
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -129,7 +130,9 @@ class MealView extends GetView<MealController> {
                               Obx(() {
                                 if (controller.aiInsights.isNotEmpty) {
                                   return Padding(
-                                    padding: const EdgeInsets.only(bottom: 24.0),
+                                    padding: const EdgeInsets.only(
+                                      bottom: 24.0,
+                                    ),
                                     child: _buildAIInsightsSection(context),
                                   );
                                 }
@@ -519,81 +522,96 @@ class MealView extends GetView<MealController> {
           : 0.0;
 
       return Container(
-        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xff0B0817).withOpacity(0.6),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withOpacity(0.18), width: 1.2),
+          color: const Color(0xff120D23).withOpacity(0.8),
+          border: Border.all(color: Colors.white.withOpacity(0.25), width: 1.5),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            child: Stack(
               children: [
-                Text(
-                  _nutritionHeading(controller.dayLabel),
-                  style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.4),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.2,
-                  ),
+                Positioned.fill(
+                  child: CustomPaint(painter: TodayNutritionBgPainter()),
                 ),
-                Text(
-                  "${_formatNumber(controller.currentCalories.value)}/${_formatNumber(controller.targetCalories.value)} kcal",
-                  style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.4),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 22),
-
-            // Segmented macro ring + legend
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 20),
-                  child: _buildMacroRing(
-                    currentCalories: controller.currentCalories.value,
-                    proteinProgress: proteinProgress,
-                    carbsProgress: carbsProgress,
-                    fatProgress: fatProgress,
-                  ),
-                ),
-                Flexible(
+                  padding: const EdgeInsets.all(20),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildLegendRow(
-                        "${controller.consumedCarbs.value}g",
-                        "Carbs",
-                        _carbsColor,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _nutritionHeading(controller.dayLabel),
+                            style: GoogleFonts.inter(
+                              color: Colors.white.withOpacity(0.4),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          Text(
+                            "${_formatNumber(controller.currentCalories.value)}/${_formatNumber(controller.targetCalories.value)} kcal",
+                            style: GoogleFonts.inter(
+                              color: Colors.white.withOpacity(0.4),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 24),
-                      _buildLegendRow(
-                        "${controller.consumedProtein.value}g",
-                        "Protein",
-                        _proteinColor,
-                      ),
-                      const SizedBox(height: 24),
-                      _buildLegendRow(
-                        "${controller.consumedFat.value}g",
-                        "Fat",
-                        _fatColor,
+                      const SizedBox(height: 22),
+
+                      // Segmented macro ring + legend
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 20),
+                            child: _buildMacroRing(
+                              currentCalories: controller.currentCalories.value,
+                              proteinProgress: proteinProgress,
+                              carbsProgress: carbsProgress,
+                              fatProgress: fatProgress,
+                            ),
+                          ),
+                          Flexible(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                _buildLegendRow(
+                                  "${controller.consumedCarbs.value}g",
+                                  "Carbs",
+                                  _carbsColor,
+                                ),
+                                const SizedBox(height: 24),
+                                _buildLegendRow(
+                                  "${controller.consumedProtein.value}g",
+                                  "Protein",
+                                  _proteinColor,
+                                ),
+                                const SizedBox(height: 24),
+                                _buildLegendRow(
+                                  "${controller.consumedFat.value}g",
+                                  "Fat",
+                                  _fatColor,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-          ],
+          ),
         ),
       );
     });
@@ -710,14 +728,17 @@ class MealView extends GetView<MealController> {
   // fill eases in from the background at the top and eases back out at the
   Widget _buildAIInsightsSection(BuildContext context) {
     final insights = controller.aiInsights;
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 18),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: const Color(0xff151520),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xffFF00E5).withOpacity(0.3), width: 1),
+        border: Border.all(
+          color: const Color(0xffFF00E5).withOpacity(0.3),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: const Color(0xffFF00E5).withOpacity(0.08),
@@ -738,7 +759,11 @@ class MealView extends GetView<MealController> {
                   color: const Color(0xffFF00E5).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.auto_awesome, color: Color(0xffFF00E5), size: 20),
+                child: const Icon(
+                  Icons.auto_awesome,
+                  color: Color(0xffFF00E5),
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Text(
@@ -752,33 +777,66 @@ class MealView extends GetView<MealController> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           if (insights['advice'] != null) ...[
-            Text("General Guidance", style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)),
+            Text(
+              "General Guidance",
+              style: GoogleFonts.outfit(
+                color: Colors.white70,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 4),
             Text(
               insights['advice'].toString(),
-              style: GoogleFonts.outfit(color: Colors.white, fontSize: 14, height: 1.4),
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontSize: 14,
+                height: 1.4,
+              ),
             ),
             const SizedBox(height: 16),
           ],
-          
+
           if (insights['suggested_protein_powder'] != null) ...[
-            Text("Suggested Supplement", style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)),
+            Text(
+              "Suggested Supplement",
+              style: GoogleFonts.outfit(
+                color: Colors.white70,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 4),
             Text(
               insights['suggested_protein_powder'].toString(),
-              style: GoogleFonts.outfit(color: Colors.white, fontSize: 14, height: 1.4),
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontSize: 14,
+                height: 1.4,
+              ),
             ),
             const SizedBox(height: 16),
           ],
-          
+
           if (insights['disease_guidance'] != null) ...[
-            Text("Clinical Notes", style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)),
+            Text(
+              "Clinical Notes",
+              style: GoogleFonts.outfit(
+                color: Colors.white70,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 4),
             Text(
               insights['disease_guidance'].toString(),
-              style: GoogleFonts.outfit(color: Colors.white, fontSize: 14, height: 1.4),
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontSize: 14,
+                height: 1.4,
+              ),
             ),
           ],
         ],
@@ -1440,9 +1498,13 @@ class MealView extends GetView<MealController> {
             double.tryParse(f['calories']?.toString() ?? '0') ?? 0.0;
         // Portion: prefer household_measure from food_details, then exchange_amount, then quantity+unit
         final String qtyStr = f['quantity']?.toString() ?? '';
-        final String unitStr = foodDetails['serving_unit']?.toString() ?? foodDetails['unit']?.toString() ?? '';
+        final String unitStr =
+            foodDetails['serving_unit']?.toString() ??
+            foodDetails['unit']?.toString() ??
+            '';
 
-        final String portion = unitStr.toLowerCase() == "exchange" ||
+        final String portion =
+            unitStr.toLowerCase() == "exchange" ||
                 unitStr.toLowerCase() == "exchanges"
             ? (qtyStr.isNotEmpty ? '$qtyStr Exchange' : '')
             : (qtyStr.isNotEmpty ? '$qtyStr $unitStr'.trim() : '');
@@ -1455,8 +1517,15 @@ class MealView extends GetView<MealController> {
         if (index < option2Foods.length) {
           final f2 = option2Foods[index];
           final String name2 = f2['food_details']?['food_name'] ?? '';
-          final String sSize2 = f2['serving_size']?.toString() ?? f2['quantity']?.toString() ?? '';
-          final String sUnit2 = f2['serving_unit']?.toString() ?? f2['unit']?.toString() ?? f2['food_details']?['serving_unit']?.toString() ?? '';
+          final String sSize2 =
+              f2['serving_size']?.toString() ??
+              f2['quantity']?.toString() ??
+              '';
+          final String sUnit2 =
+              f2['serving_unit']?.toString() ??
+              f2['unit']?.toString() ??
+              f2['food_details']?['serving_unit']?.toString() ??
+              '';
           final String portion2 = "$sSize2 $sUnit2".trim();
           if (name2.isNotEmpty) {
             swaps.add("$name2 ($portion2)");
@@ -1466,8 +1535,15 @@ class MealView extends GetView<MealController> {
         if (index < option3Foods.length) {
           final f3 = option3Foods[index];
           final String name3 = f3['food_details']?['food_name'] ?? '';
-          final String sSize3 = f3['serving_size']?.toString() ?? f3['quantity']?.toString() ?? '';
-          final String sUnit3 = f3['serving_unit']?.toString() ?? f3['unit']?.toString() ?? f3['food_details']?['serving_unit']?.toString() ?? '';
+          final String sSize3 =
+              f3['serving_size']?.toString() ??
+              f3['quantity']?.toString() ??
+              '';
+          final String sUnit3 =
+              f3['serving_unit']?.toString() ??
+              f3['unit']?.toString() ??
+              f3['food_details']?['serving_unit']?.toString() ??
+              '';
           final String portion3 = "$sSize3 $sUnit3".trim();
           if (name3.isNotEmpty) {
             swaps.add("$name3 ($portion3)");
@@ -1672,4 +1748,83 @@ class _MacroRingPainter extends CustomPainter {
         oldDelegate.proteinProgress != proteinProgress ||
         oldDelegate.fatProgress != fatProgress;
   }
+}
+
+class TodayNutritionBgPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    double w = size.width;
+    double h = size.height;
+
+    /// A. Draw Purple/Pink Nebula Radial Gradients
+    Paint nebulaPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          const Color(0xffFF00E5).withOpacity(0.18),
+          const Color(0xffB100FF).withOpacity(0.04),
+          Colors.transparent,
+        ],
+        center: Alignment.centerRight,
+      ).createShader(Rect.fromLTRB(w * 0.4, -h * 0.2, w * 1.2, h * 1.2));
+    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), nebulaPaint);
+
+    /// B. Draw Stars/Dots
+    Paint starPaint = Paint()..color = Colors.white.withOpacity(0.15);
+    canvas.drawCircle(Offset(w * 0.15, h * 0.22), 1.0, starPaint);
+    canvas.drawCircle(Offset(w * 0.32, h * 0.18), 1.2, starPaint);
+    canvas.drawCircle(Offset(w * 0.45, h * 0.35), 0.8, starPaint);
+    canvas.drawCircle(
+      Offset(w * 0.72, h * 0.12),
+      1.5,
+      starPaint..color = Colors.white.withOpacity(0.25),
+    );
+    canvas.drawCircle(Offset(w * 0.88, h * 0.28), 1.0, starPaint);
+    canvas.drawCircle(Offset(w * 0.62, h * 0.45), 0.7, starPaint);
+
+    /// C. Draw Mountain Silhouette (right aligned bottom)
+    Path mountain = Path();
+    mountain.moveTo(w * 0.42, h);
+    mountain.lineTo(w * 0.64, h * 0.52); // Peak
+    mountain.lineTo(w * 0.86, h);
+    mountain.close();
+
+    Paint mountainPaint = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xff120826), Color(0xff06010F)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ).createShader(Rect.fromLTRB(w * 0.4, h * 0.5, w * 0.9, h));
+
+    canvas.drawPath(mountain, mountainPaint);
+
+    /// Draw a tiny human silhouette on peak
+    Paint humanPaint = Paint()..color = Colors.white.withOpacity(0.50);
+    double px = w * 0.64;
+    double py = h * 0.52;
+    canvas.drawCircle(Offset(px, py - 4), 1.2, humanPaint); // Head
+    canvas.drawLine(
+      Offset(px, py - 3),
+      Offset(px, py),
+      Paint()
+        ..color = Colors.white.withOpacity(0.50)
+        ..strokeWidth = 1.2,
+    );
+    canvas.drawLine(
+      Offset(px, py),
+      Offset(px - 2, py + 4),
+      Paint()
+        ..color = Colors.white.withOpacity(0.50)
+        ..strokeWidth = 1.0,
+    );
+    canvas.drawLine(
+      Offset(px, py),
+      Offset(px + 2, py + 4),
+      Paint()
+        ..color = Colors.white.withOpacity(0.50)
+        ..strokeWidth = 1.0,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

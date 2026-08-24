@@ -140,15 +140,24 @@ class _OptionalMetricsScreenState extends State<OptionalMetricsScreen> {
                       children: deficiencyList.map((d) {
                         final isSelected = selectedDeficiencies.contains(d);
                         return ChoiceChip(
-                          label: Text(d),
+                          label: Text(d, style: TextStyle(color: isSelected ? Colors.white : Colors.white54)),
                           selected: isSelected,
                           onSelected: (val) {
                             setState(() {
                               val ? selectedDeficiencies.add(d) : selectedDeficiencies.remove(d);
                             });
                           },
-                          backgroundColor: Colors.white.withOpacity(0.05),
-                          selectedColor: const Color(0xffFF00E5).withOpacity(0.3),
+                          backgroundColor: const Color(0xff12121A),
+                          surfaceTintColor: Colors.transparent,
+                          selectedColor: const Color(0xff12121A),
+                          showCheckmark: false,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: isSelected ? const Color(0xffFF00E5) : Colors.white.withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
                           labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.white54),
                         );
                       }).toList(),
@@ -163,11 +172,20 @@ class _OptionalMetricsScreenState extends State<OptionalMetricsScreen> {
                       children: workoutStyles.map((w) {
                         final isSelected = selectedWorkoutStyle == w;
                         return ChoiceChip(
-                          label: Text(w),
+                          label: Text(w, style: TextStyle(color: isSelected ? Colors.white : Colors.white54)),
                           selected: isSelected,
                           onSelected: (val) => setState(() => selectedWorkoutStyle = val ? w : null),
-                          backgroundColor: Colors.white.withOpacity(0.05),
-                          selectedColor: const Color(0xff7B61FF).withOpacity(0.5),
+                          backgroundColor: const Color(0xff12121A),
+                          surfaceTintColor: Colors.transparent,
+                          selectedColor: const Color(0xff12121A),
+                          showCheckmark: false,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: isSelected ? const Color(0xff7B61FF) : Colors.white.withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
                           labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.white54),
                         );
                       }).toList(),
@@ -182,11 +200,20 @@ class _OptionalMetricsScreenState extends State<OptionalMetricsScreen> {
                       children: workoutTimes.map((t) {
                         final isSelected = selectedWorkoutTime == t;
                         return ChoiceChip(
-                          label: Text(t),
+                          label: Text(t, style: TextStyle(color: isSelected ? Colors.white : Colors.white54)),
                           selected: isSelected,
                           onSelected: (val) => setState(() => selectedWorkoutTime = val ? t : null),
-                          backgroundColor: Colors.white.withOpacity(0.05),
-                          selectedColor: const Color(0xff7B61FF).withOpacity(0.5),
+                          backgroundColor: const Color(0xff12121A),
+                          surfaceTintColor: Colors.transparent,
+                          selectedColor: const Color(0xff12121A),
+                          showCheckmark: false,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: isSelected ? const Color(0xff7B61FF) : Colors.white.withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
                           labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.white54),
                         );
                       }).toList(),
@@ -206,9 +233,13 @@ class _OptionalMetricsScreenState extends State<OptionalMetricsScreen> {
                                 keyboardType: TextInputType.number,
                                 style: const TextStyle(color: Colors.white),
                                 decoration: InputDecoration(
+                                  hintText: 'e.g. 80',
+                                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
                                   filled: true,
-                                  fillColor: Colors.white.withOpacity(0.05),
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                  fillColor: Colors.white.withOpacity(0.03),
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withOpacity(0.2))),
+                                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withOpacity(0.2))),
+                                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: const Color(0xffFF00E5))),
                                 ),
                               ),
                             ],
@@ -226,9 +257,13 @@ class _OptionalMetricsScreenState extends State<OptionalMetricsScreen> {
                                 keyboardType: TextInputType.number,
                                 style: const TextStyle(color: Colors.white),
                                 decoration: InputDecoration(
+                                  hintText: 'e.g. 95',
+                                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
                                   filled: true,
-                                  fillColor: Colors.white.withOpacity(0.05),
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                  fillColor: Colors.white.withOpacity(0.03),
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withOpacity(0.2))),
+                                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withOpacity(0.2))),
+                                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: const Color(0xffFF00E5))),
                                 ),
                               ),
                             ],

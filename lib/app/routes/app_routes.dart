@@ -10,6 +10,7 @@ abstract class Routes {
   static const GOAL_SELECTION = _Paths.GOAL_SELECTION;
   static const MEAL_PLAN = _Paths.MEAL_PLAN;
   static const PROGRESS = _Paths.PROGRESS;
+  static const PROGRESS_PHOTOS = _Paths.PROGRESS_PHOTOS;
   static const REWARDS_HUB = _Paths.REWARDS_HUB;
   static const BOOKING = _Paths.BOOKING;
   static const PROFILE = _Paths.PROFILE;
@@ -36,6 +37,7 @@ abstract class _Paths {
   static const GOAL_SELECTION = '/goal-selection';
   static const MEAL_PLAN = '/meal-plan';
   static const PROGRESS = '/progress';
+  static const PROGRESS_PHOTOS = '/progress-photos';
   static const REWARDS_HUB = '/rewards-hub';
   static const BOOKING = '/booking';
   static const PROFILE = '/profile';

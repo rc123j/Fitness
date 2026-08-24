@@ -80,27 +80,34 @@ class ProgressView extends GetView<ProgressController> {
                         return _buildLoadingState();
                       }
 
-                      return SingleChildScrollView(
-                        controller: scrollController,
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.only(
-                          left: 18,
-                          right: 18,
-                          bottom: 100,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 10),
-                            _buildJourneyHeaderCard(),
-                            const SizedBox(height: 24),
-                            _buildTransformationGallery(),
-                            const SizedBox(height: 24),
-                            _buildComplianceChart(),
-                            const SizedBox(height: 24),
-                            _buildStartingSnapshot(),
-                            const SizedBox(height: 40),
-                          ],
+                      return RefreshIndicator(
+                        color: const Color(0xffB100FF),
+                        backgroundColor: const Color(0xff121220),
+                        onRefresh: controller.fetchProgressData,
+                        child: SingleChildScrollView(
+                          controller: scrollController,
+                          physics: const AlwaysScrollableScrollPhysics(
+                            parent: BouncingScrollPhysics(),
+                          ),
+                          padding: const EdgeInsets.only(
+                            left: 18,
+                            right: 18,
+                            bottom: 100,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 10),
+                              _buildJourneyHeaderCard(),
+                              const SizedBox(height: 24),
+                              _buildTransformationGallery(),
+                              const SizedBox(height: 24),
+                              _buildComplianceChart(),
+                              const SizedBox(height: 24),
+                              _buildStartingSnapshot(),
+                              const SizedBox(height: 40),
+                            ],
+                          ),
                         ),
                       );
                     }),
@@ -271,14 +278,21 @@ class ProgressView extends GetView<ProgressController> {
             height: 180,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xff121220),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xff1C1533),
+                  const Color(0xff0D0818),
+                ],
+              ),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withOpacity(0.05)),
+              border: Border.all(color: Colors.white.withOpacity(0.08)),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xffB100FF).withOpacity(0.1),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
+                  color: const Color(0xffB100FF).withOpacity(0.16),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
                 ),
               ],
             ),
@@ -333,7 +347,9 @@ class ProgressView extends GetView<ProgressController> {
                       child: Container(
                         height: 8,
                         decoration: BoxDecoration(
-                          color: const Color(0xffB100FF),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xffB100FF), Color(0xffFF00E5)],
+                          ),
                           borderRadius: BorderRadius.circular(4),
                           boxShadow: [
                             BoxShadow(
@@ -360,7 +376,14 @@ class ProgressView extends GetView<ProgressController> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xffFF7A00).withOpacity(0.1),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      const Color(0xffFF7A00).withOpacity(0.16),
+                      const Color(0xffFF7A00).withOpacity(0.04),
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: const Color(0xffFF7A00).withOpacity(0.3),
@@ -368,10 +391,17 @@ class ProgressView extends GetView<ProgressController> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.local_fire_department_rounded,
-                      color: Color(0xffFF7A00),
-                      size: 32,
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xffFF7A00).withOpacity(0.15),
+                      ),
+                      child: const Icon(
+                        Icons.local_fire_department_rounded,
+                        color: Color(0xffFF7A00),
+                        size: 22,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Column(
@@ -406,7 +436,14 @@ class ProgressView extends GetView<ProgressController> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xff00FF87).withOpacity(0.1),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      const Color(0xff00FF87).withOpacity(0.16),
+                      const Color(0xff00FF87).withOpacity(0.04),
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: const Color(0xff00FF87).withOpacity(0.3),
@@ -414,10 +451,17 @@ class ProgressView extends GetView<ProgressController> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.verified_rounded,
-                      color: Color(0xff00FF87),
-                      size: 32,
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xff00FF87).withOpacity(0.15),
+                      ),
+                      child: const Icon(
+                        Icons.verified_rounded,
+                        color: Color(0xff00FF87),
+                        size: 22,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Column(
@@ -468,7 +512,38 @@ class ProgressView extends GetView<ProgressController> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const Icon(Icons.info_outline, color: Colors.white54, size: 20),
+            GestureDetector(
+              onTap: () => Get.toNamed('/progress-photos'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xffB100FF).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xffB100FF).withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Manage",
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xffB100FF),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Color(0xffB100FF),
+                      size: 12,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -484,15 +559,20 @@ class ProgressView extends GetView<ProgressController> {
               final url = controller.transformationPhotos[key] ?? '';
 
               return GestureDetector(
-                onTap: () {
-                  // Only allow interaction with current or past milestones
-                  // For simplicity, we allow tapping any frame right now
-                  controller.handlePhotoAction(key);
-                },
+                // Tapping a frame opens the dedicated Progress Photos screen
+                // (where the actual upload/replace/remove actions live).
+                onTap: () => Get.toNamed('/progress-photos'),
                 child: Container(
                   width: 130,
                   decoration: BoxDecoration(
-                    color: const Color(0xff121220),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xff1B1430),
+                        const Color(0xff0D0818),
+                      ],
+                    ),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: url.isNotEmpty
@@ -500,6 +580,13 @@ class ProgressView extends GetView<ProgressController> {
                           : Colors.white.withOpacity(0.1),
                       width: 1.5,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.25),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
                   ),
                   child: Stack(
                     fit: StackFit.expand,
@@ -574,9 +661,23 @@ class ProgressView extends GetView<ProgressController> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xff121220),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xff1C1533),
+            const Color(0xff0D0818),
+          ],
+        ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -593,8 +694,17 @@ class ProgressView extends GetView<ProgressController> {
           SizedBox(
             height: 160,
             child: Obx(() {
-              if (controller.weeklyAdherenceData.isEmpty) {
+              if (controller.isLoading.value && controller.weeklyAdherenceData.isEmpty) {
                 return const Center(child: CircularProgressIndicator());
+              }
+              if (controller.weeklyAdherenceData.isEmpty) {
+                return Center(
+                  child: Text(
+                    "No meals logged yet.\nStart logging to see your adherence!",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.outfit(color: Colors.white54, fontSize: 14),
+                  ),
+                );
               }
               return CustomPaint(
                 size: const Size(double.infinity, 160),
@@ -630,6 +740,7 @@ class ProgressView extends GetView<ProgressController> {
                 "Starting Weight",
                 "${controller.startingWeight.value} kg",
                 const Color(0xff00A2FF),
+                Icons.monitor_weight_outlined,
               ),
             ),
             const SizedBox(width: 12),
@@ -638,6 +749,7 @@ class ProgressView extends GetView<ProgressController> {
                 "Target BMI",
                 "${controller.bmi.value}",
                 const Color(0xffFF00E5),
+                Icons.speed_rounded,
               ),
             ),
             const SizedBox(width: 12),
@@ -646,6 +758,7 @@ class ProgressView extends GetView<ProgressController> {
                 "Ideal Weight",
                 "${controller.ibw.value} kg",
                 const Color(0xff00FF87),
+                Icons.accessibility_new_rounded,
               ),
             ),
           ],
@@ -654,21 +767,39 @@ class ProgressView extends GetView<ProgressController> {
     );
   }
 
-  Widget _buildMetricMiniCard(String title, String value, Color color) {
+  Widget _buildMetricMiniCard(
+    String title,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       decoration: BoxDecoration(
-        color: const Color(0xff121220),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [color.withOpacity(0.14), color.withOpacity(0.03)],
+        ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withOpacity(0.25)),
       ),
       child: Column(
         children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withOpacity(0.15),
+            ),
+            child: Icon(icon, color: color, size: 18),
+          ),
+          const SizedBox(height: 8),
           Text(
             value,
             style: GoogleFonts.outfit(
               color: Colors.white,
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),

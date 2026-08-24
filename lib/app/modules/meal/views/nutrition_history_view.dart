@@ -61,7 +61,10 @@ class NutritionHistoryView extends GetView<MealController> {
                 Expanded(
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -106,7 +109,11 @@ class NutritionHistoryView extends GetView<MealController> {
                   width: 0.8,
                 ),
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
+              child: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+                size: 16,
+              ),
             ),
           ),
           const SizedBox(width: 14),
@@ -151,7 +158,10 @@ class NutritionHistoryView extends GetView<MealController> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 color: const Color(0xff0B0817).withOpacity(0.55),
-                border: Border.all(color: const Color(0xff00FF87).withOpacity(0.15), width: 1.0),
+                border: Border.all(
+                  color: const Color(0xff00FF87).withOpacity(0.15),
+                  width: 1.0,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,7 +176,11 @@ class NutritionHistoryView extends GetView<MealController> {
                           fontSize: 10,
                         ),
                       ),
-                      const Icon(Icons.bolt, color: Color(0xff00FF87), size: 14),
+                      const Icon(
+                        Icons.bolt,
+                        color: Color(0xff00FF87),
+                        size: 14,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -197,7 +211,10 @@ class NutritionHistoryView extends GetView<MealController> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 color: const Color(0xff0B0817).withOpacity(0.55),
-                border: Border.all(color: const Color(0xffB100FF).withOpacity(0.15), width: 1.0),
+                border: Border.all(
+                  color: const Color(0xffB100FF).withOpacity(0.15),
+                  width: 1.0,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,7 +229,11 @@ class NutritionHistoryView extends GetView<MealController> {
                           fontSize: 10,
                         ),
                       ),
-                      const Icon(Icons.verified_rounded, color: Color(0xffB100FF), size: 14),
+                      const Icon(
+                        Icons.verified_rounded,
+                        color: Color(0xffB100FF),
+                        size: 14,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -268,7 +289,9 @@ class NutritionHistoryView extends GetView<MealController> {
                 height: 160,
                 child: Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xff00FF87)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xff00FF87),
+                    ),
                   ),
                 ),
               );
@@ -291,13 +314,18 @@ class NutritionHistoryView extends GetView<MealController> {
                   children: list.map((day) {
                     final dateStr = day['date'] as String;
                     final parts = dateStr.split('-');
-                    final label = parts.length == 3 ? "${parts[2]}/${parts[1]}" : "Log";
+                    final label = parts.length == 3
+                        ? "${parts[2]}/${parts[1]}"
+                        : "Log";
                     return Text(
                       label,
-                      style: GoogleFonts.inter(color: Colors.white.withOpacity(0.35), fontSize: 9),
+                      style: GoogleFonts.inter(
+                        color: Colors.white.withOpacity(0.35),
+                        fontSize: 9,
+                      ),
                     );
                   }).toList(),
-                )
+                ),
               ],
             );
           }),
@@ -328,7 +356,10 @@ class NutritionHistoryView extends GetView<MealController> {
           const SizedBox(height: 4),
           Text(
             "Visual check of marked vs missed meals",
-            style: GoogleFonts.inter(color: Colors.white.withOpacity(0.40), fontSize: 9.5),
+            style: GoogleFonts.inter(
+              color: Colors.white.withOpacity(0.40),
+              fontSize: 9.5,
+            ),
           ),
           const SizedBox(height: 18),
           Obx(() {
@@ -365,7 +396,9 @@ class NutritionHistoryView extends GetView<MealController> {
                       ...list.map((day) {
                         final dateStr = day['date'] as String;
                         final parts = dateStr.split('-');
-                        final dayLabel = parts.length == 3 ? "${parts[2]}/${parts[1]}" : "";
+                        final dayLabel = parts.length == 3
+                            ? "${parts[2]}/${parts[1]}"
+                            : "";
                         return TableCell(
                           child: Center(
                             child: Text(
@@ -378,7 +411,7 @@ class NutritionHistoryView extends GetView<MealController> {
                             ),
                           ),
                         );
-                      }).toList()
+                      }).toList(),
                     ],
                   ),
 
@@ -410,31 +443,50 @@ class NutritionHistoryView extends GetView<MealController> {
                           final bool isLogged = mealsLogged.contains(typeId);
                           final String dayStr = day['date'] as String;
                           final bool isPast = DateTime.parse(dayStr).isBefore(
-                            DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
+                            DateTime(
+                              DateTime.now().year,
+                              DateTime.now().month,
+                              DateTime.now().day,
+                            ),
                           );
 
                           Widget icon = const SizedBox.shrink();
                           if (isLogged) {
-                            icon = const Icon(Icons.check_circle_rounded, color: Color(0xff00FF87), size: 14);
+                            icon = const Icon(
+                              Icons.check_circle_rounded,
+                              color: Color(0xff00FF87),
+                              size: 14,
+                            );
                           } else if (isPast) {
-                            icon = Icon(Icons.cancel_rounded, color: Colors.white.withOpacity(0.12), size: 14);
+                            icon = Icon(
+                              Icons.cancel_rounded,
+                              color: Colors.white.withOpacity(0.12),
+                              size: 14,
+                            );
                           } else {
-                            icon = const Icon(Icons.radio_button_unchecked_rounded, color: Colors.white24, size: 12);
+                            icon = const Icon(
+                              Icons.radio_button_unchecked_rounded,
+                              color: Colors.white24,
+                              size: 12,
+                            );
                           }
 
                           return TableCell(
-                            verticalAlignment: TableCellVerticalAlignment.middle,
+                            verticalAlignment:
+                                TableCellVerticalAlignment.middle,
                             child: Center(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                ),
                                 child: icon,
                               ),
                             ),
                           );
-                        }).toList()
+                        }).toList(),
                       ],
                     );
-                  }).toList()
+                  }).toList(),
                 ],
               ),
             );
@@ -460,25 +512,39 @@ class CalorieHistoryChartPainter extends CustomPainter {
     final targetPaint = Paint()
       ..color = const Color(0xffFF3B30).withOpacity(0.3)
       ..strokeWidth = 1.0;
-    
+
     // Draw target baseline text
     final textPainter = TextPainter(
       text: TextSpan(
         text: "Target: ${target.toInt()} kcal",
-        style: GoogleFonts.inter(color: const Color(0xffFF3B30).withOpacity(0.6), fontSize: 8),
+        style: GoogleFonts.inter(
+          color: const Color(0xffFF3B30).withOpacity(0.6),
+          fontSize: 8,
+        ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
 
-    double maxVal = max(target, history.map((day) => double.tryParse(day['calories']?.toString() ?? '0') ?? 0.0).reduce(max));
+    double maxVal = max(
+      target,
+      history
+          .map(
+            (day) => double.tryParse(day['calories']?.toString() ?? '0') ?? 0.0,
+          )
+          .reduce(max),
+    );
     if (maxVal == 0) maxVal = 2000.0;
-    
+
     double targetY = h - ((target / maxVal) * (h - 20)) - 10;
     canvas.drawLine(Offset(0, targetY), Offset(w, targetY), targetPaint);
     textPainter.paint(canvas, Offset(4, targetY - 12));
 
     // Plot intake curve
-    final List<double> calories = history.map((day) => double.tryParse(day['calories']?.toString() ?? '0.0') ?? 0.0).toList();
+    final List<double> calories = history
+        .map(
+          (day) => double.tryParse(day['calories']?.toString() ?? '0.0') ?? 0.0,
+        )
+        .toList();
     if (calories.isEmpty) return;
 
     double stepX = w / (calories.length - 1 == 0 ? 1 : calories.length - 1);
@@ -534,7 +600,11 @@ class CalorieHistoryChartPainter extends CustomPainter {
       final calVal = calories[i].toInt();
 
       // Outer glow circle
-      canvas.drawCircle(pt, 5, Paint()..color = const Color(0xff00FF87).withOpacity(0.25));
+      canvas.drawCircle(
+        pt,
+        5,
+        Paint()..color = const Color(0xff00FF87).withOpacity(0.25),
+      );
       // Inner circle
       canvas.drawCircle(pt, 2, Paint()..color = Colors.white);
 
@@ -542,11 +612,18 @@ class CalorieHistoryChartPainter extends CustomPainter {
         final valPainter = TextPainter(
           text: TextSpan(
             text: "$calVal",
-            style: GoogleFonts.outfit(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+            style: GoogleFonts.outfit(
+              color: Colors.white,
+              fontSize: 8,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           textDirection: TextDirection.ltr,
         )..layout();
-        valPainter.paint(canvas, Offset(pt.dx - valPainter.width / 2, pt.dy - 14));
+        valPainter.paint(
+          canvas,
+          Offset(pt.dx - valPainter.width / 2, pt.dy - 14),
+        );
       }
     }
   }

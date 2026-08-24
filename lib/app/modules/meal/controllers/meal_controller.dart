@@ -465,9 +465,31 @@ class MealController extends GetxController {
         tempHistory.add(Map<String, dynamic>.from(day));
       }
 
+      // The window always spans 7 days, padded with zero-entries for any
+      // day before the plan was activated. Average/adherence over a fixed
+      // 7 would silently crush a new user's numbers, so only divide by the
+      // days the plan has actually been active (capped at the window size).
+      final int activeDays = _activeDaysInWindow(
+        data['activated_at']?.toString(),
+        rawHistory.length,
+      );
+
       calorieHistoryList.value = tempHistory;
-      historyAverageCalories.value = (totalCal / 7).round();
-      historyAdherenceRate.value = ((daysAdherent / 7.0) * 100).round();
+      historyAverageCalories.value = (totalCal / activeDays).round();
+      historyAdherenceRate.value =
+          ((daysAdherent / activeDays) * 100).round();
     } catch (_) {}
+  }
+
+  int _activeDaysInWindow(String? activatedAtStr, int windowSize) {
+    if (windowSize <= 0) return 1;
+    if (activatedAtStr == null || activatedAtStr.isEmpty) return windowSize;
+
+    final activatedDate = DateTime.tryParse(activatedAtStr);
+    if (activatedDate == null) return windowSize;
+
+    final daysSinceActivation =
+        DateTime.now().difference(activatedDate).inDays + 1;
+    return daysSinceActivation.clamp(1, windowSize);
   }
 }

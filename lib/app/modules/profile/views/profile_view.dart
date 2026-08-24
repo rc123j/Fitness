@@ -493,8 +493,7 @@ class ProfileView extends GetView<ProfileController> {
             icon: Icons.photo_library_outlined,
             title: "Progress Photos",
             subtitle: "View your transformation",
-            onTap: () =>
-                Get.to(() => const ComingSoonView(title: "Progress Photos")),
+            onTap: () => Get.toNamed('/progress-photos'),
           ),
         ],
       ),
