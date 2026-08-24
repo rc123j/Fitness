@@ -1,5 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart' as dio;
 import '../../../services/api_client.dart';
+import '../../../services/api_endpoints.dart';
 import '../../../services/api_endpoints.dart';
 
 class ProgressController extends GetxController {
@@ -7,61 +11,37 @@ class ProgressController extends GetxController {
 
   final isLoading = false.obs;
 
-  // Timeframe state: "7 Days", "30 Days", "3 Months", "1 Year", "All Time"
-  final selectedTimeframe = "30 Days".obs;
+  // Corner Case: No Active Plan
+  final hasActivePlan = false.obs;
 
-  // Progress photos timeframe: "30 Days", "90 Days", "All Time"
-  final selectedPhotoTimeframe = "30 Days".obs;
+  // 30-Day Journey State
+  final currentDay = 1.obs;
+  final daysRemaining = 30.obs;
 
-  // Selected index in the transformation timeline (0 = Day 1, 1 = Day 15, 2 = Day 30, etc.)
-  final activeTimelineIndex = 2.obs;
+  // Consistency State
+  final currentStreak = 0.obs;
+  final dietCompliance = 0.obs; // Percentage
 
-  // Overall progress percentage
-  final overallProgress = 72.obs;
+  // Starting Health Snapshot
+  final bmi = 0.0.obs;
+  final tdee = 0.obs;
+  final bmr = 0.obs;
+  final ibw = 0.0.obs;
+  final startingWeight = 0.0.obs;
 
-  // Current metrics
-  final weight = 68.4.obs;
-  final weightChange = (-2.6).obs;
+  // Transformation Gallery
+  // The map stores local UI milestones mapped to their image URLs (empty if not uploaded).
+  final transformationPhotos = {
+    'Day 1': '',
+    'Week 1': '',
+    'Week 2': '',
+    'Week 3': '',
+    'Day 30': '',
+  }.obs;
 
-  final bodyFat = 18.7.obs;
-  final bodyFatChange = (-3.1).obs;
-
-  final muscleMass = 32.6.obs;
-  final muscleMassChange = 2.4.obs;
-
-  final bmi = 23.1.obs;
-  final bmiChange = (-0.8).obs;
-
-  // New Health Report Metrics
-  final tdee = 2450.obs;
-  final bmr = 1800.obs;
-  final ibw = 72.0.obs;
+  // 7-Day Adherence Data Points (Mon-Sun)
   final targetCalories = 2150.obs;
-
-  // 7-Day Adherence Data Points
   final weeklyAdherenceData = <Map<String, dynamic>>[].obs;
-
-  // Weight Trend Data Points (Date, Weight)
-  final weightTrendData = <Map<String, dynamic>>[
-    {"date": "16 Apr", "weight": 71.0},
-    {"date": "21 Apr", "weight": 70.1},
-    {"date": "26 Apr", "weight": 69.3},
-    {"date": "01 May", "weight": 69.0},
-    {"date": "06 May", "weight": 68.6},
-    {"date": "11 May", "weight": 68.4},
-    {"date": "15 May", "weight": 68.4},
-  ].obs;
-
-  // Body Composition Values
-  final muscleMassKg = 32.6.obs; // 48.7%
-  final bodyFatKg = 18.7.obs; // 18.7%
-  final otherKg = 16.1.obs; // 32.6%
-
-  // Achievements Count
-  final achievementsCount = 12.obs;
-
-  // Goal weight
-  final goalWeight = 65.0.obs;
 
   @override
   void onInit() {
@@ -71,80 +51,50 @@ class ProgressController extends GetxController {
 
   Future<void> fetchProgressData() async {
     isLoading.value = true;
-    await Future.delayed(
-      const Duration(seconds: 2),
-    ); // Artificial delay for shimmer
+
     try {
-      // 1. Fetch weight and steps history logs
-      final response = await _apiClient.get(ApiEndpoints.progressLog);
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data;
-        weight.value =
-            (data['current_weight'] as num?)?.toDouble() ?? weight.value;
-        weightChange.value =
-            (data['weight_difference_kg'] as num?)?.toDouble() ??
-            weightChange.value;
+      // 1. Check Active Plan Status & Metrics
+      final planRes = await _apiClient.get(ApiEndpoints.currentDietPlan);
+      if (planRes.statusCode == 200 && planRes.data != null) {
+        final planData = planRes.data['plan'];
+        final activationData = planRes.data['activation'];
 
-        final logsList = data['logs'] as List?;
-        if (logsList != null && logsList.isNotEmpty) {
-          final List<Map<String, dynamic>> trend = [];
-          for (var item in logsList) {
-            final double wt = (item['weight_kg'] as num?)?.toDouble() ?? 0.0;
-            final String dateStr = item['logged_date']?.toString() ?? "";
+        if (planData != null && activationData != null) {
+          hasActivePlan.value = true;
+          targetCalories.value =
+              (planData['target_calories'] as num?)?.toInt() ?? 2000;
 
-            // Format "2026-07-21" to "21 Jul"
-            String formattedDate = dateStr;
-            if (dateStr.length >= 10) {
-              try {
-                final date = DateTime.parse(dateStr);
-                final months = [
-                  "Jan",
-                  "Feb",
-                  "Mar",
-                  "Apr",
-                  "May",
-                  "Jun",
-                  "Jul",
-                  "Aug",
-                  "Sep",
-                  "Oct",
-                  "Nov",
-                  "Dec",
-                ];
-                formattedDate = "${date.day} ${months[date.month - 1]}";
-              } catch (_) {}
-            }
-            if (wt > 0) {
-              trend.add({"date": formattedDate, "weight": wt});
+          // Calculate days remaining based on activation date
+          final activatedAtStr = activationData['activated_at'];
+          final expiresAtStr = activationData['expires_at'];
+
+          if (activatedAtStr != null && expiresAtStr != null) {
+            final activatedDate = DateTime.parse(activatedAtStr);
+            final expiresDate = DateTime.parse(expiresAtStr);
+            final now = DateTime.now();
+
+            final totalDays = expiresDate.difference(activatedDate).inDays;
+            final daysPassed = now.difference(activatedDate).inDays;
+
+            currentDay.value = (daysPassed + 1).clamp(1, 30);
+            daysRemaining.value = (totalDays - daysPassed).clamp(0, 30);
+
+            // Corner Case: Day 31 Expiration
+            if (daysRemaining.value == 0 && currentDay.value >= 30) {
+              _showPlanExpiredDialog();
             }
           }
-          if (trend.isNotEmpty) {
-            weightTrendData.value = trend;
-          }
-        }
 
-        // Setup mock 7-day adherence data (Calories vs Target)
-        final List<Map<String, dynamic>> adherence = [];
-        final today = DateTime.now();
-        final days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-        for (int i = 6; i >= 0; i--) {
-          final d = today.subtract(Duration(days: i));
-          // Mock data: sometimes hitting target, sometimes over
-          int cal = 1900 + (d.day * 50) % 600;
-          adherence.add({
-            "day": days[d.weekday - 1],
-            "calories": cal,
-            "target": targetCalories.value,
-          });
+          // 3. Setup Adherence Data by hitting real backend
+          await _fetchRealAdherenceHistory();
+        } else {
+          hasActivePlan.value = false;
         }
-        weeklyAdherenceData.value = adherence;
+      } else {
+        hasActivePlan.value = false;
       }
-    } catch (_) {
-      // Fallback gracefully on network failures
-    }
 
-    try {
-      // 2. Fetch body composition, BMI, and target weight from profile metrics
+      // 2. Fetch profile metrics for Starting Snapshot
       final profileRes = await _apiClient.get(ApiEndpoints.profile);
       if (profileRes.statusCode == 200 && profileRes.data != null) {
         final data = profileRes.data;
@@ -152,62 +102,265 @@ class ProgressController extends GetxController {
         final latestMetrics = data['latest_metrics'];
 
         if (profile != null) {
-          weight.value =
-              (profile['weight_kg'] as num?)?.toDouble() ?? weight.value;
+          startingWeight.value =
+              (profile['weight_kg'] as num?)?.toDouble() ?? 0.0;
         }
 
         if (latestMetrics != null) {
-          bmi.value = (latestMetrics['bmi'] as num?)?.toDouble() ?? bmi.value;
-          tdee.value = (latestMetrics['tdee'] as num?)?.toInt() ?? tdee.value;
-          bmr.value = (latestMetrics['bmr'] as num?)?.toInt() ?? bmr.value;
-          ibw.value = (latestMetrics['ibw'] as num?)?.toDouble() ?? ibw.value;
-
-          final double fatPct =
-              (latestMetrics['body_fat_pct'] as num?)?.toDouble() ?? 0.0;
-          final double musclePct =
-              (latestMetrics['muscle_mass_pct'] as num?)?.toDouble() ?? 0.0;
-
-          if (fatPct > 0) {
-            bodyFat.value = fatPct;
-            bodyFatKg.value = double.parse(
-              (weight.value * (fatPct / 100)).toStringAsFixed(1),
-            );
-          }
-          if (musclePct > 0) {
-            muscleMass.value = double.parse(
-              (weight.value * (musclePct / 100)).toStringAsFixed(1),
-            );
-            muscleMassKg.value = muscleMass.value;
-          }
-
-          otherKg.value = double.parse(
-            (weight.value - bodyFatKg.value - muscleMassKg.value)
-                .toStringAsFixed(1),
-          );
+          bmi.value = (latestMetrics['bmi'] as num?)?.toDouble() ?? 0.0;
+          tdee.value = (latestMetrics['tdee'] as num?)?.toInt() ?? 0;
+          bmr.value = (latestMetrics['bmr'] as num?)?.toInt() ?? 0;
+          ibw.value = (latestMetrics['ibw'] as num?)?.toDouble() ?? 0.0;
         }
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint("Error fetching progress: $e");
+      // Fallback state on error
+      hasActivePlan.value = false;
+    }
+
     isLoading.value = false;
   }
 
-  void changeTimeframe(String timeframe) {
-    selectedTimeframe.value = timeframe;
-    // Mock updates to metrics based on timeframe if needed
-    if (timeframe == "7 Days") {
-      weightChange.value = -0.5;
-      bodyFatChange.value = -0.8;
-      muscleMassChange.value = 0.3;
-      bmiChange.value = -0.1;
-    } else if (timeframe == "30 Days") {
-      weightChange.value = -2.6;
-      bodyFatChange.value = -3.1;
-      muscleMassChange.value = 2.4;
-      bmiChange.value = -0.8;
-    } else {
-      weightChange.value = -4.2;
-      bodyFatChange.value = -5.0;
-      muscleMassChange.value = 4.1;
-      bmiChange.value = -1.5;
+  Future<void> _fetchRealAdherenceHistory() async {
+    try {
+      final res = await _apiClient.get(ApiEndpoints.calorieHistory);
+      if (res.statusCode == 200 && res.data != null) {
+        final List rawHistory = res.data['history'] ?? [];
+        final List<Map<String, dynamic>> tempHistory = [];
+        
+        int daysAdherent = 0;
+        int streakCounter = 0;
+        bool streakBroken = false;
+
+        // The API returns the last 7 days. We parse it to calculate compliance and streak.
+        for (var day in rawHistory.reversed) {
+          final double cal = double.tryParse(day['calories']?.toString() ?? '0.0') ?? 0.0;
+          final String dateStr = day['date']?.toString() ?? '';
+          
+          String shortDay = 'Day';
+          if (dateStr.isNotEmpty) {
+            try {
+              final d = DateTime.parse(dateStr);
+              final daysList = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+              shortDay = daysList[d.weekday - 1];
+            } catch (_) {}
+          }
+
+          tempHistory.insert(0, {
+            "day": shortDay,
+            "calories": cal.toInt(),
+            "target": targetCalories.value,
+          });
+
+          // Check adherence: They MUST hit at least 85% of their target to maintain the streak.
+          final double minimumRequiredCalories = targetCalories.value * 0.85;
+
+          if (cal >= minimumRequiredCalories) { 
+            daysAdherent++;
+            if (!streakBroken) streakCounter++;
+          } else {
+            // They missed meals or fell short. Streak breaks!
+            streakBroken = true;
+          }
+        }
+        
+        weeklyAdherenceData.value = tempHistory;
+        currentStreak.value = streakCounter;
+        dietCompliance.value = rawHistory.isNotEmpty ? ((daysAdherent / rawHistory.length) * 100).round() : 0;
+      }
+    } catch (e) {
+      debugPrint("Error fetching real history: $e");
     }
+  }
+
+  void handlePhotoAction(String milestone) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Color(0xff121220),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "$milestone Photo",
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Update your transformation gallery.",
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.6),
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ListTile(
+              leading: const Icon(
+                Icons.camera_alt_outlined,
+                color: Color(0xffB100FF),
+              ),
+              title: const Text(
+                "Take Photo",
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Get.back();
+                _uploadPhoto(milestone, 'camera');
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.photo_library_outlined,
+                color: Color(0xffB100FF),
+              ),
+              title: const Text(
+                "Choose from Gallery",
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Get.back();
+                _uploadPhoto(milestone, 'gallery');
+              },
+            ),
+            // Corner Case: Deleting/Retaking
+            if (transformationPhotos[milestone] != null &&
+                transformationPhotos[milestone]!.isNotEmpty) ...[
+              const Divider(color: Colors.white12),
+              ListTile(
+                leading: const Icon(
+                  Icons.delete_outline,
+                  color: Colors.redAccent,
+                ),
+                title: const Text(
+                  "Remove Photo",
+                  style: TextStyle(color: Colors.redAccent),
+                ),
+                onTap: () {
+                  Get.back();
+                  final currentPhotos = Map<String, String>.from(
+                    transformationPhotos,
+                  );
+                  currentPhotos[milestone] = '';
+                  transformationPhotos.value = currentPhotos;
+                },
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _uploadPhoto(String milestone, String source) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(
+      source: source == 'camera' ? ImageSource.camera : ImageSource.gallery,
+      imageQuality: 70, // compress slightly
+    );
+
+    if (image == null) return; // User canceled
+
+    Get.dialog(
+      const Center(child: CircularProgressIndicator(color: Color(0xffB100FF))),
+      barrierDismissible: false,
+    );
+    
+    try {
+      final formData = dio.FormData.fromMap({
+        'photo': await dio.MultipartFile.fromFile(image.path, filename: image.name),
+      });
+
+      // We need to use the dio instance directly from api_client if it supports raw paths, 
+      // or we can just call post with the formData.
+      // Assuming _apiClient.post handles formData properly:
+      final res = await _apiClient.post('/api/progress/photo', data: formData);
+
+      Get.back(); // close dialog
+
+      if (res.statusCode == 200) {
+        final photoUrl = res.data['photo_url'];
+        final currentPhotos = Map<String, String>.from(transformationPhotos);
+        // Replace with the real backend URL. Assuming baseUrl is prefixed by the UI if needed, 
+        // or we just use ApiEndpoints.baseUrl + photoUrl
+        currentPhotos[milestone] = '${ApiEndpoints.baseUrl}$photoUrl';
+        transformationPhotos.value = currentPhotos;
+
+        Get.snackbar(
+          "Photo Uploaded!",
+          "Looking great! Your transformation photo for $milestone has been securely saved.",
+          backgroundColor: const Color(0xff00FF87).withOpacity(0.9),
+          colorText: Colors.black,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
+      } else {
+        Get.snackbar("Error", "Failed to upload photo. Please try again.", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      }
+    } catch (e) {
+      Get.back();
+      debugPrint("Photo upload error: $e");
+      Get.snackbar("Error", "An error occurred while uploading.", backgroundColor: Colors.redAccent, colorText: Colors.white);
+    }
+  }
+
+  void _showPlanExpiredDialog() {
+    Get.defaultDialog(
+      title: "30 Days Complete! 🎉",
+      titleStyle: const TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      backgroundColor: const Color(0xff121220),
+      contentPadding: const EdgeInsets.all(20),
+      content: Column(
+        children: [
+          const Icon(
+            Icons.emoji_events_rounded,
+            color: Color(0xff00FF87),
+            size: 48,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Congratulations on finishing your 30-day journey! It's time to step on the scale and record your final weight so we can generate your next optimized plan.",
+            style: TextStyle(color: Colors.white.withOpacity(0.8), height: 1.5),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xffB100FF),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              minimumSize: const Size(double.infinity, 50),
+            ),
+            onPressed: () {
+              // Navigate to a new weight input screen (to be implemented later)
+              Get.back();
+            },
+            child: const Text(
+              "Enter Final Weight",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
   }
 }

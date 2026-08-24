@@ -153,7 +153,12 @@ class HomeController extends GetxController {
           "icon": icon,
         });
       }
-      tempHomeMeals.sort((a, b) => (a['meal_id'] as int).compareTo(b['meal_id'] as int));
+      const mealDisplayOrder = {1: 0, 2: 1, 3: 2, 6: 3, 7: 4, 4: 5, 5: 6};
+      tempHomeMeals.sort((a, b) {
+        final aOrder = mealDisplayOrder[a['meal_id'] as int] ?? 99;
+        final bOrder = mealDisplayOrder[b['meal_id'] as int] ?? 99;
+        return aOrder.compareTo(bOrder);
+      });
       homeMeals.value = tempHomeMeals;
 
       // 4. Removed Water Logging Aggregates

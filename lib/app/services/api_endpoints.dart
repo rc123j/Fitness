@@ -2,11 +2,11 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   // Set to true to connect to production server, false for local development
-  static const bool isProduction = true;
+  static const bool isProduction = false;
 
   static const String baseUrl = isProduction
       ? 'https://api.fitwithdeveloper.com'
-      : 'http://192.168.1.9:4017';
+      : 'http://192.168.1.7:4017';
 
   static const String login = '/api/auth/login';
   static const String register = '/api/auth/register';

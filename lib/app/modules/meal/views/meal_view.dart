@@ -691,10 +691,6 @@ class MealView extends GetView<MealController> {
   }
 
   String _formatNumber(int val) {
-    if (val >= 1000) {
-      final double formatted = val / 1000.0;
-      return formatted.toStringAsFixed(1).replaceAll('.0', '') + "k";
-    }
     return val.toString();
   }
 
@@ -1354,20 +1350,13 @@ class MealView extends GetView<MealController> {
         final double kcal =
             double.tryParse(f['calories']?.toString() ?? '0') ?? 0.0;
         // Portion: prefer household_measure from food_details, then exchange_amount, then quantity+unit
-        final String householdMeasure =
-            foodDetails['household_measure']?.toString() ?? '';
-        final String exchangeAmount =
-            foodDetails['exchange_amount']?.toString() ?? '';
         final String qtyStr = f['quantity']?.toString() ?? '';
-        final String unitStr =
-            foodDetails['serving_unit']?.toString() ??
-            f['serving_unit']?.toString() ??
-            'g';
-        final String portion = householdMeasure.isNotEmpty
-            ? householdMeasure
-            : exchangeAmount.isNotEmpty
-            ? exchangeAmount
-            : (qtyStr.isNotEmpty ? '$qtyStr $unitStr' : '');
+        final String unitStr = foodDetails['serving_unit']?.toString() ?? foodDetails['unit']?.toString() ?? '';
+
+        final String portion = unitStr.toLowerCase() == "exchange" ||
+                unitStr.toLowerCase() == "exchanges"
+            ? (qtyStr.isNotEmpty ? '$qtyStr Exchange' : '')
+            : (qtyStr.isNotEmpty ? '$qtyStr $unitStr'.trim() : '');
 
         // Construct swaps from Option 2 and Option 3 at the same index
         final List<String> swaps = [];
@@ -1377,8 +1366,9 @@ class MealView extends GetView<MealController> {
         if (index < option2Foods.length) {
           final f2 = option2Foods[index];
           final String name2 = f2['food_details']?['food_name'] ?? '';
-          final String portion2 =
-              "${f2['serving_size']} ${f2['serving_unit'] ?? f2['unit'] ?? ''}";
+          final String sSize2 = f2['serving_size']?.toString() ?? f2['quantity']?.toString() ?? '';
+          final String sUnit2 = f2['serving_unit']?.toString() ?? f2['unit']?.toString() ?? f2['food_details']?['serving_unit']?.toString() ?? '';
+          final String portion2 = "$sSize2 $sUnit2".trim();
           if (name2.isNotEmpty) {
             swaps.add("$name2 ($portion2)");
           }
@@ -1387,8 +1377,9 @@ class MealView extends GetView<MealController> {
         if (index < option3Foods.length) {
           final f3 = option3Foods[index];
           final String name3 = f3['food_details']?['food_name'] ?? '';
-          final String portion3 =
-              "${f3['serving_size']} ${f3['serving_unit'] ?? f3['unit'] ?? ''}";
+          final String sSize3 = f3['serving_size']?.toString() ?? f3['quantity']?.toString() ?? '';
+          final String sUnit3 = f3['serving_unit']?.toString() ?? f3['unit']?.toString() ?? f3['food_details']?['serving_unit']?.toString() ?? '';
+          final String portion3 = "$sSize3 $sUnit3".trim();
           if (name3.isNotEmpty) {
             swaps.add("$name3 ($portion3)");
           }

@@ -847,72 +847,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
                             ],
                           ),
 
-                          const SizedBox(height: 20),
 
-                          /// 5. AI PERSONALIZED SUGGESTIONS BOX
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.03),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.12),
-                                    width: 0.8,
-                                  ),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          height: 30,
-                                          width: 30,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                            gradient: const LinearGradient(
-                                              colors: [
-                                                Color(0xffFF00E5),
-                                                Color(0xff7B61FF),
-                                              ],
-                                            ),
-                                          ),
-                                          child: const Icon(
-                                            Icons.auto_awesome_rounded,
-                                            color: Colors.white,
-                                            size: 16,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          "AI RECOMMENDATION",
-                                          style: GoogleFonts.outfit(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            letterSpacing: 1.0,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 6),
-                                    buildRichMarkdownText(
-                                      getAISuggestionText(),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
                           const SizedBox(height: 12),
                         ],
                       ),

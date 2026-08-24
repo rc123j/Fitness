@@ -14,7 +14,6 @@ import '../modules/meal/views/meal_view.dart';
 import '../modules/meal/views/nutrition_history_view.dart';
 import '../modules/progress/bindings/progress_binding.dart';
 import '../modules/progress/views/progress_view.dart';
-import '../modules/progress/views/progress_photos_view.dart';
 import '../modules/wallet/bindings/wallet_binding.dart';
 import '../modules/wallet/views/wallet_view.dart';
 import '../modules/booking/bindings/booking_binding.dart';
@@ -82,11 +81,6 @@ class AppPages {
     GetPage(
       name: _Paths.PROGRESS,
       page: () => const ProgressView(),
-      binding: ProgressBinding(),
-    ),
-    GetPage(
-      name: _Paths.PROGRESS_PHOTOS,
-      page: () => ProgressPhotosView(),
       binding: ProgressBinding(),
     ),
     GetPage(
