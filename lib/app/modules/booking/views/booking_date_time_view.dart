@@ -249,8 +249,10 @@ class _BookingDateTimeViewState extends State<BookingDateTimeView> {
                     );
                     return;
                   }
-                  await controller.bookSession();
-                  Get.off(() => const MySessionsView());
+                  final success = await controller.bookSession();
+                  if (success) {
+                    Get.off(() => const MySessionsView());
+                  }
                 },
                 borderRadius: BorderRadius.circular(16),
                 child: Padding(

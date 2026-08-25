@@ -90,7 +90,7 @@ class ExpertDashboardView extends GetView<BookingController> {
             final user = member['user'] ?? {};
             final slot = apt['slot'] ?? {};
             final dateStr = slot['start_time'] ?? '';
-            
+
             DateTime? startTime;
             if (dateStr.isNotEmpty) {
               startTime = DateTime.parse(dateStr).toLocal();
@@ -106,6 +106,15 @@ class ExpertDashboardView extends GetView<BookingController> {
             final status = apt['status'] as String? ?? 'PENDING';
             final isPending = status == 'PENDING';
             final isCompleted = status == 'COMPLETED';
+            // Only allow starting the call from 10 minutes before the
+            // scheduled slot onward — approving a request shouldn't
+            // immediately let either side jump into a call for a session
+            // that's still hours (or days) away.
+            final bool canStartCall =
+                startTime != null &&
+                DateTime.now().isAfter(
+                  startTime.subtract(const Duration(minutes: 10)),
+                );
 
             return Container(
               margin: const EdgeInsets.only(bottom: 16),
@@ -133,7 +142,10 @@ class ExpertDashboardView extends GetView<BookingController> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: _getStatusColor(status).withOpacity(0.12),
                           borderRadius: BorderRadius.circular(10),
@@ -166,7 +178,11 @@ class ExpertDashboardView extends GetView<BookingController> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      const Icon(Icons.calendar_month_rounded, color: Color(0xff00E5FF), size: 16),
+                      const Icon(
+                        Icons.calendar_month_rounded,
+                        color: Color(0xff00E5FF),
+                        size: 16,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         formattedDate,
@@ -176,7 +192,11 @@ class ExpertDashboardView extends GetView<BookingController> {
                         ),
                       ),
                       const Spacer(),
-                      const Icon(Icons.access_time_rounded, color: Color(0xffFF00E5), size: 16),
+                      const Icon(
+                        Icons.access_time_rounded,
+                        color: Color(0xffFF00E5),
+                        size: 16,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         formattedTime,
@@ -187,7 +207,8 @@ class ExpertDashboardView extends GetView<BookingController> {
                       ),
                     ],
                   ),
-                  if (apt['notes'] != null && (apt['notes'] as String).isNotEmpty) ...[
+                  if (apt['notes'] != null &&
+                      (apt['notes'] as String).isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Text(
                       "Client Notes: ${apt['notes']}",
@@ -204,7 +225,10 @@ class ExpertDashboardView extends GetView<BookingController> {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: () => controller.respondToAppointment(apt['id'], 'REJECTED'),
+                            onPressed: () => controller.respondToAppointment(
+                              apt['id'],
+                              'REJECTED',
+                            ),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.red,
                               side: const BorderSide(color: Colors.redAccent),
@@ -214,14 +238,20 @@ class ExpertDashboardView extends GetView<BookingController> {
                             ),
                             child: Text(
                               "Reject",
-                              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13),
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () => controller.respondToAppointment(apt['id'], 'APPROVED'),
+                            onPressed: () => controller.respondToAppointment(
+                              apt['id'],
+                              'APPROVED',
+                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xff00FF87),
                               foregroundColor: Colors.black,
@@ -231,50 +261,129 @@ class ExpertDashboardView extends GetView<BookingController> {
                             ),
                             child: Text(
                               "Approve",
-                              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13),
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ] else if (!isCompleted && status != 'REJECTED' && status != 'CANCELLED') ...[
-                    Row(
+                  ] else if (!isCompleted &&
+                      status != 'REJECTED' &&
+                      status != 'CANCELLED') ...[
+                    Column(
                       children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => _showCompleteSessionDialog(context, apt['id']),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xffFF00E5),
-                              side: const BorderSide(color: Color(0xffFF00E5)),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () => _showCompleteSessionDialog(
+                                  context,
+                                  apt['id'],
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: const Color(0xffFF00E5),
+                                  side: const BorderSide(
+                                    color: Color(0xffFF00E5),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: Text(
+                                  "Add Notes",
+                                  style: GoogleFonts.outfit(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
                               ),
                             ),
-                            child: Text(
-                              "Add Notes",
-                              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () => Get.toNamed(
+                                  '/chat',
+                                  arguments: {
+                                    'appointmentId': apt['id'],
+                                    'otherPartyName':
+                                        "${user['first_name'] ?? 'Client'} ${user['last_name'] ?? ''}",
+                                  },
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  side: BorderSide(
+                                    color: Colors.white.withOpacity(0.2),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.chat_bubble_outline_rounded,
+                                      size: 15,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      "Message",
+                                      style: GoogleFonts.outfit(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: () => Get.toNamed('/video-call', arguments: apt),
+                            onPressed: canStartCall
+                                ? () =>
+                                      Get.toNamed('/video-call', arguments: apt)
+                                : null,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xff00FF87),
-                              foregroundColor: Colors.black,
+                              backgroundColor: canStartCall
+                                  ? const Color(0xff00FF87)
+                                  : Colors.white.withOpacity(0.06),
+                              disabledBackgroundColor: Colors.white.withOpacity(
+                                0.06,
+                              ),
+                              foregroundColor: canStartCall
+                                  ? Colors.black
+                                  : Colors.white38,
+                              disabledForegroundColor: Colors.white38,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.videocam_rounded, size: 16),
+                                Icon(
+                                  canStartCall
+                                      ? Icons.videocam_rounded
+                                      : Icons.lock_clock_rounded,
+                                  size: 16,
+                                ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  "Start Call",
-                                  style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13),
+                                  canStartCall
+                                      ? "Start Call"
+                                      : "Available at $formattedTime",
+                                  style: GoogleFonts.outfit(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ],
                             ),
@@ -283,7 +392,8 @@ class ExpertDashboardView extends GetView<BookingController> {
                       ],
                     ),
                   ] else if (isCompleted) ...[
-                    if (apt['expert_notes'] != null && (apt['expert_notes'] as String).isNotEmpty) ...[
+                    if (apt['expert_notes'] != null &&
+                        (apt['expert_notes'] as String).isNotEmpty) ...[
                       const SizedBox(height: 8),
                       Text(
                         "Your Notes: ${apt['expert_notes']}",
@@ -292,7 +402,7 @@ class ExpertDashboardView extends GetView<BookingController> {
                           fontSize: 11,
                         ),
                       ),
-                    ]
+                    ],
                   ],
                 ],
               ),
@@ -355,12 +465,17 @@ class ExpertDashboardView extends GetView<BookingController> {
                 style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
                 decoration: InputDecoration(
                   hintText: "Add workout tips, diet recommendations...",
-                  hintStyle: GoogleFonts.inter(color: Colors.white24, fontSize: 13),
+                  hintStyle: GoogleFonts.inter(
+                    color: Colors.white24,
+                    fontSize: 13,
+                  ),
                   fillColor: Colors.white.withOpacity(0.02),
                   filled: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                    borderSide: BorderSide(
+                      color: Colors.white.withOpacity(0.1),
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -376,13 +491,18 @@ class ExpertDashboardView extends GetView<BookingController> {
                     onPressed: () => Get.back(),
                     child: Text(
                       "Cancel",
-                      style: GoogleFonts.outfit(color: Colors.white.withOpacity(0.6)),
+                      style: GoogleFonts.outfit(
+                        color: Colors.white.withOpacity(0.6),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton(
                     onPressed: () {
-                      controller.completeAppointment(appointmentId, notesController.text.trim());
+                      controller.completeAppointment(
+                        appointmentId,
+                        notesController.text.trim(),
+                      );
                       Get.back();
                     },
                     style: ElevatedButton.styleFrom(
@@ -393,11 +513,14 @@ class ExpertDashboardView extends GetView<BookingController> {
                     ),
                     child: Text(
                       "Complete & Save",
-                      style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.white),
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),

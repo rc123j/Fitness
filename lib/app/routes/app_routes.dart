@@ -27,6 +27,7 @@ abstract class Routes {
   static const CALORIE_HISTORY = _Paths.CALORIE_HISTORY;
   static const MEMBERSHIP = _Paths.MEMBERSHIP;
   static const FAQ = _Paths.FAQ;
+  static const CHAT = _Paths.CHAT;
 }
 
 abstract class _Paths {
@@ -55,4 +56,5 @@ abstract class _Paths {
   static const CALORIE_HISTORY = '/calorie-history';
   static const MEMBERSHIP = '/membership';
   static const FAQ = '/faq';
+  static const CHAT = '/chat';
 }

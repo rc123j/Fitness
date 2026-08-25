@@ -412,24 +412,80 @@ class BookingView extends GetView<BookingController> {
         border: Border(top: BorderSide(color: Colors.white.withOpacity(0.05))),
       ),
       child: SafeArea(
-        child: ElevatedButton(
-          onPressed: () => Get.to(() => const BookingDateTimeView()),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xffFF00E5),
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+        child: Obx(() {
+          final existing = controller.activeBookingWithCurrentExpert;
+
+          // Already have a pending/approved booking with this expert —
+          // offer to view it, plus a secondary way to still book another
+          // one (the backend rejects a genuine duplicate with a clear
+          // error, this just makes that state visible upfront).
+          if (existing != null) {
+            return Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Get.to(() => const MySessionsView()),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: BorderSide(color: Colors.white.withOpacity(0.2)),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: Text(
+                      "Booked Session",
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Get.to(() => const BookingDateTimeView()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xffFF00E5),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: Text(
+                      "Book a New Session",
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return ElevatedButton(
+            onPressed: () => Get.to(() => const BookingDateTimeView()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xffFF00E5),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
             ),
-          ),
-          child: Text(
-            "Book a Session",
-            style: GoogleFonts.outfit(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+            child: Text(
+              "Book a Session",
+              style: GoogleFonts.outfit(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ),
+          );
+        }),
       ),
     );
   }

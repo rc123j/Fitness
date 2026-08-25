@@ -47,6 +47,7 @@ dependencies:
   flutter_local_notifications: ^18.0.1
   flutter_timezone: ^5.1.0
   timezone: ^0.9.4
+  jitsi_meet_flutter_sdk: ^11.0.0
 
 
 dev_dependencies:

@@ -2,16 +2,23 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart';
 import '../../../services/api_client.dart';
+import '../../../services/auth_service.dart';
 
 class VideoCallController extends GetxController {
   final _apiClient = Get.find<ApiClient>();
+  final _authService = Get.find<AuthService>();
+  final _jitsiMeet = JitsiMeet();
 
   // Call controls states
   final isMuted = false.obs;
   final isCameraOff = false.obs;
-  final connectionStatus = "Connecting...".obs;
+  final connectionStatus = "Setting up room...".obs;
+  // True once the native Jitsi call view has actually been joined — used
+  // to tell a "left before joining" back-tap apart from a real hang-up.
+  final isInCall = false.obs;
+  bool _hasEnded = false;
 
   // Timer states
   final elapsedSeconds = 0.obs;
@@ -20,11 +27,14 @@ class VideoCallController extends GetxController {
   // Call participant info
   final trainerName = "Expert Coach".obs;
   final trainerRole = "Senior Specialist".obs;
-  final trainerAvatar = "https://images.unsplash.com/photo-1594744803329-e58b31de215f?q=80&w=200".obs;
+  final trainerAvatar =
+      "https://images.unsplash.com/photo-1594744803329-e58b31de215f?q=80&w=200"
+          .obs;
 
   // Jitsi configuration
   final appointmentId = 0.obs;
   final jitsiUrl = "".obs;
+  final roomName = "".obs;
   final isLoadingUrl = false.obs;
   final isExpertCaller = false.obs;
 
@@ -34,7 +44,7 @@ class VideoCallController extends GetxController {
     final apt = Get.arguments as Map<String, dynamic>?;
     if (apt != null) {
       appointmentId.value = apt['id'] ?? 0;
-      
+
       final consultant = apt['consultant'] ?? {};
       final member = apt['member'] ?? {};
       final user = member['user'] ?? {};
@@ -44,56 +54,110 @@ class VideoCallController extends GetxController {
         isExpertCaller.value = true;
         trainerName.value = "${user['first_name']} ${user['last_name'] ?? ''}";
         trainerRole.value = "Client Profile";
-        trainerAvatar.value = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200";
+        trainerAvatar.value =
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200";
       } else {
         isExpertCaller.value = false;
-        trainerName.value = "${consultant['first_name'] ?? 'Coach'} ${consultant['last_name'] ?? ''}";
+        trainerName.value =
+            "${consultant['first_name'] ?? 'Coach'} ${consultant['last_name'] ?? ''}";
         trainerRole.value = "Nutrition Coach";
-        trainerAvatar.value = "https://images.unsplash.com/photo-1594744803329-e58b31de215f?q=80&w=200";
+        trainerAvatar.value =
+            "https://images.unsplash.com/photo-1594744803329-e58b31de215f?q=80&w=200";
       }
 
       fetchJitsiCallLink();
     }
-    startCallTimer();
+    // Timer starts once the call is actually joined (conferenceJoined),
+    // not while the pre-join lobby is just sitting there.
   }
 
   @override
   void onClose() {
     _timer?.cancel();
+    if (isInCall.value) _jitsiMeet.hangUp();
     super.onClose();
   }
 
   Future<void> fetchJitsiCallLink() async {
     isLoadingUrl.value = true;
     try {
-      final response = await _apiClient.get('/api/bookings/${appointmentId.value}/video-token');
+      final response = await _apiClient.get(
+        '/api/bookings/${appointmentId.value}/video-token',
+      );
       jitsiUrl.value = response.data['jitsiUrl'] ?? '';
-      connectionStatus.value = "Connected";
+      roomName.value = response.data['roomName'] ?? '';
+      connectionStatus.value = "Ready to join";
     } catch (e) {
       debugPrint("Error fetching Jitsi Link: $e");
       connectionStatus.value = "Failed to connect";
-      Get.snackbar("Connection Error", "Failed to retrieve Jitsi room link.", snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        "Connection Error",
+        "Failed to retrieve the video room. Please try again.",
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       isLoadingUrl.value = false;
     }
   }
 
-  Future<void> launchJitsiCall() async {
-    if (jitsiUrl.value.isEmpty) {
-      Get.snackbar("Error", "Jitsi room URL is not loaded yet.", snackPosition: SnackPosition.BOTTOM);
+  /// Launches the real, embedded Jitsi Meet call (native SDK view — not an
+  /// external browser link) for this appointment's room.
+  Future<void> joinCall() async {
+    if (roomName.value.isEmpty) {
+      Get.snackbar(
+        "Error",
+        "Video room is not ready yet.",
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return;
     }
-    
-    final uri = Uri.parse(jitsiUrl.value);
-    try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        Get.snackbar("Error", "Could not open browser/Jitsi app.", snackPosition: SnackPosition.BOTTOM);
-      }
-    } catch (e) {
-      Get.snackbar("Error", "Failed to launch call link: $e", snackPosition: SnackPosition.BOTTOM);
-    }
+
+    final displayName =
+        _authService.userEmail?.split('@').first ?? 'Nutri Shape User';
+
+    final options = JitsiMeetConferenceOptions(
+      serverURL: "https://meet.jit.si",
+      room: roomName.value,
+      userInfo: JitsiMeetUserInfo(displayName: displayName),
+      configOverrides: {
+        "startWithAudioMuted": false,
+        "startWithVideoMuted": false,
+        "subject": "Nutri Shape Consultation",
+      },
+      featureFlags: {
+        "welcomepage.enabled": false,
+        "invite.enabled": false,
+        "add-people.enabled": false,
+        "calendar.enabled": false,
+        "call-integration.enabled": false,
+        // In-app chat is handled by our own Chat screen, not Jitsi's.
+        "chat.enabled": false,
+        "meeting-name.enabled": false,
+      },
+    );
+
+    await _jitsiMeet.join(
+      options,
+      JitsiMeetEventListener(
+        conferenceJoined: (url) {
+          connectionStatus.value = "Connected";
+          if (!isInCall.value) {
+            isInCall.value = true;
+            startCallTimer();
+          }
+        },
+        conferenceTerminated: (url, error) => _handleNativeCallEnded(),
+        readyToClose: () => _handleNativeCallEnded(),
+      ),
+    );
+  }
+
+  /// Called when the native Jitsi call view reports it's done (hang up,
+  /// dropped connection, etc). Shows the session summary the same way a
+  /// manual "end call" tap does, but only once even if both callbacks fire.
+  void _handleNativeCallEnded() {
+    if (_hasEnded || !isInCall.value) return;
+    endCall();
   }
 
   // Starts the stopwatch ticking every second
@@ -121,9 +185,27 @@ class VideoCallController extends GetxController {
     isCameraOff.value = !isCameraOff.value;
   }
 
+  /// Used by the lobby's back/hang-up buttons — leaving before ever
+  /// actually joining the call should just close the screen, not show the
+  /// "Consultation Ended" summary for a call that never happened.
+  void handleExitTap() {
+    if (isInCall.value) {
+      endCall();
+    } else {
+      Get.back();
+    }
+  }
+
   // End consultation session
   void endCall() {
+    if (_hasEnded) return;
+    _hasEnded = true;
+
     _timer?.cancel();
+    if (isInCall.value) {
+      isInCall.value = false;
+      _jitsiMeet.hangUp();
+    }
     final sessionDuration = formattedDuration;
 
     Get.dialog(
@@ -145,7 +227,11 @@ class VideoCallController extends GetxController {
                   shape: BoxShape.circle,
                   color: Colors.red.withOpacity(0.12),
                 ),
-                child: const Icon(Icons.call_end_rounded, color: Colors.red, size: 28),
+                child: const Icon(
+                  Icons.call_end_rounded,
+                  color: Colors.red,
+                  size: 28,
+                ),
               ),
               const SizedBox(height: 18),
               Text(
@@ -167,7 +253,10 @@ class VideoCallController extends GetxController {
               ),
               const SizedBox(height: 18),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.02),
                   borderRadius: BorderRadius.circular(12),
