@@ -77,10 +77,6 @@ class ProgressView extends GetView<ProgressController> {
                 Expanded(
                   child: ScrollNavBarBinder(
                     builder: (context, scrollController) => Obx(() {
-                      if (controller.isLoading.value) {
-                        return _buildLoadingState();
-                      }
-
                       return RefreshIndicator(
                         color: const Color(0xffB100FF),
                         backgroundColor: const Color(0xff121220),
@@ -95,49 +91,48 @@ class ProgressView extends GetView<ProgressController> {
                             right: 18,
                             bottom: 100,
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 10),
-                              _buildGreeting(),
-                              const SizedBox(height: 24),
-                              Stack(
-                                clipBehavior: Clip.none,
-                                children: [
-                                  _buildJourneyProgressCard(),
-                                  Positioned(
-                                    top: -152,
-                                    right: 8,
-                                    child: Image.asset(
-                                      'assets/progress/boyontop.png',
-                                      height: 155,
-                                      fit: BoxFit.contain,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                            return Image.asset(
-                                              'assets/profile/avatar.png',
-                                              height: 155,
-                                              fit: BoxFit.contain,
-                                              errorBuilder: (c, e, s) =>
-                                                  const SizedBox.shrink(),
-                                            );
-                                          },
+                          child: AppShimmer(
+                            enabled: controller.isLoading.value,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 10),
+                                _buildGreeting(),
+                                const SizedBox(height: 24),
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    _buildJourneyProgressCard(),
+                                    Positioned(
+                                      top: -152,
+                                      right: 8,
+                                      child: Image.asset(
+                                        'assets/progress/boyontop.png',
+                                        height: 155,
+                                        fit: BoxFit.contain,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return Image.asset(
+                                                'assets/profile/avatar.png',
+                                                height: 155,
+                                                fit: BoxFit.contain,
+                                                errorBuilder: (c, e, s) =>
+                                                    const SizedBox.shrink(),
+                                              );
+                                            },
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              _buildDisciplineBanner(),
-                              const SizedBox(height: 24),
-                              _buildTodayNutritionCard(),
-                              const SizedBox(height: 24),
-                              _buildWeeklyCalorieChart(),
-                              const SizedBox(height: 24),
-                              _buildWeightTracker(),
-                              const SizedBox(height: 24),
-                              _buildStartingSnapshot(),
-                              const SizedBox(height: 40),
-                            ],
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                _buildDisciplineBanner(),
+                                const SizedBox(height: 24),
+                                _buildAnalyticsTabs(),
+                                const SizedBox(height: 24),
+                                _buildStartingSnapshot(),
+                                const SizedBox(height: 40),
+                              ],
+                            ),
                           ),
                         ),
                       );
@@ -179,22 +174,6 @@ class ProgressView extends GetView<ProgressController> {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildLoadingState() {
-    return const AppShimmer(
-      enabled: true,
-      child: Padding(
-        padding: EdgeInsets.all(18.0),
-        child: Column(
-          children: [
-            SizedBox(height: 200, width: double.infinity, child: Card()),
-            SizedBox(height: 20),
-            SizedBox(height: 250, width: double.infinity, child: Card()),
-          ],
-        ),
       ),
     );
   }
@@ -261,12 +240,20 @@ class ProgressView extends GetView<ProgressController> {
     );
   }
 
+  String _timeBasedGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return "Good Morning,";
+    if (hour < 17) return "Good Afternoon,";
+    if (hour < 21) return "Good Evening,";
+    return "Good Night,";
+  }
+
   Widget _buildGreeting() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Good Morning,",
+          _timeBasedGreeting(),
           style: GoogleFonts.outfit(
             color: const Color(0xffB100FF),
             fontSize: 24,
@@ -506,6 +493,119 @@ class ProgressView extends GetView<ProgressController> {
     );
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // Analytics Tab Switcher
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildAnalyticsTabs() {
+    const tabs = [
+      'Today\'s Nutrition',
+      'Weekly Calories',
+      // 'Weight Tracker', // commented out per request
+    ];
+    const icons = [
+      Icons.donut_large_rounded,
+      Icons.bar_chart_rounded,
+      // Icons.monitor_weight_outlined,
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Tab pill row ──────────────────────────────────────────────────
+        Obx(() {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: List.generate(tabs.length, (i) {
+                final isSelected = controller.selectedTab.value == i;
+                return GestureDetector(
+                  onTap: () => controller.selectedTab.value = i,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    margin: EdgeInsets.only(
+                      right: i < tabs.length - 1 ? 10 : 0,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xffB100FF)
+                          : const Color(0xff1C1533),
+                      borderRadius: BorderRadius.circular(50),
+                      border: Border.all(
+                        color: isSelected
+                            ? const Color(0xffB100FF)
+                            : Colors.white.withOpacity(0.1),
+                        width: 1.5,
+                      ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: const Color(0xffB100FF).withOpacity(0.4),
+                                blurRadius: 12,
+                                spreadRadius: 0,
+                              ),
+                            ]
+                          : [],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          icons[i],
+                          size: 14,
+                          color: isSelected
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.5),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          tabs[i],
+                          style: GoogleFonts.outfit(
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.white.withOpacity(0.55),
+                            fontSize: 13,
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ),
+          );
+        }),
+        const SizedBox(height: 20),
+        // ── Tab content ───────────────────────────────────────────────────
+        Obx(() {
+          switch (controller.selectedTab.value) {
+            case 0:
+              return Column(
+                children: [
+                  _buildTodayNutritionCard(),
+                  const SizedBox(height: 16),
+                  _buildStreakAndTipCards(),
+                ],
+              );
+            case 1:
+              return _buildWeeklyCalorieChart();
+            // case 2:
+            //   return _buildWeightTracker();
+            default:
+              return const SizedBox.shrink();
+          }
+        }),
+      ],
+    );
+  }
+
   Widget _buildDisciplineBanner() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -569,494 +669,1215 @@ class ProgressView extends GetView<ProgressController> {
     final int currentCalories = controller.todayConsumedCalories.value.toInt();
     final int targetCalories = controller.targetCalories.value.toInt();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18.0),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          color: const Color(0xff120D23).withOpacity(0.8),
-          border: Border.all(color: Colors.white.withOpacity(0.25), width: 1.5),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: CustomPaint(painter: TodayNutritionBgPainter()),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Today's Nutrition",
-                            style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.4),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.2,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        color: const Color(0xff120D23).withOpacity(0.8),
+        border: Border.all(color: Colors.white.withOpacity(0.10), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: CustomPaint(painter: TodayNutritionBgPainter()),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(22, 20, 22, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                  0xffB100FF,
+                                ).withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(
+                                Icons.local_fire_department_rounded,
+                                color: Color(0xffFF7A00),
+                                size: 14,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              "Today's Nutrition",
+                              style: GoogleFonts.outfit(
+                                color: Colors.white.withOpacity(0.85),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.08),
                             ),
                           ),
-                          Text(
+                          child: Text(
                             "$currentCalories/$targetCalories kcal",
                             style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.4),
+                              color: Colors.white.withOpacity(0.65),
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 22),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10),
-                            child: SizedBox(
-                              width: 110,
-                              height: 110,
-                              child: CustomPaint(
-                                painter: _MacroRingPainter(
-                                  carbsProgress: carbsProgress,
-                                  proteinProgress: proteinProgress,
-                                  fatProgress: fatProgress,
-                                  carbsColor: const Color(0xffFF7A00),
-                                  proteinColor: const Color(0xff00A2FF),
-                                  fatColor: const Color(0xffFF00E5),
-                                ),
-                                child: Center(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        "$currentCalories",
-                                        style: GoogleFonts.inter(
-                                          color: Colors.white,
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold,
-                                          height: 1.1,
-                                        ),
-                                      ),
-                                      Text(
-                                        "kcal",
-                                        style: GoogleFonts.inter(
-                                          color: Colors.white.withOpacity(0.4),
-                                          fontSize: 10,
-                                          height: 1.1,
-                                        ),
-                                      ),
-                                    ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 26),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 116,
+                          height: 116,
+                          child: CustomPaint(
+                            painter: _MacroRingPainter(
+                              carbsProgress: carbsProgress,
+                              proteinProgress: proteinProgress,
+                              fatProgress: fatProgress,
+                              carbsColor: const Color(0xffFF7A00),
+                              proteinColor: const Color(0xff00A2FF),
+                              fatColor: const Color(0xffFF00E5),
+                            ),
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "$currentCalories",
+                                    style: GoogleFonts.outfit(
+                                      color: Colors.white,
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.bold,
+                                      height: 1.0,
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    "of $targetCalories kcal",
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white.withOpacity(0.4),
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          Flexible(
+                        ),
+                        const SizedBox(width: 24),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              _buildMacroLegendItem(
+                                "Carbs",
+                                carbs,
+                                targetCarbs,
+                                carbsProgress,
+                                const Color(0xffFF7A00),
+                              ),
+                              const SizedBox(height: 16),
+                              _buildMacroLegendItem(
+                                "Protein",
+                                protein,
+                                targetProtein,
+                                proteinProgress,
+                                const Color(0xff00A2FF),
+                              ),
+                              const SizedBox(height: 16),
+                              _buildMacroLegendItem(
+                                "Fat",
+                                fat,
+                                targetFat,
+                                fatProgress,
+                                const Color(0xffFF00E5),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMacroLegendItem(
+    String label,
+    int value,
+    int target,
+    double progress,
+    Color color,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    color: Colors.white.withOpacity(0.55),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              target > 0 ? "${value}g / ${target}g" : "${value}g",
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: progress,
+            minHeight: 5,
+            backgroundColor: Colors.white.withOpacity(0.08),
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStreakAndTipCards() {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(flex: 11, child: _buildStreakCard()),
+          const SizedBox(width: 12),
+          Expanded(flex: 10, child: _buildTipCard()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStreakCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xffFFF3E0), // Light orange
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            right: -10,
+            top: -1,
+            child: const Text("🏆", style: TextStyle(fontSize: 60)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Keep the Streak!",
+                  style: GoogleFonts.outfit(
+                    color: const Color(0xffC06B1F),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Obx(
+                  () => Text(
+                    "${controller.currentStreak.value} Days 🔥",
+                    style: GoogleFonts.outfit(
+                      color: const Color(0xff8D490B),
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "You're doing great!",
+                  style: GoogleFonts.outfit(
+                    color: const Color(0xff8D490B).withOpacity(0.7),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Obx(() {
+                  final history = controller.weeklyAdherenceData;
+                  if (history.isEmpty) return const SizedBox();
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(7, (index) {
+                      bool isCompleted = history[index]['isAdherent'] == true;
+                      String dayStr = (history[index]['day'] as String);
+                      String dayInitial = dayStr.isNotEmpty
+                          ? dayStr.substring(0, 1)
+                          : "D";
+
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          isCompleted
+                              ? const Icon(
+                                  Icons.check_circle_rounded,
+                                  color: Color(0xffF27121),
+                                  size: 16,
+                                )
+                              : Container(
+                                  width: 16,
+                                  height: 16,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                          const SizedBox(height: 4),
+                          Text(
+                            dayInitial,
+                            style: GoogleFonts.outfit(
+                              color: const Color(0xff8D490B),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTipCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xffEEECFF), // Light purple
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            right: 0,
+            bottom: -5,
+            child: const Text("💧", style: TextStyle(fontSize: 60)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Color(0xffB100FF),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.lightbulb_outline_rounded,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      "Today's Tip",
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xff702F9A),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "Drink more water and stay consistent with your meals.",
+                  style: GoogleFonts.outfit(
+                    color: const Color(0xff4A2066),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Weekly calorie trend — dynamic bar chart
+  Widget _buildWeeklyCalorieChart() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: const Color(0xff120D23).withOpacity(0.8),
+        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.0),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xffFF7A00).withOpacity(0.05),
+            blurRadius: 20,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Obx(() {
+        final list = controller.weeklyAdherenceData.toList();
+        if (list.isEmpty) {
+          return const SizedBox(
+            height: 220,
+            child: Center(
+              child: CircularProgressIndicator(color: Color(0xffB100FF)),
+            ),
+          );
+        }
+
+        double totalCal = 0;
+        int activeDays = 0;
+        for (var day in list) {
+          double cal = double.tryParse(day['calories']?.toString() ?? '0') ?? 0;
+          if (cal > 0) {
+            totalCal += cal;
+            activeDays++;
+          }
+        }
+        int avgCal = activeDays > 0 ? (totalCal / activeDays).round() : 0;
+        int target = controller.targetCalories.value;
+
+        String formatNum(int n) {
+          return n.toString().replaceAllMapped(
+            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+            (Match m) => '${m[1]},',
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Average",
+                      style: GoogleFonts.inter(
+                        color: const Color(0xffB100FF).withOpacity(0.7),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          formatNum(avgCal),
+                          style: GoogleFonts.outfit(
+                            color: const Color(0xffB100FF),
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          "kcal",
+                          style: GoogleFonts.inter(
+                            color: const Color(0xffB100FF).withOpacity(0.7),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      "Goal",
+                      style: GoogleFonts.inter(
+                        color: const Color(0xffFF7A00).withOpacity(0.7),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          formatNum(target),
+                          style: GoogleFonts.outfit(
+                            color: const Color(0xffFF7A00),
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          "kcal",
+                          style: GoogleFonts.inter(
+                            color: const Color(0xffFF7A00).withOpacity(0.7),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              height: 160,
+              width: double.infinity,
+              child: CustomPaint(
+                painter: CalorieBarChartPainter(
+                  history: list,
+                  target: target.toDouble(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: const BoxDecoration(
+                    color: Color(0xffB100FF),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  "Calories Consumed",
+                  style: GoogleFonts.inter(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(width: 24),
+                Container(
+                  width: 24,
+                  height: 2,
+                  color: Colors.transparent,
+                  child: CustomPaint(
+                    painter: DashedLinePainter(color: const Color(0xffFF7A00)),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  "Target",
+                  style: GoogleFonts.inter(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildWeightTracker() {
+    return Obx(() {
+      final current = controller.currentWeight.value;
+      final diff = controller.weightDifferenceKg.value;
+      final ibw = controller.ibw.value;
+      final hasLost = diff >= 0;
+      final diffColor = diff == 0
+          ? Colors.white54
+          : (hasLost ? const Color(0xff00FF87) : const Color(0xffFF7A00));
+
+      final history = controller.weightHistory.toList();
+      final List<double> weights = history
+          .map((e) => (e['weight'] as num?)?.toDouble() ?? 0.0)
+          .where((w) => w > 0)
+          .toList();
+
+      final double highest = weights.isNotEmpty ? weights.reduce(max) : 0;
+      final double lowest = weights.isNotEmpty ? weights.reduce(min) : 0;
+
+      final List<Map<String, dynamic>> insights = [];
+      if (diff > 0) {
+        insights.add({
+          'icon': Icons.trending_down_rounded,
+          'color': const Color(0xff00FF87),
+          'title': 'You are on the right track!',
+          'sub':
+              'You\'ve lost ${diff.toStringAsFixed(1)} kg since you started.',
+        });
+      } else if (diff < 0) {
+        insights.add({
+          'icon': Icons.trending_up_rounded,
+          'color': const Color(0xffFF7A00),
+          'title': 'Keep an eye on your intake!',
+          'sub':
+              'You\'ve gained ${diff.abs().toStringAsFixed(1)} kg. Adjust your meals.',
+        });
+      }
+      if (ibw > 0 && current > 0) {
+        final double away = (current - ibw).abs();
+        insights.add({
+          'icon': Icons.flag_rounded,
+          'color': const Color(0xff00A2FF),
+          'title': 'Keep going!',
+          'sub':
+              '${away.toStringAsFixed(1)} kg away from your ideal weight (${ibw.toStringAsFixed(1)} kg).',
+        });
+      }
+      insights.add({
+        'icon': Icons.stars_rounded,
+        'color': const Color(0xffFFD166),
+        'title': 'Consistency is key',
+        'sub':
+            'Maintain your progress with balanced nutrition and regular activity.',
+      });
+
+      return Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xff1C1533), Color(0xff0D0818)],
+          ),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white.withOpacity(0.08)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header ─────────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffB100FF).withOpacity(0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.monitor_weight_outlined,
+                      color: Color(0xffB100FF),
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'WEIGHT TRACKER',
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffFF7A00).withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: const Color(0xffFF7A00).withOpacity(0.3),
+                      ),
+                    ),
+                    child: Text(
+                      'Estimated',
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xffFF7A00),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Current weight headline ─────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Current Weight',
+                          style: GoogleFonts.inter(
+                            color: Colors.white54,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          current > 0
+                              ? '${current.toStringAsFixed(1)} kg'
+                              : '--',
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 38,
+                            fontWeight: FontWeight.bold,
+                            height: 1.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (diff != 0)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              hasLost
+                                  ? Icons.arrow_downward_rounded
+                                  : Icons.arrow_upward_rounded,
+                              color: diffColor,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              '${diff.abs().toStringAsFixed(1)} kg',
+                              style: GoogleFonts.outfit(
+                                color: diffColor,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          'vs start weight',
+                          style: GoogleFonts.inter(
+                            color: Colors.white38,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // ── Trend chart ─────────────────────────────────────────────────
+            if (weights.length >= 2) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: SizedBox(
+                  height: 120,
+                  width: double.infinity,
+                  child: CustomPaint(
+                    painter: WeightTrendPainter(history: history),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: history.map((e) {
+                    final dateStr = e['date']?.toString() ?? '';
+                    String label = '';
+                    try {
+                      final d = DateTime.parse(dateStr);
+                      label = '${d.day} ${_monthAbbr(d.month)}';
+                    } catch (_) {
+                      label = dateStr.length > 5
+                          ? dateStr.substring(5)
+                          : dateStr;
+                    }
+                    return Text(
+                      label,
+                      style: GoogleFonts.inter(
+                        color: Colors.white38,
+                        fontSize: 9,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ] else
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Text(
+                  'Complete at least 2 days of meals to see your weight trend.',
+                  style: GoogleFonts.outfit(
+                    color: Colors.white38,
+                    fontSize: 13,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+            const SizedBox(height: 20),
+
+            // ── Stats row: Highest / Lowest / Goal ──────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildWeightStat(
+                      'Highest',
+                      highest > 0 ? '${highest.toStringAsFixed(1)} kg' : '--',
+                      const Color(0xffFF7A00),
+                    ),
+                  ),
+                  Container(width: 1, height: 36, color: Colors.white12),
+                  Expanded(
+                    child: _buildWeightStat(
+                      'Lowest',
+                      lowest > 0 ? '${lowest.toStringAsFixed(1)} kg' : '--',
+                      const Color(0xff00FF87),
+                    ),
+                  ),
+                  Container(width: 1, height: 36, color: Colors.white12),
+                  Expanded(
+                    child: _buildWeightStat(
+                      'Goal',
+                      ibw > 0 ? '${ibw.toStringAsFixed(1)} kg' : '--',
+                      const Color(0xff00A2FF),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // ── Weight Insights ─────────────────────────────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.03),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
+                border: Border(
+                  top: BorderSide(color: Colors.white.withOpacity(0.06)),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.auto_awesome_rounded,
+                        color: Color(0xffB100FF),
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'WEIGHT INSIGHTS',
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  ...insights.map(
+                    (ins) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: (ins['color'] as Color).withOpacity(0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              ins['icon'] as IconData,
+                              color: ins['color'] as Color,
+                              size: 16,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
                             child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildLegendRow(
-                                  "${carbs}g",
-                                  "Carbs",
-                                  const Color(0xffFF7A00),
+                                Text(
+                                  ins['title'] as String,
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                                const SizedBox(height: 24),
-                                _buildLegendRow(
-                                  "${protein}g",
-                                  "Protein",
-                                  const Color(0xff00A2FF),
-                                ),
-                                const SizedBox(height: 24),
-                                _buildLegendRow(
-                                  "${fat}g",
-                                  "Fat",
-                                  const Color(0xffFF00E5),
+                                const SizedBox(height: 2),
+                                Text(
+                                  ins['sub'] as String,
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.white54,
+                                    fontSize: 11,
+                                    height: 1.4,
+                                  ),
                                 ),
                               ],
                             ),
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLegendRow(String value, String label, Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              value,
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                height: 1.1,
-              ),
-            ),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                color: Colors.white.withOpacity(0.4),
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                height: 1.1,
+                ],
               ),
             ),
           ],
         ),
-        const SizedBox(width: 8),
-        Container(
-          width: 4,
-          height: 32,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-      ],
-    );
+      );
+    });
   }
 
-  // Weekly calorie trend — moved here from the History screen, which now
-  // shows only the Meal Attendance Log. Reuses weeklyAdherenceData (already
-  // fetched for streak/compliance) rather than a separate network call.
-  Widget _buildWeeklyCalorieChart() {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: const Color(0xff0B0817).withOpacity(0.55),
-        border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
-      ),
+  Widget _buildWeightStat(String label, String value, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Weekly Calorie Intake vs Target",
+            label,
+            style: GoogleFonts.inter(color: Colors.white38, fontSize: 11),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
             style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 14,
+              color: color,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 22),
-          Obx(() {
-            final list = controller.weeklyAdherenceData.toList();
-            if (list.isEmpty) {
-              return const SizedBox(
-                height: 160,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Color(0xff00FF87),
-                    ),
-                  ),
-                ),
-              );
-            }
-            return Column(
-              children: [
-                SizedBox(
-                  height: 160,
-                  width: double.infinity,
-                  child: CustomPaint(
-                    painter: CalorieHistoryChartPainter(
-                      history: list,
-                      target: controller.targetCalories.value.toDouble(),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: list.map((day) {
-                    final label = day['day']?.toString() ?? 'Log';
-                    return Text(
-                      label,
-                      style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.35),
-                        fontSize: 9,
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            );
-          }),
         ],
       ),
     );
   }
 
-  Widget _buildWeightTracker() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [const Color(0xff1C1533), const Color(0xff0D0818)],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
+  String _monthAbbr(int month) {
+    const m = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return m[(month - 1).clamp(0, 11)];
+  }
+
+  Widget _buildStartingSnapshot() {
+    return Obx(() {
+      double pctIbw = 100.0;
+      if (controller.ibw.value > 0) {
+        pctIbw =
+            (controller.startingWeight.value / controller.ibw.value) * 100.0;
+      }
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            "Starting Health Snapshot",
+            style: GoogleFonts.outfit(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
           Row(
             children: [
-              Text(
-                "Weight Tracker",
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: _buildMetricReportCard(
+                  title: "BMR",
+                  value: "${controller.bmr.value.toInt()}",
+                  unit: "kcal",
+                  desc: "Basal Metabolic Rate",
+                  icon: Icons.local_fire_department_rounded,
+                  color: const Color(0xffFF5F6D),
+                  bgImage: "assets/new_images1/bmr.png",
                 ),
               ),
-              const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: const Color(0xffFF7A00).withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: const Color(0xffFF7A00).withOpacity(0.3),
-                  ),
-                ),
-                child: Text(
-                  "Estimated",
-                  style: GoogleFonts.outfit(
-                    color: const Color(0xffFF7A00),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildMetricReportCard(
+                  imageLeft: 25,
+                  imageTop: -35,
+                  imageBottom: -35,
+                  title: "IDEAL WEIGHT",
+                  value: controller.ibw.value.toStringAsFixed(1),
+                  unit: "kg",
+                  desc: "Devine Formula (IBW)",
+                  icon: Icons.monitor_weight_outlined,
+                  color: const Color(0xff7B61FF),
+                  bgImage: "assets/new_images1/ideal_weight.png",
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          Obx(() {
-            final current = controller.currentWeight.value;
-            final diff = controller.weightDifferenceKg.value;
-            final hasLost = diff >= 0;
-            final diffColor = diff == 0
-                ? Colors.white54
-                : (hasLost ? const Color(0xff00FF87) : const Color(0xffFF7A00));
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetricReportCard(
+                  imageRight: -20,
+                  imageTop: -30,
+                  imageBottom: -30,
+                  title: "DAILY TDEE",
+                  value: "${controller.tdee.value.toInt()}",
+                  unit: "kcal",
+                  desc: "Total Daily Energy\nExpenditure",
+                  icon: Icons.bolt_rounded,
+                  color: const Color(0xff00E5FF),
+                  bgImage: "assets/new_images1/daily_tdeee.png",
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildMetricReportCard(
+                  imageRight: -5,
+                  title: "WEIGHT RATIO",
+                  value: "${pctIbw.toInt()}",
+                  unit: "%",
+                  desc: "Current / Ideal Weight",
+                  icon: Icons.show_chart_rounded,
+                  color: const Color(0xffFF7A00),
+                  bgImage: "assets/new_images1/weight ratio.png",
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    });
+  }
 
-            return Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        current > 0 ? "${current.toStringAsFixed(1)} kg" : "--",
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        "Estimated Weight",
-                        style: GoogleFonts.outfit(
-                          color: Colors.white.withOpacity(0.5),
-                          fontSize: 12,
-                        ),
-                      ),
+  Widget _buildMetricReportCard({
+    required String title,
+    required String value,
+    required String unit,
+    required String desc,
+    required IconData icon,
+    required Color color,
+    required String bgImage,
+    double? imageTop,
+    double? imageBottom,
+    double? imageRight,
+    double? imageLeft,
+  }) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        height: 180,
+        decoration: BoxDecoration(
+          color: const Color(0xff151520),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.0),
+        ),
+        child: Stack(
+          children: [
+            // Background Image shifted
+            Positioned(
+              top: imageTop ?? -10,
+              bottom: imageBottom ?? -10,
+              right: imageLeft != null ? null : (imageRight ?? -30),
+              left: imageLeft,
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  const Color(0xff151520).withOpacity(0.3),
+                  BlendMode.darken,
+                ),
+                child: Image.asset(bgImage, fit: BoxFit.fitHeight),
+              ),
+            ),
+            // Gradient Overlay and Content
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xff151520).withOpacity(0.8),
+                      const Color(0xff151520).withOpacity(0.2),
+                      const Color(0xff151520).withOpacity(0.8),
                     ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
-                if (diff != 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: diffColor.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: diffColor.withOpacity(0.3)),
-                    ),
-                    child: Row(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
                       children: [
-                        Icon(
-                          hasLost
-                              ? Icons.trending_down_rounded
-                              : Icons.trending_up_rounded,
-                          color: diffColor,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          "~${diff.abs().toStringAsFixed(1)} kg ${hasLost ? 'Lost' : 'Gained'}",
-                          style: GoogleFonts.outfit(
-                            color: diffColor,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: GoogleFonts.outfit(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-              ],
-            );
-          }),
-          const SizedBox(height: 10),
-          Text(
-            "Estimated from your logged meals — not a substitute for weighing yourself.",
-            style: GoogleFonts.outfit(color: Colors.white38, fontSize: 11),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 90,
-            child: Obx(() {
-              if (controller.weightHistory.length < 2) {
-                return Center(
-                  child: Text(
-                    "Complete at least 2 days of meals to see your estimated trend.",
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.outfit(
-                      color: Colors.white38,
-                      fontSize: 13,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              value,
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 32,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              unit,
+                              style: GoogleFonts.outfit(
+                                color: Colors.white.withOpacity(0.7),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Container(height: 2, width: 24, color: color),
+                        const SizedBox(height: 12),
+                        Text(
+                          desc,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 11,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                );
-              }
-              return CustomPaint(
-                size: const Size(double.infinity, 90),
-                painter: WeightTrendPainter(history: controller.weightHistory),
-              );
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStartingSnapshot() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Starting Health Snapshot",
-          style: GoogleFonts.outfit(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildMetricMiniCard(
-                "Starting Weight",
-                "${controller.startingWeight.value} kg",
-                const Color(0xff00A2FF),
-                Icons.monitor_weight_outlined,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildMetricMiniCard(
-                "Target BMI",
-                "${controller.bmi.value}",
-                const Color(0xffFF00E5),
-                Icons.speed_rounded,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildMetricMiniCard(
-                "Ideal Weight",
-                "${controller.ibw.value} kg",
-                const Color(0xff00FF87),
-                Icons.accessibility_new_rounded,
+                  ],
+                ),
               ),
             ),
           ],
         ),
-      ],
-    );
-  }
-
-  Widget _buildMetricMiniCard(
-    String title,
-    String value,
-    Color color,
-    IconData icon,
-  ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [color.withOpacity(0.14), color.withOpacity(0.03)],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.25)),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color.withOpacity(0.15),
-            ),
-            child: Icon(icon, color: color, size: 18),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
-              color: color,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1299,138 +2120,165 @@ class WeightTrendPainter extends CustomPainter {
       oldDelegate.history != history;
 }
 
-// Moved here from the History screen along with _buildWeeklyCalorieChart.
-class CalorieHistoryChartPainter extends CustomPainter {
+class CalorieBarChartPainter extends CustomPainter {
   final List<Map<String, dynamic>> history;
   final double target;
 
-  CalorieHistoryChartPainter({required this.history, required this.target});
+  CalorieBarChartPainter({required this.history, required this.target});
 
   @override
   void paint(Canvas canvas, Size size) {
     double w = size.width;
     double h = size.height;
 
-    // Draw horizontal grid line representing target threshold
+    double yAxisWidth = 30.0;
+    double xAxisHeight = 24.0;
+
+    double chartLeft = yAxisWidth;
+    double chartTop = 0;
+    double chartWidth = w - yAxisWidth;
+    double chartHeight = h - xAxisHeight;
+
+    double maxVal = max(target, 2500);
+    for (var day in history) {
+      double cal = double.tryParse(day['calories']?.toString() ?? '0') ?? 0;
+      if (cal > maxVal) maxVal = cal;
+    }
+    maxVal = (maxVal / 1000).ceil() * 1000.0;
+
+    int steps = (maxVal / 1000).floor();
+    for (int i = 0; i <= steps; i++) {
+      double val = i * 1000.0;
+      double y = chartHeight - (val / maxVal) * chartHeight;
+
+      String label = val == 0 ? "0" : "${(val / 1000).toInt()}K";
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: label,
+          style: GoogleFonts.inter(
+            color: Colors.white.withOpacity(0.5),
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      textPainter.paint(canvas, Offset(0, y - textPainter.height / 2));
+    }
+
+    double targetY = chartHeight - (target / maxVal) * chartHeight;
+    double dashWidth = 4.0;
+    double dashSpace = 4.0;
+    double currentX = chartLeft;
     final targetPaint = Paint()
-      ..color = const Color(0xffFF3B30).withOpacity(0.3)
+      ..color = const Color(0xffFF7A00).withOpacity(0.6)
       ..strokeWidth = 1.0;
 
-    // Draw target baseline text
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: "Target: ${target.toInt()} kcal",
-        style: GoogleFonts.inter(
-          color: const Color(0xffFF3B30).withOpacity(0.6),
-          fontSize: 8,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    double maxVal = max(
-      target,
-      history
-          .map(
-            (day) => double.tryParse(day['calories']?.toString() ?? '0') ?? 0.0,
-          )
-          .reduce(max),
-    );
-    if (maxVal == 0) maxVal = 2000.0;
-
-    double targetY = h - ((target / maxVal) * (h - 20)) - 10;
-    canvas.drawLine(Offset(0, targetY), Offset(w, targetY), targetPaint);
-    textPainter.paint(canvas, Offset(4, targetY - 12));
-
-    // Plot intake curve
-    final List<double> calories = history
-        .map(
-          (day) => double.tryParse(day['calories']?.toString() ?? '0.0') ?? 0.0,
-        )
-        .toList();
-    if (calories.isEmpty) return;
-
-    double stepX = w / (calories.length - 1 == 0 ? 1 : calories.length - 1);
-    final points = <Offset>[];
-
-    for (int i = 0; i < calories.length; i++) {
-      double x = i * stepX;
-      double y = h - ((calories[i] / maxVal) * (h - 20)) - 10;
-      points.add(Offset(x, y));
+    while (currentX < w) {
+      canvas.drawLine(
+        Offset(currentX, targetY),
+        Offset(currentX + dashWidth, targetY),
+        targetPaint,
+      );
+      currentX += dashWidth + dashSpace;
     }
 
-    final path = Path()..moveTo(points[0].dx, points[0].dy);
-    for (int i = 0; i < points.length - 1; i++) {
-      final p1 = points[i];
-      final p2 = points[i + 1];
-      final controlPoint1 = Offset(p1.dx + (p2.dx - p1.dx) / 2.2, p1.dy);
-      final controlPoint2 = Offset(p1.dx + (p2.dx - p1.dx) / 2.2, p2.dy);
-      path.cubicTo(
-        controlPoint1.dx,
-        controlPoint1.dy,
-        controlPoint2.dx,
-        controlPoint2.dy,
-        p2.dx,
-        p2.dy,
-      );
-    }
+    if (history.isEmpty) return;
 
-    // Fill area under line
-    final fillPath = Path.from(path)
-      ..lineTo(points.last.dx, h)
-      ..lineTo(points.first.dx, h)
-      ..close();
+    double barWidth = 24.0;
+    double spacing =
+        (chartWidth - (barWidth * history.length)) / (history.length + 1);
 
-    final fillPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [const Color(0xff00FF87).withOpacity(0.08), Colors.transparent],
-      ).createShader(Rect.fromLTWH(0, 0, w, h));
-    canvas.drawPath(fillPath, fillPaint);
+    for (int i = 0; i < history.length; i++) {
+      double x = chartLeft + spacing + (i * (barWidth + spacing));
+      double cal =
+          double.tryParse(history[i]['calories']?.toString() ?? '0') ?? 0;
+      double barHeight = (cal / maxVal) * chartHeight;
 
-    // Draw main glowing green chart line
-    final linePaint = Paint()
-      ..color = const Color(0xff00FF87)
-      ..strokeWidth = 2.5
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    canvas.drawPath(path, linePaint);
+      if (barHeight > 0) {
+        bool isToday = i == history.length - 1;
 
-    // Draw dots and calorie numbers
-    for (int i = 0; i < points.length; i++) {
-      final pt = points[i];
-      final calVal = calories[i].toInt();
+        Rect barRect = Rect.fromLTWH(
+          x,
+          chartHeight - barHeight,
+          barWidth,
+          barHeight,
+        );
 
-      // Outer glow circle
-      canvas.drawCircle(
-        pt,
-        5,
-        Paint()..color = const Color(0xff00FF87).withOpacity(0.25),
-      );
-      // Inner circle
-      canvas.drawCircle(pt, 2, Paint()..color = Colors.white);
+        Paint barPaint = Paint()
+          ..shader = LinearGradient(
+            colors: isToday
+                ? [const Color(0xffFFD166), const Color(0xffFF7A00)]
+                : [const Color(0xffD07CFF), const Color(0xff702F9A)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ).createShader(barRect);
 
-      if (calVal > 0) {
-        final valPainter = TextPainter(
-          text: TextSpan(
-            text: "$calVal",
-            style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 8,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          textDirection: TextDirection.ltr,
-        )..layout();
-        valPainter.paint(
-          canvas,
-          Offset(pt.dx - valPainter.width / 2, pt.dy - 14),
+        Paint glowPaint = Paint()
+          ..color =
+              (isToday ? const Color(0xffFF7A00) : const Color(0xffB100FF))
+                  .withOpacity(0.3)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8.0);
+
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(barRect, const Radius.circular(6)),
+          glowPaint,
+        );
+
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(barRect, const Radius.circular(6)),
+          barPaint,
         );
       }
+
+      String dayLabel = history[i]['day'] ?? '';
+      final labelPainter = TextPainter(
+        text: TextSpan(
+          text: dayLabel,
+          style: GoogleFonts.inter(
+            color: Colors.white,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      labelPainter.paint(
+        canvas,
+        Offset(x + (barWidth / 2) - (labelPainter.width / 2), chartHeight + 8),
+      );
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CalorieBarChartPainter oldDelegate) => true;
+}
+
+class DashedLinePainter extends CustomPainter {
+  final Color color;
+  DashedLinePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    double dashWidth = 4.0;
+    double dashSpace = 4.0;
+    double currentX = 0;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.0;
+
+    while (currentX < size.width) {
+      canvas.drawLine(
+        Offset(currentX, size.height / 2),
+        Offset(currentX + dashWidth, size.height / 2),
+        paint,
+      );
+      currentX += dashWidth + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant DashedLinePainter oldDelegate) => false;
 }

@@ -15,6 +15,9 @@ class ProgressController extends GetxController {
 
   final isLoading = false.obs;
 
+  // Tab selection for the analytics tab switcher (0=Nutrition, 1=Weekly, 2=Weight)
+  final selectedTab = 0.obs;
+
   // Corner Case: No Active Plan
   final hasActivePlan = false.obs;
 
@@ -206,34 +209,40 @@ class ProgressController extends GetxController {
             } catch (_) {}
           }
 
-          tempHistory.insert(0, {
-            "day": shortDay,
-            "calories": cal.toInt(),
-            "target": targetCalories.value,
-          });
 
           // Only evaluate adherence for days they were actually active
           if (evaluatedDays < activeDaysInHistory) {
-            // Today hasn't necessarily finished yet — if nothing's been
-            // logged so far, don't let it wipe out a real streak from
-            // earlier days. It'll be evaluated normally once something is
-            // eaten, or count as a miss in tomorrow's history once the day
-            // has actually passed with nothing logged.
+            bool adherent = false;
             if (isToday && cal == 0) {
               skippedToday = true;
             } else {
-              final double minimumRequiredCalories = targetCalories.value - 300;
-              final double maximumAllowedCalories = targetCalories.value + 100;
+              // Relax adherence rules to account for AI meal generation discrepancies.
+              final double minimumRequiredCalories = targetCalories.value * 0.6;
+              final double maximumAllowedCalories = targetCalories.value * 1.5;
 
               if (cal >= minimumRequiredCalories && cal <= maximumAllowedCalories) {
+                adherent = true;
                 daysAdherent++;
                 if (!streakBroken) streakCounter++;
               } else {
-                // They fell short or overshot their target. Streak breaks!
                 streakBroken = true;
               }
               evaluatedDays++;
             }
+            
+            tempHistory.insert(0, {
+              "day": shortDay,
+              "calories": cal.toInt(),
+              "target": targetCalories.value,
+              "isAdherent": adherent,
+            });
+          } else {
+            tempHistory.insert(0, {
+              "day": shortDay,
+              "calories": cal.toInt(),
+              "target": targetCalories.value,
+              "isAdherent": false,
+            });
           }
         }
 

@@ -23,9 +23,7 @@ class BookingView extends GetView<BookingController> {
         final expert = controller.currentExpert;
         if (expert.isEmpty) {
           return const Center(
-            child: CircularProgressIndicator(
-              color: Color(0xffFF00E5),
-            ),
+            child: CircularProgressIndicator(color: Color(0xffFF00E5)),
           );
         }
 
@@ -41,297 +39,281 @@ class BookingView extends GetView<BookingController> {
                   child: Column(
                     children: [
                       /// COVER IMAGE & GRADIENT & BADGE STACKED INSIDE SCROLLVIEW
-                    Stack(
-                      children: [
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.38,
-                          width: double.infinity,
-                          child: Image.network(
-                            expert["image"] ?? 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=600',
-                            fit: BoxFit.cover,
+                      Stack(
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.38,
+                            width: double.infinity,
+                            child: Image.network(
+                              expert["image"] ??
+                                  'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=600',
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                        ),
-                        /// Dark gradient overlay at top of image (for floating buttons visibility)
-                        Positioned.fill(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.black.withOpacity(0.4),
-                                  Colors.transparent,
+
+                          /// Dark gradient overlay at top of image (for floating buttons visibility)
+                          Positioned.fill(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.black.withOpacity(0.4),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          /// Gallery count badge (bottom right of cover photo)
+                          Positioned(
+                            bottom:
+                                50, // high enough to not get fully overlapped by floating card
+                            right: 16,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.photo_library_outlined,
+                                    color: Colors.white,
+                                    size: 12,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    "1/5",
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
                           ),
-                        ),
-                        /// Gallery count badge (bottom right of cover photo)
-                        Positioned(
-                          bottom: 50, // high enough to not get fully overlapped by floating card
-                          right: 16,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.photo_library_outlined,
-                                  color: Colors.white,
-                                  size: 12,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  "1/5",
-                                  style: GoogleFonts.inter(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
+                        ],
+                      ),
+
+                      /// OVERLAPPING SHIFTED COLUMN
+                      Transform.translate(
+                        offset: const Offset(0, -40),
+                        child: Column(
+                          children: [
+                            /// FLOATING CARD (White background, Zomato style)
+                            Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.15),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 4),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    /// OVERLAPPING SHIFTED COLUMN
-                    Transform.translate(
-                      offset: const Offset(0, -40),
-                      child: Column(
-                        children: [
-                          /// FLOATING CARD (White background, Zomato style)
-                          Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16),
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.15),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                /// Name & Rating row
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        expert["name"] ?? '',
-                                        style: GoogleFonts.outfit(
-                                          color: Colors.black,
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xff24963F), // Zomato green
-                                            borderRadius: BorderRadius.circular(6),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                "${expert["rating"] ?? 4.9}",
-                                                style: GoogleFonts.inter(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 2),
-                                              const Icon(
-                                                Icons.star_rounded,
-                                                color: Colors.white,
-                                                size: 12,
-                                              ),
-                                            ],
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  /// Name & Rating row
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          expert["name"] ?? '',
+                                          style: GoogleFonts.outfit(
+                                            color: Colors.black,
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          "${expert["reviewsCount"] ?? 150} ratings",
-                                          style: GoogleFonts.inter(
-                                            color: Colors.black.withOpacity(0.4),
-                                            fontSize: 9,
-                                            decoration: TextDecoration.underline,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-
-                                /// Distance / Location Row
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.location_on_outlined,
-                                      color: Colors.black.withOpacity(0.6),
-                                      size: 14,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      "${expert["location"] ?? 'Online'} · Verified Coach",
-                                      style: GoogleFonts.inter(
-                                        color: Colors.black.withOpacity(0.6),
-                                        fontSize: 12,
                                       ),
-                                    ),
-                                    const SizedBox(width: 2),
-                                    Icon(
-                                      Icons.arrow_drop_down,
-                                      color: Colors.black.withOpacity(0.6),
-                                      size: 16,
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-
-                                /// Role / Price Info
-                                Text(
-                                  "${expert["role"] ?? 'Fitness Specialist'} | ₹500 for Session",
-                                  style: GoogleFonts.inter(
-                                    color: Colors.black.withOpacity(0.5),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Divider(color: Colors.black.withOpacity(0.08), height: 1),
-                                const SizedBox(height: 12),
-
-                                /// Bottom Buttons inside card (Open, Directions, Call)
-                                Row(
-                                  children: [
-                                    /// Open/Available tag
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.03),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Row(
+                                      const SizedBox(width: 12),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
                                         children: [
-                                          Text(
-                                            "Available",
-                                            style: GoogleFonts.inter(
-                                              color: const Color(0xff24963F),
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: const Color(
+                                                0xff24963F,
+                                              ), // Zomato green
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  "${expert["rating"] ?? 4.9}",
+                                                  style: GoogleFonts.inter(
+                                                    color: Colors.white,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 2),
+                                                const Icon(
+                                                  Icons.star_rounded,
+                                                  color: Colors.white,
+                                                  size: 12,
+                                                ),
+                                              ],
                                             ),
                                           ),
+                                          const SizedBox(height: 4),
                                           Text(
-                                            " Today",
+                                            "${expert["reviewsCount"] ?? 150} ratings",
                                             style: GoogleFonts.inter(
-                                              color: Colors.black,
-                                              fontSize: 12,
+                                              color: Colors.black.withOpacity(
+                                                0.4,
+                                              ),
+                                              fontSize: 9,
+                                              decoration:
+                                                  TextDecoration.underline,
                                             ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          const Icon(
-                                            Icons.keyboard_arrow_down_rounded,
-                                            color: Colors.black54,
-                                            size: 14,
                                           ),
                                         ],
                                       ),
-                                    ),
-                                    const Spacer(),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
 
-                                    /// Chat Button
-                                    GestureDetector(
-                                      onTap: () {
-                                        Get.snackbar(
-                                          "Chat Initiated",
-                                          "Start chatting with ${expert["name"]}",
-                                          snackPosition: SnackPosition.BOTTOM,
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.03),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.chat_bubble_outline_rounded,
-                                          color: Colors.black87,
-                                          size: 18,
+                                  /// Distance / Location Row
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_on_outlined,
+                                        color: Colors.black.withOpacity(0.6),
+                                        size: 14,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        "${expert["location"] ?? 'Online'} · Verified Coach",
+                                        style: GoogleFonts.inter(
+                                          color: Colors.black.withOpacity(0.6),
+                                          fontSize: 12,
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
+                                      const SizedBox(width: 2),
+                                      Icon(
+                                        Icons.arrow_drop_down,
+                                        color: Colors.black.withOpacity(0.6),
+                                        size: 16,
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
 
-                                    /// Call Button
-                                    GestureDetector(
-                                      onTap: () {
-                                        Get.snackbar(
-                                          "Calling...",
-                                          "Calling ${expert["name"]}",
-                                          snackPosition: SnackPosition.BOTTOM,
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.all(8),
+                                  /// Role / Price Info
+                                  Text(
+                                    "${expert["role"] ?? 'Fitness Specialist'} | ₹500 for Session",
+                                    style: GoogleFonts.inter(
+                                      color: Colors.black.withOpacity(0.5),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Divider(
+                                    color: Colors.black.withOpacity(0.08),
+                                    height: 1,
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  /// Bottom Buttons inside card (Open, Directions, Call)
+                                  Row(
+                                    children: [
+                                      /// Open/Available tag
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 6,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: Colors.black.withOpacity(0.03),
-                                          shape: BoxShape.circle,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
-                                        child: const Icon(
-                                          Icons.phone_outlined,
-                                          color: Colors.black87,
-                                          size: 18,
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              "Available",
+                                              style: GoogleFonts.inter(
+                                                color: const Color(0xff24963F),
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(
+                                              " Today",
+                                              style: GoogleFonts.inter(
+                                                color: Colors.black,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            const Icon(
+                                              Icons.keyboard_arrow_down_rounded,
+                                              color: Colors.black54,
+                                              size: 14,
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 20),
+                            const SizedBox(height: 20),
 
-                          /// ABOUT, SERVICES, FEATURES
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                buildAboutTabContent(),
-                                const SizedBox(height: 24),
-                                _buildFeaturesSection(),
-                              ],
+                            /// ABOUT, SERVICES, FEATURES
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  buildAboutTabContent(),
+                                  const SizedBox(height: 24),
+                                  _buildFeaturesSection(),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20), // Bottom padding to compensate for translation
-                  ],
+                      const SizedBox(
+                        height: 20,
+                      ), // Bottom padding to compensate for translation
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
 
             /// 2. FLOATING FIXED TOP ACTIONS (Back button, Share, Favorite)
             Positioned(
@@ -816,135 +798,11 @@ class BookingView extends GetView<BookingController> {
             ],
           ),
         ),
-        const SizedBox(height: 20),
-
-        /// Services List inside About
-        buildServicesSection(),
       ],
     );
   }
 
-  /// DYNAMIC TAB: SERVICES DOCK
-  Widget buildServicesSection() {
-    return Obx(() {
-      final expert = controller.currentExpert;
-      if (expert.isEmpty || expert["services"] == null)
-        return const SizedBox.shrink();
-      return Container(
-        padding: const EdgeInsets.all(16),
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: const Color(0xff0B0817).withOpacity(0.55),
-          border: Border.all(color: Colors.white.withOpacity(0.03), width: 0.8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Services & Pricing",
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  "View All",
-                  style: GoogleFonts.inter(
-                    color: const Color(0xffFF00E5),
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            /// List of items
-            Column(
-              children: (expert["services"] as List<Map<String, dynamic>>).map((
-                srv,
-              ) {
-                IconData icon = Icons.videocam_rounded;
-                Color clr = const Color(0xffB100FF);
-
-                if (srv["type"] == "chat") {
-                  icon = Icons.chat_bubble_rounded;
-                  clr = const Color(0xffFF7A00);
-                } else if (srv["type"] == "plan") {
-                  icon = Icons.calendar_month_rounded;
-                  clr = const Color(0xffFF00E5);
-                }
-
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.white.withOpacity(0.01),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.03),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: clr.withOpacity(0.12),
-                        ),
-                        child: Icon(icon, color: clr, size: 14),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              srv["title"],
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 1),
-                            Text(
-                              srv["duration"],
-                              style: GoogleFonts.inter(
-                                color: Colors.white.withOpacity(0.40),
-                                fontSize: 8,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        "₹${srv["price"]}",
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-
-  // Removed Reviews and Gallery sections
+  // Removed Services & Pricing section, and Reviews and Gallery sections
 
   /// ----------------------------------------------------
   /// 6. BOOK A SESSION CALENDAR (DATE/TIME GRID SELECTOR)
