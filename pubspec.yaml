@@ -81,6 +81,7 @@ flutter:
     - assets/new_images/
     - assets/new_images1/
     - assets/home/
+    - assets/progress/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

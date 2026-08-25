@@ -74,7 +74,6 @@ class ProgressView extends GetView<ProgressController> {
           SafeArea(
             child: Column(
               children: [
-                _buildHeader(),
                 Expanded(
                   child: ScrollNavBarBinder(
                     builder: (context, scrollController) => Obx(() {
@@ -100,9 +99,35 @@ class ProgressView extends GetView<ProgressController> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 10),
-                              _buildJourneyHeaderCard(),
+                              _buildGreeting(),
                               const SizedBox(height: 24),
-                              _buildTransformationGallery(),
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  _buildJourneyProgressCard(),
+                                  Positioned(
+                                    top: -152,
+                                    right: 8,
+                                    child: Image.asset(
+                                      'assets/progress/boyontop.png',
+                                      height: 155,
+                                      fit: BoxFit.contain,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return Image.asset(
+                                              'assets/profile/avatar.png',
+                                              height: 155,
+                                              fit: BoxFit.contain,
+                                              errorBuilder: (c, e, s) =>
+                                                  const SizedBox.shrink(),
+                                            );
+                                          },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              _buildDisciplineBanner(),
                               const SizedBox(height: 24),
                               _buildTodayNutritionCard(),
                               const SizedBox(height: 24),
@@ -133,77 +158,22 @@ class ProgressView extends GetView<ProgressController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          const Icon(Icons.menu, color: Colors.white, size: 28),
+          Stack(
+            alignment: Alignment.topRight,
             children: [
-              Text(
-                "30-Day Journey",
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+              const Icon(
+                Icons.notifications_none_rounded,
+                color: Colors.white,
+                size: 28,
               ),
-              Text(
-                "Trust the process. See the results.",
-                style: GoogleFonts.outfit(
-                  color: Colors.white.withOpacity(0.5),
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => Get.to(
-                  () => const NutritionHistoryView(),
-                  binding: MealBinding(),
-                ),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xff00FF87).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xff00FF87).withOpacity(0.3),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.history_rounded,
-                        color: Color(0xff00FF87),
-                        size: 18,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        "History",
-                        style: GoogleFonts.outfit(
-                          color: const Color(0xff00FF87),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
               Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
-                ),
-                child: const Icon(
-                  Icons.share_rounded,
-                  color: Colors.white,
-                  size: 20,
+                margin: const EdgeInsets.only(top: 2, right: 2),
+                height: 8,
+                width: 8,
+                decoration: const BoxDecoration(
+                  color: Colors.redAccent,
+                  shape: BoxShape.circle,
                 ),
               ),
             ],
@@ -291,421 +261,317 @@ class ProgressView extends GetView<ProgressController> {
     );
   }
 
-  Widget _buildJourneyHeaderCard() {
-    return Row(
+  Widget _buildGreeting() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          flex: 6,
-          child: Container(
-            height: 180,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [const Color(0xff1C1533), const Color(0xff0D0818)],
-              ),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withOpacity(0.08)),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xffB100FF).withOpacity(0.16),
-                  blurRadius: 24,
-                  offset: const Offset(0, 12),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Days Left",
-                  style: GoogleFonts.outfit(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      "${controller.daysRemaining.value}",
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                        height: 1.0,
-                      ),
-                    ),
-                    Text(
-                      " / 30",
-                      style: GoogleFonts.outfit(
-                        color: Colors.white.withOpacity(0.4),
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Stack(
-                  children: [
-                    Container(
-                      height: 8,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    FractionallySizedBox(
-                      widthFactor: controller.currentDay.value / 30,
-                      child: Container(
-                        height: 8,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xffB100FF), Color(0xffFF00E5)],
-                          ),
-                          borderRadius: BorderRadius.circular(4),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xffB100FF).withOpacity(0.5),
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+        Text(
+          "Good Morning,",
+          style: GoogleFonts.outfit(
+            color: const Color(0xffB100FF),
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          flex: 4,
-          child: Column(
+        Row(
+          children: [
+            Text(
+              "${controller.userName.value.isNotEmpty ? controller.userName.value.split(' ')[0] : 'Rahul'}!",
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text("👋", style: TextStyle(fontSize: 24)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          "Small steps today,\nstronger you tomorrow.",
+          style: GoogleFonts.outfit(
+            color: Colors.white.withOpacity(0.6),
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildJourneyProgressCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        image: const DecorationImage(
+          image: AssetImage('assets/progress/cardbg.png'),
+          fit: BoxFit.cover,
+        ),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Your Journey Progress",
+            style: GoogleFonts.outfit(
+              color: Colors.white.withOpacity(0.8),
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
             children: [
-              Container(
-                height: 82,
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xffFF7A00).withOpacity(0.16),
-                      const Color(0xffFF7A00).withOpacity(0.04),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: const Color(0xffFF7A00).withOpacity(0.3),
-                  ),
-                ),
-                child: Row(
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color(0xffFF7A00).withOpacity(0.15),
-                      ),
-                      child: const Icon(
-                        Icons.local_fire_department_rounded,
-                        color: Color(0xffFF7A00),
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
                       children: [
                         Text(
-                          "${controller.currentStreak.value}",
+                          "${controller.daysRemaining.value}",
                           style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 22,
+                            color: const Color(0xffFF00E5),
+                            fontSize: 40,
                             fontWeight: FontWeight.bold,
                             height: 1.0,
                           ),
                         ),
+                        const SizedBox(width: 8),
                         Text(
-                          "Streak",
+                          "Days Left",
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "of your 30-day goal",
+                      style: GoogleFonts.outfit(
+                        color: Colors.white.withOpacity(0.6),
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Stack(
+                      children: [
+                        Container(
+                          height: 8,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        FractionallySizedBox(
+                          widthFactor: controller.currentDay.value / 30,
+                          child: Container(
+                            height: 8,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xffB100FF), Color(0xffFF7A00)],
+                              ),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "${controller.currentDay.value} Days Completed",
+                          style: GoogleFonts.outfit(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          "${((controller.currentDay.value / 30) * 100).toInt()}%",
                           style: GoogleFonts.outfit(
                             color: const Color(0xffFF7A00),
                             fontSize: 12,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xffB100FF).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xffB100FF).withOpacity(0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "View Plan",
+                            style: GoogleFonts.outfit(
+                              color: const Color(0xffB100FF),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Color(0xffB100FF),
+                            size: 16,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-              Container(
-                height: 82,
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xff00FF87).withOpacity(0.16),
-                      const Color(0xff00FF87).withOpacity(0.04),
+              Expanded(
+                flex: 2,
+                child: Center(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        height: 120,
+                        width: 120,
+                        child: CircularProgressIndicator(
+                          value: controller.currentDay.value / 30,
+                          strokeWidth: 8,
+                          backgroundColor: Colors.white.withOpacity(0.1),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Color(0xffFF7A00),
+                          ),
+                        ),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                "${((controller.currentDay.value / 30) * 100).toInt()}",
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                "%",
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            "Complete",
+                            style: GoogleFonts.outfit(
+                              color: Colors.white.withOpacity(0.6),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: const Color(0xff00FF87).withOpacity(0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color(0xff00FF87).withOpacity(0.15),
-                      ),
-                      child: const Icon(
-                        Icons.verified_rounded,
-                        color: Color(0xff00FF87),
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "${controller.dietCompliance.value}%",
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            height: 1.0,
-                          ),
-                        ),
-                        Text(
-                          "Compliance",
-                          style: GoogleFonts.outfit(
-                            color: const Color(0xff00FF87),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                 ),
               ),
             ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildTransformationGallery() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Transformation Gallery",
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
+  Widget _buildDisciplineBanner() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xff1C1533),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xffFF7A00).withOpacity(0.2),
             ),
-            GestureDetector(
-              onTap: () => Get.toNamed('/progress-photos'),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xffB100FF).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: const Color(0xffB100FF).withOpacity(0.3),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      "Manage",
-                      style: GoogleFonts.outfit(
-                        color: const Color(0xffB100FF),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: Color(0xffB100FF),
-                      size: 12,
-                    ),
-                  ],
-                ),
-              ),
+            child: const Icon(
+              Icons.track_changes_rounded,
+              color: Color(0xffFF7A00),
+              size: 20,
             ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 180,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: controller.transformationPhotos.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 16),
-            itemBuilder: (context, index) {
-              final key = controller.transformationPhotos.keys.elementAt(index);
-              final url = controller.transformationPhotos[key] ?? '';
-
-              return GestureDetector(
-                // Tapping a frame opens the dedicated Progress Photos screen
-                // (where the actual upload/replace/remove actions live).
-                onTap: () => Get.toNamed('/progress-photos'),
-                child: Container(
-                  width: 130,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        const Color(0xff1B1430),
-                        const Color(0xff0D0818),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: url.isNotEmpty
-                          ? const Color(0xffB100FF).withOpacity(0.5)
-                          : Colors.white.withOpacity(0.1),
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.25),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      if (url.isNotEmpty)
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(18),
-                          child: Image.network(
-                            url,
-                            fit: BoxFit.cover,
-                            errorBuilder: (c, e, s) =>
-                                const Icon(Icons.error, color: Colors.red),
-                          ),
-                        )
-                      else
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.add_a_photo_outlined,
-                              color: Colors.white54,
-                              size: 32,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              "Upload",
-                              style: GoogleFonts.outfit(
-                                color: Colors.white54,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                      // Label
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.only(
-                              bottomLeft: Radius.circular(18),
-                              bottomRight: Radius.circular(18),
-                            ),
-                            color: Colors.black.withOpacity(0.7),
-                          ),
-                          child: Text(
-                            key,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.outfit(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
           ),
-        ),
-      ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              "Discipline today, results tomorrow.",
+              style: GoogleFonts.outfit(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 14,
+              ),
+            ),
+          ),
+          const Icon(
+            Icons.arrow_forward_ios_rounded,
+            color: Colors.white54,
+            size: 14,
+          ),
+        ],
+      ),
     );
   }
-
-  // Today's Nutrition card — moved here from the Meal screen, which showed
-  // the exact same "today vs target" data (both read the same
-  // /logs/today endpoint) via a differently-styled card. One canonical
-  // place for it now, on Progress.
-  static const Color _proteinColor = Color(0xffFFD166);
-  static const Color _carbsColor = Color(0xff00FF87);
-  static const Color _fatColor = Color(0xffB100FF);
 
   Widget _buildTodayNutritionCard() {
-    return Obx(() {
-      final double proteinProgress = controller.todayTargetProtein.value > 0
-          ? (controller.todayConsumedProtein.value /
-                    controller.todayTargetProtein.value)
-                .clamp(0.0, 1.0)
-          : 0.0;
-      final double carbsProgress = controller.todayTargetCarbs.value > 0
-          ? (controller.todayConsumedCarbs.value /
-                    controller.todayTargetCarbs.value)
-                .clamp(0.0, 1.0)
-          : 0.0;
-      final double fatProgress = controller.todayTargetFat.value > 0
-          ? (controller.todayConsumedFat.value /
-                    controller.todayTargetFat.value)
-                .clamp(0.0, 1.0)
-          : 0.0;
+    final int carbs = controller.todayConsumedCarbs.value.toInt();
+    final int protein = controller.todayConsumedProtein.value.toInt();
+    final int fat = controller.todayConsumedFat.value.toInt();
+    final int targetCarbs = controller.todayTargetCarbs.value.toInt();
+    final int targetProtein = controller.todayTargetProtein.value.toInt();
+    final int targetFat = controller.todayTargetFat.value.toInt();
 
-      return Container(
+    final double proteinProgress = targetProtein > 0
+        ? (protein / targetProtein).clamp(0.0, 1.0)
+        : 0.0;
+    final double carbsProgress = targetCarbs > 0
+        ? (carbs / targetCarbs).clamp(0.0, 1.0)
+        : 0.0;
+    final double fatProgress = targetFat > 0
+        ? (fat / targetFat).clamp(0.0, 1.0)
+        : 0.0;
+
+    final int currentCalories = controller.todayConsumedCalories.value.toInt();
+    final int targetCalories = controller.targetCalories.value.toInt();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18.0),
+      child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           color: const Color(0xff120D23).withOpacity(0.8),
@@ -738,7 +604,7 @@ class ProgressView extends GetView<ProgressController> {
                             ),
                           ),
                           Text(
-                            "${_formatNumber(controller.todayConsumedCalories.value)}/${_formatNumber(controller.targetCalories.value)} kcal",
+                            "$currentCalories/$targetCalories kcal",
                             style: GoogleFonts.inter(
                               color: Colors.white.withOpacity(0.4),
                               fontSize: 11,
@@ -748,20 +614,49 @@ class ProgressView extends GetView<ProgressController> {
                         ],
                       ),
                       const SizedBox(height: 22),
-
-                      // Segmented macro ring + legend
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(left: 20),
-                            child: _buildMacroRing(
-                              currentCalories:
-                                  controller.todayConsumedCalories.value,
-                              proteinProgress: proteinProgress,
-                              carbsProgress: carbsProgress,
-                              fatProgress: fatProgress,
+                            padding: const EdgeInsets.only(left: 10),
+                            child: SizedBox(
+                              width: 110,
+                              height: 110,
+                              child: CustomPaint(
+                                painter: _MacroRingPainter(
+                                  carbsProgress: carbsProgress,
+                                  proteinProgress: proteinProgress,
+                                  fatProgress: fatProgress,
+                                  carbsColor: const Color(0xffFF7A00),
+                                  proteinColor: const Color(0xff00A2FF),
+                                  fatColor: const Color(0xffFF00E5),
+                                ),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        "$currentCalories",
+                                        style: GoogleFonts.inter(
+                                          color: Colors.white,
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                          height: 1.1,
+                                        ),
+                                      ),
+                                      Text(
+                                        "kcal",
+                                        style: GoogleFonts.inter(
+                                          color: Colors.white.withOpacity(0.4),
+                                          fontSize: 10,
+                                          height: 1.1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                           Flexible(
@@ -770,21 +665,21 @@ class ProgressView extends GetView<ProgressController> {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 _buildLegendRow(
-                                  "${controller.todayConsumedCarbs.value}g",
+                                  "${carbs}g",
                                   "Carbs",
-                                  _carbsColor,
+                                  const Color(0xffFF7A00),
                                 ),
                                 const SizedBox(height: 24),
                                 _buildLegendRow(
-                                  "${controller.todayConsumedProtein.value}g",
+                                  "${protein}g",
                                   "Protein",
-                                  _proteinColor,
+                                  const Color(0xff00A2FF),
                                 ),
                                 const SizedBox(height: 24),
                                 _buildLegendRow(
-                                  "${controller.todayConsumedFat.value}g",
+                                  "${fat}g",
                                   "Fat",
-                                  _fatColor,
+                                  const Color(0xffFF00E5),
                                 ),
                               ],
                             ),
@@ -798,57 +693,6 @@ class ProgressView extends GetView<ProgressController> {
             ),
           ),
         ),
-      );
-    });
-  }
-
-  // Ring split into three 120°-ish arcs (Carbs, Protein, Fat), each filled
-  // according to that macro's own progress toward its target.
-  Widget _buildMacroRing({
-    required int currentCalories,
-    required double proteinProgress,
-    required double carbsProgress,
-    required double fatProgress,
-  }) {
-    return SizedBox(
-      height: 188,
-      width: 188,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          CustomPaint(
-            size: const Size(188, 188),
-            painter: _MacroRingPainter(
-              carbsProgress: carbsProgress,
-              proteinProgress: proteinProgress,
-              fatProgress: fatProgress,
-              carbsColor: _carbsColor,
-              proteinColor: _proteinColor,
-              fatColor: _fatColor,
-            ),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                _formatNumber(currentCalories),
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 36,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              Text(
-                "kcal",
-                style: GoogleFonts.inter(
-                  color: Colors.white.withOpacity(0.4),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -860,40 +704,39 @@ class ProgressView extends GetView<ProgressController> {
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               value,
               style: GoogleFonts.outfit(
                 color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                height: 1.1,
               ),
             ),
             Text(
               label,
               style: GoogleFonts.inter(
-                color: Colors.white.withOpacity(0.45),
+                color: Colors.white.withOpacity(0.4),
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
+                height: 1.1,
               ),
             ),
           ],
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         Container(
-          height: 10,
-          width: 10,
+          width: 4,
+          height: 32,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(2),
           ),
         ),
       ],
     );
-  }
-
-  String _formatNumber(int val) {
-    return val.toString();
   }
 
   // Weekly calorie trend — moved here from the History screen, which now

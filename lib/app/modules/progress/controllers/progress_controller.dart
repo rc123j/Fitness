@@ -18,6 +18,9 @@ class ProgressController extends GetxController {
   // Corner Case: No Active Plan
   final hasActivePlan = false.obs;
 
+  // User Profile State
+  final userName = ''.obs;
+
   // 30-Day Journey State
   final currentDay = 1.obs;
   final daysRemaining = 30.obs;
@@ -140,6 +143,12 @@ class ProgressController extends GetxController {
       if (profileRes.statusCode == 200 && profileRes.data != null) {
         final data = profileRes.data;
         final latestMetrics = data['latest_metrics'];
+
+        final profile = data['profile'];
+        if (profile != null && profile['user'] != null) {
+          final user = profile['user'];
+          userName.value = '${user['first_name'] ?? ''} ${user['last_name'] ?? ''}'.trim();
+        }
 
         if (latestMetrics != null) {
           bmi.value = double.tryParse(latestMetrics['bmi']?.toString() ?? '') ?? 0.0;
