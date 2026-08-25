@@ -249,7 +249,8 @@ class MealView extends GetView<MealController> {
   // 2. WEEKLY CALENDAR
   Widget _buildWeeklyCalendar() {
     return Obx(() {
-      final now = DateTime.now();
+      final rawNow = DateTime.now();
+      final now = DateTime(rawNow.year, rawNow.month, rawNow.day);
       final DateTime anchor = now.add(
         Duration(days: 7 * controller.weekOffset.value),
       );
@@ -627,6 +628,19 @@ class MealView extends GetView<MealController> {
   /// Builds the dynamic list of insight tabs — only sections with real data
   /// for this specific user appear; nothing is shown as filler.
   List<_InsightTab> _buildInsightTabs(BuildContext context) {
+    // Locked days (future or before the plan's activation) have no real
+    // insight data to show — keep only the "Meal" tab, which already
+    // renders the lock screen, instead of leaving Macros/Advice/etc. open.
+    if (controller.isLockedDate) {
+      return [
+        _InsightTab(
+          label: "Meal",
+          icon: Icons.restaurant_menu_rounded,
+          builder: () => _buildMealCardContent(context),
+        ),
+      ];
+    }
+
     final tabs = <_InsightTab>[
       // Always first and selected by default.
       _InsightTab(
@@ -1535,12 +1549,16 @@ class MealView extends GetView<MealController> {
   // 6. CONSOLIDATED MEAL TIMELINE
   Widget _buildMealsTimeline(BuildContext context) {
     return Obx(() {
-      // ── FUTURE DATE: Show lock screen ──────────────────────────────────────
-      if (controller.isFutureDate) {
+      // ── FUTURE OR PRE-ACTIVATION DATE: Show lock screen ─────────────────────
+      if (controller.isLockedDate) {
+        final bool beforeActivation = controller.isBeforeActivation;
         final int days = controller.daysUntilSelected;
-        final String unlockMsg = days == 1
-            ? "Unlocks Tomorrow"
-            : "Unlocks in $days days";
+        final String unlockMsg = beforeActivation
+            ? "Not Available"
+            : (days == 1 ? "Unlocks Tomorrow" : "Unlocks in $days days");
+        final String bodyMsg = beforeActivation
+            ? "Your meal plan hadn't started yet on\nthis day. Check out today's meals\ninstead! 💪"
+            : "Your meal plan for this day hasn't been\nrevealed yet. Focus on today's meals\nand come back when it unlocks! 💪";
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
@@ -1596,7 +1614,7 @@ class MealView extends GetView<MealController> {
               ),
               const SizedBox(height: 10),
               Text(
-                "Your meal plan for this day hasn't been\nrevealed yet. Focus on today's meals\nand come back when it unlocks! 💪",
+                bodyMsg,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   color: Colors.white.withOpacity(0.45),
@@ -1605,34 +1623,35 @@ class MealView extends GetView<MealController> {
                 ),
               ),
               const SizedBox(height: 28),
-              // Day countdown chips
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xffB100FF).withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(
-                        color: const Color(0xffB100FF).withOpacity(0.3),
-                        width: 1,
+              // Day countdown chip — only meaningful for future dates.
+              if (!beforeActivation)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xffB100FF).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: const Color(0xffB100FF).withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        days == 1 ? "🗓  1 day to go" : "🗓  $days days to go",
+                        style: GoogleFonts.inter(
+                          color: const Color(0xffB100FF),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      days == 1 ? "🗓  1 day to go" : "🗓  $days days to go",
-                      style: GoogleFonts.inter(
-                        color: const Color(0xffB100FF),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
             ],
           ),
         );

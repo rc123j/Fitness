@@ -53,13 +53,13 @@ class MealController extends GetxController {
 
   Map<String, dynamic>? get priorityNutrients =>
       aiInsights['priority_nutrients'] is Map
-          ? Map<String, dynamic>.from(aiInsights['priority_nutrients'])
-          : null;
+      ? Map<String, dynamic>.from(aiInsights['priority_nutrients'])
+      : null;
 
   Map<String, dynamic>? get suggestedProteinPowder =>
       aiInsights['suggested_protein_powder'] is Map
-          ? Map<String, dynamic>.from(aiInsights['suggested_protein_powder'])
-          : null;
+      ? Map<String, dynamic>.from(aiInsights['suggested_protein_powder'])
+      : null;
 
   List<Map<String, dynamic>> get suggestedFiberFoods =>
       (aiInsights['suggested_fiber_foods'] as List?)
@@ -70,26 +70,30 @@ class MealController extends GetxController {
 
   Map<String, dynamic>? get lifeStageGuidance =>
       aiInsights['life_stage_guidance'] is Map
-          ? Map<String, dynamic>.from(aiInsights['life_stage_guidance'])
-          : null;
+      ? Map<String, dynamic>.from(aiInsights['life_stage_guidance'])
+      : null;
 
-  Map<String, dynamic>? get macroAchieved =>
-      aiInsights['macro_achieved'] is Map
-          ? Map<String, dynamic>.from(aiInsights['macro_achieved'])
-          : null;
+  Map<String, dynamic>? get macroAchieved => aiInsights['macro_achieved'] is Map
+      ? Map<String, dynamic>.from(aiInsights['macro_achieved'])
+      : null;
 
   String get accuracyNote => aiInsights['accuracy_note']?.toString() ?? '';
 
   Map<String, dynamic>? get anthropometrics =>
       aiInsights['anthropometrics'] is Map
-          ? Map<String, dynamic>.from(aiInsights['anthropometrics'])
-          : null;
+      ? Map<String, dynamic>.from(aiInsights['anthropometrics'])
+      : null;
 
   // Track selected option (1, 2, 3, 4) for each meal slot (key is dietPlanMealId)
   final selectedOptions = <int, int>{}.obs;
 
   // Track current day in the 30-day rotation
   final currentDay = 1.obs;
+
+  // Date (day-only) the member's current diet plan was activated on.
+  // Null until the first successful fetch. Used to lock out dates before
+  // the plan existed, the same way future dates are locked.
+  DateTime? _activatedAtDate;
 
   // Set of completed meal_ids (1=Breakfast, etc.) for today
   final completedMealIds = <int>{}.obs;
@@ -129,9 +133,20 @@ class MealController extends GetxController {
       if (planRes.data != null) {
         currentDay.value = planRes.data['current_day'] ?? 1;
 
+        final activatedAtStr = planRes.data['activated_at']?.toString();
+        final parsedActivatedAt = activatedAtStr != null
+            ? DateTime.tryParse(activatedAtStr)
+            : null;
+        if (parsedActivatedAt != null) {
+          _activatedAtDate = DateTime(
+            parsedActivatedAt.year,
+            parsedActivatedAt.month,
+            parsedActivatedAt.day,
+          );
+        }
+
         final planData = planRes.data['diet_plan'];
         if (planData != null) {
-          
           if (planData['ai_insights_json'] != null) {
             try {
               final parsed = planData['ai_insights_json'] is String
@@ -397,31 +412,46 @@ class MealController extends GetxController {
     return "${target.day} ${months[target.month - 1]}";
   }
 
-  /// Returns true when the currently selected date is strictly in the future (after today).
-  bool get isFutureDate {
-    if (selectedQueryDate.value.isEmpty) return false;
+  // Today's date with the time-of-day zeroed out, so it can be safely
+  // compared against other day-only dates.
+  DateTime get _todayDateOnly {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  // Whichever date is currently selected (day-only), falling back to today
+  // when nothing has been explicitly picked.
+  DateTime get _selectedDateOnly {
+    if (selectedQueryDate.value.isEmpty) return _todayDateOnly;
     final parts = selectedQueryDate.value.split('-');
-    if (parts.length != 3) return false;
+    if (parts.length != 3) return _todayDateOnly;
     final y = int.tryParse(parts[0]);
     final m = int.tryParse(parts[1]);
     final d = int.tryParse(parts[2]);
-    if (y == null || m == null || d == null) return false;
-    final selected = DateTime(y, m, d);
-    return selected.isAfter(today);
+    if (y == null || m == null || d == null) return _todayDateOnly;
+    return DateTime(y, m, d);
   }
+
+  /// Returns true when the currently selected date is strictly in the future (after today).
+  bool get isFutureDate => _selectedDateOnly.isAfter(_todayDateOnly);
+
+  /// Returns true when the currently selected date is before the member's
+  /// diet plan was activated (e.g. viewing "yesterday" on the member's
+  /// very first day) — there was never a real plan for that day.
+  bool get isBeforeActivation {
+    if (_activatedAtDate == null) return false;
+    return _selectedDateOnly.isBefore(_activatedAtDate!);
+  }
+
+  /// True when the selected day's meal plan should be hidden behind the
+  /// lock screen — either it hasn't been revealed yet (future) or the plan
+  /// didn't exist yet on that day (before activation).
+  bool get isLockedDate => isFutureDate || isBeforeActivation;
 
   /// How many days until the selected future date (0 if today or past).
   int get daysUntilSelected {
     if (!isFutureDate) return 0;
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final parts = selectedQueryDate.value.split('-');
-    final y = int.tryParse(parts[0])!;
-    final m = int.tryParse(parts[1])!;
-    final d = int.tryParse(parts[2])!;
-    return DateTime(y, m, d).difference(today).inDays;
+    return _selectedDateOnly.difference(_todayDateOnly).inDays;
   }
 
   Future<void> addWater(double amountLiters) async {
@@ -543,8 +573,7 @@ class MealController extends GetxController {
 
       calorieHistoryList.value = tempHistory;
       historyAverageCalories.value = (totalCal / activeDays).round();
-      historyAdherenceRate.value =
-          ((daysAdherent / activeDays) * 100).round();
+      historyAdherenceRate.value = ((daysAdherent / activeDays) * 100).round();
     } catch (_) {}
   }
 
