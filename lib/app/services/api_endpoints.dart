@@ -6,7 +6,7 @@ class ApiEndpoints {
 
   static const String baseUrl = isProduction
       ? 'https://api.fitwithdeveloper.com'
-      : 'http://192.168.1.7:4017';
+      : 'http://192.168.1.6:4017';
 
   static const String login = '/api/auth/login';
   static const String register = '/api/auth/register';
@@ -32,4 +32,5 @@ class ApiEndpoints {
   static const String logSteps = '/api/progress/steps';
   static const String logWeight = '/api/progress/weight';
   static const String calorieHistory = '/api/diet-plans/logs/history';
+  static const String progressPhotos = '/api/progress/photos';
 }

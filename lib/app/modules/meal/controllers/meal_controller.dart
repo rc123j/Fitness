@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
+import '../../home/controllers/home_controller.dart';
+import '../../progress/controllers/progress_controller.dart';
 
 class MealController extends GetxController {
   final _apiClient = Get.find<ApiClient>();
@@ -35,8 +37,53 @@ class MealController extends GetxController {
   // Diet Plan Meals Timeline data
   final mealTimeline = <Map<String, dynamic>>[].obs;
 
-  // AI Insights
+  // AI Insights (parsed from the diet plan's ai_insights_json — see fetchMealData)
   final aiInsights = <String, dynamic>{}.obs;
+  final selectedInsightTab = 0.obs;
+
+  List<String> get adviceList =>
+      (aiInsights['advice'] as List?)?.map((e) => e.toString()).toList() ?? [];
+
+  List<Map<String, dynamic>> get diseaseGuidance =>
+      (aiInsights['disease_guidance'] as List?)
+          ?.whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList() ??
+      [];
+
+  Map<String, dynamic>? get priorityNutrients =>
+      aiInsights['priority_nutrients'] is Map
+          ? Map<String, dynamic>.from(aiInsights['priority_nutrients'])
+          : null;
+
+  Map<String, dynamic>? get suggestedProteinPowder =>
+      aiInsights['suggested_protein_powder'] is Map
+          ? Map<String, dynamic>.from(aiInsights['suggested_protein_powder'])
+          : null;
+
+  List<Map<String, dynamic>> get suggestedFiberFoods =>
+      (aiInsights['suggested_fiber_foods'] as List?)
+          ?.whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList() ??
+      [];
+
+  Map<String, dynamic>? get lifeStageGuidance =>
+      aiInsights['life_stage_guidance'] is Map
+          ? Map<String, dynamic>.from(aiInsights['life_stage_guidance'])
+          : null;
+
+  Map<String, dynamic>? get macroAchieved =>
+      aiInsights['macro_achieved'] is Map
+          ? Map<String, dynamic>.from(aiInsights['macro_achieved'])
+          : null;
+
+  String get accuracyNote => aiInsights['accuracy_note']?.toString() ?? '';
+
+  Map<String, dynamic>? get anthropometrics =>
+      aiInsights['anthropometrics'] is Map
+          ? Map<String, dynamic>.from(aiInsights['anthropometrics'])
+          : null;
 
   // Track selected option (1, 2, 3, 4) for each meal slot (key is dietPlanMealId)
   final selectedOptions = <int, int>{}.obs;
@@ -97,6 +144,9 @@ class MealController extends GetxController {
           } else {
             aiInsights.clear();
           }
+          // Avoid landing on a stale tab index if the available sections
+          // differ for this day (e.g. fewer tabs shown).
+          selectedInsightTab.value = 0;
 
           final metrics = planData['metric_snapshot'];
 
@@ -410,6 +460,7 @@ class MealController extends GetxController {
       completedMealIds.add(mealId);
       await fetchMealData(silent: true); // silent refresh — no spinner
       await fetchCalorieHistory();
+      _refreshDependentScreens();
       return true;
     } catch (e) {
       return false;
@@ -431,9 +482,25 @@ class MealController extends GetxController {
       completedMealIds.remove(mealId);
       await fetchMealData(silent: true); // silent refresh — no spinner
       await fetchCalorieHistory();
+      _refreshDependentScreens();
       return true;
     } catch (e) {
       return false;
+    }
+  }
+
+  /// Home and Progress each show their own summary of today's meals, but
+  /// both are kept alive in the background (IndexedStack) and don't know a
+  /// meal was just marked complete/incomplete here. Push a silent refresh
+  /// to them directly so they're already correct the moment the user
+  /// switches tabs, instead of needing a restart or waiting on their own
+  /// tab-switch listener to catch up.
+  void _refreshDependentScreens() {
+    if (Get.isRegistered<HomeController>()) {
+      Get.find<HomeController>().fetchProfile(silent: true);
+    }
+    if (Get.isRegistered<ProgressController>()) {
+      Get.find<ProgressController>().fetchProgressData();
     }
   }
 

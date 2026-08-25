@@ -3,9 +3,14 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
+import '../../main_navigation/controllers/main_navigation_controller.dart';
+
+// Index of the Home tab inside MainNavigationView's IndexedStack.
+const int _kHomeTabIndex = 0;
 
 class HomeController extends GetxController {
   final _apiClient = Get.find<ApiClient>();
+  Worker? _tabWorker;
 
   final isLoading = true.obs;
   final userName = ''.obs;
@@ -59,11 +64,33 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     fetchProfile();
+
+    // Home is kept alive inside an IndexedStack, so it never rebuilds/
+    // refetches on its own when the user switches back to it. Re-fetch
+    // (silently, no shimmer) whenever it becomes the active tab so changes
+    // made elsewhere (e.g. marking a meal complete on the Meal tab) show up
+    // without needing an app restart.
+    if (Get.isRegistered<MainNavigationController>()) {
+      _tabWorker = ever<int>(
+        Get.find<MainNavigationController>().selectedIndex,
+        (index) {
+          if (index == _kHomeTabIndex) fetchProfile(silent: true);
+        },
+      );
+    }
   }
 
-  Future<void> fetchProfile() async {
-    isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 2)); // Artificial delay for shimmer
+  @override
+  void onClose() {
+    _tabWorker?.dispose();
+    super.onClose();
+  }
+
+  Future<void> fetchProfile({bool silent = false}) async {
+    if (!silent) {
+      isLoading.value = true;
+      await Future.delayed(const Duration(seconds: 2)); // Artificial delay for shimmer
+    }
 
     try {
       // 1. Fetch member profile

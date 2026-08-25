@@ -131,294 +131,302 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
             SafeArea(
               top: false,
               bottom: false,
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  children: [
-                    /// 1. TOP HEADER SECTION (Location/Profile)
-                    Obx(() {
-                      final isMeal = controller.activeTab.value == 0;
-                      final headerBg = isMeal
-                          ? const Color(0xff3A5224).withOpacity(0.20)
-                          : Colors.transparent;
+              child: RefreshIndicator(
+                color: const Color(0xffB100FF),
+                backgroundColor: const Color(0xff121220),
+                onRefresh: () => controller.fetchProfile(),
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  child: Column(
+                    children: [
+                      /// 1. TOP HEADER SECTION (Location/Profile)
+                      Obx(() {
+                        final isMeal = controller.activeTab.value == 0;
+                        final headerBg = isMeal
+                            ? const Color(0xff3A5224).withOpacity(0.20)
+                            : Colors.transparent;
 
-                      // Dynamically update system status bar style to match the tab theme
-                      SystemChrome.setSystemUIOverlayStyle(
-                        SystemUiOverlayStyle(
-                          statusBarColor: headerBg,
-                          statusBarIconBrightness: Brightness.light,
-                          statusBarBrightness: Brightness.dark, // iOS
-                          systemNavigationBarColor: const Color(0xff06010F),
-                          systemNavigationBarIconBrightness: Brightness.light,
-                        ),
-                      );
-
-                      return AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        color: headerBg,
-                        padding: EdgeInsets.only(
-                          left: 18,
-                          right: 18,
-                          top: topPadding + 14,
-                          bottom: 16,
-                        ),
-                        child: buildTopHeader(),
-                      );
-                    }),
-
-                    /// THE SWIGGY STYLE TOP TABS
-                    const SwiggyTabsHeader(),
-
-                    /// THE DYNAMIC CONTENT AREA
-                    Obx(() {
-                      final isMeal = controller.activeTab.value == 0;
-                      final bgColor = isMeal
-                          ? const Color(0xff243516)
-                          : Colors.transparent;
-
-                      if (!isMeal) {
-                        return Container(
-                          width: double.infinity,
-                          alignment: Alignment.topCenter,
-                          padding: const EdgeInsets.only(
-                            top: 40,
-                            left: 32,
-                            right: 32,
-                            bottom: 40,
-                          ),
-                          color: Colors.transparent,
-                          child: Image.asset(
-                            'assets/home/coming_soon.png',
-                            height: 630,
-                            fit: BoxFit.contain,
+                        // Dynamically update system status bar style to match the tab theme
+                        SystemChrome.setSystemUIOverlayStyle(
+                          SystemUiOverlayStyle(
+                            statusBarColor: headerBg,
+                            statusBarIconBrightness: Brightness.light,
+                            statusBarBrightness: Brightness.dark, // iOS
+                            systemNavigationBarColor: const Color(0xff06010F),
+                            systemNavigationBarIconBrightness: Brightness.light,
                           ),
                         );
-                      }
 
-                      return Column(
-                        children: [
-                          // Colored Section (Bleeds from tabs)
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            decoration: BoxDecoration(
-                              gradient: isMeal
-                                  ? const LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Color(
-                                          0xff3A5224,
-                                        ), // Lighter green at top
-                                        Color(
-                                          0xff1C2A11,
-                                        ), // Darker green at bottom
-                                      ],
-                                    )
-                                  : null,
-                              color: isMeal ? null : bgColor,
-                              borderRadius: const BorderRadius.only(
-                                bottomLeft: Radius.circular(24),
-                                bottomRight: Radius.circular(24),
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          color: headerBg,
+                          padding: EdgeInsets.only(
+                            left: 18,
+                            right: 18,
+                            top: topPadding + 14,
+                            bottom: 16,
+                          ),
+                          child: buildTopHeader(),
+                        );
+                      }),
+
+                      /// THE SWIGGY STYLE TOP TABS
+                      const SwiggyTabsHeader(),
+
+                      /// THE DYNAMIC CONTENT AREA
+                      Obx(() {
+                        final isMeal = controller.activeTab.value == 0;
+                        final bgColor = isMeal
+                            ? const Color(0xff243516)
+                            : Colors.transparent;
+
+                        if (!isMeal) {
+                          return Container(
+                            width: double.infinity,
+                            alignment: Alignment.topCenter,
+                            padding: const EdgeInsets.only(
+                              top: 40,
+                              left: 32,
+                              right: 32,
+                              bottom: 40,
+                            ),
+                            color: Colors.transparent,
+                            child: Image.asset(
+                              'assets/home/coming_soon.png',
+                              height: 630,
+                              fit: BoxFit.contain,
+                            ),
+                          );
+                        }
+
+                        return Column(
+                          children: [
+                            // Colored Section (Bleeds from tabs)
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              decoration: BoxDecoration(
+                                gradient: isMeal
+                                    ? const LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Color(
+                                            0xff3A5224,
+                                          ), // Lighter green at top
+                                          Color(
+                                            0xff1C2A11,
+                                          ), // Darker green at bottom
+                                        ],
+                                      )
+                                    : null,
+                                color: isMeal ? null : bgColor,
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(24),
+                                  bottomRight: Radius.circular(24),
+                                ),
+                              ),
+                              padding: const EdgeInsets.only(
+                                left: 18,
+                                right: 18,
+                                top: 16,
+                                bottom: 18,
+                              ),
+                              child: Column(
+                                children: [
+                                  if (isMeal) ...[
+                                    // When sticky bar is visible, hide the inline
+                                    // search bar so it doesn't show twice.
+                                    AnimatedOpacity(
+                                      duration: const Duration(
+                                        milliseconds: 250,
+                                      ),
+                                      opacity: _showStickySearch ? 0.0 : 1.0,
+                                      child: const PremiumSearchBar(),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Image.asset(
+                                        'assets/home/advertisemt_home.png',
+                                        width: double.infinity,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    SwiggyPromoCards(),
+                                  ] else
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(24),
+                                      child: Image.asset(
+                                        'assets/home/home1.png',
+                                        width: double.infinity,
+                                        height: 140,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
-                            padding: const EdgeInsets.only(
-                              left: 18,
-                              right: 18,
-                              top: 16,
-                              bottom: 18,
-                            ),
-                            child: Column(
-                              children: [
-                                if (isMeal) ...[
-                                  // When sticky bar is visible, hide the inline
-                                  // search bar so it doesn't show twice.
-                                  AnimatedOpacity(
-                                    duration: const Duration(milliseconds: 250),
-                                    opacity: _showStickySearch ? 0.0 : 1.0,
-                                    child: const PremiumSearchBar(),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(16),
-                                    child: Image.asset(
-                                      'assets/home/advertisemt_home.png',
-                                      width: double.infinity,
-                                      fit: BoxFit.contain,
+
+                            // Dark Section (Rest of the content)
+                            Container(
+                              decoration: const BoxDecoration(
+                                color: Color(0xff06010F),
+                              ),
+                              padding: const EdgeInsets.only(
+                                top: 24,
+                                bottom: 100,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 18,
                                     ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  SwiggyPromoCards(),
-                                ] else
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(24),
-                                    child: Image.asset(
-                                      'assets/home/home1.png',
-                                      width: double.infinity,
-                                      height: 140,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const SizedBox(height: 8),
 
-                          // Dark Section (Rest of the content)
-                          Container(
-                            decoration: const BoxDecoration(
-                              color: Color(0xff06010F),
-                            ),
-                            padding: const EdgeInsets.only(
-                              top: 24,
-                              bottom: 100,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 18,
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const SizedBox(height: 8),
-
-                                      /// 2. ACTIVE PLAN CARD (Glassmorphic)
-                                      Obx(
-                                        () => AppShimmer(
-                                          enabled: controller.isLoading.value,
-                                          child: buildActivePlanCard(),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                const SizedBox(height: 28),
-
-                                /// 4. TODAY'S MEAL PLAN — full-width blue gradient section
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.only(
-                                    top: 32,
-                                    bottom: 28,
-                                  ),
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Color(0xff06010F), // match background
-                                        Color(0xff09287B), // rich deep blue
-                                        Color(
-                                          0xff0E44B5,
-                                        ), // vibrant royal blue center glow
-                                        Color(
-                                          0xff081E57,
-                                        ), // dark blue/navy transition
-                                        Color(0xff06010F), // match background
-                                      ],
-                                      stops: [0.0, 0.25, 0.55, 0.85, 1.0],
-                                    ),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 18,
-                                        ),
-                                        child: GestureDetector(
-                                          onTap: () =>
-                                              Get.toNamed('/meal-plan'),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                "Today's\nMeal Plan",
-                                                style: GoogleFonts.outfit(
-                                                  color: Colors.white,
-                                                  fontSize: 28,
-                                                  fontWeight: FontWeight.bold,
-                                                  height: 1.15,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                "View Full Plan →",
-                                                style: GoogleFonts.inter(
-                                                  color: Colors.white
-                                                      .withOpacity(0.6),
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ],
+                                        /// 2. ACTIVE PLAN CARD (Glassmorphic)
+                                        Obx(
+                                          () => AppShimmer(
+                                            enabled: controller.isLoading.value,
+                                            child: buildActivePlanCard(),
                                           ),
                                         ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 28),
+
+                                  /// 4. TODAY'S MEAL PLAN — full-width blue gradient section
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.only(
+                                      top: 32,
+                                      bottom: 28,
+                                    ),
+                                    decoration: const BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Color(0xff06010F), // match background
+                                          Color(0xff09287B), // rich deep blue
+                                          Color(
+                                            0xff0E44B5,
+                                          ), // vibrant royal blue center glow
+                                          Color(
+                                            0xff081E57,
+                                          ), // dark blue/navy transition
+                                          Color(0xff06010F), // match background
+                                        ],
+                                        stops: [0.0, 0.25, 0.55, 0.85, 1.0],
                                       ),
-                                      const SizedBox(height: 16),
-                                      Obx(
-                                        () => AppShimmer(
-                                          enabled: controller.isLoading.value,
-                                          child: buildMealPlanTimeline(),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 18,
+                                          ),
+                                          child: GestureDetector(
+                                            onTap: () =>
+                                                Get.toNamed('/meal-plan'),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  "Today's\nMeal Plan",
+                                                  style: GoogleFonts.outfit(
+                                                    color: Colors.white,
+                                                    fontSize: 28,
+                                                    fontWeight: FontWeight.bold,
+                                                    height: 1.15,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  "View Full Plan →",
+                                                  style: GoogleFonts.inter(
+                                                    color: Colors.white
+                                                        .withOpacity(0.6),
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(height: 16),
+                                        Obx(
+                                          () => AppShimmer(
+                                            enabled: controller.isLoading.value,
+                                            child: buildMealPlanTimeline(),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
 
-                                const SizedBox(height: 28),
+                                  const SizedBox(height: 28),
 
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 18,
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      /// PROMO BANNERS
-                                      buildPromoBanners(),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 18,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        /// PROMO BANNERS
+                                        buildPromoBanners(),
 
-                                      const SizedBox(height: 24),
+                                        const SizedBox(height: 24),
 
-                                      /// OFFER CARDS
-                                    ], // close Column children
-                                  ), // close Column
-                                ), // close Padding
-                                // Offers Section - full width, no extra padding
-                                buildOfferCards(context),
+                                        /// OFFER CARDS
+                                      ], // close Column children
+                                    ), // close Column
+                                  ), // close Padding
+                                  // Offers Section - full width, no extra padding
+                                  buildOfferCards(context),
 
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 18,
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // const SizedBox(height: 24),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 18,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // const SizedBox(height: 24),
 
-                                      /// TODAY'S MEAL PROGRESS CARD
-                                      // buildMealProgressCard(),
+                                        /// TODAY'S MEAL PROGRESS CARD
+                                        // buildMealProgressCard(),
 
-                                      /// 5. AI COACH & HYDRATION GOAL (ROW)
-                                      // Row(
-                                      //   crossAxisAlignment: CrossAxisAlignment.start,
-                                      //   children: [
-                                      //     Expanded(flex: 11, child: buildAICoachCard()),
-                                      //     const SizedBox(width: 12),
-                                      //     Expanded(flex: 8, child: buildHydrationGoalCard()),
-                                      //   ],
-                                      // ),`
-                                      // const SizedBox(height: 28),
+                                        /// 5. AI COACH & HYDRATION GOAL (ROW)
+                                        // Row(
+                                        //   crossAxisAlignment: CrossAxisAlignment.start,
+                                        //   children: [
+                                        //     Expanded(flex: 11, child: buildAICoachCard()),
+                                        //     const SizedBox(width: 12),
+                                        //     Expanded(flex: 8, child: buildHydrationGoalCard()),
+                                        //   ],
+                                        // ),`
+                                        // const SizedBox(height: 28),
 
-                                      /*
+                                        /*
                                   Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -431,26 +439,27 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                                     ],
                                   ),
                                   */
-                                      const SizedBox(height: 28),
+                                        const SizedBox(height: 28),
 
-                                      /// 7. QUICK ACTIONS Grid
-                                      /*
+                                        /// 7. QUICK ACTIONS Grid
+                                        /*
                                   sectionTitle("QUICK ACTIONS", ""),
 
                                   const SizedBox(height: 16),
 
                                   buildQuickActionsGrid(),
                                   */
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      );
-                    }),
-                  ],
+                          ],
+                        );
+                      }),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -3712,7 +3721,11 @@ class _PremiumSearchBarState extends State<PremiumSearchBar> {
                 _textController.clear();
                 controller.mealSearchQuery.value = '';
               },
-              child: const Icon(Icons.close_rounded, color: Colors.black45, size: 20),
+              child: const Icon(
+                Icons.close_rounded,
+                color: Colors.black45,
+                size: 20,
+              ),
             );
           }),
         ],

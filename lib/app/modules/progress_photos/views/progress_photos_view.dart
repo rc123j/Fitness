@@ -28,24 +28,32 @@ class ProgressPhotosView extends GetView<ProgressController> {
               children: [
                 _buildHeader(),
                 Expanded(
-                  child: Obx(
-                    () => GridView.builder(
-                      padding: const EdgeInsets.fromLTRB(18, 8, 18, 32),
-                      physics: const BouncingScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                        childAspectRatio: 0.78,
+                  child: RefreshIndicator(
+                    color: const Color(0xffB100FF),
+                    backgroundColor: const Color(0xff121220),
+                    onRefresh: controller.fetchProgressData,
+                    child: Obx(
+                      () => GridView.builder(
+                        padding: const EdgeInsets.fromLTRB(18, 8, 18, 32),
+                        physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics(),
+                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                              childAspectRatio: 0.78,
+                            ),
+                        itemCount: controller.transformationPhotos.length,
+                        itemBuilder: (context, index) {
+                          final key = controller.transformationPhotos.keys
+                              .elementAt(index);
+                          final url =
+                              controller.transformationPhotos[key] ?? '';
+                          return _buildPhotoCard(key, url);
+                        },
                       ),
-                      itemCount: controller.transformationPhotos.length,
-                      itemBuilder: (context, index) {
-                        final key =
-                            controller.transformationPhotos.keys.elementAt(index);
-                        final url = controller.transformationPhotos[key] ?? '';
-                        return _buildPhotoCard(key, url);
-                      },
                     ),
                   ),
                 ),
@@ -116,10 +124,7 @@ class ProgressPhotosView extends GetView<ProgressController> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              const Color(0xff1B1430),
-              const Color(0xff0D0818),
-            ],
+            colors: [const Color(0xff1B1430), const Color(0xff0D0818)],
           ),
           border: Border.all(
             color: url.isNotEmpty
@@ -129,9 +134,7 @@ class ProgressPhotosView extends GetView<ProgressController> {
           ),
           boxShadow: [
             BoxShadow(
-              color: (url.isNotEmpty
-                      ? const Color(0xffB100FF)
-                      : Colors.black)
+              color: (url.isNotEmpty ? const Color(0xffB100FF) : Colors.black)
                   .withOpacity(url.isNotEmpty ? 0.18 : 0.25),
               blurRadius: 16,
               offset: const Offset(0, 8),
@@ -190,7 +193,10 @@ class ProgressPhotosView extends GetView<ProgressController> {
               left: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 8,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(23),

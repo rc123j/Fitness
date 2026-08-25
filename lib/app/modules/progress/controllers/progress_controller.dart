@@ -56,10 +56,12 @@ class ProgressController extends GetxController {
   final todayTargetCarbs = 0.obs;
   final todayTargetFat = 0.obs;
 
-  // Weight Tracker
-  final isLoggingWeight = false.obs;
+  // Weight Tracker — ESTIMATED, not measured. No manual weigh-in input;
+  // derived from the calorie surplus/deficit of meals actually marked
+  // complete vs. TDEE (~7700 kcal ≈ 1 kg), since there is no other
+  // automatic source of real body-weight data.
   final currentWeight = 0.0.obs;
-  final weightDifferenceKg = 0.0.obs; // negative = lost, positive = gained
+  final weightDifferenceKg = 0.0.obs; // positive = estimated loss, negative = estimated gain
   final weightHistory = <Map<String, dynamic>>[].obs;
 
   @override
@@ -106,25 +108,21 @@ class ProgressController extends GetxController {
           targetCalories.value =
               double.tryParse(planData['target_calories']?.toString() ?? '')?.toInt() ?? 2000;
 
-          // Calculate days remaining based on activation date
-          final activatedAtStr = activationData['activated_at'];
-          final expiresAtStr = activationData['expires_at'];
+          // Use the backend's own current_day/days_remaining directly —
+          // it computes these on calendar-date boundaries (activation date
+          // vs today's date, both with time-of-day zeroed out), the same
+          // way HomeController already does. Recomputing this client-side
+          // from raw DateTime.now().difference(...).inDays requires a full
+          // 24 hours to have elapsed since the activation *time*, not just
+          // a calendar-date rollover — that under-counts the day whenever
+          // "now" is earlier in the day than the original activation time,
+          // which is why this used to get stuck showing 30/30 days left.
+          currentDay.value = (activationData['current_day'] as num?)?.toInt().clamp(1, 30) ?? 1;
+          daysRemaining.value = (activationData['days_remaining'] as num?)?.toInt().clamp(0, 30) ?? 30;
 
-          if (activatedAtStr != null && expiresAtStr != null) {
-            final activatedDate = DateTime.parse(activatedAtStr);
-            final expiresDate = DateTime.parse(expiresAtStr);
-            final now = DateTime.now();
-
-            final totalDays = expiresDate.difference(activatedDate).inDays;
-            final daysPassed = now.difference(activatedDate).inDays;
-
-            currentDay.value = (daysPassed + 1).clamp(1, 30);
-            daysRemaining.value = (totalDays - daysPassed).clamp(0, 30);
-
-            // Corner Case: Day 31 Expiration
-            if (daysRemaining.value == 0 && currentDay.value >= 30) {
-              _showPlanExpiredDialog();
-            }
+          // Corner Case: Day 31 Expiration
+          if (daysRemaining.value == 0 && currentDay.value >= 30) {
+            _showPlanExpiredDialog();
           }
 
           // 3. Setup Adherence Data by hitting real backend
@@ -151,9 +149,12 @@ class ProgressController extends GetxController {
         }
       }
 
-      // 3. Weight tracker (starting/current weight + trend), independent of
-      // diet-plan activation — a member can log weigh-ins regardless.
-      await _fetchWeightData();
+      // 3. Weight tracker: estimated trend from calorie deficit/surplus.
+      await _fetchEstimatedWeightTrend();
+
+      // 4. Transformation gallery photos — independent of diet-plan
+      // activation, persisted server-side so they survive app restarts.
+      await _fetchTransformationPhotos();
     } catch (e) {
       debugPrint("Error fetching progress: $e");
       // Fallback state on error
@@ -173,16 +174,20 @@ class ProgressController extends GetxController {
         int daysAdherent = 0;
         int streakCounter = 0;
         bool streakBroken = false;
-        
+
         // We only evaluate streak/compliance for days they were actually enrolled.
         int activeDaysInHistory = currentDay.value.clamp(1, 7);
         int evaluatedDays = 0;
+        bool skippedToday = false;
+
+        final todayStr = DateTime.now().toIso8601String().split('T')[0];
 
         // The API returns the last 7 days. We parse it to calculate compliance and streak.
         for (var day in rawHistory.reversed) {
           final double cal = double.tryParse(day['calories']?.toString() ?? '0.0') ?? 0.0;
           final String dateStr = day['date']?.toString() ?? '';
-          
+          final bool isToday = dateStr == todayStr;
+
           String shortDay = 'Day';
           if (dateStr.isNotEmpty) {
             try {
@@ -200,23 +205,37 @@ class ProgressController extends GetxController {
 
           // Only evaluate adherence for days they were actually active
           if (evaluatedDays < activeDaysInHistory) {
-            final double minimumRequiredCalories = targetCalories.value - 300;
-            final double maximumAllowedCalories = targetCalories.value + 100;
-
-            if (cal >= minimumRequiredCalories && cal <= maximumAllowedCalories) {
-              daysAdherent++;
-              if (!streakBroken) streakCounter++;
+            // Today hasn't necessarily finished yet — if nothing's been
+            // logged so far, don't let it wipe out a real streak from
+            // earlier days. It'll be evaluated normally once something is
+            // eaten, or count as a miss in tomorrow's history once the day
+            // has actually passed with nothing logged.
+            if (isToday && cal == 0) {
+              skippedToday = true;
             } else {
-              // They fell short or overshot their target. Streak breaks!
-              streakBroken = true;
+              final double minimumRequiredCalories = targetCalories.value - 300;
+              final double maximumAllowedCalories = targetCalories.value + 100;
+
+              if (cal >= minimumRequiredCalories && cal <= maximumAllowedCalories) {
+                daysAdherent++;
+                if (!streakBroken) streakCounter++;
+              } else {
+                // They fell short or overshot their target. Streak breaks!
+                streakBroken = true;
+              }
+              evaluatedDays++;
             }
-            evaluatedDays++;
           }
         }
-        
+
         weeklyAdherenceData.value = tempHistory;
         currentStreak.value = streakCounter;
-        dietCompliance.value = activeDaysInHistory > 0 ? ((daysAdherent / activeDaysInHistory) * 100).round() : 0;
+        final complianceDenominator = skippedToday
+            ? (activeDaysInHistory - 1)
+            : activeDaysInHistory;
+        dietCompliance.value = complianceDenominator > 0
+            ? ((daysAdherent / complianceDenominator) * 100).round()
+            : 0;
       }
     } catch (e) {
       debugPrint("Error fetching real history: $e");
@@ -245,71 +264,91 @@ class ProgressController extends GetxController {
     }
   }
 
-  Future<void> _fetchWeightData() async {
+  /// Estimates a weight trend from calorie deficit/surplus vs. TDEE, using
+  /// the ~7700 kcal ≈ 1 kg rule — the only automatic (no manual weigh-in)
+  /// way to reflect progress from meals actually marked complete.
+  Future<void> _fetchEstimatedWeightTrend() async {
     try {
-      final res = await _apiClient.get(ApiEndpoints.progressLog);
-      if (res.statusCode == 200 && res.data != null) {
-        final data = res.data;
-
+      // Starting weight still comes from the member's earliest recorded
+      // metric (captured at onboarding/plan activation).
+      final progRes = await _apiClient.get(ApiEndpoints.progressLog);
+      if (progRes.statusCode == 200 && progRes.data != null) {
         startingWeight.value =
-            double.tryParse(data['starting_weight']?.toString() ?? '') ??
+            double.tryParse(progRes.data['starting_weight']?.toString() ?? '') ??
             startingWeight.value;
-        currentWeight.value =
-            double.tryParse(data['current_weight']?.toString() ?? '') ?? 0.0;
-        weightDifferenceKg.value =
-            double.tryParse(data['weight_difference_kg']?.toString() ?? '') ?? 0.0;
+      }
 
-        final List rawLogs = data['logs'] ?? [];
-        final tempHistory = <Map<String, dynamic>>[];
-        for (var log in rawLogs) {
-          final w = double.tryParse(log['weight_kg']?.toString() ?? '') ?? 0.0;
-          final dateStr = log['logged_date']?.toString() ?? '';
-          if (w > 0) {
-            tempHistory.add({'date': dateStr, 'weight': w});
-          }
-        }
-        // Keep only the most recent entries so the trend line stays readable.
-        weightHistory.value = tempHistory.length > 10
-            ? tempHistory.sublist(tempHistory.length - 10)
-            : tempHistory;
+      if (startingWeight.value <= 0) return;
+
+      // Request exactly as many days as the plan has actually been active
+      // (capped at 30), so every entry returned is a real day — no
+      // zero-padded pre-activation days inflating a fake deficit.
+      final days = currentDay.value.clamp(1, 30);
+      final historyRes = await _apiClient.get(
+        '${ApiEndpoints.calorieHistory}?days=$days',
+      );
+
+      if (historyRes.statusCode != 200 || historyRes.data == null) return;
+
+      final List rawHistory = historyRes.data['history'] ?? [];
+      final double tdeeValue = tdee.value > 0
+          ? tdee.value.toDouble()
+          : targetCalories.value.toDouble();
+
+      double cumulativeDeficit = 0.0;
+      final tempHistory = <Map<String, dynamic>>[];
+      for (var day in rawHistory) {
+        final cal = double.tryParse(day['calories']?.toString() ?? '0.0') ?? 0.0;
+        cumulativeDeficit += (tdeeValue - cal);
+        final estimatedWeight = startingWeight.value - (cumulativeDeficit / 7700);
+        final dateStr = day['date']?.toString() ?? '';
+        tempHistory.add({'date': dateStr, 'weight': estimatedWeight});
+      }
+
+      weightHistory.value = tempHistory;
+      if (tempHistory.isNotEmpty) {
+        currentWeight.value = tempHistory.last['weight'] as double;
+        weightDifferenceKg.value = startingWeight.value - currentWeight.value;
+      } else {
+        currentWeight.value = startingWeight.value;
+        weightDifferenceKg.value = 0.0;
       }
     } catch (e) {
-      debugPrint("Error fetching weight history: $e");
+      debugPrint("Error estimating weight trend: $e");
     }
   }
 
-  Future<bool> logWeight(double weightKg) async {
-    isLoggingWeight.value = true;
+  Future<void> _fetchTransformationPhotos() async {
     try {
-      final res = await _apiClient.post(
-        ApiEndpoints.logWeight,
-        data: {'weight_kg': weightKg},
-      );
-
-      if (res.statusCode == 200 || res.statusCode == 201) {
-        await _fetchWeightData();
-        Get.snackbar(
-          "Weight Logged",
-          "Your weight has been updated to ${weightKg.toStringAsFixed(1)} kg.",
-          backgroundColor: const Color(0xff00FF87).withOpacity(0.9),
-          colorText: Colors.black,
-          snackPosition: SnackPosition.BOTTOM,
-          margin: const EdgeInsets.all(16),
-        );
-        return true;
+      final res = await _apiClient.get(ApiEndpoints.progressPhotos);
+      if (res.statusCode == 200 && res.data != null) {
+        final rawPhotos = res.data['photos'];
+        if (rawPhotos is Map) {
+          final currentPhotos = Map<String, String>.from(transformationPhotos);
+          rawPhotos.forEach((milestone, url) {
+            if (currentPhotos.containsKey(milestone)) {
+              currentPhotos[milestone] = url?.toString().isNotEmpty == true
+                  ? '${ApiEndpoints.baseUrl}$url'
+                  : '';
+            }
+          });
+          transformationPhotos.value = currentPhotos;
+        }
       }
-      return false;
     } catch (e) {
-      debugPrint("Error logging weight: $e");
-      Get.snackbar(
-        "Error",
-        "Failed to log weight. Please try again.",
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
-      return false;
+      debugPrint("Error fetching transformation photos: $e");
+    }
+  }
+
+  Future<void> _deletePhoto(String milestone) async {
+    try {
+      await _apiClient.delete('${ApiEndpoints.progressPhotos}/$milestone');
+    } catch (e) {
+      debugPrint("Error deleting photo: $e");
     } finally {
-      isLoggingWeight.value = false;
+      final currentPhotos = Map<String, String>.from(transformationPhotos);
+      currentPhotos[milestone] = '';
+      transformationPhotos.value = currentPhotos;
     }
   }
 
@@ -388,11 +427,7 @@ class ProgressController extends GetxController {
                 ),
                 onTap: () {
                   Get.back();
-                  final currentPhotos = Map<String, String>.from(
-                    transformationPhotos,
-                  );
-                  currentPhotos[milestone] = '';
-                  transformationPhotos.value = currentPhotos;
+                  _deletePhoto(milestone);
                 },
               ),
             ],
@@ -419,6 +454,7 @@ class ProgressController extends GetxController {
     try {
       final formData = dio.FormData.fromMap({
         'photo': await dio.MultipartFile.fromFile(image.path, filename: image.name),
+        'milestone': milestone,
       });
 
       // We need to use the dio instance directly from api_client if it supports raw paths, 
