@@ -49,8 +49,9 @@ class NotificationService {
       // Fallback: keep UTC if resolution fails
     }
 
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -68,13 +69,17 @@ class NotificationService {
         // When user taps a notification, log it inside the app notification screen
         _logTappedNotification(response);
       },
-      onDidReceiveBackgroundNotificationResponse: _backgroundNotificationHandler,
+      onDidReceiveBackgroundNotificationResponse:
+          _backgroundNotificationHandler,
     );
     _initialized = true;
   }
 
-  // Called in background (isolate) when notification tapped while app is closed
-  // Must be a top-level function
+  // Called in background (isolate) when notification tapped while app is
+  // closed. Needs vm:entry-point or release builds tree-shake it away since
+  // it's only ever referenced via a native callback pointer, not a normal
+  // Dart call site — without this it silently never runs in release mode.
+  @pragma('vm:entry-point')
   static void _backgroundNotificationHandler(NotificationResponse response) {
     _logTappedNotification(response);
   }
@@ -85,7 +90,11 @@ class NotificationService {
       final parts = (response.payload ?? '').split('|||');
       final title = parts.isNotEmpty ? parts[0] : 'Reminder';
       final body = parts.length > 1 ? parts[1] : '';
-      NotificationController.addFromReminder(title: title, body: body, category: 'Reminders');
+      NotificationController.addFromReminder(
+        title: title,
+        body: body,
+        category: 'Reminders',
+      );
     } catch (_) {}
   }
 
@@ -93,10 +102,12 @@ class NotificationService {
   Future<bool> requestPermission() async {
     final android = _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     final ios = _plugin
         .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>();
+          IOSFlutterLocalNotificationsPlugin
+        >();
 
     bool granted = false;
 
@@ -104,7 +115,9 @@ class NotificationService {
       granted = await android.requestNotificationsPermission() ?? false;
     }
     if (ios != null) {
-      granted = await ios.requestPermissions(alert: true, badge: true, sound: true) ?? false;
+      granted =
+          await ios.requestPermissions(alert: true, badge: true, sound: true) ??
+          false;
     }
     return granted;
   }
@@ -119,7 +132,8 @@ class NotificationService {
     required String body,
     required String time, // Format: "08:30 AM" or "08:30 PM"
     required List<String> days,
-    VoidCallback? onFired, // currently unused at OS level; logged via tap handler
+    VoidCallback?
+    onFired, // currently unused at OS level; logged via tap handler
   }) async {
     await cancelReminder(id);
 
@@ -217,8 +231,14 @@ class NotificationService {
 
   tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
     final now = tz.TZDateTime.now(tz.local);
-    var scheduled =
-        tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    var scheduled = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
     }

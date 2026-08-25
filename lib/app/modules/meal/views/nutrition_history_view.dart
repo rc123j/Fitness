@@ -192,7 +192,34 @@ class NutritionHistoryView extends GetView<MealController> {
           ),
           const SizedBox(height: 32),
           Obx(() {
-            final list = controller.calorieHistoryList.toList();
+            // Drop days before the member's plan was activated — they never
+            // joined yet on those days, so they shouldn't show up as
+            // "missed" (red X) entries.
+            final list = controller.calorieHistoryList
+                .where(
+                  (day) =>
+                      !controller.isDateBeforeActivation(day['date'] as String),
+                )
+                .toList();
+
+            // The backend's history window only looks backward from today,
+            // so a member who just joined ends up with a single lonely
+            // column. Pad forward with the rest of this week (up to 7 days
+            // total) so the log always reads as a full week — those extra
+            // days have no data yet, so they render as the neutral "not
+            // open yet" icon below, not a missed (X) mark.
+            if (list.isNotEmpty) {
+              DateTime lastDate = DateTime.parse(list.last['date'] as String);
+              while (list.length < 7) {
+                lastDate = lastDate.add(const Duration(days: 1));
+                final dStr =
+                    "${lastDate.year.toString().padLeft(4, '0')}-"
+                    "${lastDate.month.toString().padLeft(2, '0')}-"
+                    "${lastDate.day.toString().padLeft(2, '0')}";
+                list.add({"date": dStr, "meals_logged": const []});
+              }
+            }
+
             if (list.isEmpty) {
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: 60),

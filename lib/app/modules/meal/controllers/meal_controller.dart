@@ -448,6 +448,20 @@ class MealController extends GetxController {
   /// didn't exist yet on that day (before activation).
   bool get isLockedDate => isFutureDate || isBeforeActivation;
 
+  /// True when [dateStr] (yyyy-MM-dd) falls before the member's plan was
+  /// activated — used to keep history views (e.g. the meal attendance log)
+  /// from showing days the member never actually joined for as "missed".
+  bool isDateBeforeActivation(String dateStr) {
+    if (_activatedAtDate == null) return false;
+    final parts = dateStr.split('-');
+    if (parts.length != 3) return false;
+    final y = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    final d = int.tryParse(parts[2]);
+    if (y == null || m == null || d == null) return false;
+    return DateTime(y, m, d).isBefore(_activatedAtDate!);
+  }
+
   /// How many days until the selected future date (0 if today or past).
   int get daysUntilSelected {
     if (!isFutureDate) return 0;
@@ -542,6 +556,18 @@ class MealController extends GetxController {
       historyTargetCalories.value =
           double.tryParse(data['target_calories']?.toString() ?? '')?.toInt() ??
           2000;
+
+      final activatedAtStr = data['activated_at']?.toString();
+      final parsedActivatedAt = activatedAtStr != null
+          ? DateTime.tryParse(activatedAtStr)
+          : null;
+      if (parsedActivatedAt != null) {
+        _activatedAtDate = DateTime(
+          parsedActivatedAt.year,
+          parsedActivatedAt.month,
+          parsedActivatedAt.day,
+        );
+      }
 
       final List rawHistory = data['history'] ?? [];
       final List<Map<String, dynamic>> tempHistory = [];

@@ -7,6 +7,7 @@ import '../../goal/views/congratulations_screen.dart';
 import 'edit_profile_view.dart';
 import 'change_password_view.dart';
 import 'coming_soon_view.dart';
+
 class SettingsView extends GetView<ProfileController> {
   const SettingsView({super.key});
 
@@ -168,14 +169,14 @@ class SettingsView extends GetView<ProfileController> {
                 GestureDetector(
                   onTap: () => Get.toNamed('/membership'),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       gradient: const LinearGradient(
-                        colors: [
-                          Color(0xffFF00E5),
-                          Color(0xffFF7A00),
-                        ],
+                        colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
                       ),
                       boxShadow: [
                         BoxShadow(
@@ -236,10 +237,7 @@ class SettingsView extends GetView<ProfileController> {
       decoration: BoxDecoration(
         color: const Color(0xff0B0817).withOpacity(0.55),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.12),
-          width: 1.0,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.0),
       ),
       child: Column(
         children: [
@@ -262,7 +260,8 @@ class SettingsView extends GetView<ProfileController> {
             icon: Icons.link_rounded,
             title: "Connected Accounts",
             subtitle: "Manage Google, Apple & more",
-            onTap: () => Get.to(() => const ComingSoonView(title: "Connected Accounts")),
+            onTap: () =>
+                Get.to(() => const ComingSoonView(title: "Connected Accounts")),
           ),
         ],
       ),
@@ -277,15 +276,10 @@ class SettingsView extends GetView<ProfileController> {
       decoration: BoxDecoration(
         color: const Color(0xff0B0817).withOpacity(0.55),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.12),
-          width: 1.0,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.0),
       ),
       child: Column(
         children: [
-
-
           /// Notifications
           Obx(() {
             return buildSettingsRowItem(
@@ -301,7 +295,8 @@ class SettingsView extends GetView<ProfileController> {
                   activeTrackColor: const Color(0xffFF00E5).withOpacity(0.20),
                   inactiveThumbColor: Colors.white30,
                   inactiveTrackColor: Colors.white10,
-                  onChanged: (val) => controller.notificationsEnabled.value = val,
+                  onChanged: (val) =>
+                      controller.notificationsEnabled.value = val,
                 ),
               ),
               onTap: () {},
@@ -338,19 +333,23 @@ class SettingsView extends GetView<ProfileController> {
       decoration: BoxDecoration(
         color: const Color(0xff0B0817).withOpacity(0.55),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.12),
-          width: 1.0,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.0),
       ),
       child: Column(
         children: [
-
+          buildSettingsRowItem(
+            icon: Icons.help_outline_rounded,
+            title: "FAQs",
+            subtitle: "Answers to common questions",
+            onTap: () => Get.toNamed('/faq'),
+          ),
+          buildDivider(),
           buildSettingsRowItem(
             icon: Icons.mail_outline_rounded,
             title: "Contact Us",
             subtitle: "We're here to help",
-            onTap: () => Get.to(() => const ComingSoonView(title: "Contact Us")),
+            onTap: () =>
+                Get.to(() => const ComingSoonView(title: "Contact Us")),
           ),
           buildDivider(),
           buildSettingsRowItem(
@@ -359,7 +358,6 @@ class SettingsView extends GetView<ProfileController> {
             subtitle: "Share your feedback",
             onTap: () => Get.to(() => const ComingSoonView(title: "Rate Us")),
           ),
-
         ],
       ),
     );
@@ -373,10 +371,7 @@ class SettingsView extends GetView<ProfileController> {
       decoration: BoxDecoration(
         color: const Color(0xff0B0817).withOpacity(0.55),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.red.withOpacity(0.25),
-          width: 1.0,
-        ),
+        border: Border.all(color: Colors.red.withOpacity(0.25), width: 1.0),
       ),
       child: Material(
         color: Colors.transparent,
@@ -384,8 +379,12 @@ class SettingsView extends GetView<ProfileController> {
           onTap: () {
             Get.defaultDialog(
               title: "Delete Account",
-              titleStyle: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
-              middleText: "Are you sure you want to delete your account? This action cannot be undone.",
+              titleStyle: GoogleFonts.outfit(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+              middleText:
+                  "Are you sure you want to delete your account? This action cannot be undone.",
               middleTextStyle: GoogleFonts.inter(color: Colors.white70),
               backgroundColor: const Color(0xff120D23),
               textConfirm: "Delete",
@@ -405,7 +404,11 @@ class SettingsView extends GetView<ProfileController> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
+                const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.red,
+                  size: 20,
+                ),
                 const SizedBox(width: 12),
                 Text(
                   "Delete Account",
@@ -428,10 +431,7 @@ class SettingsView extends GetView<ProfileController> {
       decoration: BoxDecoration(
         color: const Color(0xff0B0817).withOpacity(0.55),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.red.withOpacity(0.25),
-          width: 1.0,
-        ),
+        border: Border.all(color: Colors.red.withOpacity(0.25), width: 1.0),
       ),
       child: Material(
         color: Colors.transparent,
@@ -510,10 +510,7 @@ class SettingsView extends GetView<ProfileController> {
                   ],
                 ),
               ),
-              if (trailing != null) ...[
-                trailing,
-                const SizedBox(width: 8),
-              ],
+              if (trailing != null) ...[trailing, const SizedBox(width: 8)],
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 color: Colors.white.withOpacity(0.20),
@@ -525,5 +522,4 @@ class SettingsView extends GetView<ProfileController> {
       ),
     );
   }
-
 }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -89,7 +90,9 @@ class HomeController extends GetxController {
   Future<void> fetchProfile({bool silent = false}) async {
     if (!silent) {
       isLoading.value = true;
-      await Future.delayed(const Duration(seconds: 2)); // Artificial delay for shimmer
+      await Future.delayed(
+        const Duration(seconds: 2),
+      ); // Artificial delay for shimmer
     }
 
     try {
@@ -103,12 +106,15 @@ class HomeController extends GetxController {
       userName.value = '${user['first_name']} ${user['last_name']}';
       memberCode.value = profile['member_code'] ?? '';
       goalName.value = profile['goal']?['goal_name'] ?? '';
-      planName.value = goalName.value.isNotEmpty ? "${goalName.value} Plan" : "Fat Loss Plan";
+      planName.value = goalName.value.isNotEmpty
+          ? "${goalName.value} Plan"
+          : "Fat Loss Plan";
       activityLevel.value = profile['activity_level']?['title'] ?? '';
       currentLevel.value = profile['wallet']?['current_level'] ?? 'Bronze';
       fitPoints.value = profile['wallet']?['fit_points'] ?? 0;
       currentStreak.value = profile['wallet']?['current_streak'] ?? 0;
-      currentWeight.value = double.tryParse(profile['weight_kg']?.toString() ?? '0.0') ?? 0.0;
+      currentWeight.value =
+          double.tryParse(profile['weight_kg']?.toString() ?? '0.0') ?? 0.0;
       metrics = latestMetrics;
 
       // 2. Fetch current diet plan details for day/days remaining tracking
@@ -117,8 +123,9 @@ class HomeController extends GetxController {
         final planRes = await _apiClient.get(ApiEndpoints.currentDietPlan);
         planDayNumber.value = planRes.data['current_day'] ?? 1;
         planDaysRemaining.value = planRes.data['days_remaining'] ?? 30;
-        
-        final List mealsList = planRes.data['diet_plan']?['diet_plan_meals'] ?? [];
+
+        final List mealsList =
+            planRes.data['diet_plan']?['diet_plan_meals'] ?? [];
         totalMealsToday.value = mealsList.isNotEmpty ? mealsList.length : 5;
         tempMeals = mealsList;
       } catch (_) {}
@@ -128,17 +135,26 @@ class HomeController extends GetxController {
       try {
         final nutRes = await _apiClient.get(ApiEndpoints.todayNutritionLog);
         final nutData = nutRes.data;
-        currentCalories.value = (nutData['consumed']?['calories'] as num?)?.toInt() ?? 0;
-        targetCalories.value = (nutData['targets']?['calories'] as num?)?.toInt() ?? 2000;
-        currentProtein.value = (nutData['consumed']?['protein'] as num?)?.toInt() ?? 0;
-        targetProtein.value = (nutData['targets']?['protein'] as num?)?.toInt() ?? 150;
-        currentCarbs.value = (nutData['consumed']?['carbs'] as num?)?.toInt() ?? 0;
-        targetCarbs.value = (nutData['targets']?['carbs'] as num?)?.toInt() ?? 200;
+        currentCalories.value =
+            (nutData['consumed']?['calories'] as num?)?.toInt() ?? 0;
+        targetCalories.value =
+            (nutData['targets']?['calories'] as num?)?.toInt() ?? 2000;
+        currentProtein.value =
+            (nutData['consumed']?['protein'] as num?)?.toInt() ?? 0;
+        targetProtein.value =
+            (nutData['targets']?['protein'] as num?)?.toInt() ?? 150;
+        currentCarbs.value =
+            (nutData['consumed']?['carbs'] as num?)?.toInt() ?? 0;
+        targetCarbs.value =
+            (nutData['targets']?['carbs'] as num?)?.toInt() ?? 200;
         currentFat.value = (nutData['consumed']?['fat'] as num?)?.toInt() ?? 0;
         targetFat.value = (nutData['targets']?['fat'] as num?)?.toInt() ?? 65;
-        
+
         final List rawLogged = nutData['logged_meal_ids'] ?? [];
-        loggedIds = rawLogged.map((id) => int.tryParse(id?.toString() ?? '')).whereType<int>().toList();
+        loggedIds = rawLogged
+            .map((id) => int.tryParse(id?.toString() ?? ''))
+            .whereType<int>()
+            .toList();
         mealsCompletedToday.value = loggedIds.length;
       } catch (_) {}
 
@@ -148,14 +164,30 @@ class HomeController extends GetxController {
       for (var meal in tempMeals) {
         final mealTypeName = meal['meal_type']?['name'] ?? 'Meal';
         final List foods = meal['foods'] ?? [];
-        final String foodDesc = foods.map((f) => f['food_details']?['food_name'] ?? '').join(', ');
+        final String foodDesc = foods
+            .map((f) => f['food_details']?['food_name'] ?? '')
+            .join(', ');
 
         double protein = 0.0;
         double carbs = 0.0;
         double fat = 0.0;
         double calories = 0.0;
 
+        // Foods carry multiple exchange options (option 1, 2, 3...) inside
+        // their `notes` metadata; the Meal screen only totals the selected
+        // option (option 1 by default). Summing every food here would double
+        // (or triple) count and disagree with what the Meal screen shows.
         for (var f in foods) {
+          int opt = 1;
+          final String? notes = f['notes']?.toString();
+          if (notes != null && notes.isNotEmpty) {
+            try {
+              final Map<String, dynamic> meta = jsonDecode(notes);
+              opt = int.tryParse(meta['option']?.toString() ?? '1') ?? 1;
+            } catch (_) {}
+          }
+          if (opt != 1) continue;
+
           calories += double.tryParse(f['calories']?.toString() ?? '0') ?? 0;
           protein += double.tryParse(f['protein']?.toString() ?? '0') ?? 0;
           carbs += double.tryParse(f['carbs']?.toString() ?? '0') ?? 0;
@@ -207,16 +239,31 @@ class HomeController extends GetxController {
       try {
         final progRes = await _apiClient.get(ApiEndpoints.progressLog);
         final progData = progRes.data;
-        weightDifference.value = (progData['weight_difference_kg'] as num?)?.toDouble() ?? 0.0;
-        
+        weightDifference.value =
+            (progData['weight_difference_kg'] as num?)?.toDouble() ?? 0.0;
+
         final List logs = progData['logs'] ?? [];
         if (logs.isNotEmpty) {
-
           // Parse weights and dates for line chart
           weightHistoryLogs.clear();
-          final recentLogs = logs.length > 5 ? logs.sublist(logs.length - 5) : logs;
-          final months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-          
+          final recentLogs = logs.length > 5
+              ? logs.sublist(logs.length - 5)
+              : logs;
+          final months = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ];
+
           for (var log in recentLogs) {
             try {
               final String fullDate = log['logged_date'] ?? '';
@@ -229,7 +276,8 @@ class HomeController extends GetxController {
                   label = "$dayVal ${months[monthVal - 1]}";
                 }
               }
-              final double w = double.tryParse(log['weight_kg']?.toString() ?? '0.0') ?? 0.0;
+              final double w =
+                  double.tryParse(log['weight_kg']?.toString() ?? '0.0') ?? 0.0;
               if (w > 0) {
                 weightHistoryLogs.add({
                   "date": label.isNotEmpty ? label : "Log",
@@ -243,12 +291,17 @@ class HomeController extends GetxController {
         // Fill dynamic fallback log entries to keep weight chart look good
         if (weightHistoryLogs.isEmpty) {
           weightHistoryLogs.addAll([
-            {"date": "Start", "weight": currentWeight.value > 0 ? currentWeight.value : 70.0},
-            {"date": "Today", "weight": currentWeight.value > 0 ? currentWeight.value : 70.0},
+            {
+              "date": "Start",
+              "weight": currentWeight.value > 0 ? currentWeight.value : 70.0,
+            },
+            {
+              "date": "Today",
+              "weight": currentWeight.value > 0 ? currentWeight.value : 70.0,
+            },
           ]);
         }
       } catch (_) {}
-
     } on DioException catch (_) {
       // Keep defaults
     } catch (_) {
@@ -267,13 +320,13 @@ class HomeController extends GetxController {
       updatedMeal['tag'] = 'Completed';
       homeMeals[index] = updatedMeal;
     }
-    
+
     // 2. Add macros
     currentCalories.value += kcal.toInt();
     currentProtein.value += p.toInt();
     currentCarbs.value += c.toInt();
     currentFat.value += f.toInt();
-    
+
     // Note: A real app would make a POST request to an API here
   }
 }

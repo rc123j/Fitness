@@ -29,7 +29,7 @@ class _BookingDateTimeViewState extends State<BookingDateTimeView> {
   void _updateControllerDateSelection(DateTime selectedDate) {
     final dateStr = DateFormat('yyyy-MM-dd').format(selectedDate);
     final dateList = controller.dates;
-    
+
     int foundIndex = -1;
     for (int i = 0; i < dateList.length; i++) {
       if (dateList[i]['rawDate'] == dateStr) {
@@ -37,9 +37,10 @@ class _BookingDateTimeViewState extends State<BookingDateTimeView> {
         break;
       }
     }
-    
+
     controller.selectedDateIndex.value = foundIndex;
-    controller.selectedTimeSlotIndex.value = 0; // Reset time slot on date change
+    controller.selectedTimeSlotIndex.value =
+        0; // Reset time slot on date change
   }
 
   @override
@@ -58,7 +59,11 @@ class _BookingDateTimeViewState extends State<BookingDateTimeView> {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+            size: 18,
+          ),
           onPressed: () => Get.back(),
         ),
       ),
@@ -116,9 +121,19 @@ class _BookingDateTimeViewState extends State<BookingDateTimeView> {
         headerStyle: HeaderStyle(
           formatButtonVisible: false,
           titleCentered: true,
-          titleTextStyle: GoogleFonts.outfit(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-          leftChevronIcon: const Icon(Icons.chevron_left_rounded, color: Colors.white54),
-          rightChevronIcon: const Icon(Icons.chevron_right_rounded, color: Colors.white54),
+          titleTextStyle: GoogleFonts.outfit(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+          leftChevronIcon: const Icon(
+            Icons.chevron_left_rounded,
+            color: Colors.white54,
+          ),
+          rightChevronIcon: const Icon(
+            Icons.chevron_right_rounded,
+            color: Colors.white54,
+          ),
         ),
         daysOfWeekStyle: DaysOfWeekStyle(
           weekdayStyle: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
@@ -154,23 +169,36 @@ class _BookingDateTimeViewState extends State<BookingDateTimeView> {
             children: List.generate(controller.timeSlots.length, (index) {
               final slot = controller.timeSlots[index];
               return Obx(() {
-                final isActive = index == controller.selectedTimeSlotIndex.value;
-                Color borderClr = isActive ? const Color(0xffB100FF) : Colors.white.withOpacity(0.04);
-                Color fillClr = isActive ? const Color(0xffB100FF).withOpacity(0.08) : Colors.white.withOpacity(0.01);
+                final isActive =
+                    index == controller.selectedTimeSlotIndex.value;
+                Color borderClr = isActive
+                    ? const Color(0xffB100FF)
+                    : Colors.white.withOpacity(0.04);
+                Color fillClr = isActive
+                    ? const Color(0xffB100FF).withOpacity(0.08)
+                    : Colors.white.withOpacity(0.01);
 
                 return GestureDetector(
                   onTap: () => controller.selectedTimeSlotIndex.value = index,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       color: fillClr,
-                      border: Border.all(color: borderClr, width: isActive ? 1.5 : 0.8),
+                      border: Border.all(
+                        color: borderClr,
+                        width: isActive ? 1.5 : 0.8,
+                      ),
                     ),
                     child: Text(
                       slot,
                       style: GoogleFonts.outfit(
-                        color: isActive ? Colors.white : Colors.white.withOpacity(0.50),
+                        color: isActive
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.50),
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -188,57 +216,66 @@ class _BookingDateTimeViewState extends State<BookingDateTimeView> {
   Widget _buildConfirmButton() {
     return Obx(() {
       final expert = controller.currentExpert;
-      if (expert.isEmpty || expert["services"] == null || (expert["services"] as List).isEmpty) {
+      if (expert.isEmpty ||
+          expert["services"] == null ||
+          (expert["services"] as List).isEmpty) {
         return const SizedBox.shrink();
       }
       final price = (expert["services"] as List)[0]["price"];
       final duration = (expert["services"] as List)[0]["duration"];
 
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Container(
-          width: double.infinity,
-          height: 56,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: const LinearGradient(
-              colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
-            ),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () async {
-                if (controller.timeSlots.isEmpty) {
-                  Get.snackbar("No Slot Selected", "Please select a valid time slot to book.", snackPosition: SnackPosition.BOTTOM);
-                  return;
-                }
-                await controller.bookSession();
-                Get.off(() => const MySessionsView());
-              },
+      return SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Container(
+            width: double.infinity,
+            height: 56,
+            decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Confirm Booking",
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+              gradient: const LinearGradient(
+                colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
+              ),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () async {
+                  if (controller.timeSlots.isEmpty) {
+                    Get.snackbar(
+                      "No Slot Selected",
+                      "Please select a valid time slot to book.",
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                    return;
+                  }
+                  await controller.bookSession();
+                  Get.off(() => const MySessionsView());
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Confirm Booking",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    Text(
-                      "₹$price • $duration",
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                      Text(
+                        "₹$price • $duration",
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

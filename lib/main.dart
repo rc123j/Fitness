@@ -5,6 +5,7 @@ import 'package:get_storage/get_storage.dart';
 import 'app/modules/login/controllers/login_controller.dart';
 import 'app/modules/notifications/controllers/notification_controller.dart';
 import 'app/modules/register/controllers/register_controller.dart';
+import 'app/modules/reminders/controllers/reminder_controller.dart';
 import 'app/routes/app_pages.dart';
 import 'app/services/api_client.dart';
 import 'app/services/auth_service.dart';
@@ -22,6 +23,7 @@ void main() async {
 
   // Register core controllers permanently
   Get.put(NotificationController(), permanent: true);
+  Get.put(ReminderController(), permanent: true);
   Get.put(LoginController(), permanent: true);
   Get.put(RegisterController(), permanent: true);
 

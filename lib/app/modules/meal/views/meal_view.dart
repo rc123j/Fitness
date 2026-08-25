@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/meal_controller.dart';
 import '../../progress/controllers/progress_controller.dart';
+import '../../main_navigation/controllers/main_navigation_controller.dart';
 import '../../../widgets/app_shimmer.dart';
 import '../../../widgets/scroll_nav_bar_binder.dart';
 
@@ -172,7 +173,16 @@ class MealView extends GetView<MealController> {
       backgroundColor: const Color(0xff06010F),
       elevation: 0,
       leading: GestureDetector(
-        onTap: () => Get.back(),
+        onTap: () {
+          // MealView is a tab page inside MainNavigationView's IndexedStack,
+          // not a pushed route — there's nothing for Get.back() to pop, so
+          // switch back to the Home tab instead.
+          if (Get.isRegistered<MainNavigationController>()) {
+            Get.find<MainNavigationController>().changeTab(0);
+          } else if (Get.key.currentState?.canPop() ?? false) {
+            Get.back();
+          }
+        },
         child: Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
@@ -241,7 +251,10 @@ class MealView extends GetView<MealController> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        titlePadding: const EdgeInsets.only(left: 18, bottom: 16),
+        // left inset clears the leading back button once the bar is
+        // collapsed/pinned — a smaller value here lets the title render
+        // underneath the back button while scrolling.
+        titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
       ),
     );
   }
@@ -604,29 +617,718 @@ class MealView extends GetView<MealController> {
   Widget _buildInfoCardContent(Widget child) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 18),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: const Color(0xff151520),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: const Color(0xffFF00E5).withOpacity(0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xffFF00E5).withOpacity(0.08),
-            blurRadius: 20,
-            spreadRadius: 2,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: Colors.white.withOpacity(0.08), width: 1),
       ),
       child: child,
     );
   }
 
-  /// Builds the dynamic list of insight tabs — only sections with real data
-  /// for this specific user appear; nothing is shown as filler.
+  Widget _insightSectionLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 14,
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: Colors.white70,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Text(
+            text.toUpperCase(),
+            style: GoogleFonts.outfit(
+              color: Colors.white70,
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _insightBodyText(String text) {
+    return Text(
+      text,
+      style: GoogleFonts.inter(
+        color: Colors.white.withOpacity(0.80),
+        fontSize: 13,
+        height: 1.55,
+      ),
+    );
+  }
+
+  Widget _insightBulletList(List<String> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: items.map((item) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.04),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 1),
+                width: 26,
+                height: 26,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.1),
+                ),
+                child: const Icon(
+                  Icons.lightbulb_outline_rounded,
+                  color: Colors.white70,
+                  size: 14,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  item,
+                  style: GoogleFonts.inter(
+                    color: Colors.white.withOpacity(0.85),
+                    fontSize: 13,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _insightChips(List<String> items) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: items
+          .map(
+            (item) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.15),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                item,
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  Widget _insightInfoCard({
+    required String title,
+    List<Widget> children = const [],
+    IconData? icon,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.02),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.04),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                if (icon != null) ...[
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.1),
+                    ),
+                    child: Icon(icon, color: Colors.white70, size: 16),
+                  ),
+                  const SizedBox(width: 10),
+                ],
+                Expanded(
+                  child: Text(
+                    title,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(height: 1, color: Colors.white.withOpacity(0.1)),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMacrosTab() {
+    final achieved = controller.macroAchieved;
+
+    Widget statTile(
+      String label,
+      int target,
+      num? achievedVal, {
+      String unit = 'g',
+    }) {
+      final achievedInt = achievedVal?.round() ?? target;
+      final delta = achievedInt - target;
+      return Expanded(
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.04),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+          ),
+          child: Column(
+            children: [
+              Text(
+                "$achievedInt\n$unit",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  height: 1.1,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                "of $target",
+                style: GoogleFonts.outfit(color: Colors.white38, fontSize: 10),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: GoogleFonts.outfit(
+                  color: Colors.white70,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (delta != 0)
+                Text(
+                  "${delta > 0 ? '+' : ''}$delta $unit",
+                  style: GoogleFonts.outfit(color: Colors.white38, fontSize: 9),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            statTile(
+              "Calories",
+              controller.targetCalories.value,
+              achieved?['kcal'],
+              unit: 'kcal',
+            ),
+            statTile(
+              "Carbs",
+              controller.targetCarbs.value,
+              achieved?['carb_g'],
+            ),
+            statTile(
+              "Protein",
+              controller.targetProtein.value,
+              achieved?['protein_g'],
+            ),
+            statTile("Fat", controller.targetFat.value, achieved?['fat_g']),
+          ],
+        ),
+        if (controller.accuracyNote.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          _insightSectionLabel("Plan Accuracy"),
+          const SizedBox(height: 4),
+          _insightBodyText(controller.accuracyNote),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildAdviceTab() {
+    return _insightBulletList(controller.adviceList);
+  }
+
+  Widget _buildAnthropometricTab() {
+    final data = controller.anthropometrics;
+    if (data == null) {
+      return _insightBodyText("No anthropometric data available.");
+    }
+
+    final waistCm = (data['waist_cm'] as num?)?.toDouble() ?? 0;
+    final hipCm = (data['hip_cm'] as num?)?.toDouble() ?? 0;
+    final whr = (data['whr'] as num?)?.toDouble() ?? 0;
+    final whtr = (data['whtr'] as num?)?.toDouble() ?? 0;
+    final waistCutoff = (data['waist_cutoff'] as num?)?.toDouble() ?? 0;
+    final whrCutoff = (data['whr_cutoff'] as num?)?.toDouble() ?? 0;
+    final whtrStatus = data['whtr_status']?.toString() ?? 'Healthy';
+    final alerts =
+        (data['alerts'] as List?)?.map((e) => e.toString()).toList() ?? [];
+
+    final waistAtRisk = alerts.any((a) => a.contains('Visceral'));
+    final whrAtRisk = alerts.any((a) => a.contains('Central Obesity'));
+    final whtrHealthy = whtrStatus == 'Healthy';
+
+    Widget measurementCard(
+      String label,
+      String value,
+      String cutoff,
+      String status,
+      bool atRisk,
+      IconData icon,
+    ) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.04),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.1),
+              ),
+              child: Icon(icon, color: Colors.white70, size: 20),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    "Cutoff: $cutoff",
+                    style: GoogleFonts.outfit(
+                      color: Colors.white54,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  value,
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    status,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        measurementCard(
+          "Waist Circumference",
+          "${waistCm.toStringAsFixed(0)} cm",
+          "< ${waistCutoff.toStringAsFixed(0)} cm",
+          waistAtRisk ? "At Risk" : "Healthy",
+          waistAtRisk,
+          Icons.straighten_rounded,
+        ),
+        measurementCard(
+          "Hip Circumference",
+          "${hipCm.toStringAsFixed(0)} cm",
+          "N/A",
+          "Healthy",
+          false,
+          Icons.accessibility_new_rounded,
+        ),
+        measurementCard(
+          "Waist-to-Hip (WHR)",
+          whr.toStringAsFixed(2),
+          "< ${whrCutoff.toStringAsFixed(2)}",
+          whrAtRisk ? "Central Obesity" : "Healthy",
+          whrAtRisk,
+          Icons.monitor_weight_outlined,
+        ),
+        measurementCard(
+          "Waist-to-Height (WHtR)",
+          whtr.toStringAsFixed(2),
+          "< 0.50",
+          whtrHealthy ? "Healthy" : "Cardio Risk",
+          !whtrHealthy,
+          Icons.favorite_border_rounded,
+        ),
+        if (alerts.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          _insightSectionLabel("Cardio-Metabolic Risks"),
+          const SizedBox(height: 8),
+          _insightChips(alerts),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildPriorityNutrientsTab() {
+    final data = controller.priorityNutrients;
+    if (data == null)
+      return _insightBodyText("No flagged nutrients right now.");
+
+    final deficiencyDetails =
+        (data['deficiency_details'] as List?)
+            ?.whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList() ??
+        [];
+    final topFoodsByNutrient = data['top_foods_by_nutrient'] is Map
+        ? Map<String, dynamic>.from(data['top_foods_by_nutrient'])
+        : <String, dynamic>{};
+
+    if (deficiencyDetails.isEmpty) {
+      return _insightBodyText("No flagged nutrients right now.");
+    }
+
+    final targetingNames = deficiencyDetails
+        .map((n) => n['micronutrient']?.toString() ?? '')
+        .where((s) => s.isNotEmpty)
+        .toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (targetingNames.isNotEmpty) ...[
+          _insightSectionLabel("Nutrient Targets"),
+          const SizedBox(height: 8),
+          _insightChips(targetingNames),
+          const SizedBox(height: 20),
+        ],
+        ...deficiencyDetails.map((nutrient) {
+          final name = nutrient['micronutrient']?.toString() ?? 'Nutrient';
+          final topFoods =
+              (topFoodsByNutrient[name] as List?)
+                  ?.whereType<Map>()
+                  .map((f) => f['food_item']?.toString() ?? '')
+                  .where((s) => s.isNotEmpty)
+                  .toList() ??
+              [];
+
+          return _insightInfoCard(
+            title: name,
+            icon: Icons.spa_outlined,
+            children: [
+              if (nutrient['deficiency_condition'] != null) ...[
+                _insightBodyText(nutrient['deficiency_condition'].toString()),
+                const SizedBox(height: 12),
+              ],
+              if (nutrient['best_indian_food_sources'] != null) ...[
+                _insightSectionLabel("Best Food Sources"),
+                const SizedBox(height: 4),
+                _insightBodyText(
+                  nutrient['best_indian_food_sources'].toString(),
+                ),
+                const SizedBox(height: 12),
+              ],
+              if (nutrient['absorption_tips'] != null) ...[
+                _insightSectionLabel("Absorption Tips"),
+                const SizedBox(height: 4),
+                _insightBodyText(nutrient['absorption_tips'].toString()),
+                const SizedBox(height: 12),
+              ],
+              if (topFoods.isNotEmpty) ...[
+                _insightSectionLabel("Top Foods In This Plan"),
+                const SizedBox(height: 8),
+                _insightChips(topFoods),
+              ],
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildDiseaseGuidanceTab() {
+    final guides = controller.diseaseGuidance;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: guides.map((guide) {
+        final name = guide['disease_name']?.toString() ?? 'Condition';
+        final keyMicronutrients =
+            (guide['keyMicronutrients'] as List?)
+                ?.map((e) => e.toString())
+                .toList() ??
+            [];
+
+        return _insightInfoCard(
+          title: name,
+          icon: Icons.health_and_safety_outlined,
+          children: [
+            if (guide['macronutrient_considerations'] != null) ...[
+              _insightSectionLabel("Macronutrient Considerations"),
+              const SizedBox(height: 4),
+              _insightBodyText(
+                guide['macronutrient_considerations'].toString(),
+              ),
+              const SizedBox(height: 12),
+            ],
+            if (guide['clinical_notes'] != null) ...[
+              _insightSectionLabel("Clinical Notes"),
+              const SizedBox(height: 4),
+              _insightBodyText(guide['clinical_notes'].toString()),
+              const SizedBox(height: 12),
+            ],
+            if (guide['food_first_sources'] != null) ...[
+              _insightSectionLabel("Food-First Sources"),
+              const SizedBox(height: 4),
+              _insightBodyText(guide['food_first_sources'].toString()),
+              const SizedBox(height: 12),
+            ],
+            if (guide['suggested_supplement'] != null) ...[
+              _insightSectionLabel("Suggested Supplement"),
+              const SizedBox(height: 4),
+              _insightBodyText(guide['suggested_supplement'].toString()),
+              const SizedBox(height: 12),
+            ],
+            if (keyMicronutrients.isNotEmpty) ...[
+              _insightSectionLabel("Key Micronutrients"),
+              const SizedBox(height: 8),
+              _insightChips(keyMicronutrients),
+            ],
+          ],
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildFiberProteinTab() {
+    final fiberFoods = controller.suggestedFiberFoods;
+    final proteinPowder = controller.suggestedProteinPowder;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (fiberFoods.isNotEmpty) ...[
+          _insightSectionLabel("High-Fiber Foods & Supplements"),
+          const SizedBox(height: 12),
+          ...fiberFoods.map((food) {
+            final name =
+                food['food_or_supplement']?.toString() ?? 'Fiber source';
+            final fiberContent = food['fiber_content']?.toString();
+            final dosage = food['recommended_dosage']?.toString() ?? '-';
+            final cautions = food['cautions']?.toString() ?? '-';
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.04),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.1),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.1),
+                        ),
+                        child: const Icon(
+                          Icons.eco_outlined,
+                          color: Colors.white70,
+                          size: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          fiberContent != null ? "$name ($fiberContent)" : name,
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _insightSectionLabel("Dosage"),
+                            const SizedBox(height: 2),
+                            Text(
+                              dosage,
+                              style: GoogleFonts.inter(
+                                color: Colors.white70,
+                                fontSize: 12,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _insightSectionLabel("Cautions"),
+                            const SizedBox(height: 2),
+                            Text(
+                              cautions,
+                              style: GoogleFonts.inter(
+                                color: Colors.white70,
+                                fontSize: 12,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+        if (proteinPowder != null) ...[
+          if (fiberFoods.isNotEmpty) const SizedBox(height: 8),
+          _insightSectionLabel("Suggested Protein Powder"),
+          const SizedBox(height: 12),
+          _insightInfoCard(
+            title: proteinPowder['powder_type']?.toString() ?? 'Protein Powder',
+            icon: Icons.fitness_center_rounded,
+            children: [
+              if (proteinPowder['source'] != null) ...[
+                _insightSectionLabel("Source"),
+                const SizedBox(height: 4),
+                _insightBodyText(proteinPowder['source'].toString()),
+                const SizedBox(height: 10),
+              ],
+              if (proteinPowder['protein_per_scoop'] != null) ...[
+                _insightSectionLabel("Protein Per Scoop"),
+                const SizedBox(height: 4),
+                _insightBodyText(proteinPowder['protein_per_scoop'].toString()),
+                const SizedBox(height: 10),
+              ],
+              if (proteinPowder['key_cautions'] != null) ...[
+                _insightSectionLabel("Cautions"),
+                const SizedBox(height: 4),
+                _insightBodyText(proteinPowder['key_cautions'].toString()),
+              ],
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
   List<_InsightTab> _buildInsightTabs(BuildContext context) {
     // Locked days (future or before the plan's activation) have no real
     // insight data to show — keep only the "Meal" tab, which already
@@ -685,16 +1387,6 @@ class MealView extends GetView<MealController> {
       );
     }
 
-    if (controller.lifeStageGuidance != null) {
-      tabs.add(
-        _InsightTab(
-          label: "Life Stage",
-          icon: Icons.accessibility_new_rounded,
-          builder: () => _buildInfoCardContent(_buildLifeStageTab()),
-        ),
-      );
-    }
-
     if (controller.suggestedFiberFoods.isNotEmpty ||
         controller.suggestedProteinPowder != null) {
       tabs.add(
@@ -716,728 +1408,7 @@ class MealView extends GetView<MealController> {
       );
     }
 
-    tabs.add(
-      _InsightTab(
-        label: "Body Snapshot",
-        icon: Icons.monitor_heart_outlined,
-        builder: () => _buildInfoCardContent(_buildBodySnapshotTab()),
-      ),
-    );
-
     return tabs;
-  }
-
-  // ---- Shared small building blocks for insight tab content ----
-
-  Widget _insightSectionLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Text(
-        text,
-        style: GoogleFonts.outfit(
-          color: Colors.white70,
-          fontSize: 13,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Widget _insightBodyText(String text) {
-    return Text(
-      text,
-      style: GoogleFonts.outfit(color: Colors.white, fontSize: 14, height: 1.4),
-    );
-  }
-
-  Widget _insightBulletList(List<String> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: items
-          .map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xffFF00E5),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(child: _insightBodyText(item)),
-                ],
-              ),
-            ),
-          )
-          .toList(),
-    );
-  }
-
-  Widget _insightChips(
-    List<String> items, {
-    Color color = const Color(0xff00FF87),
-  }) {
-    if (items.isEmpty) return const SizedBox.shrink();
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: items
-          .map(
-            (item) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: color.withOpacity(0.3)),
-              ),
-              child: Text(
-                item,
-                style: GoogleFonts.outfit(
-                  color: color,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          )
-          .toList(),
-    );
-  }
-
-  Widget _insightInfoCard({
-    required String title,
-    List<Widget> children = const [],
-  }) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.04),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ...children,
-        ],
-      ),
-    );
-  }
-
-  // ---- Macros tab ----
-  Widget _buildMacrosTab() {
-    final achieved = controller.macroAchieved;
-
-    Widget statTile(
-      String label,
-      int target,
-      num? achievedVal,
-      Color color, {
-      String unit = 'g',
-    }) {
-      final achievedInt = achievedVal?.round() ?? target;
-      final delta = achievedInt - target;
-      return Expanded(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
-          margin: const EdgeInsets.symmetric(horizontal: 3),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: color.withOpacity(0.25)),
-          ),
-          child: Column(
-            children: [
-              Text(
-                "$achievedInt$unit",
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                "of $target$unit",
-                style: GoogleFonts.outfit(color: Colors.white38, fontSize: 9),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: GoogleFonts.outfit(
-                  color: color,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              if (delta != 0)
-                Text(
-                  "${delta > 0 ? '+' : ''}$delta $unit",
-                  style: GoogleFonts.outfit(color: Colors.white38, fontSize: 9),
-                ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            statTile(
-              "Calories",
-              controller.targetCalories.value,
-              achieved?['kcal'],
-              const Color(0xff00FF87),
-              unit: 'kcal',
-            ),
-            statTile(
-              "Carbs",
-              controller.targetCarbs.value,
-              achieved?['carb_g'],
-              const Color(0xffFF7A00),
-            ),
-            statTile(
-              "Protein",
-              controller.targetProtein.value,
-              achieved?['protein_g'],
-              const Color(0xff00A2FF),
-            ),
-            statTile(
-              "Fat",
-              controller.targetFat.value,
-              achieved?['fat_g'],
-              const Color(0xffFF00E5),
-            ),
-          ],
-        ),
-        if (controller.accuracyNote.isNotEmpty) ...[
-          const SizedBox(height: 14),
-          _insightSectionLabel("Plan Accuracy"),
-          _insightBodyText(controller.accuracyNote),
-        ],
-      ],
-    );
-  }
-
-  // ---- Advice tab ----
-  Widget _buildAdviceTab() {
-    return _insightBulletList(controller.adviceList);
-  }
-
-  // ---- Body Snapshot tab (from ProgressController — already fetched app-wide) ----
-  Widget _buildBodySnapshotTab() {
-    if (!Get.isRegistered<ProgressController>()) {
-      return _insightBodyText("Body metrics aren't available yet.");
-    }
-    final progress = Get.find<ProgressController>();
-
-    Widget metric(String label, String value, Color color) {
-      return Expanded(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: color.withOpacity(0.25)),
-          ),
-          child: Column(
-            children: [
-              Text(
-                value,
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: GoogleFonts.outfit(
-                  color: color,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Obx(
-      () => Column(
-        children: [
-          Row(
-            children: [
-              metric(
-                "BMI",
-                progress.bmi.value.toStringAsFixed(1),
-                const Color(0xffFF00E5),
-              ),
-              metric(
-                "BMR",
-                "${progress.bmr.value} kcal",
-                const Color(0xffFF7A00),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              metric(
-                "TDEE",
-                "${progress.tdee.value} kcal",
-                const Color(0xff00A2FF),
-              ),
-              metric(
-                "Ideal Weight",
-                "${progress.ibw.value.toStringAsFixed(1)} kg",
-                const Color(0xff00FF87),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ---- Anthropometric Result tab ----
-  Widget _buildAnthropometricTab() {
-    final data = controller.anthropometrics;
-    if (data == null) {
-      return _insightBodyText("No anthropometric data available.");
-    }
-
-    final waistCm = (data['waist_cm'] as num?)?.toDouble() ?? 0;
-    final hipCm = (data['hip_cm'] as num?)?.toDouble() ?? 0;
-    final whr = (data['whr'] as num?)?.toDouble() ?? 0;
-    final whtr = (data['whtr'] as num?)?.toDouble() ?? 0;
-    final waistCutoff = (data['waist_cutoff'] as num?)?.toDouble() ?? 0;
-    final whrCutoff = (data['whr_cutoff'] as num?)?.toDouble() ?? 0;
-    final whtrStatus = data['whtr_status']?.toString() ?? 'Healthy';
-    final alerts =
-        (data['alerts'] as List?)?.map((e) => e.toString()).toList() ?? [];
-
-    final waistAtRisk = alerts.any((a) => a.contains('Visceral'));
-    final whrAtRisk = alerts.any((a) => a.contains('Central Obesity'));
-    final whtrHealthy = whtrStatus == 'Healthy';
-
-    TextStyle headerStyle = GoogleFonts.outfit(
-      color: Colors.white54,
-      fontSize: 11,
-      fontWeight: FontWeight.w600,
-    );
-
-    Widget row(
-      String label,
-      String value,
-      String cutoff,
-      String status,
-      bool atRisk,
-    ) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 3,
-              child: Text(
-                label,
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Text(
-                value,
-                style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13),
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Text(
-                cutoff,
-                style: GoogleFonts.outfit(color: Colors.white38, fontSize: 12),
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Text(
-                status,
-                style: GoogleFonts.outfit(
-                  color: atRisk
-                      ? const Color(0xffFF3E3E)
-                      : const Color(0xff00FF87),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(flex: 3, child: Text("MEASUREMENT", style: headerStyle)),
-            Expanded(flex: 2, child: Text("VALUE", style: headerStyle)),
-            Expanded(flex: 2, child: Text("CUT-OFF", style: headerStyle)),
-            Expanded(flex: 3, child: Text("STATUS", style: headerStyle)),
-          ],
-        ),
-        Divider(color: Colors.white.withOpacity(0.1), height: 1),
-        row(
-          "Waist Circumference",
-          "${waistCm.toStringAsFixed(0)} cm",
-          "< ${waistCutoff.toStringAsFixed(0)} cm",
-          waistAtRisk ? "Visceral Fat Built Up" : "Healthy Range",
-          waistAtRisk,
-        ),
-        Divider(color: Colors.white.withOpacity(0.06), height: 1),
-        row(
-          "Hip Circumference",
-          "${hipCm.toStringAsFixed(0)} cm",
-          "N/A",
-          "Healthy Range",
-          false,
-        ),
-        Divider(color: Colors.white.withOpacity(0.06), height: 1),
-        row(
-          "Waist-to-Hip (WHR)",
-          whr.toStringAsFixed(2),
-          "< ${whrCutoff.toStringAsFixed(2)}",
-          whrAtRisk ? "Central Obesity Diagnosed" : "Healthy Range",
-          whrAtRisk,
-        ),
-        Divider(color: Colors.white.withOpacity(0.06), height: 1),
-        row(
-          "Waist-to-Height (WHtR)",
-          whtr.toStringAsFixed(2),
-          "< 0.50",
-          whtrHealthy ? "Healthy Range" : "Cardio Metabolic Risk ($whtrStatus)",
-          !whtrHealthy,
-        ),
-        if (alerts.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          _insightSectionLabel("Indicated Cardio-Metabolic & Visceral Risks"),
-          _insightChips(alerts, color: const Color(0xffFF3E3E)),
-        ],
-      ],
-    );
-  }
-
-  // ---- Priority Nutrients tab ----
-  Widget _buildPriorityNutrientsTab() {
-    final data = controller.priorityNutrients;
-    if (data == null)
-      return _insightBodyText("No flagged nutrients right now.");
-
-    final deficiencyDetails =
-        (data['deficiency_details'] as List?)
-            ?.whereType<Map>()
-            .map((e) => Map<String, dynamic>.from(e))
-            .toList() ??
-        [];
-    final topFoodsByNutrient = data['top_foods_by_nutrient'] is Map
-        ? Map<String, dynamic>.from(data['top_foods_by_nutrient'])
-        : <String, dynamic>{};
-
-    if (deficiencyDetails.isEmpty) {
-      return _insightBodyText("No flagged nutrients right now.");
-    }
-
-    final targetingNames = deficiencyDetails
-        .map((n) => n['micronutrient']?.toString() ?? '')
-        .where((s) => s.isNotEmpty)
-        .toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (targetingNames.isNotEmpty) ...[
-          Text(
-            "Targeting: ${targetingNames.join(', ')}",
-            style: GoogleFonts.outfit(
-              color: Colors.white70,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 14),
-        ],
-        ...deficiencyDetails.map((nutrient) {
-          final name = nutrient['micronutrient']?.toString() ?? 'Nutrient';
-          final topFoods =
-              (topFoodsByNutrient[name] as List?)
-                  ?.whereType<Map>()
-                  .map((f) => f['food_item']?.toString() ?? '')
-                  .where((s) => s.isNotEmpty)
-                  .toList() ??
-              [];
-
-          return _insightInfoCard(
-            title: name,
-            children: [
-              if (nutrient['deficiency_condition'] != null) ...[
-                _insightBodyText(nutrient['deficiency_condition'].toString()),
-                const SizedBox(height: 8),
-              ],
-              if (nutrient['best_indian_food_sources'] != null) ...[
-                _insightSectionLabel("Best Food Sources"),
-                _insightBodyText(
-                  nutrient['best_indian_food_sources'].toString(),
-                ),
-                const SizedBox(height: 8),
-              ],
-              if (nutrient['absorption_tips'] != null) ...[
-                _insightSectionLabel("Absorption Tips"),
-                _insightBodyText(nutrient['absorption_tips'].toString()),
-                const SizedBox(height: 8),
-              ],
-              if (topFoods.isNotEmpty) ...[
-                _insightSectionLabel("Top Foods In This Plan"),
-                _insightChips(topFoods),
-              ],
-            ],
-          );
-        }),
-      ],
-    );
-  }
-
-  // ---- Disease Guidance tab ----
-  Widget _buildDiseaseGuidanceTab() {
-    final guides = controller.diseaseGuidance;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: guides.map((guide) {
-        final name = guide['disease_name']?.toString() ?? 'Condition';
-        final keyMicronutrients =
-            (guide['keyMicronutrients'] as List?)
-                ?.map((e) => e.toString())
-                .toList() ??
-            [];
-
-        return _insightInfoCard(
-          title: name,
-          children: [
-            if (guide['macronutrient_considerations'] != null) ...[
-              _insightSectionLabel("Macronutrient Considerations"),
-              _insightBodyText(
-                guide['macronutrient_considerations'].toString(),
-              ),
-              const SizedBox(height: 8),
-            ],
-            if (guide['clinical_notes'] != null) ...[
-              _insightSectionLabel("Clinical Notes"),
-              _insightBodyText(guide['clinical_notes'].toString()),
-              const SizedBox(height: 8),
-            ],
-            if (guide['food_first_sources'] != null) ...[
-              _insightSectionLabel("Food-First Sources"),
-              _insightBodyText(guide['food_first_sources'].toString()),
-              const SizedBox(height: 8),
-            ],
-            if (guide['suggested_supplement'] != null) ...[
-              _insightSectionLabel("Suggested Supplement"),
-              _insightBodyText(guide['suggested_supplement'].toString()),
-              const SizedBox(height: 8),
-            ],
-            if (keyMicronutrients.isNotEmpty) ...[
-              _insightSectionLabel("Key Micronutrients To Watch"),
-              _insightChips(keyMicronutrients, color: const Color(0xffFF7A00)),
-            ],
-          ],
-        );
-      }).toList(),
-    );
-  }
-
-  // ---- Life Stage tab ----
-  Widget _buildLifeStageTab() {
-    final guide = controller.lifeStageGuidance;
-    if (guide == null) return const SizedBox.shrink();
-
-    final keyMicronutrients =
-        (guide['keyMicronutrients'] as List?)
-            ?.map((e) => e.toString())
-            .toList() ??
-        [];
-
-    return _insightInfoCard(
-      title: guide['life_stage_name']?.toString() ?? 'Life Stage',
-      children: [
-        if (guide['macronutrient_focus'] != null) ...[
-          _insightSectionLabel("Macronutrient Focus"),
-          _insightBodyText(guide['macronutrient_focus'].toString()),
-          const SizedBox(height: 8),
-        ],
-        if (guide['notes_cautions'] != null) ...[
-          _insightSectionLabel("Notes & Cautions"),
-          _insightBodyText(guide['notes_cautions'].toString()),
-          const SizedBox(height: 8),
-        ],
-        if (guide['food_first_sources'] != null) ...[
-          _insightSectionLabel("Food-First Sources"),
-          _insightBodyText(guide['food_first_sources'].toString()),
-          const SizedBox(height: 8),
-        ],
-        if (guide['suggested_supplement'] != null) ...[
-          _insightSectionLabel("Suggested Supplement"),
-          _insightBodyText(guide['suggested_supplement'].toString()),
-          const SizedBox(height: 8),
-        ],
-        if (keyMicronutrients.isNotEmpty) ...[
-          _insightSectionLabel("Key Micronutrients"),
-          _insightChips(keyMicronutrients, color: const Color(0xff00A2FF)),
-        ],
-      ],
-    );
-  }
-
-  // ---- Fiber & Protein tab ----
-  Widget _buildFiberProteinTab() {
-    final fiberFoods = controller.suggestedFiberFoods;
-    final proteinPowder = controller.suggestedProteinPowder;
-
-    TextStyle headerStyle = GoogleFonts.outfit(
-      color: Colors.white54,
-      fontSize: 11,
-      fontWeight: FontWeight.w600,
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (fiberFoods.isNotEmpty) ...[
-          _insightSectionLabel("High-Fiber Foods & Supplements"),
-          const SizedBox(height: 10),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(flex: 3, child: Text("ITEM", style: headerStyle)),
-              Expanded(
-                flex: 4,
-                child: Text("DOSAGE & DURATION", style: headerStyle),
-              ),
-              Expanded(flex: 3, child: Text("CAUTIONS", style: headerStyle)),
-            ],
-          ),
-          Divider(color: Colors.white.withOpacity(0.1), height: 1),
-          ...fiberFoods.map((food) {
-            final name =
-                food['food_or_supplement']?.toString() ?? 'Fiber source';
-            final fiberContent = food['fiber_content']?.toString();
-            final dosage = food['recommended_dosage']?.toString() ?? '-';
-            final cautions = food['cautions']?.toString() ?? '-';
-
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          fiberContent != null ? "$name ($fiberContent)" : name,
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 4,
-                        child: Text(
-                          dosage,
-                          style: GoogleFonts.outfit(
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          cautions,
-                          style: GoogleFonts.outfit(
-                            color: const Color(0xffFF7A00),
-                            fontSize: 11,
-                            height: 1.3,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Divider(color: Colors.white.withOpacity(0.06), height: 1),
-              ],
-            );
-          }),
-        ],
-        if (proteinPowder != null) ...[
-          if (fiberFoods.isNotEmpty) const SizedBox(height: 6),
-          _insightSectionLabel("Suggested Protein Powder"),
-          const SizedBox(height: 6),
-          _insightInfoCard(
-            title: proteinPowder['powder_type']?.toString() ?? 'Protein Powder',
-            children: [
-              if (proteinPowder['source'] != null) ...[
-                _insightSectionLabel("Source"),
-                _insightBodyText(proteinPowder['source'].toString()),
-                const SizedBox(height: 8),
-              ],
-              if (proteinPowder['protein_per_scoop'] != null) ...[
-                _insightSectionLabel("Protein Per Scoop"),
-                _insightBodyText(proteinPowder['protein_per_scoop'].toString()),
-                const SizedBox(height: 8),
-              ],
-              if (proteinPowder['key_cautions'] != null) ...[
-                _insightSectionLabel("Cautions"),
-                _insightBodyText(proteinPowder['key_cautions'].toString()),
-              ],
-            ],
-          ),
-        ],
-      ],
-    );
   }
 
   // bottom, instead of cutting hard into the section — flat solid purple
@@ -1465,14 +1436,38 @@ class MealView extends GetView<MealController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Daily Meals",
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                height: 1.15,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Daily Meals",
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    height: 1.15,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Get.toNamed('/calorie-history'),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.06),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.12),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.history_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
 
@@ -1852,17 +1847,6 @@ class MealView extends GetView<MealController> {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  if (isExpanded) ...[
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      "${targetKcal.toInt()} kcal • P ${totalProtein.toInt()}g C ${totalCarbs.toInt()}g F ${totalFat.toInt()}g",
-                                      style: GoogleFonts.inter(
-                                        color: const Color(0xff00FF87),
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
                                 ],
                               ),
                             ),
@@ -1957,8 +1941,9 @@ class MealView extends GetView<MealController> {
                             ),
                             const SizedBox(height: 16),
 
-                            // 2. Macronutrient distributes chips
+                            // 2. Calorie & macronutrient distributes chips
                             _buildMacroSummaryChips(
+                              targetKcal,
                               totalProtein,
                               totalCarbs,
                               totalFat,
@@ -2003,10 +1988,23 @@ class MealView extends GetView<MealController> {
   }
 
   // Macro Summary Chips Row
-  Widget _buildMacroSummaryChips(double protein, double carbs, double fat) {
+  Widget _buildMacroSummaryChips(
+    double kcal,
+    double protein,
+    double carbs,
+    double fat,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        Expanded(
+          child: _buildMiniMacroChip(
+            "Kcal",
+            "${kcal.toInt()}",
+            const Color(0xffFF7A00),
+          ),
+        ),
+        const SizedBox(width: 6),
         Expanded(
           child: _buildMiniMacroChip(
             "Protein",
@@ -2036,7 +2034,7 @@ class MealView extends GetView<MealController> {
 
   Widget _buildMiniMacroChip(String label, String value, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.02),
         borderRadius: BorderRadius.circular(10),
@@ -2050,13 +2048,17 @@ class MealView extends GetView<MealController> {
             width: 6,
             decoration: BoxDecoration(shape: BoxShape.circle, color: color),
           ),
-          const SizedBox(width: 6),
-          Text(
-            "$label: $value",
-            style: GoogleFonts.inter(
-              color: Colors.white.withOpacity(0.65),
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              "$label: $value",
+              style: GoogleFonts.inter(
+                color: Colors.white.withOpacity(0.65),
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -2246,15 +2248,7 @@ class MealView extends GetView<MealController> {
         height: 48,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          gradient: isCompleted
-              ? null
-              : const LinearGradient(
-                  colors: [Color(0xff00FF87), Color(0xffFFD166)],
-                ),
-          color: isCompleted ? Colors.white.withOpacity(0.06) : null,
-          border: isCompleted
-              ? Border.all(color: Colors.white.withOpacity(0.12), width: 1.0)
-              : null,
+          color: Colors.white,
         ),
         alignment: Alignment.center,
         child: Row(
@@ -2264,14 +2258,14 @@ class MealView extends GetView<MealController> {
               isCompleted
                   ? Icons.check_circle_rounded
                   : Icons.check_circle_outline_rounded,
-              color: isCompleted ? const Color(0xff00FF87) : Colors.black,
+              color: Colors.black,
               size: 18,
             ),
             const SizedBox(width: 8),
             Text(
-              isCompleted ? "Marked as Eaten" : "Log this Meal",
+              isCompleted ? "Marked as Eaten" : "Mark as Complete",
               style: GoogleFonts.outfit(
-                color: isCompleted ? Colors.white : Colors.black,
+                color: Colors.black,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),

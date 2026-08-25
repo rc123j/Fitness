@@ -42,6 +42,7 @@ import '../modules/main_navigation/bindings/main_navigation_binding.dart';
 import '../modules/main_navigation/views/main_navigation_view.dart';
 import '../modules/membership/bindings/membership_binding.dart';
 import '../modules/membership/views/membership_view.dart';
+import '../modules/faq/views/faq_view.dart';
 
 part 'app_routes.dart';
 
@@ -165,5 +166,6 @@ class AppPages {
       page: () => const MembershipView(),
       binding: MembershipBinding(),
     ),
+    GetPage(name: _Paths.FAQ, page: () => const FaqView()),
   ];
 }

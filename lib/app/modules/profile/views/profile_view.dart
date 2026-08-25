@@ -124,29 +124,6 @@ class ProfileView extends GetView<ProfileController> {
           ),
           Row(
             children: [
-              /// Notification Icon
-              GestureDetector(
-                onTap: () {},
-                child: Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.03),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.08),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.notifications_none_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-
               /// Settings Gear Icon
               GestureDetector(
                 onTap: () => Get.toNamed('/settings'),

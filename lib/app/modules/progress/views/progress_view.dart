@@ -288,207 +288,180 @@ class ProgressView extends GetView<ProgressController> {
 
   Widget _buildJourneyProgressCard() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(1.2),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        image: const DecorationImage(
-          image: AssetImage('assets/progress/cardbg.png'),
-          fit: BoxFit.cover,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            const Color(0xffFF00E5).withOpacity(0.25), // light gradient top
+            Colors.transparent,
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.3, 1.0],
         ),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Your Journey Progress",
-            style: GoogleFonts.outfit(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 14,
-            ),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(23),
+          color: const Color(0xff151520),
+          image: const DecorationImage(
+            image: AssetImage('assets/progress/cardbg.png'),
+            fit: BoxFit.cover,
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          "${controller.daysRemaining.value}",
-                          style: GoogleFonts.outfit(
-                            color: const Color(0xffFF00E5),
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            height: 1.0,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Your Journey Progress",
+              style: GoogleFonts.outfit(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            "${controller.daysRemaining.value}",
+                            style: GoogleFonts.outfit(
+                              color: const Color(0xffFF00E5),
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              height: 1.0,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Days Left",
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
+                          const SizedBox(width: 8),
+                          Text(
+                            "Days Left",
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "of your 30-day goal",
-                      style: GoogleFonts.outfit(
-                        color: Colors.white.withOpacity(0.6),
-                        fontSize: 14,
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    Stack(
-                      children: [
-                        Container(
-                          height: 8,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "of your 30-day goal",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white.withOpacity(0.6),
+                          fontSize: 14,
                         ),
-                        FractionallySizedBox(
-                          widthFactor: controller.currentDay.value / 30,
-                          child: Container(
+                      ),
+                      const SizedBox(height: 24),
+                      Stack(
+                        children: [
+                          Container(
                             height: 8,
+                            width: double.infinity,
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xffB100FF), Color(0xffFF7A00)],
-                              ),
+                              color: Colors.white.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "${controller.currentDay.value} Days Completed",
-                          style: GoogleFonts.outfit(
-                            color: Colors.white.withOpacity(0.6),
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          "${((controller.currentDay.value / 30) * 100).toInt()}%",
-                          style: GoogleFonts.outfit(
-                            color: const Color(0xffFF7A00),
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xffB100FF).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xffB100FF).withOpacity(0.3),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "View Plan",
-                            style: GoogleFonts.outfit(
-                              color: const Color(0xffB100FF),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          const Icon(
-                            Icons.arrow_forward_rounded,
-                            color: Color(0xffB100FF),
-                            size: 16,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Center(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox(
-                        height: 120,
-                        width: 120,
-                        child: CircularProgressIndicator(
-                          value: controller.currentDay.value / 30,
-                          strokeWidth: 8,
-                          backgroundColor: Colors.white.withOpacity(0.1),
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Color(0xffFF7A00),
-                          ),
-                        ),
-                      ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              Text(
-                                "${((controller.currentDay.value / 30) * 100).toInt()}",
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
+                          FractionallySizedBox(
+                            widthFactor: controller.currentDay.value / 30,
+                            child: Container(
+                              height: 8,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xffB100FF),
+                                    Color(0xffFF7A00),
+                                  ],
                                 ),
+                                borderRadius: BorderRadius.circular(4),
                               ),
-                              Text(
-                                "%",
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            "Complete",
-                            style: GoogleFonts.outfit(
-                              color: Colors.white.withOpacity(0.6),
-                              fontSize: 12,
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "${controller.currentDay.value} Days Completed",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white.withOpacity(0.6),
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          height: 120,
+                          width: 120,
+                          child: CircularProgressIndicator(
+                            value: controller.currentDay.value / 30,
+                            strokeWidth: 8,
+                            backgroundColor: Colors.white.withOpacity(0.1),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              Color(0xffFF7A00),
+                            ),
+                          ),
+                        ),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
+                              children: [
+                                Text(
+                                  "${((controller.currentDay.value / 30) * 100).toInt()}",
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.white,
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  "%",
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              "Complete",
+                              style: GoogleFonts.outfit(
+                                color: Colors.white.withOpacity(0.6),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

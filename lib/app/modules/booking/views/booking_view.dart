@@ -66,42 +66,6 @@ class BookingView extends GetView<BookingController> {
                               ),
                             ),
                           ),
-
-                          /// Gallery count badge (bottom right of cover photo)
-                          Positioned(
-                            bottom:
-                                50, // high enough to not get fully overlapped by floating card
-                            right: 16,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.6),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.photo_library_outlined,
-                                    color: Colors.white,
-                                    size: 12,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    "1/5",
-                                    style: GoogleFonts.inter(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
                         ],
                       ),
 
@@ -180,18 +144,6 @@ class BookingView extends GetView<BookingController> {
                                                   size: 12,
                                                 ),
                                               ],
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            "${expert["reviewsCount"] ?? 150} ratings",
-                                            style: GoogleFonts.inter(
-                                              color: Colors.black.withOpacity(
-                                                0.4,
-                                              ),
-                                              fontSize: 9,
-                                              decoration:
-                                                  TextDecoration.underline,
                                             ),
                                           ),
                                         ],
@@ -315,7 +267,7 @@ class BookingView extends GetView<BookingController> {
               ),
             ),
 
-            /// 2. FLOATING FIXED TOP ACTIONS (Back button, Share, Favorite)
+            /// 2. FLOATING FIXED BACK BUTTON
             Positioned(
               top: MediaQuery.of(context).padding.top + 10,
               left: 16,
@@ -333,43 +285,6 @@ class BookingView extends GetView<BookingController> {
                     size: 20,
                   ),
                 ),
-              ),
-            ),
-
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 10,
-              right: 16,
-              child: Row(
-                children: [
-                  /// Favorite Icon
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.favorite_border_rounded,
-                      color: Colors.black,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-
-                  /// Share Icon
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.share_outlined,
-                      color: Colors.black,
-                      size: 20,
-                    ),
-                  ),
-                ],
               ),
             ),
           ],
@@ -479,18 +394,6 @@ class BookingView extends GetView<BookingController> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.bookmark_border_rounded,
-                    color: Colors.white,
-                    size: 16,
                   ),
                 ),
               ],
