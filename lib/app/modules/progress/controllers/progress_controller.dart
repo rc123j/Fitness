@@ -47,6 +47,21 @@ class ProgressController extends GetxController {
   final targetCalories = 2150.obs;
   final weeklyAdherenceData = <Map<String, dynamic>>[].obs;
 
+  // Today's Report (daily-only for now; weekly view lands later)
+  final todayConsumedCalories = 0.obs;
+  final todayConsumedProtein = 0.obs;
+  final todayConsumedCarbs = 0.obs;
+  final todayConsumedFat = 0.obs;
+  final todayTargetProtein = 0.obs;
+  final todayTargetCarbs = 0.obs;
+  final todayTargetFat = 0.obs;
+
+  // Weight Tracker
+  final isLoggingWeight = false.obs;
+  final currentWeight = 0.0.obs;
+  final weightDifferenceKg = 0.0.obs; // negative = lost, positive = gained
+  final weightHistory = <Map<String, dynamic>>[].obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -114,6 +129,7 @@ class ProgressController extends GetxController {
 
           // 3. Setup Adherence Data by hitting real backend
           await _fetchRealAdherenceHistory();
+          await _fetchTodayReport();
         } else {
           hasActivePlan.value = false;
         }
@@ -125,13 +141,7 @@ class ProgressController extends GetxController {
       final profileRes = await _apiClient.get(ApiEndpoints.profile);
       if (profileRes.statusCode == 200 && profileRes.data != null) {
         final data = profileRes.data;
-        final profile = data['profile'];
         final latestMetrics = data['latest_metrics'];
-
-        if (profile != null) {
-          startingWeight.value =
-              double.tryParse(profile['weight_kg']?.toString() ?? '') ?? 0.0;
-        }
 
         if (latestMetrics != null) {
           bmi.value = double.tryParse(latestMetrics['bmi']?.toString() ?? '') ?? 0.0;
@@ -140,6 +150,10 @@ class ProgressController extends GetxController {
           ibw.value = double.tryParse(latestMetrics['ibw']?.toString() ?? '') ?? 0.0;
         }
       }
+
+      // 3. Weight tracker (starting/current weight + trend), independent of
+      // diet-plan activation — a member can log weigh-ins regardless.
+      await _fetchWeightData();
     } catch (e) {
       debugPrint("Error fetching progress: $e");
       // Fallback state on error
@@ -206,6 +220,96 @@ class ProgressController extends GetxController {
       }
     } catch (e) {
       debugPrint("Error fetching real history: $e");
+    }
+  }
+
+  Future<void> _fetchTodayReport() async {
+    try {
+      final res = await _apiClient.get(ApiEndpoints.todayNutritionLog);
+      if (res.statusCode == 200 && res.data != null) {
+        final data = res.data;
+        final consumed = data['consumed'] ?? {};
+        final targets = data['targets'] ?? {};
+
+        todayConsumedCalories.value = (consumed['calories'] as num?)?.round() ?? 0;
+        todayConsumedProtein.value = (consumed['protein'] as num?)?.round() ?? 0;
+        todayConsumedCarbs.value = (consumed['carbs'] as num?)?.round() ?? 0;
+        todayConsumedFat.value = (consumed['fat'] as num?)?.round() ?? 0;
+
+        todayTargetProtein.value = (targets['protein'] as num?)?.round() ?? 0;
+        todayTargetCarbs.value = (targets['carbs'] as num?)?.round() ?? 0;
+        todayTargetFat.value = (targets['fat'] as num?)?.round() ?? 0;
+      }
+    } catch (e) {
+      debugPrint("Error fetching today's report: $e");
+    }
+  }
+
+  Future<void> _fetchWeightData() async {
+    try {
+      final res = await _apiClient.get(ApiEndpoints.progressLog);
+      if (res.statusCode == 200 && res.data != null) {
+        final data = res.data;
+
+        startingWeight.value =
+            double.tryParse(data['starting_weight']?.toString() ?? '') ??
+            startingWeight.value;
+        currentWeight.value =
+            double.tryParse(data['current_weight']?.toString() ?? '') ?? 0.0;
+        weightDifferenceKg.value =
+            double.tryParse(data['weight_difference_kg']?.toString() ?? '') ?? 0.0;
+
+        final List rawLogs = data['logs'] ?? [];
+        final tempHistory = <Map<String, dynamic>>[];
+        for (var log in rawLogs) {
+          final w = double.tryParse(log['weight_kg']?.toString() ?? '') ?? 0.0;
+          final dateStr = log['logged_date']?.toString() ?? '';
+          if (w > 0) {
+            tempHistory.add({'date': dateStr, 'weight': w});
+          }
+        }
+        // Keep only the most recent entries so the trend line stays readable.
+        weightHistory.value = tempHistory.length > 10
+            ? tempHistory.sublist(tempHistory.length - 10)
+            : tempHistory;
+      }
+    } catch (e) {
+      debugPrint("Error fetching weight history: $e");
+    }
+  }
+
+  Future<bool> logWeight(double weightKg) async {
+    isLoggingWeight.value = true;
+    try {
+      final res = await _apiClient.post(
+        ApiEndpoints.logWeight,
+        data: {'weight_kg': weightKg},
+      );
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        await _fetchWeightData();
+        Get.snackbar(
+          "Weight Logged",
+          "Your weight has been updated to ${weightKg.toStringAsFixed(1)} kg.",
+          backgroundColor: const Color(0xff00FF87).withOpacity(0.9),
+          colorText: Colors.black,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Error logging weight: $e");
+      Get.snackbar(
+        "Error",
+        "Failed to log weight. Please try again.",
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+      return false;
+    } finally {
+      isLoggingWeight.value = false;
     }
   }
 

@@ -18,6 +18,19 @@ class HomeController extends GetxController {
   final homeMeals = <Map<String, dynamic>>[].obs;
   final weightHistoryLogs = <Map<String, dynamic>>[].obs;
 
+  // Search bar query — filters homeMeals by meal type/food name.
+  final mealSearchQuery = ''.obs;
+
+  List<Map<String, dynamic>> get filteredHomeMeals {
+    final query = mealSearchQuery.value.trim().toLowerCase();
+    if (query.isEmpty) return homeMeals;
+    return homeMeals.where((meal) {
+      final title = (meal['title'] ?? '').toString().toLowerCase();
+      final desc = (meal['desc'] ?? '').toString().toLowerCase();
+      return title.contains(query) || desc.contains(query);
+    }).toList();
+  }
+
   // Swiggy-style tab navigation state
   final activeTab = 0.obs; // 0 = Meal, 1 = Workout
 

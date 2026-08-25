@@ -2127,7 +2127,20 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
 
   Widget buildMealPlanTimeline() {
     return Obx(() {
-      return BlockbusterMealCarousel(meals: controller.homeMeals.toList());
+      final meals = controller.filteredHomeMeals;
+      if (meals.isEmpty && controller.mealSearchQuery.value.isNotEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 32),
+          child: Center(
+            child: Text(
+              'No meals match "${controller.mealSearchQuery.value}"',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(color: Colors.white54, fontSize: 14),
+            ),
+          ),
+        );
+      }
+      return BlockbusterMealCarousel(meals: meals);
     });
   }
 
@@ -3626,12 +3639,16 @@ class _PremiumSearchBarState extends State<PremiumSearchBar> {
   ];
   int currentIndex = 0;
   late Timer _timer;
+  final TextEditingController _textController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (mounted) {
+      // Only rotate the placeholder while the field is empty and unfocused,
+      // so it never interrupts an in-progress search.
+      if (mounted && _textController.text.isEmpty && !_focusNode.hasFocus) {
         setState(() {
           currentIndex = (currentIndex + 1) % searchHints.length;
         });
@@ -3642,11 +3659,15 @@ class _PremiumSearchBarState extends State<PremiumSearchBar> {
   @override
   void dispose() {
     _timer.cancel();
+    _textController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final HomeController controller = Get.find<HomeController>();
+
     return Container(
       height: 54,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -3666,45 +3687,34 @@ class _PremiumSearchBarState extends State<PremiumSearchBar> {
           const Icon(Icons.search_rounded, color: Colors.black54, size: 22),
           const SizedBox(width: 12),
           Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 500),
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 0.2),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
-                  ),
-                );
-              },
-              child: Align(
-                key: ValueKey<int>(currentIndex),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  searchHints[currentIndex],
-                  style: GoogleFonts.outfit(
-                    color: Colors.black87,
-                    fontSize: 15,
-                  ),
+            child: TextField(
+              controller: _textController,
+              focusNode: _focusNode,
+              onChanged: (value) => controller.mealSearchQuery.value = value,
+              style: GoogleFonts.outfit(color: Colors.black87, fontSize: 15),
+              decoration: InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                hintText: searchHints[currentIndex],
+                hintStyle: GoogleFonts.outfit(
+                  color: Colors.black45,
+                  fontSize: 15,
                 ),
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: const Color(0xff00A2FF),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.tune_rounded,
-              color: Colors.white,
-              size: 18,
-            ),
-          ),
+          Obx(() {
+            if (controller.mealSearchQuery.value.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return GestureDetector(
+              onTap: () {
+                _textController.clear();
+                controller.mealSearchQuery.value = '';
+              },
+              child: const Icon(Icons.close_rounded, color: Colors.black45, size: 20),
+            );
+          }),
         ],
       ),
     );

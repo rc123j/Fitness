@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/progress_controller.dart';
 import '../../meal/views/nutrition_history_view.dart';
+import '../../meal/bindings/meal_binding.dart';
 import '../../../widgets/app_shimmer.dart';
 import '../../../widgets/scroll_nav_bar_binder.dart';
 
@@ -102,7 +103,9 @@ class ProgressView extends GetView<ProgressController> {
                               const SizedBox(height: 24),
                               _buildTransformationGallery(),
                               const SizedBox(height: 24),
-                              _buildComplianceChart(),
+                              _buildTodayReport(),
+                              const SizedBox(height: 24),
+                              _buildWeightTracker(),
                               const SizedBox(height: 24),
                               _buildStartingSnapshot(),
                               const SizedBox(height: 40),
@@ -150,7 +153,10 @@ class ProgressView extends GetView<ProgressController> {
           Row(
             children: [
               GestureDetector(
-                onTap: () => Get.to(() => const NutritionHistoryView()),
+                onTap: () => Get.to(
+                  () => const NutritionHistoryView(),
+                  binding: MealBinding(),
+                ),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
@@ -657,7 +663,7 @@ class ProgressView extends GetView<ProgressController> {
     );
   }
 
-  Widget _buildComplianceChart() {
+  Widget _buildTodayReport() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -682,41 +688,483 @@ class ProgressView extends GetView<ProgressController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Weekly Calorie Adherence",
-            style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Today's Report",
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: const Color(0xff00FF87).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: const Color(0xff00FF87).withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xff00FF87),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      "Live",
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xff00FF87),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 24),
+          Obx(() {
+            if (controller.isLoading.value) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 40),
+                child: Center(child: CircularProgressIndicator(color: Color(0xffB100FF))),
+              );
+            }
+
+            final consumed = controller.todayConsumedCalories.value;
+            final target = controller.targetCalories.value;
+
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _buildCalorieRing(consumed, target),
+                const SizedBox(width: 24),
+                Expanded(
+                  child: Column(
+                    children: [
+                      _buildMacroBar(
+                        "Protein",
+                        controller.todayConsumedProtein.value,
+                        controller.todayTargetProtein.value,
+                        const Color(0xff00A2FF),
+                      ),
+                      const SizedBox(height: 14),
+                      _buildMacroBar(
+                        "Carbs",
+                        controller.todayConsumedCarbs.value,
+                        controller.todayTargetCarbs.value,
+                        const Color(0xffFF7A00),
+                      ),
+                      const SizedBox(height: 14),
+                      _buildMacroBar(
+                        "Fat",
+                        controller.todayConsumedFat.value,
+                        controller.todayTargetFat.value,
+                        const Color(0xffFF00E5),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCalorieRing(int consumed, int target) {
+    final double ratio = target > 0 ? consumed / target : 0.0;
+
+    Color ringColor = const Color(0xff00FF87);
+    String statusLabel = "On Track";
+    if (ratio < 0.5) {
+      ringColor = const Color(0xffFF7A00);
+      statusLabel = "Keep Going";
+    } else if (ratio > 1.1) {
+      ringColor = const Color(0xffFF3E3E);
+      statusLabel = "Over Target";
+    }
+
+    return SizedBox(
+      width: 148,
+      height: 148,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          CustomPaint(
+            size: const Size(148, 148),
+            painter: CalorieRingPainter(progress: ratio, color: ringColor),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "$consumed",
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  height: 1.0,
+                ),
+              ),
+              Text(
+                "/ $target kcal",
+                style: GoogleFonts.outfit(
+                  color: Colors.white.withOpacity(0.45),
+                  fontSize: 11,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                statusLabel,
+                style: GoogleFonts.outfit(
+                  color: ringColor,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMacroBar(String label, int consumed, int target, Color color) {
+    final double ratio = target > 0 ? (consumed / target).clamp(0.0, 1.0) : 0.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.outfit(
+                color: Colors.white.withOpacity(0.7),
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              "${consumed}g / ${target}g",
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Stack(
+          children: [
+            Container(
+              height: 8,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            FractionallySizedBox(
+              widthFactor: ratio,
+              child: Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [color, color.withOpacity(0.6)],
+                  ),
+                  borderRadius: BorderRadius.circular(4),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withOpacity(0.5),
+                      blurRadius: 6,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWeightTracker() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xff1C1533),
+            const Color(0xff0D0818),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Weight Tracker",
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => _showLogWeightSheet(),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xffB100FF), Color(0xffFF00E5)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.add_rounded, color: Colors.white, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        "Log Weight",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Obx(() {
+            final current = controller.currentWeight.value;
+            final diff = controller.weightDifferenceKg.value;
+            final hasLost = diff >= 0;
+            final diffColor = diff == 0
+                ? Colors.white54
+                : (hasLost ? const Color(0xff00FF87) : const Color(0xffFF7A00));
+
+            return Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        current > 0 ? "${current.toStringAsFixed(1)} kg" : "--",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "Current Weight",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white.withOpacity(0.5),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (diff != 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: diffColor.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: diffColor.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          hasLost ? Icons.trending_down_rounded : Icons.trending_up_rounded,
+                          color: diffColor,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          "${diff.abs().toStringAsFixed(1)} kg ${hasLost ? 'Lost' : 'Gained'}",
+                          style: GoogleFonts.outfit(
+                            color: diffColor,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            );
+          }),
+          const SizedBox(height: 20),
           SizedBox(
-            height: 160,
+            height: 90,
             child: Obx(() {
-              if (controller.isLoading.value && controller.weeklyAdherenceData.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (controller.weeklyAdherenceData.isEmpty) {
+              if (controller.weightHistory.length < 2) {
                 return Center(
                   child: Text(
-                    "No meals logged yet.\nStart logging to see your adherence!",
+                    "Log at least two weigh-ins to see your trend.",
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.outfit(color: Colors.white54, fontSize: 14),
+                    style: GoogleFonts.outfit(color: Colors.white38, fontSize: 13),
                   ),
                 );
               }
               return CustomPaint(
-                size: const Size(double.infinity, 160),
-                painter: WeeklyAdherencePainter(
-                  data: controller.weeklyAdherenceData,
-                  targetCalories: controller.targetCalories.value,
-                ),
+                size: const Size(double.infinity, 90),
+                painter: WeightTrendPainter(history: controller.weightHistory),
               );
             }),
           ),
         ],
       ),
+    );
+  }
+
+  void _showLogWeightSheet() {
+    final textController = TextEditingController(
+      text: controller.currentWeight.value > 0
+          ? controller.currentWeight.value.toStringAsFixed(1)
+          : '',
+    );
+
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 24,
+          bottom: MediaQuery.of(Get.context!).viewInsets.bottom + 24,
+        ),
+        decoration: const BoxDecoration(
+          color: Color(0xff121220),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Log Today's Weight",
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Keep this up to date to track your real progress.",
+              style: GoogleFonts.outfit(color: Colors.white.withOpacity(0.5), fontSize: 13),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: textController,
+              autofocus: true,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              style: GoogleFonts.outfit(color: Colors.white, fontSize: 18),
+              decoration: InputDecoration(
+                suffixText: "kg",
+                suffixStyle: GoogleFonts.outfit(color: Colors.white54),
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.06),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: Obx(
+                () => ElevatedButton(
+                  onPressed: controller.isLoggingWeight.value
+                      ? null
+                      : () async {
+                          final value = double.tryParse(textController.text.trim());
+                          if (value == null || value <= 0) {
+                            Get.snackbar(
+                              "Invalid Weight",
+                              "Please enter a valid weight in kg.",
+                              backgroundColor: Colors.redAccent,
+                              colorText: Colors.white,
+                            );
+                            return;
+                          }
+                          final success = await controller.logWeight(value);
+                          if (success) Get.back();
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffB100FF),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: controller.isLoggingWeight.value
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          "Save Weight",
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
     );
   }
 
@@ -817,6 +1265,146 @@ class ProgressView extends GetView<ProgressController> {
       ),
     );
   }
+}
+
+class CalorieRingPainter extends CustomPainter {
+  final double progress; // 0.0 - 1.0+ (can exceed 1 when over target)
+  final Color color;
+
+  CalorieRingPainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width / 2) - 10;
+    const strokeWidth = 12.0;
+
+    // Background track
+    final trackPaint = Paint()
+      ..color = Colors.white.withOpacity(0.08)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(center, radius, trackPaint);
+
+    // Progress arc (capped visually at 100%; ring glows past that via color change)
+    final sweep = (progress.clamp(0.0, 1.0)) * 2 * pi;
+    if (sweep > 0) {
+      final rect = Rect.fromCircle(center: center, radius: radius);
+      final progressPaint = Paint()
+        ..shader = SweepGradient(
+          startAngle: 0,
+          endAngle: sweep,
+          colors: [color.withOpacity(0.4), color],
+          transform: const GradientRotation(-pi / 2),
+        ).createShader(rect)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round;
+
+      canvas.drawArc(rect, -pi / 2, sweep, false, progressPaint);
+
+      // Soft glow at the leading edge
+      final glowPaint = Paint()
+        ..color = color.withOpacity(0.6)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round;
+      canvas.drawArc(rect, -pi / 2, sweep, false, glowPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CalorieRingPainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.color != color;
+}
+
+class WeightTrendPainter extends CustomPainter {
+  final List<Map<String, dynamic>> history;
+
+  WeightTrendPainter({required this.history});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (history.length < 2) return;
+
+    final weights = history.map((e) => (e['weight'] as num).toDouble()).toList();
+    final double minW = weights.reduce(min);
+    final double maxW = weights.reduce(max);
+    // Pad the range so a flat trend line doesn't hug the top/bottom edges.
+    final double range = (maxW - minW).abs() < 0.5 ? 1.0 : (maxW - minW);
+    final double paddedMin = minW - (range * 0.15);
+    final double paddedRange = range * 1.3;
+
+    final double stepX = size.width / (weights.length - 1);
+    final points = <Offset>[];
+    for (int i = 0; i < weights.length; i++) {
+      final double x = i * stepX;
+      final double normalized = (weights[i] - paddedMin) / paddedRange;
+      final double y = size.height - (normalized * size.height);
+      points.add(Offset(x, y));
+    }
+
+    // Filled area under the line for a softer, more polished look.
+    final fillPath = Path()..moveTo(points.first.dx, size.height);
+    for (final p in points) {
+      fillPath.lineTo(p.dx, p.dy);
+    }
+    fillPath.lineTo(points.last.dx, size.height);
+    fillPath.close();
+    canvas.drawPath(
+      fillPath,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            const Color(0xffB100FF).withOpacity(0.25),
+            const Color(0xffB100FF).withOpacity(0.0),
+          ],
+        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
+    );
+
+    // The trend line itself.
+    final linePath = Path()..moveTo(points.first.dx, points.first.dy);
+    for (final p in points.skip(1)) {
+      linePath.lineTo(p.dx, p.dy);
+    }
+    canvas.drawPath(
+      linePath,
+      Paint()
+        ..color = const Color(0xffB100FF)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+
+    // Dots at each entry, with the latest one highlighted.
+    for (int i = 0; i < points.length; i++) {
+      final isLast = i == points.length - 1;
+      canvas.drawCircle(
+        points[i],
+        isLast ? 5 : 3,
+        Paint()..color = isLast ? const Color(0xffFF00E5) : Colors.white,
+      );
+      if (isLast) {
+        canvas.drawCircle(
+          points[i],
+          8,
+          Paint()
+            ..color = const Color(0xffFF00E5).withOpacity(0.3)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2,
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant WeightTrendPainter oldDelegate) =>
+      oldDelegate.history != history;
 }
 
 class WeeklyAdherencePainter extends CustomPainter {
