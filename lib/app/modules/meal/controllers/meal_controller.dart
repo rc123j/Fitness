@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:dio/dio.dart' show DioException;
 import 'package:get/get.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
@@ -101,6 +102,26 @@ class MealController extends GetxController {
   // Track expanded state for each meal slot (dietPlanMealId)
   final expandedMealIds = <int>{}.obs;
 
+  // Meal-completion timing state, from the backend's `meal_marking` block.
+  // Drives whether "Mark as Complete" is tappable and what label it shows.
+  final markingIsToday = true.obs;
+  final markingIsPast = false.obs;
+  final mealUnlocked = <int, bool>{}.obs; // meal_id -> is its window open now
+  final mealUnlockLabel = <int, String>{}.obs; // meal_id -> "7:00 PM"
+
+  /// Whether this meal slot can be marked complete right now (viewing today
+  /// AND the slot's time of day has arrived). Past/future days -> false.
+  bool isMealMarkable(int mealId) =>
+      markingIsToday.value && (mealUnlocked[mealId] ?? false);
+
+  /// Label to show when a slot isn't markable yet, e.g. "Unlocks 7:00 PM".
+  String mealLockLabel(int mealId) {
+    if (markingIsPast.value) return "Log closed for this day";
+    if (!markingIsToday.value) return "Not available";
+    final t = mealUnlockLabel[mealId];
+    return t != null && t.isNotEmpty ? "Unlocks $t" : "Locked";
+  }
+
   // Calorie & Nutrition history logging
   final calorieHistoryList = <Map<String, dynamic>>[].obs;
   final historyTargetCalories = 2000.obs;
@@ -150,6 +171,27 @@ class MealController extends GetxController {
 
       if (planRes.data != null) {
         currentDay.value = planRes.data['current_day'] ?? 1;
+
+        // Meal-completion timing (per-slot unlock state) from the backend.
+        final marking = planRes.data['meal_marking'];
+        if (marking is Map) {
+          markingIsToday.value = marking['is_today'] == true;
+          markingIsPast.value = marking['is_past'] == true;
+          final newUnlocked = <int, bool>{};
+          final newLabels = <int, String>{};
+          final w = marking['windows'];
+          if (w is Map) {
+            w.forEach((key, val) {
+              final mid = int.tryParse(key.toString());
+              if (mid != null && val is Map) {
+                newUnlocked[mid] = val['unlocked'] == true;
+                newLabels[mid] = val['unlocks_at_label']?.toString() ?? '';
+              }
+            });
+          }
+          mealUnlocked.value = newUnlocked;
+          mealUnlockLabel.value = newLabels;
+        }
 
         final activatedAtStr = planRes.data['activated_at']?.toString();
         final parsedActivatedAt = activatedAtStr != null
@@ -506,7 +548,9 @@ class MealController extends GetxController {
     } catch (_) {}
   }
 
-  Future<bool> markMealAsCompleted(
+  /// Returns null on success, or a user-facing error message on failure
+  /// (e.g. "You can mark this meal from 7:00 PM.").
+  Future<String?> markMealAsCompleted(
     int dietPlanMealId,
     int mealId, {
     int selectedOption = 1,
@@ -517,19 +561,26 @@ class MealController extends GetxController {
         data: {
           'diet_plan_meal_id': dietPlanMealId,
           'selected_option': selectedOption,
+          // The day the user is looking at — the backend rejects anything
+          // that isn't the member's current local day.
+          if (selectedQueryDate.value.isNotEmpty)
+            'logged_date': selectedQueryDate.value,
         },
       );
       completedMealIds.add(mealId);
       await fetchMealData(silent: true); // silent refresh — no spinner
       await fetchCalorieHistory();
       _refreshDependentScreens();
-      return true;
-    } catch (e) {
-      return false;
+      return null;
+    } on DioException catch (e) {
+      return _errorMessage(e, fallback: 'Could not log this meal. Try again.');
+    } catch (_) {
+      return 'Could not log this meal. Try again.';
     }
   }
 
-  Future<bool> unmarkMealAsCompleted(int dietPlanMealId, int mealId) async {
+  /// Returns null on success, or a user-facing error message on failure.
+  Future<String?> unmarkMealAsCompleted(int dietPlanMealId, int mealId) async {
     try {
       final dateParam = selectedQueryDate.value.isNotEmpty
           ? selectedQueryDate.value
@@ -545,10 +596,21 @@ class MealController extends GetxController {
       await fetchMealData(silent: true); // silent refresh — no spinner
       await fetchCalorieHistory();
       _refreshDependentScreens();
-      return true;
-    } catch (e) {
-      return false;
+      return null;
+    } on DioException catch (e) {
+      return _errorMessage(e, fallback: 'Could not update this meal. Try again.');
+    } catch (_) {
+      return 'Could not update this meal. Try again.';
     }
+  }
+
+  String _errorMessage(DioException e, {required String fallback}) {
+    final data = e.response?.data;
+    if (data is Map) {
+      final m = data['message'] ?? data['error'];
+      if (m != null && m.toString().isNotEmpty) return m.toString();
+    }
+    return fallback;
   }
 
   /// Home and Progress each show their own summary of today's meals, but

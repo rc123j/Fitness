@@ -1793,20 +1793,12 @@ class MealView extends GetView<MealController> {
                           children: [
                             // Status checkmark indicator
                             GestureDetector(
-                              onTap: () {
-                                if (isCompleted) {
-                                  controller.unmarkMealAsCompleted(
-                                    dietPlanMealId,
-                                    mealTypeId,
-                                  );
-                                } else {
-                                  controller.markMealAsCompleted(
-                                    dietPlanMealId,
-                                    mealTypeId,
-                                    selectedOption: selectedOpt,
-                                  );
-                                }
-                              },
+                              onTap: () => _handleMealToggle(
+                                dietPlanMealId,
+                                mealTypeId,
+                                isCompleted,
+                                selectedOpt,
+                              ),
                               child: Container(
                                 height: 24,
                                 width: 24,
@@ -1818,7 +1810,9 @@ class MealView extends GetView<MealController> {
                                   border: Border.all(
                                     color: isCompleted
                                         ? Colors.transparent
-                                        : Colors.white.withOpacity(0.2),
+                                        : controller.isMealMarkable(mealTypeId)
+                                        ? Colors.white.withOpacity(0.2)
+                                        : Colors.white.withOpacity(0.1),
                                     width: 1.5,
                                   ),
                                 ),
@@ -1828,7 +1822,13 @@ class MealView extends GetView<MealController> {
                                         color: Colors.black,
                                         size: 14,
                                       )
-                                    : null,
+                                    : (!controller.isMealMarkable(mealTypeId)
+                                        ? Icon(
+                                            Icons.lock_outline_rounded,
+                                            color: Colors.white.withOpacity(0.25),
+                                            size: 12,
+                                          )
+                                        : null),
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -2221,51 +2221,50 @@ class MealView extends GetView<MealController> {
     bool isCompleted,
     int activeOpt,
   ) {
+    final bool locked =
+        !isCompleted && !controller.isMealMarkable(mealTypeId);
+
+    final IconData icon = isCompleted
+        ? Icons.check_circle_rounded
+        : locked
+        ? Icons.lock_clock_rounded
+        : Icons.check_circle_outline_rounded;
+    final String label = isCompleted
+        ? "Marked as Eaten"
+        : locked
+        ? controller.mealLockLabel(mealTypeId)
+        : "Mark as Complete";
+
     return GestureDetector(
-      onTap: () async {
-        if (isCompleted) {
-          await controller.unmarkMealAsCompleted(dietPlanMealId, mealTypeId);
-        } else {
-          final success = await controller.markMealAsCompleted(
-            dietPlanMealId,
-            mealTypeId,
-            selectedOption: activeOpt,
-          );
-          if (success) {
-            Get.snackbar(
-              "Meal Logged 🥗",
-              "Awesome job! +10 FitCoins added to your wallet.",
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
-              colorText: Colors.white,
-              borderColor: const Color(0xff00FF87).withOpacity(0.2),
-              borderWidth: 1,
-            );
-          }
-        }
-      },
+      onTap: () => _handleMealToggle(
+        dietPlanMealId,
+        mealTypeId,
+        isCompleted,
+        activeOpt,
+      ),
       child: Container(
         height: 48,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: Colors.white,
+          color: locked ? Colors.white.withOpacity(0.06) : Colors.white,
+          border: locked
+              ? Border.all(color: Colors.white.withOpacity(0.12))
+              : null,
         ),
         alignment: Alignment.center,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              isCompleted
-                  ? Icons.check_circle_rounded
-                  : Icons.check_circle_outline_rounded,
-              color: Colors.black,
+              icon,
+              color: locked ? Colors.white.withOpacity(0.5) : Colors.black,
               size: 18,
             ),
             const SizedBox(width: 8),
             Text(
-              isCompleted ? "Marked as Eaten" : "Mark as Complete",
+              label,
               style: GoogleFonts.outfit(
-                color: Colors.black,
+                color: locked ? Colors.white.withOpacity(0.65) : Colors.black,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -2273,6 +2272,84 @@ class MealView extends GetView<MealController> {
           ],
         ),
       ),
+    );
+  }
+
+  /// Mark / un-mark a meal, routing every timing rule through one place so
+  /// the checkmark circle and the inline button behave identically.
+  Future<void> _handleMealToggle(
+    int dietPlanMealId,
+    int mealTypeId,
+    bool isCompleted,
+    int selectedOpt,
+  ) async {
+    if (isCompleted) {
+      if (!controller.markingIsToday.value) {
+        _showMealActionMessage("You can only change today's meal log.");
+        return;
+      }
+      final err = await controller.unmarkMealAsCompleted(
+        dietPlanMealId,
+        mealTypeId,
+      );
+      if (err != null) _showMealActionMessage(err);
+      return;
+    }
+
+    // Past / future days can never be marked, and waiting won't change that
+    // — block here. For "too early on today", don't hard-block on possibly
+    // stale cached state: let the request through and let the backend's
+    // clock be the judge (it returns TOO_EARLY if it really is).
+    if (!controller.markingIsToday.value) {
+      _showMealActionMessage(_mealLockReason(mealTypeId));
+      return;
+    }
+
+    final err = await controller.markMealAsCompleted(
+      dietPlanMealId,
+      mealTypeId,
+      selectedOption: selectedOpt,
+    );
+    if (err != null) {
+      _showMealActionMessage(err);
+    } else {
+      Get.snackbar(
+        "Meal Logged 🥗",
+        "Added to today's nutrition totals.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
+        colorText: Colors.white,
+        borderColor: const Color(0xff00FF87).withOpacity(0.2),
+        borderWidth: 1,
+        margin: const EdgeInsets.all(16),
+      );
+    }
+  }
+
+  String _mealLockReason(int mealTypeId) {
+    if (controller.markingIsPast.value) {
+      return "This day's meal log is closed — you can only mark today's meals.";
+    }
+    if (!controller.markingIsToday.value) {
+      return "Meals can only be marked on the day itself.";
+    }
+    final t = controller.mealUnlockLabel[mealTypeId] ?? '';
+    return t.isNotEmpty
+        ? "You can mark this meal from $t."
+        : "This meal isn't available to mark yet.";
+  }
+
+  void _showMealActionMessage(String msg) {
+    Get.snackbar(
+      "Hold on",
+      msg,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color(0xff0B0817).withOpacity(0.92),
+      colorText: Colors.white,
+      borderColor: const Color(0xffFF7A00).withOpacity(0.3),
+      borderWidth: 1,
+      margin: const EdgeInsets.all(16),
+      duration: const Duration(seconds: 3),
     );
   }
 }
