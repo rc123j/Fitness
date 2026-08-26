@@ -107,6 +107,24 @@ class MealController extends GetxController {
   final historyAverageCalories = 0.obs;
   final historyAdherenceRate = 0.obs;
 
+  /// Per-day intake (calories + macros + which meal slots were logged),
+  /// newest day first, with days before the plan was activated dropped —
+  /// the member never logged anything for those. Backs the "Daily Intake"
+  /// chart on the Nutrition History screen.
+  List<Map<String, dynamic>> get dailyIntakeHistory {
+    final list = calorieHistoryList
+        .where(
+          (d) => !isDateBeforeActivation(d['date']?.toString() ?? ''),
+        )
+        .toList();
+    list.sort(
+      (a, b) => (b['date']?.toString() ?? '').compareTo(
+        a['date']?.toString() ?? '',
+      ),
+    );
+    return list;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -550,7 +568,10 @@ class MealController extends GetxController {
 
   Future<void> fetchCalorieHistory() async {
     try {
-      final res = await _apiClient.get(ApiEndpoints.calorieHistory);
+      // Pull the full 30-day window (backend caps at 30). The Meal
+      // Attendance Log still renders one week at a time, but the "Daily
+      // Intake" breakdown below it walks the whole plan history.
+      final res = await _apiClient.get("${ApiEndpoints.calorieHistory}?days=30");
       final data = res.data;
 
       historyTargetCalories.value =

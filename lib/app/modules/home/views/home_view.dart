@@ -1003,23 +1003,20 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Transform.translate(
-                offset: const Offset(0, -8),
-                child: GestureDetector(
-                  onTap: () => _showPremiumOfferBottomSheet(
-                    context,
-                    "Premium Access",
-                    "Unlock all features",
-                    const Color(0xffFFD166),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.asset(
-                      'assets/home/offer1.png',
-                      width: 320,
-                      height: 190,
-                      fit: BoxFit.cover,
-                    ),
+              GestureDetector(
+                onTap: () => _showPremiumOfferBottomSheet(
+                  context,
+                  "Premium Access",
+                  "Unlock all features",
+                  const Color(0xffFFD166),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/home/offer1.png',
+                    width: 478,
+                    height: 190,
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),

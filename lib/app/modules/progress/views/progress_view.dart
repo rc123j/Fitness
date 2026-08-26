@@ -8,6 +8,7 @@ import '../../meal/views/nutrition_history_view.dart';
 import '../../meal/bindings/meal_binding.dart';
 import '../../../widgets/app_shimmer.dart';
 import '../../../widgets/scroll_nav_bar_binder.dart';
+import '../../../widgets/calorie_bar_chart.dart';
 
 class ProgressView extends GetView<ProgressController> {
   const ProgressView({super.key});
@@ -91,48 +92,58 @@ class ProgressView extends GetView<ProgressController> {
                             right: 18,
                             bottom: 100,
                           ),
-                          child: AppShimmer(
-                            enabled: controller.isLoading.value,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 10),
-                                _buildGreeting(),
-                                const SizedBox(height: 24),
-                                Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    _buildJourneyProgressCard(),
-                                    Positioned(
-                                      top: -152,
-                                      right: 8,
-                                      child: Image.asset(
-                                        'assets/progress/boyontop.png',
-                                        height: 155,
-                                        fit: BoxFit.contain,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                              return Image.asset(
-                                                'assets/profile/avatar.png',
-                                                height: 155,
-                                                fit: BoxFit.contain,
-                                                errorBuilder: (c, e, s) =>
-                                                    const SizedBox.shrink(),
-                                              );
-                                            },
-                                      ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 10),
+                              AppShimmer(
+                                enabled: controller.isLoading.value,
+                                child: _buildGreeting(),
+                              ),
+                              const SizedBox(height: 24),
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  AppShimmer(
+                                    enabled: controller.isLoading.value,
+                                    child: _buildJourneyProgressCard(),
+                                  ),
+                                  Positioned(
+                                    top: -152,
+                                    right: 8,
+                                    child: Image.asset(
+                                      'assets/progress/boyontop.png',
+                                      height: 155,
+                                      fit: BoxFit.contain,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return Image.asset(
+                                              'assets/profile/avatar.png',
+                                              height: 155,
+                                              fit: BoxFit.contain,
+                                              errorBuilder: (c, e, s) =>
+                                                  const SizedBox.shrink(),
+                                            );
+                                          },
                                     ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              AppShimmer(
+                                enabled: controller.isLoading.value,
+                                child: Column(
+                                  children: [
+                                    _buildDisciplineBanner(),
+                                    const SizedBox(height: 24),
+                                    _buildAnalyticsTabs(),
+                                    const SizedBox(height: 24),
+                                    _buildStartingSnapshot(),
                                   ],
                                 ),
-                                const SizedBox(height: 16),
-                                _buildDisciplineBanner(),
-                                const SizedBox(height: 24),
-                                _buildAnalyticsTabs(),
-                                const SizedBox(height: 24),
-                                _buildStartingSnapshot(),
-                                const SizedBox(height: 40),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(height: 40),
+                            ],
                           ),
                         ),
                       );
@@ -218,46 +229,51 @@ class ProgressView extends GetView<ProgressController> {
   }
 
   Widget _buildGreeting() {
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              _timeBasedGreeting(),
-              style: GoogleFonts.outfit(
-                color: const Color(0xffB100FF),
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            GestureDetector(
-              onTap: () => Get.back(),
-              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 24),
-            ),
-          ],
+        GestureDetector(
+          onTap: () => Get.back(),
+          child: const Padding(
+            padding: EdgeInsets.only(right: 16.0, top: 4.0),
+            child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 24),
+          ),
         ),
-        Row(
-          children: [
-            Text(
-              "${controller.userName.value.isNotEmpty ? controller.userName.value.split(' ')[0] : 'Rahul'}!",
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _timeBasedGreeting(),
+                style: GoogleFonts.outfit(
+                  color: const Color(0xffB100FF),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            const Text("👋", style: TextStyle(fontSize: 24)),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Text(
-          "Small steps today,\nstronger you tomorrow.",
-          style: GoogleFonts.outfit(
-            color: Colors.white.withOpacity(0.6),
-            fontSize: 14,
+              Row(
+                children: [
+                  Text(
+                    "${controller.userName.value.isNotEmpty ? controller.userName.value.split(' ')[0] : 'Rahul'}!",
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text("👋", style: TextStyle(fontSize: 24)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Small steps today,\nstronger you tomorrow.",
+                style: GoogleFonts.outfit(
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 14,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -2050,169 +2066,6 @@ class WeightTrendPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant WeightTrendPainter oldDelegate) =>
       oldDelegate.history != history;
-}
-
-class CalorieBarChartPainter extends CustomPainter {
-  final List<Map<String, dynamic>> history;
-  final double target;
-
-  CalorieBarChartPainter({required this.history, required this.target});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    double w = size.width;
-    double h = size.height;
-
-    double yAxisWidth = 30.0;
-    double xAxisHeight = 24.0;
-
-    double chartLeft = yAxisWidth;
-    double chartTop = 0;
-    double chartWidth = w - yAxisWidth;
-    double chartHeight = h - xAxisHeight;
-
-    double maxVal = max(target, 2500);
-    for (var day in history) {
-      double cal = double.tryParse(day['calories']?.toString() ?? '0') ?? 0;
-      if (cal > maxVal) maxVal = cal;
-    }
-    maxVal = (maxVal / 1000).ceil() * 1000.0;
-
-    int steps = (maxVal / 1000).floor();
-    for (int i = 0; i <= steps; i++) {
-      double val = i * 1000.0;
-      double y = chartHeight - (val / maxVal) * chartHeight;
-
-      String label = val == 0 ? "0" : "${(val / 1000).toInt()}K";
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: label,
-          style: GoogleFonts.inter(
-            color: Colors.white.withOpacity(0.5),
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-
-      textPainter.paint(canvas, Offset(0, y - textPainter.height / 2));
-    }
-
-    double targetY = chartHeight - (target / maxVal) * chartHeight;
-    double dashWidth = 4.0;
-    double dashSpace = 4.0;
-    double currentX = chartLeft;
-    final targetPaint = Paint()
-      ..color = const Color(0xffFF7A00).withOpacity(0.6)
-      ..strokeWidth = 1.0;
-
-    while (currentX < w) {
-      canvas.drawLine(
-        Offset(currentX, targetY),
-        Offset(currentX + dashWidth, targetY),
-        targetPaint,
-      );
-      currentX += dashWidth + dashSpace;
-    }
-
-    if (history.isEmpty) return;
-
-    double barWidth = 24.0;
-    double spacing =
-        (chartWidth - (barWidth * history.length)) / (history.length + 1);
-
-    for (int i = 0; i < history.length; i++) {
-      double x = chartLeft + spacing + (i * (barWidth + spacing));
-      double cal =
-          double.tryParse(history[i]['calories']?.toString() ?? '0') ?? 0;
-      double barHeight = (cal / maxVal) * chartHeight;
-
-      if (barHeight > 0) {
-        bool isToday = history[i]['isToday'] == true;
-
-        Rect barRect = Rect.fromLTWH(
-          x,
-          chartHeight - barHeight,
-          barWidth,
-          barHeight,
-        );
-
-        Paint barPaint = Paint()
-          ..shader = LinearGradient(
-            colors: isToday
-                ? [const Color(0xffFFD166), const Color(0xffFF7A00)]
-                : [const Color(0xffD07CFF), const Color(0xff702F9A)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ).createShader(barRect);
-
-        Paint glowPaint = Paint()
-          ..color =
-              (isToday ? const Color(0xffFF7A00) : const Color(0xffB100FF))
-                  .withOpacity(0.3)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8.0);
-
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(barRect, const Radius.circular(6)),
-          glowPaint,
-        );
-
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(barRect, const Radius.circular(6)),
-          barPaint,
-        );
-      }
-
-      String dayLabel = history[i]['day'] ?? '';
-      final labelPainter = TextPainter(
-        text: TextSpan(
-          text: dayLabel,
-          style: GoogleFonts.inter(
-            color: Colors.white,
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-
-      labelPainter.paint(
-        canvas,
-        Offset(x + (barWidth / 2) - (labelPainter.width / 2), chartHeight + 8),
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CalorieBarChartPainter oldDelegate) => true;
-}
-
-class DashedLinePainter extends CustomPainter {
-  final Color color;
-  DashedLinePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    double dashWidth = 4.0;
-    double dashSpace = 4.0;
-    double currentX = 0;
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.0;
-
-    while (currentX < size.width) {
-      canvas.drawLine(
-        Offset(currentX, size.height / 2),
-        Offset(currentX + dashWidth, size.height / 2),
-        paint,
-      );
-      currentX += dashWidth + dashSpace;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant DashedLinePainter oldDelegate) => false;
 }
 
 class _MotivationCarousel extends StatefulWidget {

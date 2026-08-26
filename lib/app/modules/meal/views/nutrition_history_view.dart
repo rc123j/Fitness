@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../widgets/macro_stacked_chart.dart';
 import '../controllers/meal_controller.dart';
 
 class NutritionHistoryView extends GetView<MealController> {
@@ -79,7 +80,13 @@ class NutritionHistoryView extends GetView<MealController> {
                               MediaQuery.of(context).size.height -
                               200, // fills the screen below the header
                         ),
-                        child: buildMealAttendanceCard(),
+                        child: Column(
+                          children: [
+                            buildMealAttendanceCard(),
+                            const SizedBox(height: 16),
+                            buildDailyIntakeCard(context),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -132,7 +139,7 @@ class NutritionHistoryView extends GetView<MealController> {
               ),
               const SizedBox(height: 2),
               Text(
-                "Which meals you've completed, day by day",
+                "Meals completed & what you ate, day by day",
                 style: GoogleFonts.inter(
                   color: Colors.white.withOpacity(0.50),
                   fontSize: 10,
@@ -351,6 +358,83 @@ class NutritionHistoryView extends GetView<MealController> {
                   }),
                 ],
               ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  /// "Daily Intake" — the calories + macro split the member actually
+  /// logged, one stacked bar per day (protein / carbs / fat by calorie
+  /// share, bar height = that day's calories) against the calorie target.
+  /// Tap a bar to read its exact numbers; the chart scrolls across the
+  /// whole plan history. Deliberately a different read from the Progress
+  /// screen's flat calorie bars.
+  Widget buildDailyIntakeCard(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: const Color(0xff0B0817).withOpacity(0.55),
+        border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "Daily Intake",
+            style: GoogleFonts.outfit(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            "Calories & macro split you logged, day by day",
+            style: GoogleFonts.inter(
+              color: Colors.white.withOpacity(0.40),
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Obx(() {
+            // newest-first in the controller -> oldest-first for the chart
+            final days = controller.dailyIntakeHistory.reversed
+                .map((d) => MacroDay.fromMap(d))
+                .toList();
+
+            if (days.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: Center(
+                  child: Text(
+                    "Nothing logged yet — mark a meal complete\nto start your intake history.",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      color: Colors.white.withOpacity(0.4),
+                      fontSize: 12,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MacroStackedChart(
+                  days: days,
+                  targetCalories:
+                      controller.historyTargetCalories.value.toDouble(),
+                ),
+                const SizedBox(height: 18),
+                const MacroChartLegend(),
+              ],
             );
           }),
         ],
