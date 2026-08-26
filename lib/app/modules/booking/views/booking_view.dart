@@ -415,55 +415,75 @@ class BookingView extends GetView<BookingController> {
         child: Obx(() {
           final existing = controller.activeBookingWithCurrentExpert;
 
-          // Already have a pending/approved booking with this expert —
-          // offer to view it, plus a secondary way to still book another
-          // one (the backend rejects a genuine duplicate with a clear
-          // error, this just makes that state visible upfront).
+          // Already have a pending/approved booking with this expert — show
+          // that booking's actual time directly instead of a "book again"
+          // option. One active booking per expert at a time keeps things
+          // simple: no picking a session type, no risk of double-booking.
           if (existing != null) {
-            return Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Get.to(() => const MySessionsView()),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: BorderSide(color: Colors.white.withOpacity(0.2)),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Text(
-                      "Booked Session",
-                      style: GoogleFonts.outfit(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+            final slot = existing['slot'] ?? {};
+            final startStr = slot['start_time']?.toString();
+            final startTime = startStr != null
+                ? DateTime.tryParse(startStr)?.toLocal()
+                : null;
+            final whenText = startTime != null
+                ? DateFormat('EEE, dd MMM • hh:mm a').format(startTime)
+                : 'Time to be confirmed';
+            final status = existing['status']?.toString() ?? 'PENDING';
+
+            return GestureDetector(
+              onTap: () => Get.to(() => const MySessionsView()),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: const Color(0xffFF00E5).withOpacity(0.08),
+                  border: Border.all(
+                    color: const Color(0xffFF00E5).withOpacity(0.4),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Get.to(() => const BookingDateTimeView()),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xffFF00E5),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.event_available_rounded,
+                      color: Color(0xffFF00E5),
+                      size: 22,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Your Session — $status",
+                            style: GoogleFonts.inter(
+                              color: Colors.white.withOpacity(0.55),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            whenText,
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Text(
-                      "Book a New Session",
-                      style: GoogleFonts.outfit(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      color: Colors.white54,
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             );
           }
 

@@ -43,8 +43,8 @@ android {
         applicationId = "com.aaravinfotechnashik.nutri_shape"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        // jitsi_meet_flutter_sdk requires API 24+ for embedded video calls.
-        minSdk = maxOf(flutter.minSdkVersion, 24)
+        // jitsi_meet_flutter_sdk requires API 26+ for embedded video calls.
+        minSdk = maxOf(flutter.minSdkVersion, 26)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

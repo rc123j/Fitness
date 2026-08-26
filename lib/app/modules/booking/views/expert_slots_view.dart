@@ -89,18 +89,37 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                 outsideDaysVisible: false,
               ),
               headerStyle: HeaderStyle(
-                formatButtonTextStyle: GoogleFonts.outfit(color: Colors.white, fontSize: 11),
+                formatButtonTextStyle: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 11,
+                ),
                 formatButtonDecoration: BoxDecoration(
                   border: Border.all(color: Colors.white12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                titleTextStyle: GoogleFonts.outfit(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
-                leftChevronIcon: const Icon(Icons.chevron_left_rounded, color: Colors.white),
-                rightChevronIcon: const Icon(Icons.chevron_right_rounded, color: Colors.white),
+                titleTextStyle: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+                leftChevronIcon: const Icon(
+                  Icons.chevron_left_rounded,
+                  color: Colors.white,
+                ),
+                rightChevronIcon: const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Colors.white,
+                ),
               ),
               daysOfWeekStyle: DaysOfWeekStyle(
-                weekdayStyle: GoogleFonts.inter(color: Colors.white54, fontSize: 11),
-                weekendStyle: GoogleFonts.inter(color: Colors.white30, fontSize: 11),
+                weekdayStyle: GoogleFonts.inter(
+                  color: Colors.white54,
+                  fontSize: 11,
+                ),
+                weekendStyle: GoogleFonts.inter(
+                  color: Colors.white30,
+                  fontSize: 11,
+                ),
               ),
             ),
           ),
@@ -119,32 +138,46 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                   ),
                 ),
                 ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                ).let((_) => GestureDetector(
-                      onTap: () => _showAddSlotDialog(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xffFF00E5).withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xffFF00E5).withOpacity(0.3)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.add, color: Color(0xffFF00E5), size: 14),
-                            const SizedBox(width: 4),
-                            Text(
-                              "Add Slot",
-                              style: GoogleFonts.outfit(
-                                color: const Color(0xffFF00E5),
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                          ],
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                ).let(
+                  (_) => GestureDetector(
+                    onTap: () => _showAddSlotDialog(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xffFF00E5).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xffFF00E5).withOpacity(0.3),
                         ),
                       ),
-                    )),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.add,
+                            color: Color(0xffFF00E5),
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "Add Slot",
+                            style: GoogleFonts.outfit(
+                              color: const Color(0xffFF00E5),
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -156,7 +189,9 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
               if (controller.isLoadingSlots.value) {
                 return const Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xffFF00E5)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xffFF00E5),
+                    ),
                   ),
                 );
               }
@@ -173,12 +208,19 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.hourglass_empty_rounded, color: Colors.white24, size: 40),
+                      Icon(
+                        Icons.hourglass_empty_rounded,
+                        color: Colors.white24,
+                        size: 40,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         "No availability slots configured",
-                        style: GoogleFonts.inter(color: Colors.white30, fontSize: 13),
-                      )
+                        style: GoogleFonts.inter(
+                          color: Colors.white30,
+                          fontSize: 13,
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -197,7 +239,10 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
 
                   return Container(
                     margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xff090414),
                       borderRadius: BorderRadius.circular(16),
@@ -205,7 +250,11 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.access_time_rounded, color: Color(0xff00FF87), size: 18),
+                        const Icon(
+                          Icons.access_time_rounded,
+                          color: Color(0xff00FF87),
+                          size: 18,
+                        ),
                         const SizedBox(width: 12),
                         Text(
                           "$formattedStart - $formattedEnd",
@@ -217,19 +266,32 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                         ),
                         const Spacer(),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            color: (status == 'AVAILABLE' ? const Color(0xff00FF87) : Colors.amber).withOpacity(0.12),
+                            color:
+                                (status == 'AVAILABLE'
+                                        ? const Color(0xff00FF87)
+                                        : Colors.amber)
+                                    .withOpacity(0.12),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: (status == 'AVAILABLE' ? const Color(0xff00FF87) : Colors.amber).withOpacity(0.3),
+                              color:
+                                  (status == 'AVAILABLE'
+                                          ? const Color(0xff00FF87)
+                                          : Colors.amber)
+                                      .withOpacity(0.3),
                               width: 1,
                             ),
                           ),
                           child: Text(
                             status,
                             style: GoogleFonts.inter(
-                              color: status == 'AVAILABLE' ? const Color(0xff00FF87) : Colors.amber,
+                              color: status == 'AVAILABLE'
+                                  ? const Color(0xff00FF87)
+                                  : Colors.amber,
                               fontSize: 9,
                               fontWeight: FontWeight.bold,
                             ),
@@ -241,7 +303,8 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                             onTap: () {
                               Get.defaultDialog(
                                 title: "Delete Slot",
-                                middleText: "Are you sure you want to remove this slot?",
+                                middleText:
+                                    "Are you sure you want to remove this slot?",
                                 textConfirm: "Delete",
                                 textCancel: "Cancel",
                                 confirmTextColor: Colors.white,
@@ -249,7 +312,7 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                                 onConfirm: () {
                                   controller.deleteAvailabilitySlot(slot['id']);
                                   Get.back();
-                                }
+                                },
                               );
                             },
                             child: Container(
@@ -258,7 +321,11 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                                 color: Colors.redAccent.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: const Icon(Icons.close_rounded, color: Colors.redAccent, size: 16),
+                              child: const Icon(
+                                Icons.close_rounded,
+                                color: Colors.redAccent,
+                                size: 16,
+                              ),
                             ),
                           ),
                         ],
@@ -268,7 +335,7 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                 },
               );
             }),
-          )
+          ),
         ],
       ),
     );
@@ -281,13 +348,15 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
     // Intelligently auto-fill the next available time slot based on the last slot for this day
     final date = _selectedDay ?? DateTime.now();
     DateTime? latestEndTime;
-    
+
     for (var slot in controller.expertSlots) {
       if (slot['start_time'] == null || slot['end_time'] == null) continue;
       final slotStart = DateTime.parse(slot['start_time']).toLocal();
       final slotEnd = DateTime.parse(slot['end_time']).toLocal();
-      
-      if (slotStart.year == date.year && slotStart.month == date.month && slotStart.day == date.day) {
+
+      if (slotStart.year == date.year &&
+          slotStart.month == date.month &&
+          slotStart.day == date.day) {
         if (latestEndTime == null || slotEnd.isAfter(latestEndTime)) {
           latestEndTime = slotEnd;
         }
@@ -295,7 +364,10 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
     }
 
     if (latestEndTime != null) {
-      startTime = TimeOfDay(hour: latestEndTime.hour, minute: latestEndTime.minute);
+      startTime = TimeOfDay(
+        hour: latestEndTime.hour,
+        minute: latestEndTime.minute,
+      );
       final nextEnd = latestEndTime.add(const Duration(hours: 1));
       endTime = TimeOfDay(hour: nextEnd.hour, minute: nextEnd.minute);
     }
@@ -332,24 +404,38 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                           color: const Color(0xffFF00E5).withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.add_task_rounded, color: Color(0xffFF00E5), size: 20),
+                        child: const Icon(
+                          Icons.add_task_rounded,
+                          color: Color(0xffFF00E5),
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Text(
                         "Add Time Slot",
-                        style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Start Time Selector
-                  Text("Start Time", style: GoogleFonts.inter(color: Colors.white54, fontSize: 12)),
+                  Text(
+                    "Start Time",
+                    style: GoogleFonts.inter(
+                      color: Colors.white54,
+                      fontSize: 12,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   GestureDetector(
                     onTap: () async {
                       final picked = await showTimePicker(
-                        context: context, 
+                        context: context,
                         initialTime: startTime,
                         builder: (context, child) => Theme(
                           data: ThemeData.dark().copyWith(
@@ -366,20 +452,33 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                       }
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.03),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white.withOpacity(0.05)),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.05),
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             startTime.format(context),
-                            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
-                          const Icon(Icons.schedule_rounded, color: Color(0xff00E5FF), size: 18),
+                          const Icon(
+                            Icons.schedule_rounded,
+                            color: Color(0xff00E5FF),
+                            size: 18,
+                          ),
                         ],
                       ),
                     ),
@@ -387,12 +486,18 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                   const SizedBox(height: 16),
 
                   // End Time Selector
-                  Text("End Time", style: GoogleFonts.inter(color: Colors.white54, fontSize: 12)),
+                  Text(
+                    "End Time",
+                    style: GoogleFonts.inter(
+                      color: Colors.white54,
+                      fontSize: 12,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   GestureDetector(
                     onTap: () async {
                       final picked = await showTimePicker(
-                        context: context, 
+                        context: context,
                         initialTime: endTime,
                         builder: (context, child) => Theme(
                           data: ThemeData.dark().copyWith(
@@ -409,20 +514,33 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                       }
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.03),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white.withOpacity(0.05)),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.05),
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             endTime.format(context),
-                            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
-                          const Icon(Icons.schedule_rounded, color: Color(0xff00E5FF), size: 18),
+                          const Icon(
+                            Icons.schedule_rounded,
+                            color: Color(0xff00E5FF),
+                            size: 18,
+                          ),
                         ],
                       ),
                     ),
@@ -437,10 +555,20 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                           onPressed: () => Get.back(),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            side: BorderSide(color: Colors.white.withOpacity(0.1)),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            side: BorderSide(
+                              color: Colors.white.withOpacity(0.1),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
-                          child: Text("Cancel", style: GoogleFonts.outfit(color: Colors.white60, fontWeight: FontWeight.w600)),
+                          child: Text(
+                            "Cancel",
+                            style: GoogleFonts.outfit(
+                              color: Colors.white60,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -455,9 +583,21 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                           child: ElevatedButton(
                             onPressed: () {
                               final date = _selectedDay ?? DateTime.now();
-                              final startDateTime = DateTime(date.year, date.month, date.day, startTime.hour, startTime.minute);
-                              final endDateTime = DateTime(date.year, date.month, date.day, endTime.hour, endTime.minute);
-                              
+                              final startDateTime = DateTime(
+                                date.year,
+                                date.month,
+                                date.day,
+                                startTime.hour,
+                                startTime.minute,
+                              );
+                              final endDateTime = DateTime(
+                                date.year,
+                                date.month,
+                                date.day,
+                                endTime.hour,
+                                endTime.minute,
+                              );
+
                               if (endDateTime.isBefore(startDateTime)) {
                                 Get.snackbar(
                                   "Invalid Time",
@@ -472,11 +612,19 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                               bool hasConflict = false;
                               for (var slot in controller.expertSlots) {
                                 if (slot['start_time'] == null) continue;
-                                final existingStart = DateTime.parse(slot['start_time']).toLocal();
-                                final existingEnd = DateTime.parse(slot['end_time']).toLocal();
-                                
-                                if (existingStart.year == startDateTime.year && existingStart.month == startDateTime.month && existingStart.day == startDateTime.day) {
-                                  if (startDateTime.isBefore(existingEnd) && endDateTime.isAfter(existingStart)) {
+                                final existingStart = DateTime.parse(
+                                  slot['start_time'],
+                                ).toLocal();
+                                final existingEnd = DateTime.parse(
+                                  slot['end_time'],
+                                ).toLocal();
+
+                                if (existingStart.year == startDateTime.year &&
+                                    existingStart.month ==
+                                        startDateTime.month &&
+                                    existingStart.day == startDateTime.day) {
+                                  if (startDateTime.isBefore(existingEnd) &&
+                                      endDateTime.isAfter(existingStart)) {
                                     hasConflict = true;
                                     break;
                                   }
@@ -494,16 +642,27 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
                                 return;
                               }
 
-                              controller.addAvailabilitySlot(startDateTime, endDateTime);
+                              controller.addAvailabilitySlot(
+                                startDateTime,
+                                endDateTime,
+                              );
                               Get.back();
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                             ),
-                            child: Text("Save Slot", style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.white)),
+                            child: Text(
+                              "Save Slot",
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -513,7 +672,7 @@ class _ExpertSlotsViewState extends State<ExpertSlotsView> {
               ),
             ),
           );
-        }
+        },
       ),
     );
   }

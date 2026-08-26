@@ -284,8 +284,18 @@ class VideoCallView extends GetView<VideoCallController> {
                                     const SizedBox(width: 8),
                                     Text(
                                       isReady
-                                          ? "Join Live Consultation Room"
-                                          : "Setting up room...",
+                                          ? (controller.isExpertCaller.value
+                                                ? "Start Consultation Room"
+                                                : "Join Live Consultation Room")
+                                          : (controller
+                                                    .waitingForExpertToStart
+                                                    .value
+                                                ? "Waiting for expert..."
+                                                : controller
+                                                      .outsideSessionWindow
+                                                      .value
+                                                ? "Not available right now"
+                                                : "Setting up room..."),
                                       style: GoogleFonts.outfit(
                                         color: isReady
                                             ? Colors.white

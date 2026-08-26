@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:dio/dio.dart';
 import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../services/api_client.dart';
 import '../../../services/auth_service.dart';
 
@@ -37,6 +39,14 @@ class VideoCallController extends GetxController {
   final roomName = "".obs;
   final isLoadingUrl = false.obs;
   final isExpertCaller = false.obs;
+  // Member-only: true while polling because the expert hasn't opened the
+  // room yet — the member can never start the call themselves, only join
+  // once it's actually live.
+  final waitingForExpertToStart = false.obs;
+  // Expert-only: set when the session's time window hasn't arrived yet (or
+  // has already passed) — the call simply can't be opened outside it.
+  final outsideSessionWindow = false.obs;
+  Timer? _waitPollTimer;
 
   @override
   void onInit() {
@@ -74,12 +84,21 @@ class VideoCallController extends GetxController {
   @override
   void onClose() {
     _timer?.cancel();
+    _waitPollTimer?.cancel();
     if (isInCall.value) _jitsiMeet.hangUp();
     super.onClose();
   }
 
-  Future<void> fetchJitsiCallLink() async {
-    isLoadingUrl.value = true;
+  /// Fetches (and, for the expert within the session window, opens) the
+  /// video room. The backend enforces who can start it and when — this
+  /// just reflects whatever it says:
+  ///  - expert too early/late  -> outsideSessionWindow, no retry (won't
+  ///    change until they come back within the window)
+  ///  - member before the expert has started -> waitingForExpertToStart,
+  ///    polls every few seconds so Join lights up the moment it opens
+  ///  - anything else -> plain failure, no auto-retry
+  Future<void> fetchJitsiCallLink({bool isPoll = false}) async {
+    if (!isPoll) isLoadingUrl.value = true;
     try {
       final response = await _apiClient.get(
         '/api/bookings/${appointmentId.value}/video-token',
@@ -87,16 +106,45 @@ class VideoCallController extends GetxController {
       jitsiUrl.value = response.data['jitsiUrl'] ?? '';
       roomName.value = response.data['roomName'] ?? '';
       connectionStatus.value = "Ready to join";
+      waitingForExpertToStart.value = false;
+      outsideSessionWindow.value = false;
+      _waitPollTimer?.cancel();
     } catch (e) {
-      debugPrint("Error fetching Jitsi Link: $e");
-      connectionStatus.value = "Failed to connect";
-      Get.snackbar(
-        "Connection Error",
-        "Failed to retrieve the video room. Please try again.",
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      String? errorCode;
+      String? message;
+      if (e is DioException) {
+        final data = e.response?.data;
+        if (data is Map) {
+          errorCode = data['error']?.toString();
+          message = data['message']?.toString();
+        }
+      }
+
+      if (errorCode == 'CALL_NOT_STARTED') {
+        connectionStatus.value = "Waiting for expert to start the call...";
+        waitingForExpertToStart.value = true;
+        _waitPollTimer ??= Timer.periodic(
+          const Duration(seconds: 6),
+          (_) => fetchJitsiCallLink(isPoll: true),
+        );
+      } else if (errorCode == 'OUTSIDE_SESSION_WINDOW') {
+        connectionStatus.value =
+            message ?? "This session's time window has passed.";
+        outsideSessionWindow.value = true;
+        _waitPollTimer?.cancel();
+      } else {
+        debugPrint("Error fetching Jitsi Link: $e");
+        connectionStatus.value = "Failed to connect";
+        if (!isPoll) {
+          Get.snackbar(
+            "Connection Error",
+            message ?? "Failed to retrieve the video room. Please try again.",
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        }
+      }
     } finally {
-      isLoadingUrl.value = false;
+      if (!isPoll) isLoadingUrl.value = false;
     }
   }
 
@@ -109,6 +157,29 @@ class VideoCallController extends GetxController {
         "Video room is not ready yet.",
         snackPosition: SnackPosition.BOTTOM,
       );
+      return;
+    }
+
+    // Explicitly request camera/mic up front instead of leaving it to the
+    // native Jitsi SDK to ask mid-join — on some heavily customized Android
+    // builds (seen on Vivo devices) letting the native side trigger its own
+    // first-time permission prompt can hang the main thread instead of
+    // showing the dialog, which looks like the app freezing/crashing.
+    final statuses = await [Permission.camera, Permission.microphone].request();
+    final cameraOk = statuses[Permission.camera]?.isGranted ?? false;
+    final micOk = statuses[Permission.microphone]?.isGranted ?? false;
+
+    if (!cameraOk || !micOk) {
+      Get.snackbar(
+        "Permission Required",
+        "Camera and microphone access are needed to join the call. Please enable them in app settings.",
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 4),
+      );
+      final permanentlyDenied = statuses.values.any(
+        (s) => s.isPermanentlyDenied,
+      );
+      if (permanentlyDenied) await openAppSettings();
       return;
     }
 

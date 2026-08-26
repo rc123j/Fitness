@@ -10,8 +10,13 @@ class ExpertDashboardView extends GetView<BookingController> {
 
   @override
   Widget build(BuildContext context) {
-    // Fetch expert appointments on load
-    controller.fetchExpertAppointments();
+    // Deferred to after this frame — calling it synchronously here mutates
+    // an Rx value (isLoadingAppointments) while this very build is still in
+    // progress, which can crash with "setState() called during build" once
+    // an Obx further down reacts to it mid-build.
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => controller.fetchExpertAppointments(),
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xff06010F),
@@ -27,6 +32,16 @@ class ExpertDashboardView extends GetView<BookingController> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.forum_rounded, color: Colors.white),
+            tooltip: "Messages",
+            onPressed: () => Get.toNamed('/expert-messages'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.history_rounded, color: Colors.white),
+            tooltip: "Booking History",
+            onPressed: () => Get.toNamed('/expert-history'),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: Colors.white),
             onPressed: () => controller.fetchExpertAppointments(),
@@ -58,7 +73,14 @@ class ExpertDashboardView extends GetView<BookingController> {
           );
         }
 
-        if (controller.expertAppointments.isEmpty) {
+        // Only ongoing work belongs on the main dashboard — anything
+        // finished (completed/rejected/cancelled) piles up forever
+        // otherwise. That's what the History screen is for.
+        final activeAppointments = controller.expertAppointments
+            .where((a) => a['status'] == 'PENDING' || a['status'] == 'APPROVED')
+            .toList();
+
+        if (activeAppointments.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -70,10 +92,22 @@ class ExpertDashboardView extends GetView<BookingController> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "No appointments booked yet",
+                  "No active appointments right now",
                   style: GoogleFonts.outfit(
                     color: Colors.white.withOpacity(0.5),
                     fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () => Get.toNamed('/expert-history'),
+                  child: Text(
+                    "View booking history",
+                    style: GoogleFonts.outfit(
+                      color: const Color(0xffFF00E5),
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -83,9 +117,9 @@ class ExpertDashboardView extends GetView<BookingController> {
 
         return ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: controller.expertAppointments.length,
+          itemCount: activeAppointments.length,
           itemBuilder: (context, index) {
-            final apt = controller.expertAppointments[index];
+            final apt = activeAppointments[index];
             final member = apt['member'] ?? {};
             final user = member['user'] ?? {};
             final slot = apt['slot'] ?? {};

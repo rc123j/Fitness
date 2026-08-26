@@ -22,11 +22,15 @@ class BookingController extends GetxController {
   // Consultant portal data state lists
   final expertAppointments = <Map<String, dynamic>>[].obs;
   final expertSlots = <Map<String, dynamic>>[].obs;
+  // Messenger-style inbox: one entry per client, each with its last
+  // message + unread count, instead of hunting through each booking.
+  final consultantConversations = <Map<String, dynamic>>[].obs;
 
   // Loading states
   final isLoadingExperts = false.obs;
   final isLoadingSlots = false.obs;
   final isLoadingAppointments = false.obs;
+  final isLoadingConversations = false.obs;
 
   @override
   void onInit() {
@@ -111,6 +115,23 @@ class BookingController extends GetxController {
       debugPrint("Error fetching expert slots: $e");
     } finally {
       isLoadingSlots.value = false;
+    }
+  }
+
+  Future<void> fetchConsultantConversations() async {
+    isLoadingConversations.value = true;
+    try {
+      final response = await _apiClient.get(
+        '/api/bookings/consultant/conversations',
+      );
+      final list = List<dynamic>.from(response.data);
+      consultantConversations.value = list
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+    } catch (e) {
+      debugPrint("Error fetching conversations: $e");
+    } finally {
+      isLoadingConversations.value = false;
     }
   }
 

@@ -147,37 +147,6 @@ class ProgressView extends GetView<ProgressController> {
     );
   }
 
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Icon(Icons.menu, color: Colors.white, size: 28),
-          Stack(
-            alignment: Alignment.topRight,
-            children: [
-              const Icon(
-                Icons.notifications_none_rounded,
-                color: Colors.white,
-                size: 28,
-              ),
-              Container(
-                margin: const EdgeInsets.only(top: 2, right: 2),
-                height: 8,
-                width: 8,
-                decoration: const BoxDecoration(
-                  color: Colors.redAccent,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildLockedState() {
     return Center(
       child: Padding(
@@ -252,13 +221,22 @@ class ProgressView extends GetView<ProgressController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          _timeBasedGreeting(),
-          style: GoogleFonts.outfit(
-            color: const Color(0xffB100FF),
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              _timeBasedGreeting(),
+              style: GoogleFonts.outfit(
+                color: const Color(0xffB100FF),
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            GestureDetector(
+              onTap: () => Get.back(),
+              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 24),
+            ),
+          ],
         ),
         Row(
           children: [
@@ -374,7 +352,7 @@ class ProgressView extends GetView<ProgressController> {
                             ),
                           ),
                           FractionallySizedBox(
-                            widthFactor: controller.currentDay.value / 30,
+                            widthFactor: controller.currentDay.value / 30.0,
                             child: Container(
                               height: 8,
                               decoration: BoxDecoration(
@@ -411,7 +389,7 @@ class ProgressView extends GetView<ProgressController> {
                           height: 120,
                           width: 120,
                           child: CircularProgressIndicator(
-                            value: controller.currentDay.value / 30,
+                            value: controller.currentDay.value / 30.0,
                             strokeWidth: 8,
                             backgroundColor: Colors.white.withOpacity(0.1),
                             valueColor: const AlwaysStoppedAnimation<Color>(
@@ -580,45 +558,7 @@ class ProgressView extends GetView<ProgressController> {
   }
 
   Widget _buildDisciplineBanner() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xff1C1533),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xffFF7A00).withOpacity(0.2),
-            ),
-            child: const Icon(
-              Icons.track_changes_rounded,
-              color: Color(0xffFF7A00),
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              "Discipline today, results tomorrow.",
-              style: GoogleFonts.outfit(
-                color: Colors.white.withOpacity(0.9),
-                fontSize: 14,
-              ),
-            ),
-          ),
-          const Icon(
-            Icons.arrow_forward_ios_rounded,
-            color: Colors.white54,
-            size: 14,
-          ),
-        ],
-      ),
-    );
+    return const _MotivationCarousel();
   }
 
   Widget _buildTodayNutritionCard() {
@@ -646,7 +586,7 @@ class ProgressView extends GetView<ProgressController> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
         color: const Color(0xff120D23).withOpacity(0.8),
-        border: Border.all(color: Colors.white.withOpacity(0.10), width: 1),
+        border: Border.all(color: Colors.white, width: 1.0),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.25),
@@ -1048,7 +988,7 @@ class ProgressView extends GetView<ProgressController> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         color: const Color(0xff120D23).withOpacity(0.8),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.0),
+        border: Border.all(color: Colors.white, width: 1.0),
         boxShadow: [
           BoxShadow(
             color: const Color(0xffFF7A00).withOpacity(0.05),
@@ -1167,6 +1107,25 @@ class ProgressView extends GetView<ProgressController> {
                       ],
                     ),
                   ],
+                ),
+                GestureDetector(
+                  onTap: () => Get.to(() => const AllTimeProgressView()),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                    ),
+                    child: Text(
+                      "View All",
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -2170,7 +2129,7 @@ class CalorieBarChartPainter extends CustomPainter {
       double barHeight = (cal / maxVal) * chartHeight;
 
       if (barHeight > 0) {
-        bool isToday = i == history.length - 1;
+        bool isToday = history[i]['isToday'] == true;
 
         Rect barRect = Rect.fromLTWH(
           x,
@@ -2255,3 +2214,324 @@ class DashedLinePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant DashedLinePainter oldDelegate) => false;
 }
+
+class _MotivationCarousel extends StatefulWidget {
+  const _MotivationCarousel({Key? key}) : super(key: key);
+
+  @override
+  State<_MotivationCarousel> createState() => _MotivationCarouselState();
+}
+
+class _MotivationCarouselState extends State<_MotivationCarousel> {
+  final List<String> _quotes = [
+    "Discipline today, results tomorrow.",
+    "Consistency is the key to success.",
+    "Small steps every day.",
+    "Push yourself, because no one else will.",
+    "Sweat now, shine later."
+  ];
+  int _currentIndex = 0;
+  late final PageController _pageController;
+  late final Stream<int> _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    _timer = Stream.periodic(const Duration(seconds: 4), (i) => i);
+    _timer.listen((_) {
+      if (mounted) {
+        setState(() {
+          _currentIndex = (_currentIndex + 1) % _quotes.length;
+        });
+        _pageController.animateToPage(
+          _currentIndex,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xff1C1533),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xffFF7A00).withOpacity(0.2),
+            ),
+            child: const Icon(
+              Icons.track_changes_rounded,
+              color: Color(0xffFF7A00),
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: SizedBox(
+              height: 20,
+              child: PageView.builder(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _quotes.length,
+                scrollDirection: Axis.vertical,
+                itemBuilder: (context, index) {
+                  return Text(
+                    _quotes[index],
+                    style: GoogleFonts.outfit(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 14,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          const Icon(
+            Icons.arrow_forward_ios_rounded,
+            color: Colors.white54,
+            size: 14,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AllTimeProgressView extends StatelessWidget {
+  const AllTimeProgressView({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xff06010F),
+      body: SafeArea(
+        child: GetX<ProgressController>(
+          builder: (controller) {
+            final list = controller.allTimeAdherenceData.toList();
+            if (list.isEmpty) {
+              return const Center(
+                child: CircularProgressIndicator(color: Color(0xffB100FF)),
+              );
+            }
+
+            double totalCal = 0;
+            int activeDays = 0;
+            for (var day in list) {
+              double cal = double.tryParse(day['calories']?.toString() ?? '0') ?? 0;
+              if (cal > 0) {
+                totalCal += cal;
+                activeDays++;
+              }
+            }
+            int avgCal = activeDays > 0 ? (totalCal / activeDays).round() : 0;
+            int target = controller.targetCalories.value;
+
+            String formatNum(int n) {
+              return n.toString().replaceAllMapped(
+                RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                (Match m) => '${m[1]},',
+              );
+            }
+
+            final chartWidth = max(Get.width - 40, list.length * 40.0 + 40.0);
+
+            return Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () => Get.back(),
+                        child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 24),
+                      ),
+                      Text(
+                        "All-Time Progress",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 24), // to balance the back button
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      color: const Color(0xff120D23).withOpacity(0.8),
+                      border: Border.all(color: Colors.white, width: 1.0),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Average",
+                                  style: GoogleFonts.inter(
+                                    color: const Color(0xffB100FF).withOpacity(0.7),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: [
+                                    Text(
+                                      formatNum(avgCal),
+                                      style: GoogleFonts.outfit(
+                                        color: const Color(0xffB100FF),
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      "kcal",
+                                      style: GoogleFonts.inter(
+                                        color: const Color(0xffB100FF).withOpacity(0.7),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  "Goal",
+                                  style: GoogleFonts.inter(
+                                    color: const Color(0xffFF7A00).withOpacity(0.7),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  children: [
+                                    Text(
+                                      formatNum(target),
+                                      style: GoogleFonts.outfit(
+                                        color: const Color(0xffFF7A00),
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      "kcal",
+                                      style: GoogleFonts.inter(
+                                        color: const Color(0xffFF7A00).withOpacity(0.7),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          height: 300, // making chart taller for full screen
+                          width: double.infinity,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            reverse: true, // starts scrolled to the right (most recent)
+                            child: SizedBox(
+                              width: chartWidth,
+                              child: CustomPaint(
+                                painter: CalorieBarChartPainter(
+                                  history: list,
+                                  target: target.toDouble(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: const BoxDecoration(
+                                color: Color(0xffB100FF),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              "Calories Consumed",
+                              style: GoogleFonts.inter(
+                                color: Colors.white.withOpacity(0.7),
+                                fontSize: 11,
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            Container(
+                              width: 24,
+                              height: 2,
+                              color: Colors.transparent,
+                              child: CustomPaint(
+                                painter: DashedLinePainter(color: const Color(0xffFF7A00)),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              "Target",
+                              style: GoogleFonts.inter(
+                                color: Colors.white.withOpacity(0.7),
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+

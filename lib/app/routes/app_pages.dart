@@ -20,6 +20,8 @@ import '../modules/wallet/bindings/wallet_binding.dart';
 import '../modules/wallet/views/wallet_view.dart';
 import '../modules/booking/bindings/booking_binding.dart';
 import '../modules/booking/views/booking_view.dart';
+import '../modules/booking/views/expert_history_view.dart';
+import '../modules/booking/views/expert_messages_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/profile/views/settings_view.dart';
@@ -173,6 +175,16 @@ class AppPages {
       name: _Paths.CHAT,
       page: () => const ChatView(),
       binding: ChatBinding(),
+    ),
+    GetPage(
+      name: _Paths.EXPERT_HISTORY,
+      page: () => const ExpertHistoryView(),
+      binding: BookingBinding(),
+    ),
+    GetPage(
+      name: _Paths.EXPERT_MESSAGES,
+      page: () => const ExpertMessagesView(),
+      binding: BookingBinding(),
     ),
   ];
 }

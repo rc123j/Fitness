@@ -52,6 +52,7 @@ class ProgressController extends GetxController {
   // 7-Day Adherence Data Points (Mon-Sun)
   final targetCalories = 2150.obs;
   final weeklyAdherenceData = <Map<String, dynamic>>[].obs;
+  final allTimeAdherenceData = <Map<String, dynamic>>[].obs;
 
   // Today's Report (daily-only for now; weekly view lands later)
   final todayConsumedCalories = 0.obs;
@@ -235,6 +236,7 @@ class ProgressController extends GetxController {
               "calories": cal.toInt(),
               "target": targetCalories.value,
               "isAdherent": adherent,
+              "isToday": isToday,
             });
           } else {
             tempHistory.insert(0, {
@@ -242,9 +244,16 @@ class ProgressController extends GetxController {
               "calories": cal.toInt(),
               "target": targetCalories.value,
               "isAdherent": false,
+              "isToday": isToday,
             });
           }
         }
+
+        tempHistory.sort((a, b) {
+          final aIdx = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(a["day"]);
+          final bIdx = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(b["day"]);
+          return aIdx.compareTo(bIdx);
+        });
 
         weeklyAdherenceData.value = tempHistory;
         currentStreak.value = streakCounter;
@@ -315,15 +324,33 @@ class ProgressController extends GetxController {
 
       double cumulativeDeficit = 0.0;
       final tempHistory = <Map<String, dynamic>>[];
-      for (var day in rawHistory) {
+      final tempAllTime = <Map<String, dynamic>>[];
+      final todayStr = DateTime.now().toIso8601String().split('T')[0];
+
+      // Assuming rawHistory comes newest-first, we reverse it to process chronologically for cumulative deficit
+      for (var day in rawHistory.reversed) {
         final cal = double.tryParse(day['calories']?.toString() ?? '0.0') ?? 0.0;
         cumulativeDeficit += (tdeeValue - cal);
         final estimatedWeight = startingWeight.value - (cumulativeDeficit / 7700);
         final dateStr = day['date']?.toString() ?? '';
         tempHistory.add({'date': dateStr, 'weight': estimatedWeight});
+
+        String shortDay = 'Day';
+        if (dateStr.isNotEmpty) {
+          try {
+            final d = DateTime.parse(dateStr);
+            shortDay = "${d.day}/${d.month}";
+          } catch (_) {}
+        }
+        tempAllTime.add({
+          "day": shortDay,
+          "calories": cal.toInt(),
+          "isToday": dateStr == todayStr,
+        });
       }
 
       weightHistory.value = tempHistory;
+      allTimeAdherenceData.value = tempAllTime;
       if (tempHistory.isNotEmpty) {
         currentWeight.value = tempHistory.last['weight'] as double;
         weightDifferenceKg.value = startingWeight.value - currentWeight.value;
