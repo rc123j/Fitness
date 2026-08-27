@@ -139,6 +139,8 @@ class ProgressView extends GetView<ProgressController> {
                                     _buildAnalyticsTabs(),
                                     const SizedBox(height: 24),
                                     _buildStartingSnapshot(),
+                                    // const SizedBox(height: 32),
+                                    // _buildTransformationGallery(),
                                   ],
                                 ),
                               ),
@@ -236,7 +238,11 @@ class ProgressView extends GetView<ProgressController> {
           onTap: () => Get.back(),
           child: const Padding(
             padding: EdgeInsets.only(right: 16.0, top: 4.0),
-            child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 24),
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
           ),
         ),
         Expanded(
@@ -562,7 +568,44 @@ class ProgressView extends GetView<ProgressController> {
                 ],
               );
             case 1:
-              return _buildWeeklyCalorieChart();
+              return Column(
+                children: [
+                  _buildWeeklyCalorieChart(),
+                  const SizedBox(height: 16),
+                  GestureDetector(
+                    onTap: () => Get.toNamed('/progress-photos'),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.asset(
+                        'assets/progress/progress_images.png',
+                        width: double.infinity,
+                        fit: BoxFit.fitWidth,
+                        errorBuilder: (context, error, stackTrace) {
+                          return AspectRatio(
+                            aspectRatio: 1.5,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.04),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.08),
+                                ),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.broken_image_outlined,
+                                  color: Colors.white30,
+                                  size: 28,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              );
             // case 2:
             //   return _buildWeightTracker();
             default:
@@ -1127,7 +1170,10 @@ class ProgressView extends GetView<ProgressController> {
                 GestureDetector(
                   onTap: () => Get.to(() => const AllTimeProgressView()),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
@@ -1829,6 +1875,290 @@ class ProgressView extends GetView<ProgressController> {
       ),
     );
   }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Transformation Photo Gallery — weekly unlock gate
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildTransformationGallery() {
+    const milestones = ['Day 1', 'Week 1', 'Week 2', 'Week 3', 'Day 30'];
+    const milestoneIcons = [
+      Icons.flag_rounded,
+      Icons.looks_one_rounded,
+      Icons.looks_two_rounded,
+      Icons.looks_3_rounded,
+      Icons.emoji_events_rounded,
+    ];
+    const milestoneColors = [
+      Color(0xff00FF87),
+      Color(0xff00A2FF),
+      Color(0xffB100FF),
+      Color(0xffFF7A00),
+      Color(0xffFFD700),
+    ];
+
+    return Obx(() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Section header ──────────────────────────────────────────────
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xffB100FF).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.photo_library_outlined,
+                  color: Color(0xffB100FF),
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Transformation Gallery",
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    "Track your visual progress week by week",
+                    style: GoogleFonts.outfit(
+                      color: Colors.white.withOpacity(0.5),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          // ── 5 Photo slots ───────────────────────────────────────────────
+          ...List.generate(milestones.length, (index) {
+            final milestone = milestones[index];
+            final color = milestoneColors[index];
+            final icon = milestoneIcons[index];
+            final isUnlocked = controller.isMilestoneUnlocked(milestone);
+            final photoUrl = controller.transformationPhotos[milestone] ?? '';
+            final hasPhoto = photoUrl.isNotEmpty;
+            final unlockDay = controller.milestoneUnlockDay(milestone);
+
+            return GestureDetector(
+              onTap: () => controller.handlePhotoAction(milestone),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 14),
+                height: 110,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: const Color(0xff151520),
+                  border: Border.all(
+                    color: isUnlocked
+                        ? color.withOpacity(hasPhoto ? 0.7 : 0.35)
+                        : Colors.white.withOpacity(0.08),
+                    width: isUnlocked ? 1.5 : 1.0,
+                  ),
+                  boxShadow: isUnlocked && hasPhoto
+                      ? [
+                          BoxShadow(
+                            color: color.withOpacity(0.2),
+                            blurRadius: 16,
+                            spreadRadius: 0,
+                          ),
+                        ]
+                      : [],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(19),
+                  child: Stack(
+                    children: [
+                      // ── Background: photo if uploaded, dark otherwise ──
+                      if (hasPhoto)
+                        Positioned.fill(
+                          child: Image.network(
+                            photoUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) =>
+                                const SizedBox.shrink(),
+                          ),
+                        ),
+                      // ── Gradient overlay ───────────────────────────────
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: hasPhoto
+                                  ? [
+                                      Colors.black.withOpacity(0.72),
+                                      Colors.transparent,
+                                    ]
+                                  : [
+                                      const Color(0xff151520),
+                                      const Color(0xff1C1533),
+                                    ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // ── Lock overlay ───────────────────────────────────
+                      if (!isUnlocked)
+                        Positioned.fill(
+                          child: Container(
+                            color: Colors.black.withOpacity(0.5),
+                          ),
+                        ),
+                      // ── Main content row ───────────────────────────────
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 14,
+                        ),
+                        child: Row(
+                          children: [
+                            // Milestone icon badge
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: isUnlocked
+                                    ? color.withOpacity(0.15)
+                                    : Colors.white.withOpacity(0.06),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isUnlocked
+                                      ? color.withOpacity(0.4)
+                                      : Colors.white.withOpacity(0.1),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Icon(
+                                isUnlocked ? icon : Icons.lock_outline_rounded,
+                                color: isUnlocked
+                                    ? color
+                                    : Colors.white.withOpacity(0.3),
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            // Label + sub-text
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    milestone,
+                                    style: GoogleFonts.outfit(
+                                      color: isUnlocked
+                                          ? Colors.white
+                                          : Colors.white.withOpacity(0.35),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    isUnlocked
+                                        ? (hasPhoto
+                                              ? "Tap to view or retake"
+                                              : "Tap to add your photo")
+                                        : "Unlocks on Day $unlockDay",
+                                    style: GoogleFonts.outfit(
+                                      color: isUnlocked
+                                          ? (hasPhoto
+                                                ? color.withOpacity(0.8)
+                                                : Colors.white.withOpacity(
+                                                    0.55,
+                                                  ))
+                                          : Colors.white.withOpacity(0.3),
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Right side: status badge
+                            if (isUnlocked)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: hasPhoto
+                                      ? color.withOpacity(0.15)
+                                      : Colors.white.withOpacity(0.07),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: hasPhoto
+                                        ? color.withOpacity(0.4)
+                                        : Colors.white.withOpacity(0.1),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      hasPhoto
+                                          ? Icons.check_circle_outline_rounded
+                                          : Icons.add_a_photo_outlined,
+                                      color: hasPhoto
+                                          ? color
+                                          : Colors.white.withOpacity(0.5),
+                                      size: 14,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      hasPhoto ? "Done" : "Add",
+                                      style: GoogleFonts.outfit(
+                                        color: hasPhoto
+                                            ? color
+                                            : Colors.white.withOpacity(0.5),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else
+                              Icon(
+                                Icons.lock_outline_rounded,
+                                color: Colors.white.withOpacity(0.2),
+                                size: 20,
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+          const SizedBox(height: 8),
+          // ── Privacy hint ────────────────────────────────────────────────
+          Center(
+            child: Text(
+              "Photos are securely stored and never shared.",
+              style: GoogleFonts.outfit(
+                color: Colors.white.withOpacity(0.3),
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
+      );
+    });
+  }
 }
 
 // Paints a ring split into three rounded arcs (Carbs, Protein, Fat), each
@@ -2081,7 +2411,7 @@ class _MotivationCarouselState extends State<_MotivationCarousel> {
     "Consistency is the key to success.",
     "Small steps every day.",
     "Push yourself, because no one else will.",
-    "Sweat now, shine later."
+    "Sweat now, shine later.",
   ];
   int _currentIndex = 0;
   late final PageController _pageController;
@@ -2187,7 +2517,8 @@ class AllTimeProgressView extends StatelessWidget {
             double totalCal = 0;
             int activeDays = 0;
             for (var day in list) {
-              double cal = double.tryParse(day['calories']?.toString() ?? '0') ?? 0;
+              double cal =
+                  double.tryParse(day['calories']?.toString() ?? '0') ?? 0;
               if (cal > 0) {
                 totalCal += cal;
                 activeDays++;
@@ -2214,7 +2545,11 @@ class AllTimeProgressView extends StatelessWidget {
                     children: [
                       GestureDetector(
                         onTap: () => Get.back(),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 24),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
                       ),
                       Text(
                         "All-Time Progress",
@@ -2248,14 +2583,17 @@ class AllTimeProgressView extends StatelessWidget {
                                 Text(
                                   "Average",
                                   style: GoogleFonts.inter(
-                                    color: const Color(0xffB100FF).withOpacity(0.7),
+                                    color: const Color(
+                                      0xffB100FF,
+                                    ).withOpacity(0.7),
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Row(
-                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
                                   textBaseline: TextBaseline.alphabetic,
                                   children: [
                                     Text(
@@ -2270,7 +2608,9 @@ class AllTimeProgressView extends StatelessWidget {
                                     Text(
                                       "kcal",
                                       style: GoogleFonts.inter(
-                                        color: const Color(0xffB100FF).withOpacity(0.7),
+                                        color: const Color(
+                                          0xffB100FF,
+                                        ).withOpacity(0.7),
                                         fontSize: 12,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -2285,14 +2625,17 @@ class AllTimeProgressView extends StatelessWidget {
                                 Text(
                                   "Goal",
                                   style: GoogleFonts.inter(
-                                    color: const Color(0xffFF7A00).withOpacity(0.7),
+                                    color: const Color(
+                                      0xffFF7A00,
+                                    ).withOpacity(0.7),
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Row(
-                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
                                   textBaseline: TextBaseline.alphabetic,
                                   children: [
                                     Text(
@@ -2307,7 +2650,9 @@ class AllTimeProgressView extends StatelessWidget {
                                     Text(
                                       "kcal",
                                       style: GoogleFonts.inter(
-                                        color: const Color(0xffFF7A00).withOpacity(0.7),
+                                        color: const Color(
+                                          0xffFF7A00,
+                                        ).withOpacity(0.7),
                                         fontSize: 12,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -2324,7 +2669,8 @@ class AllTimeProgressView extends StatelessWidget {
                           width: double.infinity,
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
-                            reverse: true, // starts scrolled to the right (most recent)
+                            reverse:
+                                true, // starts scrolled to the right (most recent)
                             child: SizedBox(
                               width: chartWidth,
                               child: CustomPaint(
@@ -2362,7 +2708,9 @@ class AllTimeProgressView extends StatelessWidget {
                               height: 2,
                               color: Colors.transparent,
                               child: CustomPaint(
-                                painter: DashedLinePainter(color: const Color(0xffFF7A00)),
+                                painter: DashedLinePainter(
+                                  color: const Color(0xffFF7A00),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -2387,4 +2735,3 @@ class AllTimeProgressView extends StatelessWidget {
     );
   }
 }
-

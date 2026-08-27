@@ -1014,8 +1014,8 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(16),
                   child: Image.asset(
                     'assets/home/offer1.png',
-                    width: 478,
-                    height: 190,
+                    width: 320,
+                    height: 170,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -1028,7 +1028,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                   child: Image.asset(
                     'assets/home/offer2.png',
                     width: 320,
-                    height: 190,
+                    height: 170,
                     fit: BoxFit.cover,
                   ),
                 ),

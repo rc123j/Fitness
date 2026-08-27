@@ -397,7 +397,96 @@ class ProgressController extends GetxController {
     }
   }
 
+  // Returns the minimum plan day required to unlock a milestone slot.
+  int milestoneUnlockDay(String milestone) {
+    switch (milestone) {
+      case 'Day 1':  return 1;
+      case 'Week 1': return 7;
+      case 'Week 2': return 14;
+      case 'Week 3': return 21;
+      case 'Day 30': return 28;
+      default:       return 1;
+    }
+  }
+
+  // Returns true if the user's plan has reached the threshold for this slot.
+  bool isMilestoneUnlocked(String milestone) {
+    return currentDay.value >= milestoneUnlockDay(milestone);
+  }
+
   void handlePhotoAction(String milestone) {
+    // ── Lock gate ─────────────────────────────────────────────────────────
+    if (!isMilestoneUnlocked(milestone)) {
+      final unlockDay = milestoneUnlockDay(milestone);
+      Get.bottomSheet(
+        Container(
+          padding: const EdgeInsets.all(28),
+          decoration: const BoxDecoration(
+            color: Color(0xff121220),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.06),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.lock_outline_rounded,
+                  color: Color(0xffB100FF),
+                  size: 36,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "$milestone Photo Locked",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "This slot unlocks on Day $unlockDay of your plan.\nKeep going — you're on Day ${currentDay.value}!",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffB100FF),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  onPressed: () => Get.back(),
+                  child: const Text(
+                    "Got it!",
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      return;
+    }
+    // ── Unlocked — show normal photo actions ───────────────────────────────
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(24),

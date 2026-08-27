@@ -116,6 +116,7 @@ class ProgressPhotosView extends GetView<ProgressController> {
   }
 
   Widget _buildPhotoCard(String milestone, String url) {
+    final isUnlocked = controller.isMilestoneUnlocked(milestone);
     return GestureDetector(
       onTap: () => controller.handlePhotoAction(milestone),
       child: Container(
@@ -124,18 +125,22 @@ class ProgressPhotosView extends GetView<ProgressController> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [const Color(0xff1B1430), const Color(0xff0D0818)],
+            colors: isUnlocked
+                ? [const Color(0xff1B1430), const Color(0xff0D0818)]
+                : [const Color(0xff151022), const Color(0xff080510)],
           ),
           border: Border.all(
-            color: url.isNotEmpty
-                ? const Color(0xffB100FF).withOpacity(0.55)
-                : Colors.white.withOpacity(0.10),
+            color: !isUnlocked
+                ? Colors.white.withOpacity(0.05)
+                : (url.isNotEmpty
+                    ? const Color(0xffB100FF).withOpacity(0.55)
+                    : Colors.white.withOpacity(0.10)),
             width: 1.4,
           ),
           boxShadow: [
             BoxShadow(
-              color: (url.isNotEmpty ? const Color(0xffB100FF) : Colors.black)
-                  .withOpacity(url.isNotEmpty ? 0.18 : 0.25),
+              color: (url.isNotEmpty && isUnlocked ? const Color(0xffB100FF) : Colors.black)
+                  .withOpacity(url.isNotEmpty && isUnlocked ? 0.18 : 0.25),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -155,6 +160,35 @@ class ProgressPhotosView extends GetView<ProgressController> {
                     color: Colors.white38,
                     size: 32,
                   ),
+                ),
+              )
+            else if (!isUnlocked)
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.05),
+                      ),
+                      child: Icon(
+                        Icons.lock_outline_rounded,
+                        color: Colors.white.withOpacity(0.3),
+                        size: 26,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      "Locked",
+                      style: GoogleFonts.outfit(
+                        color: Colors.white.withOpacity(0.4),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               )
             else
@@ -207,7 +241,7 @@ class ProgressPhotosView extends GetView<ProgressController> {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.75),
+                      Colors.black.withOpacity(isUnlocked ? 0.75 : 0.85),
                     ],
                   ),
                 ),
@@ -215,7 +249,7 @@ class ProgressPhotosView extends GetView<ProgressController> {
                   milestone,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.outfit(
-                    color: Colors.white,
+                    color: isUnlocked ? Colors.white : Colors.white.withOpacity(0.4),
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                   ),
@@ -223,7 +257,7 @@ class ProgressPhotosView extends GetView<ProgressController> {
               ),
             ),
 
-            if (url.isNotEmpty)
+            if (url.isNotEmpty && isUnlocked)
               Positioned(
                 top: 8,
                 right: 8,
