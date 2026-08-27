@@ -351,6 +351,14 @@ class BookingController extends GetxController {
       final status = apt['status'];
       if (apt['consultant']?['id'] == expertId &&
           (status == 'PENDING' || status == 'APPROVED')) {
+        final slot = apt['slot'] ?? {};
+        final endStr = (slot['end_time'] ?? slot['start_time'])?.toString();
+        if (endStr != null) {
+          final endTime = DateTime.tryParse(endStr)?.toLocal();
+          if (endTime != null && DateTime.now().isAfter(endTime)) {
+            continue; // Ignore expired session
+          }
+        }
         return apt;
       }
     }

@@ -140,11 +140,17 @@ class ExpertDashboardView extends GetView<BookingController> {
             final status = apt['status'] as String? ?? 'PENDING';
             final isPending = status == 'PENDING';
             final isCompleted = status == 'COMPLETED';
+            final endStr = slot['end_time'] ?? '';
+            DateTime? endTime;
+            if (endStr.isNotEmpty) {
+              endTime = DateTime.parse(endStr).toLocal();
+            }
+            final resolvedEndTime = endTime ?? (startTime != null ? startTime.add(const Duration(minutes: 45)) : null);
+            final bool isExpired = resolvedEndTime != null && DateTime.now().isAfter(resolvedEndTime);
+
             // Only allow starting the call from 10 minutes before the
-            // scheduled slot onward — approving a request shouldn't
-            // immediately let either side jump into a call for a session
-            // that's still hours (or days) away.
-            final bool canStartCall =
+            // scheduled slot onward and if it has not yet expired.
+            final bool canStartCall = !isExpired &&
                 startTime != null &&
                 DateTime.now().isAfter(
                   startTime.subtract(const Duration(minutes: 10)),
@@ -406,14 +412,14 @@ class ExpertDashboardView extends GetView<BookingController> {
                                 Icon(
                                   canStartCall
                                       ? Icons.videocam_rounded
-                                      : Icons.lock_clock_rounded,
+                                      : (isExpired ? Icons.hourglass_empty_rounded : Icons.lock_clock_rounded),
                                   size: 16,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
                                   canStartCall
                                       ? "Start Call"
-                                      : "Available at $formattedTime",
+                                      : (isExpired ? "Session Ended" : "Available at $formattedTime"),
                                   style: GoogleFonts.outfit(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,

@@ -1202,10 +1202,15 @@ class BookingView extends GetView<BookingController> {
               final consultant = apt['consultant'] ?? {};
               final slot = apt['slot'] ?? {};
               final dateStr = slot['start_time'] ?? '';
+              final endStr = slot['end_time'] ?? '';
 
               DateTime? startTime;
               if (dateStr.isNotEmpty) {
                 startTime = DateTime.parse(dateStr).toLocal();
+              }
+              DateTime? endTime;
+              if (endStr.isNotEmpty) {
+                endTime = DateTime.parse(endStr).toLocal();
               }
 
               final formattedDate = startTime != null
@@ -1215,6 +1220,17 @@ class BookingView extends GetView<BookingController> {
                   ? DateFormat('hh:mm a').format(startTime)
                   : 'N/A';
               final status = apt['status'] as String? ?? 'PENDING';
+
+              final resolvedEndTime = endTime ?? (startTime != null ? startTime.add(const Duration(minutes: 45)) : null);
+              final bool isExpired = resolvedEndTime != null && DateTime.now().isAfter(resolvedEndTime);
+              final displayStatus = isExpired && (status == 'PENDING' || status == 'APPROVED') ? 'TIME OVER' : status;
+              final statusColor = displayStatus == 'TIME OVER'
+                  ? Colors.white38
+                  : (displayStatus == 'APPROVED' ? const Color(0xff00FF87) : Colors.amber);
+
+              final bool canJoinCall = !isExpired &&
+                  startTime != null &&
+                  DateTime.now().isAfter(startTime.subtract(const Duration(minutes: 10)));
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -1244,27 +1260,17 @@ class BookingView extends GetView<BookingController> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color:
-                                (status == 'APPROVED'
-                                        ? const Color(0xff00FF87)
-                                        : Colors.amber)
-                                    .withOpacity(0.12),
+                            color: statusColor.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color:
-                                  (status == 'APPROVED'
-                                          ? const Color(0xff00FF87)
-                                          : Colors.amber)
-                                      .withOpacity(0.3),
+                              color: statusColor.withOpacity(0.3),
                               width: 1,
                             ),
                           ),
                           child: Text(
-                            status,
+                            displayStatus,
                             style: GoogleFonts.inter(
-                              color: status == 'APPROVED'
-                                  ? const Color(0xff00FF87)
-                                  : Colors.amber,
+                              color: statusColor,
                               fontSize: 8,
                               fontWeight: FontWeight.bold,
                             ),
@@ -1293,50 +1299,34 @@ class BookingView extends GetView<BookingController> {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () =>
-                                _showRescheduleDialog(context, apt),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xffFF00E5),
-                              side: const BorderSide(color: Color(0xffFF00E5)),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                            ),
-                            child: Text(
-                              "Reschedule",
-                              style: GoogleFonts.outfit(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (status == 'APPROVED') ...[
-                          const SizedBox(width: 12),
+                        if (isExpired)
                           Expanded(
                             child: ElevatedButton(
-                              onPressed: () =>
-                                  Get.toNamed('/video-call', arguments: apt),
+                              onPressed: () {
+                                final consultantId = consultant['id'];
+                                final idx = controller.experts.indexWhere((e) => e['id'] == consultantId);
+                                if (idx != -1) {
+                                  controller.selectedExpertIndex.value = idx;
+                                  Get.to(() => const BookingDateTimeView());
+                                } else {
+                                  Get.toNamed('/booking');
+                                }
+                              },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xff00FF87),
-                                foregroundColor: Colors.black,
+                                backgroundColor: const Color(0xffFF00E5),
+                                foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.videocam_rounded, size: 14),
-                                  const SizedBox(width: 4),
+                                  const Icon(Icons.event_available_rounded, size: 14),
+                                  const SizedBox(width: 6),
                                   Text(
-                                    "Join Call",
+                                    "Book Again",
                                     style: GoogleFonts.outfit(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
@@ -1345,7 +1335,72 @@ class BookingView extends GetView<BookingController> {
                                 ],
                               ),
                             ),
+                          )
+                        else ...[
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () =>
+                                  _showRescheduleDialog(context, apt),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xffFF00E5),
+                                side: const BorderSide(color: Color(0xffFF00E5)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                              ),
+                              child: Text(
+                                "Reschedule",
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           ),
+                          if (status == 'APPROVED') ...[
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: canJoinCall
+                                    ? () => Get.toNamed('/video-call', arguments: apt)
+                                    : null,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: canJoinCall
+                                      ? const Color(0xff00FF87)
+                                      : Colors.white.withOpacity(0.06),
+                                  disabledBackgroundColor: Colors.white.withOpacity(0.06),
+                                  foregroundColor: canJoinCall
+                                      ? Colors.black
+                                      : Colors.white38,
+                                  disabledForegroundColor: Colors.white38,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      canJoinCall
+                                          ? Icons.videocam_rounded
+                                          : Icons.lock_clock_rounded,
+                                      size: 14,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      canJoinCall ? "Join Call" : "Locked",
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ],
                     ),

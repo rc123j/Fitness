@@ -94,12 +94,20 @@ class MySessionsView extends GetView<BookingController> {
     String status,
     DateTime? startTime,
   ) {
-    // Only allow joining from 10 minutes before the scheduled slot onward —
-    // an approved booking shouldn't let the member jump into a call for a
-    // session that's still hours (or days) away.
-    final bool canJoinCall =
+    final slot = apt['slot'] ?? {};
+    final endStr = slot['end_time'] ?? '';
+    DateTime? endTime;
+    if (endStr.isNotEmpty) {
+      endTime = DateTime.parse(endStr).toLocal();
+    }
+    final resolvedEndTime = endTime ?? (startTime != null ? startTime.add(const Duration(minutes: 45)) : null);
+    final bool isExpired = resolvedEndTime != null && DateTime.now().isAfter(resolvedEndTime);
+    final displayStatus = isExpired && (status == 'PENDING' || status == 'APPROVED') ? 'TIME OVER' : status;
+
+    final bool canJoinCall = !isExpired &&
         startTime != null &&
         DateTime.now().isAfter(startTime.subtract(const Duration(minutes: 10)));
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -122,7 +130,7 @@ class MySessionsView extends GetView<BookingController> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              if (status == 'PENDING' || status == 'APPROVED')
+              if (!isExpired && (status == 'PENDING' || status == 'APPROVED'))
                 IconButton(
                   icon: const Icon(
                     Icons.cancel_outlined,
@@ -140,17 +148,17 @@ class MySessionsView extends GetView<BookingController> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: _getStatusColor(status).withOpacity(0.12),
+              color: _getStatusColor(displayStatus).withOpacity(0.12),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: _getStatusColor(status).withOpacity(0.3),
+                color: _getStatusColor(displayStatus).withOpacity(0.3),
                 width: 1,
               ),
             ),
             child: Text(
-              status,
+              displayStatus,
               style: GoogleFonts.inter(
-                color: _getStatusColor(status),
+                color: _getStatusColor(displayStatus),
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
               ),
@@ -189,7 +197,48 @@ class MySessionsView extends GetView<BookingController> {
           ),
           const SizedBox(height: 16),
 
-          if (status == 'APPROVED' || status == 'PENDING')
+          if (isExpired) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final consultantId = consultant['id'];
+                      final idx = controller.experts.indexWhere((e) => e['id'] == consultantId);
+                      if (idx != -1) {
+                        controller.selectedExpertIndex.value = idx;
+                        Get.to(() => const BookingDateTimeView());
+                      } else {
+                        Get.toNamed('/booking');
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xffFF00E5),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.event_available_rounded, size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          "Book Again",
+                          style: GoogleFonts.outfit(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ] else if (status == 'APPROVED' || status == 'PENDING')
             Row(
               children: [
                 if (status == 'APPROVED') ...[
@@ -282,6 +331,7 @@ class MySessionsView extends GetView<BookingController> {
     if (status == 'APPROVED') return const Color(0xff00FF87);
     if (status == 'CANCELLED') return Colors.redAccent;
     if (status == 'COMPLETED') return Colors.blueAccent;
+    if (status == 'TIME OVER') return Colors.white30;
     return Colors.amber;
   }
 
