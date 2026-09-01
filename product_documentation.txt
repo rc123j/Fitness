@@ -1,543 +1,291 @@
-Diet, Nutrition & Sports Supplementation
-Platform — Complete Updated Product
-Documentation
-Project Vision
-Build a premium AI-driven Diet, Nutrition, Fitness, and Sports Supplementation ecosystem focused on:
-• Personalized health transformation
-• Monthly adaptive diet planning
-• Smart nutrition recommendations
-• Real-time progress tracking
-• Family wellness management
-• Gamification and retention
-• Community engagement
-• Expert consultations
-The platform should emotionally motivate users while simplifying diet adherence and long-term
-consistency.
-The experience should feel like:
-• MyFitnessPal
-• HealthifyMe
-• Fitbit
-• Cult Fit
-But:
-• More personalized
-• More premium
-• More community-driven
-• More gamified
-• More retention-focused
-
-Technology Stack
-Mobile Application
-• Flutter
-• GetX
-
-1
-
-• get_storage
-• get_cli
-
-Backend
-• Node.js
-• Express.js
-• Sequelize ORM
-• MySQL
-
-Admin Panel
-• Flutter Responsive Admin Panel
-
-Third Party Services
-• OneSignal Push Notifications
-• Agora Video SDK
-• Razorpay
-• Stripe
-• AWS S3 / Cloudinary
-• Firebase Analytics
-• Firebase Crashlytics
-
-Core Product Flow
-1. User installs app
-2. Registers/login
-3. Completes health onboarding
-4. Generates screening report
-5. Purchases personalized plan
-6. Starts plan whenever convenient
-7. Plan becomes active for 30 days from activation
-8. User follows meals and reminders
-9. Tracks progress daily
-10. Receives rewards and gamification points
-11. Re-checks weight after 30 days
-12. New adaptive plan generated according to progress
-13. Automatic expert consultation triggered if no progress observed
-
-2
-
-Important Business Logic
-Personalized Plan Activation System
-Flow
-• Diet plans are NOT auto-started immediately after purchase.
-• User can start the generated plan anytime according to their convenience.
-• Once the user taps: "Start My Plan" the 30-day duration begins.
-
-Plan Validity
-• Every generated plan remains active for 30 days only.
-• Timer should be visible on dashboard.
-• Countdown indicator:
-• Days left
-• Completion percentage
-
-Plan Renewal
-• After 30 days:
-• User must check updated weight
-• User must update progress data
-• New plan gets generated dynamically according to progress
-
-Pricing Model (Updated)
-Remove Traditional Membership Plans
-Do NOT use:
-• Monthly subscription
-• Quarterly subscription
-• Yearly subscription
-Instead use:
-
-Per Plan Pricing Model
-Example
-• One personalized 30-day plan = ₹X
-
-3
-
-Benefits
-• Easier onboarding
-• More transparent pricing
-• Better family expansion model
-• Better retention logic
-
-Family Module Business Logic
-Family Add-On System
-Users can:
-• Add wife
-• Husband
-• Parents
-• Children
-• Siblings
-Each member gets:
-• Separate assessment
-• Separate diet plan
-• Separate reminders
-• Separate progress tracking
-
-Discount Logic
-Example:
-• Primary member plan = ₹X
-• Additional family member = discounted price
-Benefits:
-• Encourages multi-user onboarding
-• Improves retention
-• Increases lifetime value
-
-4
-
-Monthly Progress Evaluation System
-Mandatory Progress Check
-At the end of every 30-day cycle:
-• User MUST update:
-• Current weight
-• Waist inches
-• Progress photos (optional)
-System compares:
-• Old vs new weight
-• Inches lost/gained
-• BMI changes
-• Fat loss estimate
-
-Achievement Celebration System
-Show emotional motivational messages.
-Examples:
-
-Weight Loss
-"Hurray! You lost 2 kg of body fat!"
-
-Inch Loss
-"Amazing! You reduced 2 inches from your waist."
-
-Consistency
-"You completed 92% of your meal schedule this month!"
-
-Streaks
-"You're on a 21-day nutrition streak!"
-
-5
-
-Use:
-• Confetti animations
-• Reward coins
-• Achievement badges
-• Progress graphs
-
-Smart Retention & Consultation Logic
-No Progress Detection
-If after 30 days:
-• Weight remains unchanged OR
-• Progress extremely low
-Then:
-
-Automatically:
-• Book consultation slot suggestion
-• Notify user
-• Escalate to expert dashboard
-
-User Notification Example
-"We value your money and the hard work you put in to earn it. We don't want your efforts to go waste. We
-have scheduled a free consultation with our health expert so we can guide you personally and improve your
-results."
-
-Consultation Features
-• One-to-one expert guidance
-• Free review session
-• Personalized corrections
-• Plan optimization
-This becomes a major trust-building feature.
-
-6
-
-Adaptive Diet Engine
-Monthly Dynamic Plan Generation
-Every month:
-• Plans should change dynamically.
-• Meal structure should adapt according to:
-• User progress
-• Weight changes
-• Goal completion
-• Compliance score
-• Food preferences
-
-Example
-Month 1:
-• Basic calorie deficit
-Month 2:
-• Increased protein
-• Different meal combinations
-• Modified calories
-Month 3:
-• Advanced optimization
-• Plateau handling
-This avoids:
-• Diet boredom
-• User drop-off
-• Repetitive meals
-
-Social Room Module
-Community Engagement System
-Create a dedicated section:
-
-7
-
-Social Room
-Users can:
-• Share success stories
-• Upload transformation photos
-• Post achievements
-• Share diet journey
-• Motivate others
-
-Social Room Features
-Post Types
-• Transformation story
-• Weight loss achievement
-• Workout update
-• Meal prep photo
-• Motivation post
-
-Interactions
-Users can:
-• Like posts
-• Comment
-• Share posts
-• Follow users
-
-Social Sharing
-User can share their achievement externally:
-• WhatsApp
-• Instagram
-• Facebook
-• X (Twitter)
-• Email
-
-8
-
-Viral Growth Strategy
-Every shared achievement should contain:
-• User transformation summary
-• App branding
-• Download CTA
-Example: "I lost 5 kg using FitFuel AI Nutrition App!"
-This creates organic growth.
-
-9
-
-Main Mobile Application Modules
-Splash Screen
-Authentication
-User Onboarding
-Health Assessment
-Screening Report
-Smart Meal Planner
-Supplement Recommendation
-Smart Reminder System
-Progress Tracking
-Gamification
-Wallet & Rewards
-Family Management
-Consultation Booking
-Video Calling
-Notifications
-Health Tips
-Social Room
-Reports & Sharing
-Profile & Settings
-
-10
-
-Health Assessment Engine
-Generate:
-• BMI
-• BMR
-• IBW
-• %IBW
-• TDEE
-Classify:
-• Underweight
-• Normal
-• Overweight
-• Obese
-Generate:
-• Color coded report
-• Suggestions
-• Graphs
-• Goal recommendation
-
-Smart Meal Planner
-Generate:
-• Breakfast
-• Mid meal
-• Lunch
-• Evening snack
-• Dinner
-• Water intake
-Every item contains:
-• Food name
-• Calories
-• Protein
-• Carbs
-• Fat
-• Fiber
-• Quantity
-• Timing
-
-11
-
-Features:
-• Replace food
-• Skip food
-• Edit quantity
-• Auto nutrition recalculation
-• Save favorites
-
-Supplement Recommendation Engine
-Suggest according to:
-• Goal
-• Diet type
-• Workout intensity
-• Deficiency
-Examples:
-• Whey protein
-• Creatine
-• Fish oil
-• Multivitamin
-• Electrolytes
-
-Smart Reminder Engine
-Examples: "Hey Rakesh, consume 2 egg whites now."
-Reminder types:
-• Meal reminders
-• Water reminders
-• Supplement reminders
-• Weight check reminders
-• Progress upload reminders
-Features:
-• Mark completed
-• Snooze
-• Auto repeat
-
-12
-
-Gamification System
-Features:
-• Daily streaks
-• XP points
-• Reward wallet
-• Achievement badges
-• Meal completion score
-• Leaderboards
-Wallet redemption:
-• Plan discounts
-• Consultation discounts
-
-Progress Tracking
-Track:
-• Weight
-• Inches
-• BMI history
-• Compliance
-• Water intake
-• Meal adherence
-• Streak history
-Charts:
-• Weekly
-• Monthly
-• Yearly
-
-Consultation System
-Users can:
-• Book appointments
-• Join video consultation
-• Pay consultation fees
-• Receive expert advice
-
-13
-
-Experts can:
-• Accept/reject slots
-• Add notes
-• Modify plan recommendations
-Use:
-• Agora SDK
-
-Social Room Screens
-Feed Screen
-• Trending stories
-• Recent achievements
-• Transformation highlights
-
-Create Post Screen
-• Upload images
-• Add caption
-• Share achievement
-
-User Profile Social Tab
-• User posts
-• Likes
-• Followers
-
-14
-
-Admin Panel Modules
-Dashboard Analytics
-User Management
-Family Management
-Meal Plan Management
-Formula Configuration
-Supplement Management
-Reminder Engine
-Consultation Management
-Reward Configuration
-Social Room Moderation
-Push Notification Management
-Reports & Analytics
-
-Admin Analytics
-Track:
-• Active users
-• Active plans
-• Renewal percentage
-• User retention
-• Weight loss achievements
-• Most successful plans
-• Revenue analytics
-• Family plan conversions
-• Social engagement analytics
-
-15
-
-Backend Requirements
-• REST APIs
-• JWT Authentication
-• Refresh Tokens
-• RBAC
-• Swagger APIs
-• Cron jobs
-• Notification queue
-• Reminder scheduler
-• Formula engine
-• Dynamic recommendation engine
-• Social room APIs
-
-Database Modules
-• users
-• family_members
-• meal_plans
-• active_plans
-• plan_history
-• food_items
-• supplements
-• rewards
-• wallets
-• reminders
-• consultations
-• appointments
-• social_posts
-• social_likes
-• social_comments
-• notifications
-• progress_logs
-• transactions
-• formula_configurations
-
-UX Design Philosophy
-The application should:
-• Emotionally motivate users
-• Build long-term consistency
-
-16
-
-• Reward discipline
-• Reduce diet frustration
-• Increase retention
-• Encourage community participation
-The UX should feel:
-• Premium
-• Motivational
-• Scientific
-• Human
-• Easy to use
-
-Recommended Future Features
-AI Nutrition Coach
-Barcode Scanner
-Wearable Integration
-AI Food Image Recognition
-Marketplace
-Smart Grocery Suggestions
-Recipe Generator
-AI Chat Assistant
-
-Final Product Goal
-Create a scalable fitness-tech SaaS platform where:
-• Users stay consistent
-• Users see measurable transformation
-• Users trust the platform
-• Users invite family members
-• Users share success stories publicly
-
-17
-
-• Experts can guide users effectively
-• Retention naturally increases through personalization and community
-The core strength of the platform should become:
-• Personalized adaptive nutrition
-• Emotional engagement
-• Community motivation
-• Progress visibility
-• Smart retention automation
-
-18
-
-
+# NutriSmart Pro — Screen-by-Screen Product Feature List
+This document outlines the detailed screen-by-screen features, user options, business rules, and mathematical formulas of the NutriSmart Pro platform. It is written in plain bullet points for easy review by non-technical managers and stakeholders.
+
+*Note: Sports Supplementation and Community Social Rooms have been excluded as requested.*
+
+---
+
+## 1. SPLASH SCREEN
+*   **Purpose:** The app's entry point that establishes brand identity and handles automatic user routing.
+*   **Key Features & Logic:**
+    *   **Animated Branding:** Premium startup logo animation with loading indicators.
+    *   **Auto-Login System:** Automatically checks if a user has a valid saved login session.
+        *   If the user is logged in, they are immediately routed to the Home Dashboard.
+        *   If the user is logged in as an Expert, they are routed to the Expert Consultation Portal.
+        *   If the session is expired or new, the user is directed to the Welcome/Login screen.
+
+---
+
+## 2. REGISTRATION SCREEN
+*   **Purpose:** Allows new users to create accounts and join the platform.
+*   **Key Features & Fields:**
+    *   **Full Name Input:** Captures first and last name.
+    *   **Email Address Input:** Must follow standard email format (validation rule).
+    *   **Password Inputs:** Includes "Password" and "Confirm Password" fields.
+    *   **Password Visibility Toggle:** Eye icon allows users to show or hide typed passwords.
+    *   **Terms and Conditions Checkbox:** Interactive checkbox where users must agree to the Terms of Service to proceed.
+    *   **Validation Banners:** Real-time error messages (e.g., "Passwords do not match", "Email already in use", or "Please agree to the terms").
+    *   **Navigation Link:** Quick link to the Login screen for users who already have an account.
+
+---
+
+## 3. LOGIN SCREEN
+*   **Purpose:** Authenticates existing users and guides them to their appropriate dashboard.
+*   **Key Features & Fields:**
+    *   **Email Address Input:** Captures user account email.
+    *   **Password Input:** Captures password.
+    *   **Password Visibility Toggle:** Eye icon to show or hide the password characters.
+    *   **Forgot Password Link:** Initiates a password recovery email flow.
+    *   **Submit Button:** Features a premium loading animation while verifying credentials.
+    *   **Error Banners:** Displays user-friendly messages for invalid passwords, inactive accounts, or missing internet connection.
+    *   **Register Navigation:** Quick link to sign up for new users.
+
+---
+
+## 4. STEP-BY-STEP ASSESSMENT ONBOARDING
+*   **Purpose:** Collects key health data from the member to generate a personalized diet and lifestyle plan.
+*   **Structure:** A linear, 10-step progress-tracked wizard that tailors itself based on the user's choices.
+*   **Screen-by-Screen Breakdown:**
+    *   **Step 1: Gender Selection:**
+        *   Options: "Male" or "Female".
+        *   Visuals: Displays corresponding gender-themed illustrations.
+        *   Logic: Adjusts the app's accent colors (e.g., Male = Green/Blue theme, Female = Pink/Purple theme) and changes the BMR, TDEE, and Ideal Body Weight calculations.
+    *   **Step 2: Age Input:**
+        *   Interactivity: Interactive dial or slider.
+        *   Visuals: Dynamically displays illustrations representing youth, middle age, or senior years based on gender and age range.
+    *   **Step 3: Height Input:**
+        *   Interactivity: Virtual ruler selector in centimeters (cm).
+        *   Visuals: Renders a character standing against a height measuring tape.
+    *   **Step 4: Weight Input:**
+        *   Interactivity: Double slider to log current body weight and set target goal weight (in kg).
+    *   **Step 5: Activity Level Selection:**
+        *   Options:
+            *   *Sedentary:* Little or no exercise.
+            *   *Lightly Active:* Light exercise/sports 1–3 days a week.
+            *   *Moderately Active:* Moderate exercise/sports 3–5 days a week.
+            *   *Very Active:* Hard exercise/sports 6–7 days a week.
+            *   *Extra Active:* Heavy physical job or training twice a day.
+        *   Logic: Configures the physical activity level multiplier used to calculate the user's daily energy requirement.
+    *   **Step 6: Goal Selection:**
+        *   Options: "Fat Loss", "Muscle Gain", "Weight Gain", or "Maintenance".
+        *   Logic: Dictates whether the final plan applies a calorie deficit or calorie surplus.
+    *   **Step 7: Dietary Preference Selection:**
+        *   Options: "Vegan", "Vegetarian", "Non-Veg", or "Eggetarian".
+        *   Logic: Filters out disallowed ingredients and menu items during plan generation.
+    *   **Step 8: Lifestyle Habits Input:**
+        *   Options: Asks questions about sleeping hours, daily water intake goals, smoking habits, and alcohol consumption frequency.
+    *   **Step 9: Health Profile Selection:**
+        *   Options: Allows selecting existing medical conditions (e.g., "Diabetes", "Hypertension", "PCOS", "Thyroid").
+        *   Logic:
+            *   *Gender Restriction:* PCOS option is dynamically hidden/ignored if "Male" was selected in Step 1.
+            *   *Dietary Safety:* Disallows specific foods during meal generation that might negatively affect listed conditions.
+    *   **Step 10: Optional Metrics Input:**
+        *   Options: Allows inputs for chest, waist, hips, and body fat percentage measurements (in inches/percentage).
+
+---
+
+## 5. SCREENING REPORT SCREEN (STEP 11)
+*   **Purpose:** Summarizes the user's physical diagnostics immediately after finishing the onboarding.
+*   **Calculations & Formulas:**
+    *   **BMI (Body Mass Index):**
+        *   *Formula:* `Weight (kg) / (Height (m) * Height (m))`
+        *   *Categories:* Renders on a color-coded gauge (Underweight < 18.5, Normal 18.5–22.9, Overweight 23–24.9, Obese >= 25).
+    *   **BMR (Basal Metabolic Rate):**
+        *   *Formula (Mifflin-St Jeor):*
+            *   Male: `10 * Weight (kg) + 6.25 * Height (cm) - 5 * Age (years) + 5`
+            *   Female: `10 * Weight (kg) + 6.25 * Height (cm) - 5 * Age (years) - 161`
+    *   **Ideal Body Weight (IBW):**
+        *   *Formula (Devine Method):*
+            *   Male: `Height (cm) - 100`
+            *   Female: `Height (cm) - 105`
+    *   **%IBW (Ideal Weight Ratio):**
+        *   *Formula:* `(Current Weight / Ideal Body Weight) * 100`
+    *   **TDEE (Total Daily Energy Expenditure):**
+        *   *Formula:* `BMR * Activity Multiplier`
+        *   *Multipliers:*
+            *   *Sedentary:* Male = 1.3 | Female = 1.3
+            *   *Lightly Active:* Male = 1.6 | Female = 1.5
+            *   *Moderately Active:* Male = 1.7 | Female = 1.6
+            *   *Very Active:* Male = 2.1 | Female = 1.9
+            *   *Extra Active:* Male = 2.4 | Female = 2.2
+    *   **Daily Target Calories:**
+        *   *Fat Loss:* `TDEE - 500 kcal` (Deficit)
+        *   *Weight Gain / Muscle Gain:* `TDEE + 300 to 400 kcal` (Surplus)
+        *   *Maintenance:* `TDEE`
+    *   **Daily Macronutrient Split Targets:**
+        *   *Carbohydrates:* 45% of Daily Target Calories (split into grams: `calories * 0.45 / 4`)
+        *   *Fats:* 25% of Daily Target Calories (split into grams: `calories * 0.25 / 9`)
+        *   *Protein:* Fixed daily intake target calculated as `Ideal Body Weight (IBW) * 1.2` in grams.
+*   **Interactive Visual Elements:**
+    *   **BMI Gauge:** An arc chart displaying the user's exact classification.
+    *   **Metrics Summary Cards:** Grid displaying BMR, IBW, TDEE, and %IBW values.
+    *   **Recommended Macros Chart:** Shows split targets for Protein, Carbs, and Fats.
+    *   **Scientific Rationale Text:** Dynamic summary explaining the recommended calorie count and workout target for their chosen goal.
+
+---
+
+## 6. CONGRATULATIONS SCREEN (STEP 12)
+*   **Purpose:** Celebrates the completion of the assessment and prompts the user to activate their plan.
+*   **Key Features & Logic:**
+    *   **Confirmation Header:** "Your Personalized Meal Plan Is Waiting".
+    *   **Bouncing Swipe-to-Generate Button:** An interactive slider button that prevents accidental clicks.
+    *   **Activation Trigger:** Swiping initiates a request to the backend that relationally creates a custom, adaptive, 30-day nutrition plan. Once generated, the user is redirected to the Home Dashboard.
+
+---
+
+## 7. HOME DASHBOARD
+*   **Purpose:** The central landing screen of the mobile application showing today's diet plan and macro statistics.
+*   **Key Features & Layout:**
+    *   **Top Navigation Header:** Displays user's first name, current profile photo, notifications badge, and a shortcut to the FitCoins wallet.
+    *   **Swiggy-Style Tab Switcher:** Swaps between "Meal" and "Workout" tabs.
+        *   *Meal Tab:* Renders active daily content (macros, timeline, promotions).
+        *   *Workout Tab:* Currently displays a "Coming Soon" splash graphic.
+    *   **The 3 Core Macro Progress Cards:** Renders three cards: Protein, Carbohydrates, and Fats.
+        *   Displays: Consumed grams vs Target grams (e.g., "40g / 120g").
+        *   Visuals: Features progress bars that fill up as the user completes meals throughout the day.
+    *   **Active Plan Card (Glassmorphic Card):**
+        *   Displays: Plan name, plan pace message, days remaining (e.g., "Day 12 of 30"), and progress bar.
+        *   Navigation: Tapping takes the user to the Detailed Progress screen.
+    *   **Today's Meal Timeline Quick-View:** Displays a preview of meal slots (Breakfast, Mid-Meal, Lunch, etc.) with calorie counts. Tapping navigates to the main Meal Planner screen.
+    *   **Sticky Search Bar:** Appears at the top of the screen when scrolling down to enable easy food searches.
+    *   **Offer/Unlock Subscriptions Card:** Appears for users with expired or unpurchased plans, opening a pricing model bottom sheet showing Monthly and Annual plan selections.
+
+---
+
+## 8. SMART MEAL PLANNER SCREEN
+*   **Purpose:** Displays the full, detailed meal list for any selected calendar day and manages meal logs.
+*   **Key Features & Conditions:**
+    *   **Weekly Calendar Picker:** Shows dates for the current week, allowing user to swipe back and forth.
+        *   *Lock Rule:* Clicking future dates, or dates prior to the active plan's start date, restricts the user to a "Meal Locked" screen.
+    *   **Insight Switcher Tabs (Conditional on Locked State):**
+        *   If the selected date is locked: Only the "Meal" tab is visible.
+        *   If the selected date is active: Displays multiple helpful tabs:
+            *   *Meal Tab:* Displays the daily recommended meal cards.
+            *   *Macros Tab:* Charts the exact target vs consumed carbs, protein, and fats.
+            *   *Deficiency Tab:* (Shown if deficiencies are registered) Highlights priority vitamins/minerals.
+            *   *Anthropometric Tab:* Shows user measurements (BMI, BMR, TDEE).
+            *   *Disease Guidance Tab:* (Shown if medical conditions exist) Details specific foods to eat, foods to avoid, and precautions.
+            *   *Fiber & Protein Tab:* Details fiber foods and protein powder schedules.
+            *   *Advice Tab:* General health tips.
+    *   **Individual Meal Cards:** Represents Breakfast, Mid-Meal, Lunch, Evening Snack, Dinner, and Water Intake.
+        *   *Food Item Listings:* Details recommended food names, portions, and calories (kcal).
+        *   *Swapping/Alternatives:* Lists alternative food swap suggestions (e.g., "Swap: Oats OR Egg whites").
+    *   **"Mark as Complete" / Meal Logging Logic:**
+        *   *Today's Logic:* Users can click "Mark as Complete" once the meal's scheduled time has arrived.
+        *   *Too-Early Logic:* If the time of day has not arrived, the button is locked, displaying "Unlocks at [Time]" (e.g., "Unlocks 1:00 PM"). Tapping it displays "You can mark this meal from [Time]."
+        *   *Past Dates Logic:* Meals on past days are closed. Tapping shows "This day's meal log is closed — you can only mark today's meals."
+        *   *Future Dates Logic:* Future meals are locked. Tapping shows "Meals can only be marked on the day itself."
+        *   *Undo Logging:* Today's marked meals can be clicked again to unmark ("Marked as Eaten" transitions back to "Mark as Complete").
+        *   *Dynamic Update:* Completing a meal instantly updates dashboard macros.
+
+---
+
+## 9. PROGRESS & ANALYTICS VIEWS
+*   **Purpose:** Tracks long-term consistency, weight changes, and overall compliance.
+*   **Key Features & Options:**
+    *   **Discipline Adherence Banner:** Displays overall consistency rate (e.g., "92% Meal Compliance").
+    *   **Journey Progress Tracker:** Shows Day X of 30 progress bar and remaining days.
+    *   **Analytics Tab Switcher:**
+        *   *Today Tab:* Shows total daily consumed calories vs target calories, macro progress rings, active logging streak count, and daily health tip.
+        *   *Weight Tab:* Displays starting snapshots, weight difference stats, and the Weight History Graph.
+    *   **Estimated Weight Tracking Logic (No Scales Integration):**
+        *   *Important Condition:* The app does not sync with smart scales or allow manual weight logging.
+        *   *Algorithm:* Bodyweight is estimated based on the calorie deficit or surplus logged.
+        *   *Formula:* The system logs calories from eaten meals and compares it against TDEE. Every 7,700 kcal deficit registers as 1 kg of estimated fat loss; every 7,700 kcal surplus registers as 1 kg of estimated fat gain.
+    *   **Starting Snapshot Card:** Archive of baseline onboarding data (BMI, BMR, TDEE, IBW).
+
+---
+
+## 10. PROGRESS PHOTOS (TRANSFORMATION GALLERY)
+*   **Purpose:** Allows users to visually compare their bodies at specific milestones.
+*   **Milestone Milestones & Lock Logic:**
+    *   **Milestone Slots:** Day 1, Week 1 (Day 7), Week 2 (Day 14), Week 3 (Day 21), Day 30 (Day 28).
+    *   **Lock Rules:** Milestone slots are locked until the user's active plan day reaches or passes the threshold. Future milestone cards display a lock icon.
+    *   **Photo Actions:**
+        *   Tapping a locked card opens a bottom sheet explanation (e.g., "Week 2 Photo Locked until Day 14").
+        *   Tapping an unlocked empty card opens the phone camera or photo gallery to upload a photo.
+        *   Tapping an uploaded slot displays the photo in full screen with an "Edit/Replace Photo" option.
+
+---
+
+## 11. NUTRITION & WEEKLY HISTORY SCREEN
+*   **Purpose:** Provides a review of logs over past weeks.
+*   **Key Features:**
+    *   **Meal Attendance Summary:** Displays statistics on completion rates for each meal slot (e.g., "Breakfast logged 25/30 times, Mid-Meal logged 12/30 times").
+    *   **Daily Intake Calendar Log:** Renders a list of past active dates showing daily target calories vs actual consumed calories, plus macronutrient gram totals.
+
+---
+
+## 12. CLIENT BOOKING & SESSION HISTORY SCREEN
+*   **Purpose:** Enables members to search and book consultations with health experts.
+*   **Key Features:**
+    *   **Expert Selector:** Displays card list of experts, including their profile photo, bios, and ratings.
+    *   **Booking Calendar Picker:** A slide calendar showing the expert's available dates.
+    *   **Slot Picker:** Displays time slot chips (e.g., "10:00 AM - 11:00 AM") showing as "Available" or "Booked".
+    *   **Client Notes Input:** Allows typing custom health complaints or objectives before booking.
+    *   **My Sessions Directory:** Displays booked consultation cards showing scheduled date, time, expert name, session notes, current status (PENDING, APPROVED, COMPLETED, CANCELLED), and a "Join Call" button when active.
+
+---
+
+## 13. EXPERT AVAILABILITY & SLOTS MANAGEMENT (EXPERT/ADMIN SIDE)
+*   **Purpose:** Allows consultants/admins to customize their daily calendar availability.
+*   **Key Features & Validation Rules:**
+    *   **Calendar Timeline Select:** Table Calendar to review configured dates.
+    *   **Availability List:** Shows slots configured for the selected date. Only slots that remain "AVAILABLE" (unbooked) can be deleted by clicking the "x" button.
+    *   **Add Availability Slot Dialog:**
+        *   *Auto-Suggestion:* Smartly pre-fills start and end times based on the last configured slot for that day (defaulting to 1-hour durations).
+        *   *Time Verification:* Prevents adding slots where the end time is before the start time.
+        *   *Overlapping Overlap Check:* Compares start/end times against existing slots. If a slot overlaps, it blocks saving and triggers a "Time Conflict" warning message.
+
+---
+
+## 14. EXPERT CONSULTATION PORTAL (EXPERT/ADMIN SIDE)
+*   **Purpose:** The central control dashboard for experts to review and conduct member sessions.
+*   **Key Features:**
+    *   **Active Appointments List:** Shows PENDING and APPROVED client appointments.
+    *   **Status Indicators:** Displays color-coded badges for status (PENDING = Yellow, APPROVED = Green, COMPLETED = Blue, CANCELLED/REJECTED = Red).
+    *   **Consultant Actions:**
+        *   *Pending Appointments:* Single-tap buttons to "Approve" or "Reject" requests.
+        *   *Approved Appointments:*
+            *   *Message Button:* Launches text chat with the client.
+            *   *Add Notes / Complete Button:* Opens a dialog for the expert to type health recommendations, workout tips, and complete/save the session.
+            *   *Start Call Button (Agora Integration):* Unlocks 10 minutes prior to start time. Displays "Session Ended" once expired, or "Available at [Time]" if clicked too early.
+
+---
+
+
+
+## 16. PROFILE SCREEN
+*   **Purpose:** Overview of member diagnostics and navigational shortcuts.
+*   **Key Features & Items:**
+    *   **Profile Card:** Displays user photo, full name, email address, and account registration date.
+    *   **Health Summary Grid:** Displays quick-reference chips showing the user's Age, Height, and Current Weight.
+    *   **Premium Member Status Badge:** Highlights whether they have an active plan.
+    *   **Options Navigational List:** Row items that route the user to Edit Profile, Settings, Support & FAQ, Family Wellness Hub, and Consultation Booking screens.
+
+---
+
+## 17. SETTINGS SCREEN
+*   **Purpose:** Manages account preferences, notifications, and security.
+*   **Key Features & Actions:**
+    *   **Reminders Toggles:** Switches to toggle push notifications/reminders for Daily Meals, Water Intake, and Workouts.
+    *   **Account Controls:** Buttons to Edit Profile and Change Password.
+    *   **General Support Group:** Renders links to Contact Us, Privacy Policy, and Terms of Service.
+    *   **Account Deletion Button:** Prompts a secure confirmation dialog before purging the user profile.
+    *   **Logout Button:** Clears local device authentication storage and routes the user back to the Login Screen.
+
+---
+
+## 18. NOTIFICATIONS SCREEN
+*   **Purpose:** Lists all push notifications received by the user.
+*   **Key Features:**
+    *   **Notification Timeline:** Card list showing warning logs (e.g., meal reminder alert, water drink logs, booking slot approvals).
+    *   **Delete/Clear Action:** Allows clearing the history log.
+
+---
+
+## 19. CHAT & VIDEO CALL PORTALS
+*   **Purpose:** Real-time communication between consultants and users.
+*   **Key Features:**
+    *   **Direct Chat:** Real-time text messaging between the member and their assigned expert.
+    *   **Agora Video Call:** Full-screen video consultation. Includes camera swap, microphone mute, speaker toggles, and call duration count.

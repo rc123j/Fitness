@@ -10,6 +10,7 @@ import 'app/routes/app_pages.dart';
 import 'app/services/api_client.dart';
 import 'app/services/auth_service.dart';
 import 'app/services/notification_service.dart';
+import 'app/services/iap_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +21,7 @@ void main() async {
 
   Get.put(AuthService(), permanent: true);
   await Get.putAsync(() => ApiClient().init(), permanent: true);
+  await Get.putAsync(() => IapService().init(), permanent: true);
 
   // Register core controllers permanently
   Get.put(NotificationController(), permanent: true);

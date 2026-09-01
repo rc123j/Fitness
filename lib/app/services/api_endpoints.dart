@@ -33,4 +33,9 @@ class ApiEndpoints {
   static const String logWeight = '/api/progress/weight';
   static const String calorieHistory = '/api/diet-plans/logs/history';
   static const String progressPhotos = '/api/progress/photos';
+
+  // Subscriptions & IAP
+  static const String subscriptionPlans = '/api/subscriptions/plans';
+  static const String subscriptionStatus = '/api/subscriptions/status';
+  static const String verifyPurchase = '/api/subscriptions/verify';
 }

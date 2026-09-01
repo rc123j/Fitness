@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/home_controller.dart';
 import 'swiggy_tabs.dart';
+import '../../../services/iap_service.dart';
 import '../../../widgets/app_shimmer.dart';
 import '../../main_navigation/controllers/main_navigation_controller.dart';
 
@@ -1003,24 +1004,32 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              GestureDetector(
-                onTap: () => _showPremiumOfferBottomSheet(
-                  context,
-                  "Premium Access",
-                  "Unlock all features",
-                  const Color(0xffFFD166),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    'assets/home/offer1.png',
-                    width: 320,
-                    height: 170,
-                    fit: BoxFit.cover,
+              Obx(() {
+                final iapService = Get.find<IapService>();
+                if (iapService.isPremium.value) {
+                  return const SizedBox.shrink();
+                }
+                return GestureDetector(
+                  onTap: () => _showPremiumOfferBottomSheet(
+                    context,
+                    "Premium Access",
+                    "Unlock all features",
+                    const Color(0xffFFD166),
                   ),
-                ),
-              ),
-              const SizedBox(width: 14),
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 14),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.asset(
+                        'assets/home/offer1.png',
+                        width: 320,
+                        height: 170,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                );
+              }),
               GestureDetector(
                 onTap: () => _showTalkToExpertBottomSheet(context),
                 child: ClipRRect(

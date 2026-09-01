@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/profile_controller.dart';
+import '../../../services/iap_service.dart';
 import '../../../widgets/app_shimmer.dart';
 import '../../../widgets/scroll_nav_bar_binder.dart';
 import 'coming_soon_view.dart';
@@ -344,6 +345,7 @@ class ProfileView extends GetView<ProfileController> {
   /// 3. PREMIUM CARD
   /// ----------------------------------------------------
   Widget buildPremiumCard() {
+    final iapService = Get.find<IapService>();
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -386,14 +388,34 @@ class ProfileView extends GetView<ProfileController> {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  "You are on Premium Plan\nNext billing on 25 May 2024",
-                  style: GoogleFonts.inter(
-                    color: Colors.white.withOpacity(0.50),
-                    fontSize: 9,
-                    height: 1.3,
-                  ),
-                ),
+                Obx(() {
+                  final isPremium = iapService.isPremium.value;
+                  final expiry = iapService.premiumExpiry.value;
+                  final planName = iapService.activePlanName.value;
+
+                  if (isPremium) {
+                    final dateStr = expiry != null
+                        ? "${expiry.day}/${expiry.month}/${expiry.year}"
+                        : "Ongoing";
+                    return Text(
+                      "You are on $planName\nActive until $dateStr",
+                      style: GoogleFonts.inter(
+                        color: Colors.white.withOpacity(0.50),
+                        fontSize: 9,
+                        height: 1.3,
+                      ),
+                    );
+                  } else {
+                    return Text(
+                      "No active subscription.\nUpgrade now to unlock features.",
+                      style: GoogleFonts.inter(
+                        color: Colors.white.withOpacity(0.50),
+                        fontSize: 9,
+                        height: 1.3,
+                      ),
+                    );
+                  }
+                }),
               ],
             ),
           ),
@@ -410,14 +432,14 @@ class ProfileView extends GetView<ProfileController> {
                   width: 0.8,
                 ),
               ),
-              child: Text(
-                "Manage Plan",
+              child: Obx(() => Text(
+                iapService.isPremium.value ? "Manage Plan" : "Upgrade Plan",
                 style: GoogleFonts.outfit(
                   color: const Color(0xffFF7A00),
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                 ),
-              ),
+              )),
             ),
           ),
         ],

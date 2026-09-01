@@ -43,6 +43,8 @@ class MembershipView extends GetView<MembershipController> {
               children: [
                 buildAppBar(),
                 const Spacer(),
+                buildHeaderTitles(),
+                const Spacer(),
                 buildStackedCarousel(),
                 const SizedBox(height: 24),
                 // buildCountdownTimerCard(),
@@ -141,7 +143,7 @@ class MembershipView extends GetView<MembershipController> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  "7 DAYS FREE TRIAL",
+                  "UNLIMITED HEALTH METRICS",
                   style: GoogleFonts.outfit(
                     color: Colors.white,
                     fontSize: 12,
@@ -157,181 +159,198 @@ class MembershipView extends GetView<MembershipController> {
     );
   }
 
-  // Plan data for the carousel
-  static const List<Map<String, dynamic>> _plans = [
-    {
-      'title': 'Weekly',
-      'subtitle': 'Try it out',
-      'price': '₹199',
-      'priceSub': '/week',
-      'badge': null,
-      'discount': null,
-      'highlighted': false,
-      'bullets': [
-        'Full Access to Workouts',
-        'Basic Meal Suggestions',
-        'Progress Tracking',
-      ],
-    },
-    {
-      'title': 'Monthly',
-      'subtitle': 'Flexible & Easy',
-      'price': '₹599',
-      'priceSub': '/month',
-      'badge': null,
-      'discount': null,
-      'highlighted': false,
-      'bullets': [
-        'Full Access to Workouts',
-        'Custom Meal Plans',
-        'Progress Tracking',
-        'Expert Support',
-      ],
-    },
-    {
-      'title': 'Quarterly',
-      'subtitle': 'Great Value',
-      'price': '₹1,499',
-      'priceSub': '/3 months',
-      'badge': 'POPULAR',
-      'discount': 'Save 16%',
-      'highlighted': false,
-      'bullets': [
-        'Full Access to Workouts',
-        'Custom Meal Plans',
-        'Progress Tracking',
-        'Expert Support',
-        'Nutrition Guidance',
-      ],
-    },
-    {
-      'title': 'Annual',
-      'subtitle': 'Most Popular',
-      'price': '₹3,999',
-      'priceSub': '/year',
-      'badge': 'BEST VALUE',
-      'discount': 'Save 44%',
-      'highlighted': true,
-      'bullets': [
-        'Full Access to Workouts',
-        'Custom Meal Plans',
-        'Progress Tracking',
-        'Expert Support',
-        'Priority Coach Access',
-        'Nutrition Guidance',
-      ],
-    },
-    {
-      'title': 'Lifetime',
-      'subtitle': 'One-Time Payment',
-      'price': '₹9,999',
-      'priceSub': ' forever',
-      'badge': 'BEST DEAL',
-      'discount': 'One time only',
-      'highlighted': false,
-      'bullets': [
-        'Full Access to Workouts',
-        'Custom Meal Plans',
-        'Progress Tracking',
-        'Expert Support',
-        'Priority Coach Access',
-        'Nutrition Guidance',
-        'Exclusive Content',
-      ],
-    },
-  ];
+  // Helper metadata mapper based on plan duration
+  String getSubtitle(String duration) {
+    switch (duration) {
+      case 'WEEKLY': return 'Try it out';
+      case 'MONTHLY': return 'Flexible & Easy';
+      case 'QUARTERLY': return 'Great Value';
+      case 'ANNUAL': return 'Most Popular';
+      case 'LIFETIME': return 'One-Time Payment';
+      default: return 'Premium Access';
+    }
+  }
+
+  String getPriceSub(String duration) {
+    switch (duration) {
+      case 'WEEKLY': return '/week';
+      case 'MONTHLY': return '/month';
+      case 'QUARTERLY': return '/3 months';
+      case 'ANNUAL': return '/year';
+      case 'LIFETIME': return ' forever';
+      default: return '';
+    }
+  }
+
+  List<String> getBullets(String duration) {
+    switch (duration) {
+      case 'WEEKLY':
+        return [
+          'Full Access to Workouts',
+          'Basic Meal Suggestions',
+          'Progress Tracking',
+        ];
+      case 'MONTHLY':
+      case 'QUARTERLY':
+        return [
+          'Full Access to Workouts',
+          'Custom Meal Plans',
+          'Progress Tracking',
+          'Expert Support',
+        ];
+      case 'ANNUAL':
+      case 'LIFETIME':
+        return [
+          'Full Access to Workouts',
+          'Custom Meal Plans',
+          'Progress Tracking',
+          'Expert Support',
+          'Priority Coach Access',
+          'Nutrition Guidance',
+        ];
+      default:
+        return ['Premium Workouts', 'Custom Meal Plans', 'Progress Tracking'];
+    }
+  }
+
+  String? getBadge(String duration) {
+    if (duration == 'ANNUAL') return 'BEST VALUE';
+    if (duration == 'QUARTERLY') return 'POPULAR';
+    if (duration == 'LIFETIME') return 'BEST DEAL';
+    return null;
+  }
+
+  String? getDiscount(String duration) {
+    if (duration == 'ANNUAL') return 'Save 44%';
+    if (duration == 'QUARTERLY') return 'Save 16%';
+    return null;
+  }
 
   /// Stacked Carousel Layout
   Widget buildStackedCarousel() {
     return SizedBox(
       height: 460,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // 1. Z-indexed Visible Cards
-          Obx(() {
-            final page = controller.pageOffset.value;
-            List<MapEntry<double, Widget>> cardEntries = [];
+      child: Obx(() {
+        if (controller.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xffFF00E5)),
+          );
+        }
 
-            for (int i = 0; i < _plans.length; i++) {
-              final diff = (i - page);
-              final absDiff = diff.abs();
+        final plans = controller.plans;
+        if (plans.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "No plans available right now.",
+                  style: GoogleFonts.inter(color: Colors.white.withOpacity(0.5)),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () => controller.refreshPlans(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white.withOpacity(0.08),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text("Retry"),
+                )
+              ],
+            ),
+          );
+        }
 
-              // Only render nearby cards for performance
-              if (absDiff > 2.5) continue;
+        final page = controller.pageOffset.value;
 
-              final scale = (1.0 - absDiff * 0.15).clamp(0.6, 1.0);
-              final opacity = (1.0 - absDiff * 0.35).clamp(0.0, 1.0);
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            // 1. Z-indexed Visible Cards
+            Builder(builder: (context) {
+              List<MapEntry<double, Widget>> cardEntries = [];
 
-              // We translate based on diff. viewportFraction is 0.5 (~200px width).
-              // We translate the visual cards by 150px per page to create a strong overlap.
-              final translate = diff * 150.0;
+              for (int i = 0; i < plans.length; i++) {
+                final diff = (i - page);
+                final absDiff = diff.abs();
 
-              final plan = _plans[i];
-              cardEntries.add(
-                MapEntry(
-                  absDiff,
-                  Transform.translate(
-                    offset: Offset(translate, 0),
-                    child: Transform.scale(
-                      scale: scale,
-                      child: Opacity(
-                        opacity: opacity,
-                        child: SizedBox(
-                          width: 290,
-                          child: buildPlanCard(
-                            index: i,
-                            title: plan['title'] as String,
-                            subtitle: plan['subtitle'] as String,
-                            price: plan['price'] as String,
-                            priceSub: plan['priceSub'] as String,
-                            badgeText: plan['badge'] as String?,
-                            discountText: plan['discount'] as String?,
-                            bullets: List<String>.from(plan['bullets'] as List),
-                            isSelected: controller.selectedPlanIndex.value == i,
-                            isHighlighted: plan['highlighted'] as bool,
+                // Only render nearby cards for performance
+                if (absDiff > 2.5) continue;
+
+                final scale = (1.0 - absDiff * 0.15).clamp(0.6, 1.0);
+                final opacity = (1.0 - absDiff * 0.35).clamp(0.0, 1.0);
+
+                // Translate cards by 150px per page to create a strong overlap.
+                final translate = diff * 150.0;
+
+                final plan = plans[i];
+                final String duration = plan['duration'] as String;
+
+                cardEntries.add(
+                  MapEntry(
+                    absDiff,
+                    Transform.translate(
+                      offset: Offset(translate, 0),
+                      child: Transform.scale(
+                        scale: scale,
+                        child: Opacity(
+                          opacity: opacity,
+                          child: SizedBox(
+                            width: 290,
+                            child: buildPlanCard(
+                              index: i,
+                              title: plan['title'] as String,
+                              subtitle: getSubtitle(duration),
+                              price: plan['price'] as String,
+                              priceSub: getPriceSub(duration),
+                              badgeText: getBadge(duration),
+                              discountText: getDiscount(duration),
+                              bullets: getBullets(duration),
+                              isSelected: controller.selectedPlanIndex.value == i,
+                              isHighlighted: duration == 'ANNUAL' || plans.length == 1,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
+                );
+              }
+
+              // Draw furthest cards first (bottom of stack)
+              cardEntries.sort((a, b) => b.key.compareTo(a.key));
+
+              return Stack(
+                alignment: Alignment.center,
+                clipBehavior: Clip.none,
+                children: cardEntries.map((e) => e.value).toList(),
               );
-            }
+            }),
 
-            // Draw furthest cards first (bottom of stack)
-            cardEntries.sort((a, b) => b.key.compareTo(a.key));
-
-            return Stack(
-              alignment: Alignment.center,
+            // 2. Invisible PageView to capture scrolling and taps
+            PageView.builder(
+              controller: controller.pageController,
               clipBehavior: Clip.none,
-              children: cardEntries.map((e) => e.value).toList(),
-            );
-          }),
-
-          // 2. Invisible PageView to capture scrolling and taps
-          PageView.builder(
-            controller: controller.pageController,
-            clipBehavior: Clip.none,
-            itemCount: _plans.length,
-            onPageChanged: (i) => controller.selectPlan(i),
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () {
-                  controller.selectPlan(index);
-                  controller.pageController.animateToPage(
-                    index,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                  );
-                },
-                behavior: HitTestBehavior.opaque,
-                child: const SizedBox.expand(),
-              );
-            },
-          ),
-        ],
-      ),
+              itemCount: plans.length,
+              onPageChanged: (i) => controller.selectPlan(i),
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    controller.selectPlan(index);
+                    controller.pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: const SizedBox.expand(),
+                );
+              },
+            ),
+          ],
+        );
+      }),
     );
   }
 
@@ -459,57 +478,74 @@ class MembershipView extends GetView<MembershipController> {
                 const SizedBox(height: 24),
 
                 /// Bullet Points
-                ...bullets.map((bullet) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.check_circle_rounded,
-                          color: Colors.white,
-                          size: 14,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            bullet,
-                            style: GoogleFonts.inter(
+                Expanded(
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: bullets.length,
+                    itemBuilder: (context, idx) {
+                      final bullet = bullets[idx];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.check_circle_rounded,
                               color: Colors.white,
-                              fontSize: 12,
-                              height: 1.2,
+                              size: 14,
                             ),
-                          ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                bullet,
+                                style: GoogleFonts.inter(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  );
-                }),
-                const Spacer(),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
 
                 /// Button inside card
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    color: isSelected
-                        ? Colors.white
-                        : Colors.white.withOpacity(0.04),
-                    border: isSelected
-                        ? null
-                        : Border.all(
-                            color: Colors.white.withOpacity(0.12),
-                            width: 1.0,
-                          ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      isSelected ? "Proceed with Plan" : "Select Plan",
-                      style: GoogleFonts.outfit(
-                        color: isSelected ? Colors.black : Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
+                GestureDetector(
+                  onTap: () {
+                    if (isSelected) {
+                      controller.purchaseSelectedPlan();
+                    } else {
+                      controller.selectPlan(index);
+                    }
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: isSelected
+                          ? Colors.white
+                          : Colors.white.withOpacity(0.04),
+                      border: isSelected
+                          ? null
+                          : Border.all(
+                              color: Colors.white.withOpacity(0.12),
+                              width: 1.0,
+                            ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        isSelected ? "Proceed with Plan" : "Select Plan",
+                        style: GoogleFonts.outfit(
+                          color: isSelected ? Colors.black : Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -544,102 +580,6 @@ class MembershipView extends GetView<MembershipController> {
             ),
         ],
       ),
-    );
-  }
-
-  /// 5. COUNTDOWN TIMER CARD
-  // Widget buildCountdownTimerCard() {
-  //   return Container(
-  //     margin: const EdgeInsets.symmetric(horizontal: 24),
-  //     padding: const EdgeInsets.all(18),
-  //     decoration: BoxDecoration(
-  //       borderRadius: BorderRadius.circular(24),
-  //       color: const Color(0xff0B0817).withOpacity(0.75),
-  //       border: Border.all(color: Colors.white.withOpacity(0.06)),
-  //     ),
-  //     child: Row(
-  //       children: [
-  //         Container(
-  //           padding: const EdgeInsets.all(12),
-  //           decoration: BoxDecoration(
-  //             shape: BoxShape.circle,
-  //             color: const Color(0xffFF00E5).withOpacity(0.12),
-  //           ),
-  //           child: const Icon(
-  //             Icons.local_fire_department_rounded,
-  //             color: Color(0xffFF00E5),
-  //             size: 24,
-  //           ),
-  //         ),
-  //         const SizedBox(width: 14),
-  //         Expanded(
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Text(
-  //                 "Special Launch Offer",
-  //                 style: GoogleFonts.outfit(
-  //                   color: Colors.white,
-  //                   fontSize: 13,
-  //                   fontWeight: FontWeight.bold,
-  //                 ),
-  //               ),
-  //               Text(
-  //                 "Limited time offer.",
-  //                 style: GoogleFonts.inter(
-  //                   color: Colors.white.withOpacity(0.4),
-  //                   fontSize: 10,
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-
-  //         /// Countdown Blocks
-  //         Row(
-  //           children: [
-  //             buildTimerBlock(controller.days, "Days"),
-  //             const SizedBox(width: 4),
-  //             buildTimerBlock(controller.hours, "Hrs"),
-  //             const SizedBox(width: 4),
-  //             buildTimerBlock(controller.minutes, "Min"),
-  //           ],
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  Widget buildTimerBlock(RxInt value, String label) {
-    return Column(
-      children: [
-        Obx(
-          () => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.04),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Colors.white.withOpacity(0.06)),
-            ),
-            child: Text(
-              value.value.toString().padLeft(2, '0'),
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            color: Colors.white.withOpacity(0.3),
-            fontSize: 7,
-          ),
-        ),
-      ],
     );
   }
 }
