@@ -755,14 +755,22 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              controller.planName.value.isNotEmpty
-                                  ? controller.planName.value
-                                  : "Fat Loss Plan",
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 26,
-                                fontWeight: FontWeight.w900,
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                () {
+                                  final name = controller.planName.value;
+                                  if (name.toLowerCase().contains("athletic")) {
+                                    return "Athletic Plan";
+                                  }
+                                  return name.isNotEmpty ? name : "Fat Loss Plan";
+                                }(),
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w900,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -1004,49 +1012,119 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Obx(() {
-                final iapService = Get.find<IapService>();
-                if (iapService.isPremium.value) {
-                  return const SizedBox.shrink();
-                }
-                return GestureDetector(
-                  onTap: () => _showPremiumOfferBottomSheet(
-                    context,
-                    "Premium Access",
-                    "Unlock all features",
-                    const Color(0xffFFD166),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 14),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
-                        'assets/home/offer1.png',
-                        width: 320,
-                        height: 170,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                );
-              }),
-              GestureDetector(
-                onTap: () => _showTalkToExpertBottomSheet(context),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    'assets/home/offer2.png',
-                    width: 320,
-                    height: 170,
-                    fit: BoxFit.cover,
-                  ),
+              _buildOfferItem(
+                imagePath: 'assets/home/offer1.png',
+                onTap: () => _showPremiumOfferBottomSheet(
+                  context,
+                  "Premium Access",
+                  "Unlock all features",
+                  const Color(0xffFFD166),
                 ),
+                fallbackTitle: "Premium Access",
+                fallbackSubtitle: "Unlock all features & personalized plans",
+                fallbackColor: const Color(0xffFFD166),
+              ),
+              _buildOfferItem(
+                imagePath: 'assets/home/offer2.png',
+                onTap: () => _showTalkToExpertBottomSheet(context),
+                fallbackTitle: "Talk to Diet Expert",
+                fallbackSubtitle: "Get 1-on-1 personalized guidance",
+                fallbackColor: const Color(0xff00FF87),
+                isLast: true,
               ),
             ],
           ),
         ),
         const SizedBox(height: 8),
       ],
+    );
+  }
+
+  Widget _buildOfferItem({
+    required String imagePath,
+    required VoidCallback onTap,
+    required String fallbackTitle,
+    required String fallbackSubtitle,
+    required Color fallbackColor,
+    bool isLast = false,
+  }) {
+    return Padding(
+      padding: EdgeInsets.only(right: isLast ? 0 : 14),
+      child: GestureDetector(
+        onTap: onTap,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.asset(
+            imagePath,
+            width: 320,
+            height: 170,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: 320,
+                height: 170,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    colors: [
+                      fallbackColor.withOpacity(0.3),
+                      const Color(0xff151520),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  border: Border.all(
+                    color: fallbackColor.withOpacity(0.5),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: fallbackColor.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        "SPECIAL OFFER",
+                        style: GoogleFonts.outfit(
+                          color: fallbackColor,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      fallbackTitle,
+                      style: GoogleFonts.outfit(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      fallbackSubtitle,
+                      style: GoogleFonts.outfit(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ),
     );
   }
 

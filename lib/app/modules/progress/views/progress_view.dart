@@ -473,12 +473,12 @@ class ProgressView extends GetView<ProgressController> {
     const tabs = [
       'Today\'s Nutrition',
       'Weekly Calories',
-      // 'Weight Tracker', // commented out per request
+      'Weight Tracker',
     ];
     const icons = [
       Icons.donut_large_rounded,
       Icons.bar_chart_rounded,
-      // Icons.monitor_weight_outlined,
+      Icons.monitor_weight_outlined,
     ];
 
     return Column(
@@ -499,55 +499,66 @@ class ProgressView extends GetView<ProgressController> {
                     margin: EdgeInsets.only(
                       right: i < tabs.length - 1 ? 10 : 0,
                     ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color(0xffB100FF)
-                          : const Color(0xff1C1533),
                       borderRadius: BorderRadius.circular(50),
                       border: Border.all(
                         color: isSelected
-                            ? const Color(0xffB100FF)
+                            ? Colors.transparent
                             : Colors.white.withOpacity(0.1),
-                        width: 1.5,
+                        width: 1.0,
                       ),
+                      gradient: isSelected
+                          ? const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [Color(0xffFF00E5), Color(0xffFF7A00)],
+                            )
+                          : null,
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: const Color(0xffB100FF).withOpacity(0.4),
-                                blurRadius: 12,
-                                spreadRadius: 0,
+                                color: const Color(0xffFF00E5).withOpacity(0.25),
+                                blurRadius: 10,
+                                spreadRadius: 1,
                               ),
                             ]
                           : [],
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          icons[i],
-                          size: 14,
-                          color: isSelected
-                              ? Colors.white
-                              : Colors.white.withOpacity(0.5),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          tabs[i],
-                          style: GoogleFonts.outfit(
+                    child: Container(
+                      margin: const EdgeInsets.all(1.2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 9.8,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(48.8),
+                        color: const Color(0xff1C1533),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            icons[i],
+                            size: 14,
                             color: isSelected
                                 ? Colors.white
-                                : Colors.white.withOpacity(0.55),
-                            fontSize: 13,
-                            fontWeight: isSelected
-                                ? FontWeight.w700
-                                : FontWeight.w500,
+                                : Colors.white.withOpacity(0.5),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 6),
+                          Text(
+                            tabs[i],
+                            style: GoogleFonts.outfit(
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.55),
+                              fontSize: 13,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -606,8 +617,8 @@ class ProgressView extends GetView<ProgressController> {
                   ),
                 ],
               );
-            // case 2:
-            //   return _buildWeightTracker();
+            case 2:
+              return _buildWeightTracker();
             default:
               return const SizedBox.shrink();
           }
@@ -1455,27 +1466,44 @@ class ProgressView extends GetView<ProgressController> {
               const SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: history.map((e) {
-                    final dateStr = e['date']?.toString() ?? '';
-                    String label = '';
-                    try {
-                      final d = DateTime.parse(dateStr);
-                      label = '${d.day} ${_monthAbbr(d.month)}';
-                    } catch (_) {
-                      label = dateStr.length > 5
-                          ? dateStr.substring(5)
-                          : dateStr;
+                child: Builder(
+                  builder: (context) {
+                    final List<Map<String, dynamic>> displayLabels;
+                    if (history.length <= 5) {
+                      displayLabels = history;
+                    } else {
+                      final n = history.length;
+                      displayLabels = [
+                        history[0],
+                        history[(n * 0.25).floor()],
+                        history[(n * 0.50).floor()],
+                        history[(n * 0.75).floor()],
+                        history[n - 1],
+                      ];
                     }
-                    return Text(
-                      label,
-                      style: GoogleFonts.inter(
-                        color: Colors.white38,
-                        fontSize: 9,
-                      ),
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: displayLabels.map((e) {
+                        final dateStr = e['date']?.toString() ?? '';
+                        String label = '';
+                        try {
+                          final d = DateTime.parse(dateStr);
+                          label = '${d.day} ${_monthAbbr(d.month)}';
+                        } catch (_) {
+                          label = dateStr.length > 5
+                              ? dateStr.substring(5)
+                              : dateStr;
+                        }
+                        return Text(
+                          label,
+                          style: GoogleFonts.inter(
+                            color: Colors.white38,
+                            fontSize: 9,
+                          ),
+                        );
+                      }).toList(),
                     );
-                  }).toList(),
+                  },
                 ),
               ),
             ] else
@@ -2373,12 +2401,17 @@ class WeightTrendPainter extends CustomPainter {
     );
 
     // Dots at each entry, with the latest one highlighted.
+    final bool isLongSeries = points.length > 15;
     for (int i = 0; i < points.length; i++) {
       final isLast = i == points.length - 1;
+      final isFirst = i == 0;
+      if (!isLast && !isFirst && isLongSeries && (i % 3 != 0)) continue;
+
+      final double dotRadius = isLast ? 5 : (isLongSeries ? 2 : 3);
       canvas.drawCircle(
         points[i],
-        isLast ? 5 : 3,
-        Paint()..color = isLast ? const Color(0xffFF00E5) : Colors.white,
+        dotRadius,
+        Paint()..color = isLast ? const Color(0xffFF00E5) : Colors.white70,
       );
       if (isLast) {
         canvas.drawCircle(

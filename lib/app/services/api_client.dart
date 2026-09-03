@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
 import 'api_endpoints.dart';
@@ -44,13 +45,29 @@ class ApiClient extends GetxService {
           // Refresh also failed — user is truly unauthorized (deleted / expired).
           // Clear local session and force back to login from anywhere in the app.
           await _authService.clearSession();
-          Get.offAllNamed('/login');
+          _safeNavigateToLogin();
         }
         handler.next(error);
       },
     ));
 
     return this;
+  }
+
+  void _safeNavigateToLogin() {
+    void navigate() {
+      if (Get.key.currentState != null) {
+        Get.offAllNamed('/login');
+      }
+    }
+
+    if (Get.key.currentState != null) {
+      navigate();
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        navigate();
+      });
+    }
   }
 
   Future<bool> _tryRefreshToken() async {

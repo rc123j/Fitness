@@ -21,10 +21,18 @@ class OnboardingDraftService {
   static const _kCondIds     = 'ob_medical_condition_ids';
   static const _kSmoking     = 'ob_smoking_habit';
   static const _kAlcohol     = 'ob_alcohol_habit';
+  static const _kRefCode     = 'ob_referral_code';
 
   // ── Read ──────────────────────────────────────────────────────────────────
 
   static int get lastStep => _box.read(_kStep) ?? 1;
+  static String get referralCode => _box.read(_kRefCode) ?? '';
+
+  static void saveReferralCode(String code) {
+    if (code.trim().isNotEmpty) {
+      _box.write(_kRefCode, code.trim().toUpperCase());
+    }
+  }
 
   static Map<String, dynamic> getDraft() {
     return {
@@ -128,5 +136,6 @@ class OnboardingDraftService {
     _box.remove(_kCondIds);
     _box.remove(_kSmoking);
     _box.remove(_kAlcohol);
+    _box.remove(_kRefCode);
   }
 }

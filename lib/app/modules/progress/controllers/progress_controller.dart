@@ -149,9 +149,14 @@ class ProgressController extends GetxController {
         final latestMetrics = data['latest_metrics'];
 
         final profile = data['profile'];
-        if (profile != null && profile['user'] != null) {
-          final user = profile['user'];
-          userName.value = '${user['first_name'] ?? ''} ${user['last_name'] ?? ''}'.trim();
+        if (profile != null) {
+          if (profile['user'] != null) {
+            final user = profile['user'];
+            userName.value = '${user['first_name'] ?? ''} ${user['last_name'] ?? ''}'.trim();
+          }
+          if (startingWeight.value <= 0 && profile['weight_kg'] != null) {
+            startingWeight.value = double.tryParse(profile['weight_kg'].toString()) ?? 0.0;
+          }
         }
 
         if (latestMetrics != null) {
@@ -303,6 +308,26 @@ class ProgressController extends GetxController {
         startingWeight.value =
             double.tryParse(progRes.data['starting_weight']?.toString() ?? '') ??
             startingWeight.value;
+
+        final List serverLogs = progRes.data['logs'] ?? [];
+        if (serverLogs.isNotEmpty) {
+          final tempHistory = <Map<String, dynamic>>[];
+          for (var item in serverLogs) {
+            final dateStr = item['logged_date']?.toString() ?? '';
+            final w = double.tryParse(item['weight_kg']?.toString() ?? '') ?? 0.0;
+            if (w > 0) {
+              tempHistory.add({'date': dateStr, 'weight': w});
+            }
+          }
+          if (tempHistory.isNotEmpty) {
+            weightHistory.value = tempHistory;
+            currentWeight.value = double.tryParse(progRes.data['current_weight']?.toString() ?? '') ??
+                (tempHistory.last['weight'] as double);
+            weightDifferenceKg.value = double.tryParse(progRes.data['weight_difference_kg']?.toString() ?? '') ??
+                (startingWeight.value - currentWeight.value);
+            return;
+          }
+        }
       }
 
       if (startingWeight.value <= 0) return;

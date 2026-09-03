@@ -474,6 +474,13 @@ class ProfileView extends GetView<ProfileController> {
           ),
           buildDivider(),
           buildOptionRowItem(
+            icon: Icons.card_giftcard_rounded,
+            title: "Refer & Earn",
+            subtitle: "Invite friends & earn 50 FitPoints",
+            onTap: () => Get.toNamed('/referral'),
+          ),
+          buildDivider(),
+          buildOptionRowItem(
             icon: Icons.calendar_today_outlined,
             title: "My Bookings",
             subtitle: "View your expert bookings",

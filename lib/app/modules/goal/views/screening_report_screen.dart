@@ -226,6 +226,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
 
     try {
       final dob = _calculateDob(widget.age);
+      final refCode = OnboardingDraftService.referralCode;
 
       final response = await _apiClient.post(
         ApiEndpoints.onboarding,
@@ -249,6 +250,7 @@ class _ScreeningReportScreenState extends State<ScreeningReportScreen> {
           'waist_cm': widget.waistCm,
           'hip_cm': widget.hipCm,
           'deficiencies': widget.deficiencies,
+          if (refCode.isNotEmpty) 'referral_code': refCode,
         },
       );
 

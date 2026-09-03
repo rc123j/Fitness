@@ -47,6 +47,8 @@ import '../modules/membership/views/membership_view.dart';
 import '../modules/faq/views/faq_view.dart';
 import '../modules/chat/bindings/chat_binding.dart';
 import '../modules/chat/views/chat_view.dart';
+import '../modules/referral/bindings/referral_binding.dart';
+import '../modules/referral/views/referral_view.dart';
 
 part 'app_routes.dart';
 
@@ -185,6 +187,11 @@ class AppPages {
       name: _Paths.EXPERT_MESSAGES,
       page: () => const ExpertMessagesView(),
       binding: BookingBinding(),
+    ),
+    GetPage(
+      name: _Paths.REFERRAL,
+      page: () => const ReferralView(),
+      binding: ReferralBinding(),
     ),
   ];
 }

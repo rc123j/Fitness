@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'api_client.dart';
@@ -28,11 +29,11 @@ class IapService extends GetxService {
       },
     );
 
-    // 2. Fetch initial premium status from backend
-    await checkPremiumStatus();
-
-    // 3. Load plans dynamically from store / database
-    await fetchAvailablePlans();
+    // 2. Fetch initial premium status & plans asynchronously after app mounts
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkPremiumStatus();
+      fetchAvailablePlans();
+    });
 
     return this;
   }

@@ -106,9 +106,16 @@ class HomeController extends GetxController {
       userName.value = '${user['first_name']} ${user['last_name']}';
       memberCode.value = profile['member_code'] ?? '';
       goalName.value = profile['goal']?['goal_name'] ?? '';
-      planName.value = goalName.value.isNotEmpty
-          ? "${goalName.value} Plan"
-          : "Fat Loss Plan";
+      final rawGoal = goalName.value;
+      if (rawGoal.toLowerCase().contains("athletic")) {
+        planName.value = "Athletic Plan";
+      } else if (rawGoal.isNotEmpty) {
+        planName.value = rawGoal.toLowerCase().endsWith("plan")
+            ? rawGoal
+            : "$rawGoal Plan";
+      } else {
+        planName.value = "Fat Loss Plan";
+      }
       activityLevel.value = profile['activity_level']?['title'] ?? '';
       currentLevel.value = profile['wallet']?['current_level'] ?? 'Bronze';
       fitPoints.value = profile['wallet']?['fit_points'] ?? 0;

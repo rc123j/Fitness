@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -54,6 +55,14 @@ class AuthService extends GetxService {
 
   Future<void> logout() async {
     await clearSession();
-    Get.offAllNamed('/splash');
+    if (Get.key.currentState != null) {
+      Get.offAllNamed('/splash');
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (Get.key.currentState != null) {
+          Get.offAllNamed('/splash');
+        }
+      });
+    }
   }
 }

@@ -30,6 +30,7 @@ abstract class Routes {
   static const CHAT = _Paths.CHAT;
   static const EXPERT_HISTORY = _Paths.EXPERT_HISTORY;
   static const EXPERT_MESSAGES = _Paths.EXPERT_MESSAGES;
+  static const REFERRAL = _Paths.REFERRAL;
 }
 
 abstract class _Paths {
@@ -61,4 +62,5 @@ abstract class _Paths {
   static const CHAT = '/chat';
   static const EXPERT_HISTORY = '/expert-history';
   static const EXPERT_MESSAGES = '/expert-messages';
+  static const REFERRAL = '/referral';
 }

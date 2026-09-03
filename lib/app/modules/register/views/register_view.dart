@@ -339,6 +339,34 @@ class RegisterView extends GetView<RegisterController> {
                       ),
                     ),
 
+                    const SizedBox(height: 12),
+
+                    // REFERRAL CODE FIELD (Optional + 50 FitPoints Bonus)
+                    PremiumTextField(
+                      hint: 'Referral Code (Optional - Claim 50 pts)',
+                      icon: Icons.card_giftcard_rounded,
+                      controller: controller.referralCodeController,
+                      textCapitalization: TextCapitalization.characters,
+                      onChanged: (_) => controller.validateReferralCode(),
+                    ),
+
+                    Obx(() {
+                      final status = controller.referralStatusMessage.value;
+                      if (status == null || status.isEmpty) return const SizedBox.shrink();
+                      final isValid = controller.isReferralCodeValid.value;
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 6, left: 4),
+                        child: Text(
+                          status,
+                          style: GoogleFonts.inter(
+                            color: isValid ? const Color(0xff00FF87) : const Color(0xffFF3B30),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      );
+                    }),
+
                     const SizedBox(height: 14),
 
                     // TERMS CHECKBOX ROW
@@ -653,6 +681,8 @@ class PremiumTextField extends StatefulWidget {
   final VoidCallback? onSuffixTap;
   final TextEditingController? controller;
   final TextInputType? keyboardType;
+  final TextCapitalization textCapitalization;
+  final ValueChanged<String>? onChanged;
 
   const PremiumTextField({
     super.key,
@@ -663,6 +693,8 @@ class PremiumTextField extends StatefulWidget {
     this.onSuffixTap,
     this.controller,
     this.keyboardType,
+    this.textCapitalization = TextCapitalization.none,
+    this.onChanged,
   });
 
   @override
@@ -721,6 +753,8 @@ class _PremiumTextFieldState extends State<PremiumTextField> {
                 style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
                 obscureText: widget.obscureText,
                 keyboardType: widget.keyboardType,
+                textCapitalization: widget.textCapitalization,
+                onChanged: widget.onChanged,
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: widget.hint,
