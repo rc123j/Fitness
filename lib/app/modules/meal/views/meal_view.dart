@@ -172,33 +172,34 @@ class MealView extends GetView<MealController> {
       pinned: true,
       backgroundColor: const Color(0xff06010F),
       elevation: 0,
-      leading: GestureDetector(
-        onTap: () {
-          // MealView is a tab page inside MainNavigationView's IndexedStack,
-          // not a pushed route — there's nothing for Get.back() to pop, so
-          // switch back to the Home tab instead.
-          if (Get.isRegistered<MainNavigationController>()) {
-            Get.find<MainNavigationController>().changeTab(0);
-          } else if (Get.key.currentState?.canPop() ?? false) {
-            Get.back();
-          }
-        },
-        child: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.4),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.white.withOpacity(0.12),
-              width: 0.8,
+      leading: Builder(
+        builder: (context) {
+          return GestureDetector(
+            onTap: () {
+              if (Navigator.canPop(context) || (Get.key.currentState?.canPop() ?? false)) {
+                Get.back();
+              } else if (Get.isRegistered<MainNavigationController>()) {
+                Get.find<MainNavigationController>().changeTab(0);
+              }
+            },
+            child: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.4),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.12),
+                  width: 0.8,
+                ),
+              ),
+              child: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+                size: 14,
+              ),
             ),
-          ),
-          child: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
-            size: 14,
-          ),
-        ),
+          );
+        },
       ),
       actions: [
         Container(

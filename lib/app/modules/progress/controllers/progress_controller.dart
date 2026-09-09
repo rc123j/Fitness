@@ -301,8 +301,7 @@ class ProgressController extends GetxController {
   /// way to reflect progress from meals actually marked complete.
   Future<void> _fetchEstimatedWeightTrend() async {
     try {
-      // Starting weight still comes from the member's earliest recorded
-      // metric (captured at onboarding/plan activation).
+      bool hasManualLogs = false;
       final progRes = await _apiClient.get(ApiEndpoints.progressLog);
       if (progRes.statusCode == 200 && progRes.data != null) {
         startingWeight.value =
@@ -320,71 +319,64 @@ class ProgressController extends GetxController {
             }
           }
           if (tempHistory.isNotEmpty) {
+            hasManualLogs = true;
             weightHistory.value = tempHistory;
             currentWeight.value = double.tryParse(progRes.data['current_weight']?.toString() ?? '') ??
                 (tempHistory.last['weight'] as double);
             weightDifferenceKg.value = double.tryParse(progRes.data['weight_difference_kg']?.toString() ?? '') ??
                 (startingWeight.value - currentWeight.value);
-            return;
           }
         }
       }
 
-      if (startingWeight.value <= 0) return;
-
-      // Request exactly as many days as the plan has actually been active
-      // (capped at 30), so every entry returned is a real day — no
-      // zero-padded pre-activation days inflating a fake deficit.
+      // Always fetch full calorie history to populate allTimeAdherenceData for "View All"
       final days = currentDay.value.clamp(1, 30);
       final historyRes = await _apiClient.get(
         '${ApiEndpoints.calorieHistory}?days=$days',
       );
 
-      if (historyRes.statusCode != 200 || historyRes.data == null) return;
+      if (historyRes.statusCode == 200 && historyRes.data != null) {
+        final List rawHistory = historyRes.data['history'] ?? [];
+        final double tdeeValue = tdee.value > 0
+            ? tdee.value.toDouble()
+            : targetCalories.value.toDouble();
 
-      final List rawHistory = historyRes.data['history'] ?? [];
-      final double tdeeValue = tdee.value > 0
-          ? tdee.value.toDouble()
-          : targetCalories.value.toDouble();
+        double cumulativeDeficit = 0.0;
+        final tempEstimatedWeightHistory = <Map<String, dynamic>>[];
+        final tempAllTime = <Map<String, dynamic>>[];
+        final todayStr = DateTime.now().toIso8601String().split('T')[0];
 
-      double cumulativeDeficit = 0.0;
-      final tempHistory = <Map<String, dynamic>>[];
-      final tempAllTime = <Map<String, dynamic>>[];
-      final todayStr = DateTime.now().toIso8601String().split('T')[0];
+        for (var day in rawHistory.reversed) {
+          final cal = double.tryParse(day['calories']?.toString() ?? '0.0') ?? 0.0;
+          cumulativeDeficit += (tdeeValue - cal);
+          final estimatedWeight = startingWeight.value - (cumulativeDeficit / 7700);
+          final dateStr = day['date']?.toString() ?? '';
+          tempEstimatedWeightHistory.add({'date': dateStr, 'weight': estimatedWeight});
 
-      // Assuming rawHistory comes newest-first, we reverse it to process chronologically for cumulative deficit
-      for (var day in rawHistory.reversed) {
-        final cal = double.tryParse(day['calories']?.toString() ?? '0.0') ?? 0.0;
-        cumulativeDeficit += (tdeeValue - cal);
-        final estimatedWeight = startingWeight.value - (cumulativeDeficit / 7700);
-        final dateStr = day['date']?.toString() ?? '';
-        tempHistory.add({'date': dateStr, 'weight': estimatedWeight});
-
-        String shortDay = 'Day';
-        if (dateStr.isNotEmpty) {
-          try {
-            final d = DateTime.parse(dateStr);
-            shortDay = "${d.day}/${d.month}";
-          } catch (_) {}
+          String shortDay = 'Day';
+          if (dateStr.isNotEmpty) {
+            try {
+              final d = DateTime.parse(dateStr);
+              shortDay = "${d.day}/${d.month}";
+            } catch (_) {}
+          }
+          tempAllTime.add({
+            "day": shortDay,
+            "calories": cal.toInt(),
+            "isToday": dateStr == todayStr,
+          });
         }
-        tempAllTime.add({
-          "day": shortDay,
-          "calories": cal.toInt(),
-          "isToday": dateStr == todayStr,
-        });
-      }
 
-      weightHistory.value = tempHistory;
-      allTimeAdherenceData.value = tempAllTime;
-      if (tempHistory.isNotEmpty) {
-        currentWeight.value = tempHistory.last['weight'] as double;
-        weightDifferenceKg.value = startingWeight.value - currentWeight.value;
-      } else {
-        currentWeight.value = startingWeight.value;
-        weightDifferenceKg.value = 0.0;
+        allTimeAdherenceData.value = tempAllTime;
+
+        if (!hasManualLogs && tempEstimatedWeightHistory.isNotEmpty) {
+          weightHistory.value = tempEstimatedWeightHistory;
+          currentWeight.value = tempEstimatedWeightHistory.last['weight'] as double;
+          weightDifferenceKg.value = startingWeight.value - currentWeight.value;
+        }
       }
     } catch (e) {
-      debugPrint("Error estimating weight trend: $e");
+      debugPrint("Error fetching estimated weight trend / all time history: $e");
     }
   }
 

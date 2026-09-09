@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/profile_controller.dart';
+import '../../main_navigation/controllers/main_navigation_controller.dart';
 import '../../../services/iap_service.dart';
 import '../../../widgets/app_shimmer.dart';
 import '../../../widgets/scroll_nav_bar_binder.dart';
@@ -58,7 +59,7 @@ class ProfileView extends GetView<ProfileController> {
             child: Column(
               children: [
                 /// Header Row
-                buildHeader(),
+                buildHeader(context),
 
                 /// Body Content
                 Expanded(
@@ -100,7 +101,7 @@ class ProfileView extends GetView<ProfileController> {
   /// ----------------------------------------------------
   /// HEADER WIDGET
   /// ----------------------------------------------------
-  Widget buildHeader() {
+  Widget buildHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Row(
@@ -109,7 +110,13 @@ class ProfileView extends GetView<ProfileController> {
           Row(
             children: [
               GestureDetector(
-                onTap: () => Get.back(),
+                onTap: () {
+                  if (Navigator.canPop(context) || (Get.key.currentState?.canPop() ?? false)) {
+                    Get.back();
+                  } else if (Get.isRegistered<MainNavigationController>()) {
+                    Get.find<MainNavigationController>().changeTab(0);
+                  }
+                },
                 child: const Icon(Icons.arrow_back, color: Colors.white),
               ),
               const SizedBox(width: 16),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/progress_controller.dart';
+import '../../main_navigation/controllers/main_navigation_controller.dart';
 import '../../meal/views/nutrition_history_view.dart';
 import '../../meal/bindings/meal_binding.dart';
 import '../../../widgets/app_shimmer.dart';
@@ -98,7 +99,7 @@ class ProgressView extends GetView<ProgressController> {
                               const SizedBox(height: 10),
                               AppShimmer(
                                 enabled: controller.isLoading.value,
-                                child: _buildGreeting(),
+                                child: _buildGreeting(context),
                               ),
                               const SizedBox(height: 24),
                               Stack(
@@ -230,12 +231,18 @@ class ProgressView extends GetView<ProgressController> {
     return "Good Night,";
   }
 
-  Widget _buildGreeting() {
+  Widget _buildGreeting(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
-          onTap: () => Get.back(),
+          onTap: () {
+            if (Navigator.canPop(context) || (Get.key.currentState?.canPop() ?? false)) {
+              Get.back();
+            } else if (Get.isRegistered<MainNavigationController>()) {
+              Get.find<MainNavigationController>().changeTab(0);
+            }
+          },
           child: const Padding(
             padding: EdgeInsets.only(right: 16.0, top: 4.0),
             child: Icon(
@@ -2538,14 +2545,74 @@ class AllTimeProgressView extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xff06010F),
       body: SafeArea(
-        child: GetX<ProgressController>(
-          builder: (controller) {
-            final list = controller.allTimeAdherenceData.toList();
-            if (list.isEmpty) {
-              return const Center(
-                child: CircularProgressIndicator(color: Color(0xffB100FF)),
-              );
-            }
+        child: Obx(() {
+          final controller = Get.find<ProgressController>();
+          if (controller.isLoading.value && controller.allTimeAdherenceData.isEmpty) {
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xffB100FF)),
+            );
+          }
+
+          final list = controller.allTimeAdherenceData.toList();
+          if (list.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () => Get.back(),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      Text(
+                        "All-Time Progress",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                    ],
+                  ),
+                  const Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.bar_chart_rounded,
+                            size: 64,
+                            color: Colors.white30,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            "No Progress History Yet",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            "Log your meals to see your calorie progress.",
+                            style: TextStyle(color: Colors.white54, fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
 
             double totalCal = 0;
             int activeDays = 0;
