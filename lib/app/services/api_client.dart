@@ -56,7 +56,7 @@ class ApiClient extends GetxService {
 
   void _safeNavigateToLogin() {
     void navigate() {
-      if (Get.key.currentState != null) {
+      if (Get.currentRoute != '/login' && Get.key.currentState != null) {
         Get.offAllNamed('/login');
       }
     }

@@ -176,7 +176,8 @@ class MealView extends GetView<MealController> {
         builder: (context) {
           return GestureDetector(
             onTap: () {
-              if (Navigator.canPop(context) || (Get.key.currentState?.canPop() ?? false)) {
+              if (Navigator.canPop(context) ||
+                  (Get.key.currentState?.canPop() ?? false)) {
                 Get.back();
               } else if (Get.isRegistered<MainNavigationController>()) {
                 Get.find<MainNavigationController>().changeTab(0);
@@ -201,26 +202,7 @@ class MealView extends GetView<MealController> {
           );
         },
       ),
-      actions: [
-        Container(
-          margin: const EdgeInsets.all(8),
-          width: 40,
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.4),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.white.withOpacity(0.12),
-              width: 0.8,
-            ),
-          ),
-          child: const Icon(
-            Icons.more_horiz_rounded,
-            color: Colors.white,
-            size: 18,
-          ),
-        ),
-        const SizedBox(width: 8),
-      ],
+      actions: const [],
       flexibleSpace: FlexibleSpaceBar(
         stretchModes: const [StretchMode.zoomBackground],
         background: Stack(
@@ -244,18 +226,34 @@ class MealView extends GetView<MealController> {
             ),
           ],
         ),
-        title: Text(
-          "Nutrition Plan",
-          style: GoogleFonts.outfit(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Builder(
+          builder: (context) {
+            final settings = context
+                .dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
+            double extraLeft = 0.0;
+            if (settings != null && settings.maxExtent > settings.minExtent) {
+              final deltaExtent = settings.maxExtent - settings.minExtent;
+              final t =
+                  ((settings.maxExtent - settings.currentExtent) / deltaExtent)
+                      .clamp(0.0, 1.0);
+              extraLeft =
+                  36.0 *
+                  t; // Smoothly transitions from 0px (expanded left: 20) to 36px (collapsed left: 56)
+            }
+            return Padding(
+              padding: EdgeInsets.only(left: extraLeft),
+              child: Text(
+                "Nutrition Plan",
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
+          },
         ),
-        // left inset clears the leading back button once the bar is
-        // collapsed/pinned — a smaller value here lets the title render
-        // underneath the back button while scrolling.
-        titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
+        titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
       ),
     );
   }
@@ -1452,19 +1450,36 @@ class MealView extends GetView<MealController> {
                 GestureDetector(
                   onTap: () => Get.toNamed('/calorie-history'),
                   child: Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.06),
-                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.12),
+                        color: Colors.white.withOpacity(0.18),
                         width: 0.8,
                       ),
                     ),
-                    child: const Icon(
-                      Icons.history_rounded,
-                      color: Colors.white,
-                      size: 20,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.history_rounded,
+                          color: Color(0xffFF00E5),
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          "History",
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -1824,12 +1839,14 @@ class MealView extends GetView<MealController> {
                                         size: 14,
                                       )
                                     : (!controller.isMealMarkable(mealTypeId)
-                                        ? Icon(
-                                            Icons.lock_outline_rounded,
-                                            color: Colors.white.withOpacity(0.25),
-                                            size: 12,
-                                          )
-                                        : null),
+                                          ? Icon(
+                                              Icons.lock_outline_rounded,
+                                              color: Colors.white.withOpacity(
+                                                0.25,
+                                              ),
+                                              size: 12,
+                                            )
+                                          : null),
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -2222,8 +2239,7 @@ class MealView extends GetView<MealController> {
     bool isCompleted,
     int activeOpt,
   ) {
-    final bool locked =
-        !isCompleted && !controller.isMealMarkable(mealTypeId);
+    final bool locked = !isCompleted && !controller.isMealMarkable(mealTypeId);
 
     final IconData icon = isCompleted
         ? Icons.check_circle_rounded
@@ -2237,12 +2253,8 @@ class MealView extends GetView<MealController> {
         : "Mark as Complete";
 
     return GestureDetector(
-      onTap: () => _handleMealToggle(
-        dietPlanMealId,
-        mealTypeId,
-        isCompleted,
-        activeOpt,
-      ),
+      onTap: () =>
+          _handleMealToggle(dietPlanMealId, mealTypeId, isCompleted, activeOpt),
       child: Container(
         height: 48,
         decoration: BoxDecoration(
@@ -2313,17 +2325,6 @@ class MealView extends GetView<MealController> {
     );
     if (err != null) {
       _showMealActionMessage(err);
-    } else {
-      Get.snackbar(
-        "Meal Logged 🥗",
-        "Added to today's nutrition totals.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xff0B0817).withOpacity(0.9),
-        colorText: Colors.white,
-        borderColor: const Color(0xff00FF87).withOpacity(0.2),
-        borderWidth: 1,
-        margin: const EdgeInsets.all(16),
-      );
     }
   }
 
@@ -2341,16 +2342,18 @@ class MealView extends GetView<MealController> {
   }
 
   void _showMealActionMessage(String msg) {
-    Get.snackbar(
-      "Hold on",
-      msg,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xff0B0817).withOpacity(0.92),
-      colorText: Colors.white,
-      borderColor: const Color(0xffFF7A00).withOpacity(0.3),
-      borderWidth: 1,
-      margin: const EdgeInsets.all(16),
-      duration: const Duration(seconds: 3),
-    );
+    if (Get.context != null && Get.isSnackbarOpen != true) {
+      Get.snackbar(
+        "Hold on",
+        msg,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xff0B0817).withOpacity(0.92),
+        colorText: Colors.white,
+        borderColor: const Color(0xffFF7A00).withOpacity(0.3),
+        borderWidth: 1,
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 3),
+      );
+    }
   }
 }

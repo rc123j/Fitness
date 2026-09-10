@@ -38,10 +38,6 @@ class ProfileController extends GetxController {
 
   Future<void> fetchProfile() async {
     isLoading.value = true;
-    await Future.delayed(
-      const Duration(seconds: 2),
-    ); // Artificial delay for shimmer
-
     try {
       final response = await _apiClient.get(ApiEndpoints.profile);
       final data = response.data;

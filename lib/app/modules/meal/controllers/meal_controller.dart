@@ -155,10 +155,6 @@ class MealController extends GetxController {
 
   Future<void> fetchMealData({bool silent = false}) async {
     if (!silent) isLoading.value = true;
-    if (!silent)
-      await Future.delayed(
-        const Duration(seconds: 2),
-      ); // Artificial delay for shimmer
     try {
       final queryParam = selectedQueryDate.value.isNotEmpty
           ? "?date=${selectedQueryDate.value}"
@@ -555,32 +551,36 @@ class MealController extends GetxController {
     int mealId, {
     int selectedOption = 1,
   }) async {
+    final wasAlreadyCompleted = completedMealIds.contains(mealId);
+    completedMealIds.add(mealId);
+
     try {
       await _apiClient.post(
         ApiEndpoints.markMealComplete,
         data: {
           'diet_plan_meal_id': dietPlanMealId,
           'selected_option': selectedOption,
-          // The day the user is looking at — the backend rejects anything
-          // that isn't the member's current local day.
           if (selectedQueryDate.value.isNotEmpty)
             'logged_date': selectedQueryDate.value,
         },
       );
-      completedMealIds.add(mealId);
-      await fetchMealData(silent: true); // silent refresh — no spinner
+      await fetchMealData(silent: true);
       await fetchCalorieHistory();
       _refreshDependentScreens();
       return null;
     } on DioException catch (e) {
+      if (!wasAlreadyCompleted) completedMealIds.remove(mealId);
       return _errorMessage(e, fallback: 'Could not log this meal. Try again.');
     } catch (_) {
+      if (!wasAlreadyCompleted) completedMealIds.remove(mealId);
       return 'Could not log this meal. Try again.';
     }
   }
 
-  /// Returns null on success, or a user-facing error message on failure.
   Future<String?> unmarkMealAsCompleted(int dietPlanMealId, int mealId) async {
+    final wasCompleted = completedMealIds.contains(mealId);
+    completedMealIds.remove(mealId);
+
     try {
       final dateParam = selectedQueryDate.value.isNotEmpty
           ? selectedQueryDate.value
@@ -592,14 +592,15 @@ class MealController extends GetxController {
           if (dateParam != null) 'date': dateParam,
         },
       );
-      completedMealIds.remove(mealId);
-      await fetchMealData(silent: true); // silent refresh — no spinner
+      await fetchMealData(silent: true);
       await fetchCalorieHistory();
       _refreshDependentScreens();
       return null;
     } on DioException catch (e) {
+      if (wasCompleted) completedMealIds.add(mealId);
       return _errorMessage(e, fallback: 'Could not update this meal. Try again.');
     } catch (_) {
+      if (wasCompleted) completedMealIds.add(mealId);
       return 'Could not update this meal. Try again.';
     }
   }

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Response;
 import 'package:flutter/material.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
@@ -90,44 +90,62 @@ class HomeController extends GetxController {
   Future<void> fetchProfile({bool silent = false}) async {
     if (!silent) {
       isLoading.value = true;
-      await Future.delayed(
-        const Duration(seconds: 2),
-      ); // Artificial delay for shimmer
     }
 
     try {
-      // 1. Fetch member profile
-      final response = await _apiClient.get(ApiEndpoints.profile);
-      final data = response.data;
-      final profile = data['profile'];
-      final latestMetrics = data['latest_metrics'];
+      // Execute network requests concurrently for maximum speed
+      final results = await Future.wait<dynamic>([
+        _apiClient.get(ApiEndpoints.profile).catchError((_) => null as dynamic),
+        _apiClient
+            .get(ApiEndpoints.currentDietPlan)
+            .catchError((_) => null as dynamic),
+        _apiClient
+            .get(ApiEndpoints.todayNutritionLog)
+            .catchError((_) => null as dynamic),
+        _apiClient
+            .get(ApiEndpoints.progressLog)
+            .catchError((_) => null as dynamic),
+      ]);
 
-      final user = profile['user'];
-      userName.value = '${user['first_name']} ${user['last_name']}';
-      memberCode.value = profile['member_code'] ?? '';
-      goalName.value = profile['goal']?['goal_name'] ?? '';
-      final rawGoal = goalName.value;
-      if (rawGoal.toLowerCase().contains("athletic")) {
-        planName.value = "Athletic Plan";
-      } else if (rawGoal.isNotEmpty) {
-        planName.value = rawGoal.toLowerCase().endsWith("plan")
-            ? rawGoal
-            : "$rawGoal Plan";
-      } else {
-        planName.value = "Fat Loss Plan";
+      final profileRes = results[0] as Response?;
+      final planRes = results[1] as Response?;
+      final nutRes = results[2] as Response?;
+      final progRes = results[3] as Response?;
+
+      // 1. Process member profile
+      if (profileRes?.data != null && profileRes!.data is Map) {
+        final data = profileRes.data;
+        final profile = data['profile'];
+        final latestMetrics = data['latest_metrics'];
+
+        if (profile != null && profile['user'] != null) {
+          final user = profile['user'];
+          userName.value = '${user['first_name']} ${user['last_name']}';
+          memberCode.value = profile['member_code'] ?? '';
+          goalName.value = profile['goal']?['goal_name'] ?? '';
+          final rawGoal = goalName.value;
+          if (rawGoal.toLowerCase().contains("athletic")) {
+            planName.value = "Athletic Plan";
+          } else if (rawGoal.isNotEmpty) {
+            planName.value = rawGoal.toLowerCase().endsWith("plan")
+                ? rawGoal
+                : "$rawGoal Plan";
+          } else {
+            planName.value = "Fat Loss Plan";
+          }
+          activityLevel.value = profile['activity_level']?['title'] ?? '';
+          currentLevel.value = profile['wallet']?['current_level'] ?? 'Bronze';
+          fitPoints.value = profile['wallet']?['fit_points'] ?? 0;
+          currentStreak.value = profile['wallet']?['current_streak'] ?? 0;
+          currentWeight.value =
+              double.tryParse(profile['weight_kg']?.toString() ?? '0.0') ?? 0.0;
+          metrics = latestMetrics;
+        }
       }
-      activityLevel.value = profile['activity_level']?['title'] ?? '';
-      currentLevel.value = profile['wallet']?['current_level'] ?? 'Bronze';
-      fitPoints.value = profile['wallet']?['fit_points'] ?? 0;
-      currentStreak.value = profile['wallet']?['current_streak'] ?? 0;
-      currentWeight.value =
-          double.tryParse(profile['weight_kg']?.toString() ?? '0.0') ?? 0.0;
-      metrics = latestMetrics;
 
-      // 2. Fetch current diet plan details for day/days remaining tracking
+      // 2. Process current diet plan details
       List tempMeals = [];
-      try {
-        final planRes = await _apiClient.get(ApiEndpoints.currentDietPlan);
+      if (planRes != null && planRes.data != null && planRes.data is Map) {
         planDayNumber.value = planRes.data['current_day'] ?? 1;
         planDaysRemaining.value = planRes.data['days_remaining'] ?? 30;
 
@@ -135,12 +153,11 @@ class HomeController extends GetxController {
             planRes.data['diet_plan']?['diet_plan_meals'] ?? [];
         totalMealsToday.value = mealsList.isNotEmpty ? mealsList.length : 5;
         tempMeals = mealsList;
-      } catch (_) {}
+      }
 
-      // 3. Fetch today's calorie / macronutrient aggregates & completed meals count
+      // 3. Process today's nutrition log
       List<int> loggedIds = [];
-      try {
-        final nutRes = await _apiClient.get(ApiEndpoints.todayNutritionLog);
+      if (nutRes != null && nutRes.data != null && nutRes.data is Map) {
         final nutData = nutRes.data;
         currentCalories.value =
             (nutData['consumed']?['calories'] as num?)?.toInt() ?? 0;
@@ -163,7 +180,7 @@ class HomeController extends GetxController {
             .whereType<int>()
             .toList();
         mealsCompletedToday.value = loggedIds.length;
-      } catch (_) {}
+      }
 
       // Map homeMeals timeline list from fetched diet plan meals & today's logs
       homeMeals.clear();
@@ -240,11 +257,8 @@ class HomeController extends GetxController {
       });
       homeMeals.value = tempHomeMeals;
 
-      // 4. Removed Water Logging Aggregates
-
-      // 5. Fetch progress logs history (weight delta)
-      try {
-        final progRes = await _apiClient.get(ApiEndpoints.progressLog);
+      // 4. Process progress logs history
+      if (progRes != null && progRes.data != null && progRes.data is Map) {
         final progData = progRes.data;
         weightDifference.value =
             (progData['weight_difference_kg'] as num?)?.toDouble() ?? 0.0;
@@ -308,9 +322,7 @@ class HomeController extends GetxController {
             },
           ]);
         }
-      } catch (_) {}
-    } on DioException catch (_) {
-      // Keep defaults
+      }
     } catch (_) {
       // Keep defaults
     } finally {

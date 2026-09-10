@@ -138,49 +138,7 @@ class RegisterView extends GetView<RegisterController> {
                       ],
                     ),
 
-                    const SizedBox(height: 6),
-
-                    // BRAND NAME
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'NUTRI\n',
-                            style: GoogleFonts.outfit(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 2,
-                              height: 1.15,
-                            ),
-                          ),
-                          TextSpan(
-                            text: 'SHAPE',
-                            style: GoogleFonts.outfit(
-                              color: const Color(0xffFF00E5),
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 2,
-                              height: 1.15,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 2),
-
-                    Text(
-                      'FUEL YOUR BEST SELF',
-                      style: GoogleFonts.inter(
-                        color: Colors.white.withOpacity(0.70),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 20),
 
                     // HEADLINE TITLE (Create Your Account)
                     Text(
@@ -343,7 +301,7 @@ class RegisterView extends GetView<RegisterController> {
 
                     // REFERRAL CODE FIELD (Optional + 50 FitPoints Bonus)
                     PremiumTextField(
-                      hint: 'Referral Code (Optional - Claim 50 pts)',
+                      hint: 'Referral Code (Optional)',
                       icon: Icons.card_giftcard_rounded,
                       controller: controller.referralCodeController,
                       textCapitalization: TextCapitalization.characters,
@@ -352,14 +310,17 @@ class RegisterView extends GetView<RegisterController> {
 
                     Obx(() {
                       final status = controller.referralStatusMessage.value;
-                      if (status == null || status.isEmpty) return const SizedBox.shrink();
+                      if (status == null || status.isEmpty)
+                        return const SizedBox.shrink();
                       final isValid = controller.isReferralCodeValid.value;
                       return Padding(
                         padding: const EdgeInsets.only(top: 6, left: 4),
                         child: Text(
                           status,
                           style: GoogleFonts.inter(
-                            color: isValid ? const Color(0xff00FF87) : const Color(0xffFF3B30),
+                            color: isValid
+                                ? const Color(0xff00FF87)
+                                : const Color(0xffFF3B30),
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),

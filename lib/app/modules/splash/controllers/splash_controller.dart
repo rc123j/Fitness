@@ -30,7 +30,9 @@ class SplashController extends GetxController {
     await Future.delayed(const Duration(milliseconds: 2000));
 
     if (!_authService.isLoggedIn) {
-      Get.offAllNamed('/login');
+      if (Get.currentRoute != '/login') {
+        Get.offAllNamed('/login');
+      }
       return;
     }
 
@@ -38,7 +40,9 @@ class SplashController extends GetxController {
     final isValid = await _validateTokenWithServer();
     if (!isValid) {
       await _authService.clearSession();
-      Get.offAllNamed('/login');
+      if (Get.currentRoute != '/login') {
+        Get.offAllNamed('/login');
+      }
       return;
     }
 

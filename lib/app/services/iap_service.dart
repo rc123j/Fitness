@@ -6,6 +6,8 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'api_client.dart';
 import 'api_endpoints.dart';
 
+import 'auth_service.dart';
+
 class IapService extends GetxService {
   final ApiClient _apiClient = Get.find<ApiClient>();
   final InAppPurchase _iap = InAppPurchase.instance;
@@ -31,8 +33,10 @@ class IapService extends GetxService {
 
     // 2. Fetch initial premium status & plans asynchronously after app mounts
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      checkPremiumStatus();
-      fetchAvailablePlans();
+      if (Get.find<AuthService>().isLoggedIn) {
+        checkPremiumStatus();
+        fetchAvailablePlans();
+      }
     });
 
     return this;
@@ -46,6 +50,8 @@ class IapService extends GetxService {
 
   // Retrieve premium status from our backend
   Future<void> checkPremiumStatus() async {
+    final authService = Get.find<AuthService>();
+    if (!authService.isLoggedIn) return;
     try {
       final response = await _apiClient.get(ApiEndpoints.subscriptionStatus);
       if (response.statusCode == 200) {
