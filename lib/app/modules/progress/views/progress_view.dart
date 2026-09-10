@@ -117,15 +117,8 @@ class ProgressView extends GetView<ProgressController> {
                                       height: 155,
                                       fit: BoxFit.contain,
                                       errorBuilder:
-                                          (context, error, stackTrace) {
-                                            return Image.asset(
-                                              'assets/profile/avatar.png',
-                                              height: 155,
-                                              fit: BoxFit.contain,
-                                              errorBuilder: (c, e, s) =>
-                                                  const SizedBox.shrink(),
-                                            );
-                                          },
+                                          (context, error, stackTrace) =>
+                                              const SizedBox.shrink(),
                                     ),
                                   ),
                                 ],

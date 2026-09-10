@@ -21,10 +21,7 @@ void showModernConfirmDialog({
         decoration: BoxDecoration(
           color: const Color(0xff120C24),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.12),
-            width: 1.2,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.2),
           boxShadow: [
             BoxShadow(
               color: confirmColor.withOpacity(0.20),
@@ -49,13 +46,7 @@ void showModernConfirmDialog({
                   width: 1.5,
                 ),
               ),
-              child: Center(
-                child: Icon(
-                  icon,
-                  color: confirmColor,
-                  size: 30,
-                ),
-              ),
+              child: Center(child: Icon(icon, color: confirmColor, size: 30)),
             ),
             const SizedBox(height: 18),
 

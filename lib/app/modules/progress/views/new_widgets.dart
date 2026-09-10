@@ -65,11 +65,7 @@ class NewWidgetsHelper extends GetView<ProgressController> {
               'assets/home/ChatGPT Image Aug 12, 2026, 12_42_22 PM.webp',
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
-                return Image.asset(
-                  'assets/profile/avatar.png',
-                  fit: BoxFit.contain,
-                  errorBuilder: (c, e, s) => const Icon(Icons.person, size: 80, color: Colors.white),
-                );
+                return const Icon(Icons.person, size: 80, color: Colors.white);
               },
             ),
           ),

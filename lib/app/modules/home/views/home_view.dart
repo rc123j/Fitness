@@ -651,15 +651,11 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                     width: 0.8,
                   ),
                 ),
-                child: ClipOval(
-                  child: Image.asset(
-                    'assets/profile/avatar.png',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Icon(
-                      Icons.person_rounded,
-                      color: Colors.white.withOpacity(0.85),
-                      size: 20,
-                    ),
+                child: Center(
+                  child: Icon(
+                    Icons.person_rounded,
+                    color: Colors.white.withOpacity(0.85),
+                    size: 20,
                   ),
                 ),
               ),
