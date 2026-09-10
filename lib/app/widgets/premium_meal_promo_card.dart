@@ -32,31 +32,31 @@ class _PremiumMealPromoCardState extends State<PremiumMealPromoCard>
     const MealPromoItem(
       title: "YOUR MEAL PLAN",
       subtitle: "Protein rich • 620 kcal",
-      imagePath: "assets/new_images/non-veg.png",
+      imagePath: "assets/new_images/non-veg.webp",
       accentColor: Color(0xffFF9A3C),
     ),
     const MealPromoItem(
       title: "YOUR VEG PLAN",
       subtitle: "Balanced • 540 kcal",
-      imagePath: "assets/new_images/vegeterian.png",
+      imagePath: "assets/new_images/vegeterian.webp",
       accentColor: Color(0xff00E5A0),
     ),
     const MealPromoItem(
       title: "YOUR VEGAN PLAN",
       subtitle: "Fiber rich • 480 kcal",
-      imagePath: "assets/new_images/vegan.png",
+      imagePath: "assets/new_images/vegan.webp",
       accentColor: Color(0xffC97FFF),
     ),
     const MealPromoItem(
       title: "YOUR EGG PLAN",
       subtitle: "Protein rich • 510 kcal",
-      imagePath: "assets/new_images/eggeterian.png",
+      imagePath: "assets/new_images/eggeterian.webp",
       accentColor: Color(0xffFF6B9D),
     ),
     const MealPromoItem(
       title: "YOUR KETO PLAN",
       subtitle: "Low carb • 580 kcal",
-      imagePath: "assets/new_images/keto.png",
+      imagePath: "assets/new_images/keto.webp",
       accentColor: Color(0xffFF3E3E),
     ),
   ];

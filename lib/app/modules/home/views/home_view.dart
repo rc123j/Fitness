@@ -251,7 +251,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(16),
                                       child: Image.asset(
-                                        'assets/home/advertisemt_home.png',
+                                        'assets/home/advertisemt_home.webp',
                                         width: double.infinity,
                                         fit: BoxFit.contain,
                                       ),

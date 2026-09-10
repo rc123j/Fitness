@@ -45,28 +45,28 @@ class _DietaryPreferencesScreenState extends State<DietaryPreferencesScreen> {
     {
       'id': null, // Non-Veg has no taste_preference row
       'label': 'Non-Vegetarian',
-      'image': 'assets/new_images/non-veg.png',
+      'image': 'assets/new_images/non-veg.webp',
       'desc': 'Includes meat, fish,\neggs & dairy',
       'color': const Color(0xffFF5F6D),
     },
     {
       'id': 4, // Eggitarian
       'label': 'Eggitarian',
-      'image': 'assets/new_images/eggeterian.png',
+      'image': 'assets/new_images/eggeterian.webp',
       'desc': 'Vegetarian diet\nthat includes eggs',
       'color': const Color(0xffFF7A00),
     },
     {
       'id': 1, // Vegetarian
       'label': 'Vegetarian',
-      'image': 'assets/new_images/vegeterian.png',
+      'image': 'assets/new_images/vegeterian.webp',
       'desc': 'No meat or fish.\nIncludes dairy & eggs',
       'color': const Color(0xff34C759),
     },
     {
       'id': 2, // Vegan
       'label': 'Vegan',
-      'image': 'assets/new_images/vegan.png',
+      'image': 'assets/new_images/vegan.webp',
       'desc': 'No animal products\nwhatsoever',
       'color': const Color(0xff00E5FF),
     },

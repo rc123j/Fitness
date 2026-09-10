@@ -46,35 +46,35 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen>
       "id": 1,
       "title": "Weight Loss",
       "subtitle": "Burn fat and lose weight in a healthy way.",
-      "image": "assets/new_images/weight_loss.png",
+      "image": "assets/new_images/weight_loss.webp",
       "color": const Color(0xffFF5F6D),
     },
     {
       "id": 12, // Weight Gain (mapped from 5 to avoid CKD database conflict)
       "title": "Weight Gain",
       "subtitle": "Gain healthy mass and increase body weight.",
-      "image": "assets/new_images/weight_gain.png",
+      "image": "assets/new_images/weight_gain.webp",
       "color": const Color(0xff00E5FF),
     },
     {
       "id": 10, // Fitness (mapped from 3 to avoid Diabetes database conflict)
       "title": "Fitness",
       "subtitle": "Improve overall fitness and daily energy.",
-      "image": "assets/new_images/fitness.png",
+      "image": "assets/new_images/fitness.webp",
       "color": const Color(0xffC026D3),
     },
     {
       "id": 11, // Athletic Performance (mapped from 4 to avoid PCOS database conflict)
       "title": "Athletic Performance",
       "subtitle": "Enhance endurance, speed and performance.",
-      "image": "assets/new_images/athelitcperformance.png",
+      "image": "assets/new_images/athelitcperformance.webp",
       "color": const Color(0xffFF7A00),
     },
     {
       "id": 2,
       "title": "Muscle Gain",
       "subtitle": "Build lean muscle and increase strength.",
-      "image": "assets/new_images/muscle_gain.png",
+      "image": "assets/new_images/muscle_gain.webp",
       "color": const Color(0xffFF7A00),
     },
   ];

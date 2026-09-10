@@ -76,11 +76,11 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/logo.png
-    - assets/images/athlete.png
-    - assets/images/login_athlete.png
-    - assets/images/register_girl.png
-    - assets/images/health_screen.png
+    - assets/images/logo.webp
+    - assets/images/athlete.webp
+    - assets/images/login_athlete.webp
+    - assets/images/register_girl.webp
+    - assets/images/health_screen.webp
     - assets/new_images/
     - assets/new_images1/
     - assets/home/

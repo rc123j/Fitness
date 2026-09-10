@@ -338,8 +338,8 @@ class _WeightScreenState extends State<WeightScreen> {
                                 alignment: Alignment.bottomCenter,
                                 child: Image.asset(
                                   widget.gender == "Male"
-                                      ? "assets/new_images/man_weight.png"
-                                      : "assets/new_images/female_weight.png",
+                                      ? "assets/new_images/man_weight.webp"
+                                      : "assets/new_images/female_weight.webp",
                                   fit: BoxFit.contain,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Icon(

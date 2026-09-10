@@ -173,7 +173,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
             right: 0,
             child: IgnorePointer(
               child: Image.asset(
-                "assets/new_images/health_profile.png",
+                "assets/new_images/health_profile.webp",
                 height: 490,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {

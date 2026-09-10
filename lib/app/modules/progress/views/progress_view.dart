@@ -1728,7 +1728,7 @@ class ProgressView extends GetView<ProgressController> {
                   desc: "Basal Metabolic Rate",
                   icon: Icons.local_fire_department_rounded,
                   color: const Color(0xffFF5F6D),
-                  bgImage: "assets/new_images1/bmr.png",
+                  bgImage: "assets/new_images1/bmr.webp",
                 ),
               ),
               const SizedBox(width: 12),

@@ -33,7 +33,7 @@ class LoginView extends GetView<LoginController> {
             right: -50,
             height: screenHeight * 0.58,
             child: Image.asset(
-              'assets/images/login_athlete.png',
+              'assets/images/login_athlete.webp',
               fit: BoxFit.cover,
               alignment: const Alignment(0.45, -0.32),
             ),

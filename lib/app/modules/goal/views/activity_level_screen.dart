@@ -59,7 +59,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen>
       "desc":
           "Little to no regular physical activity. Desk job, reading or sitting.",
       "multiplier": 1.2,
-      "image": "assets/new_images/sedentry.png",
+      "image": "assets/new_images/sedentry.webp",
       "color": const Color(0xffFF5F6D),
     },
     {
@@ -68,7 +68,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen>
       "desc":
           "Light exercise or sports 1-3 days per week. Light walking, gardening.",
       "multiplier": 1.375,
-      "image": "assets/new_images/lightly_active.png",
+      "image": "assets/new_images/lightly_active.webp",
       "color": const Color(0xffFF7A00),
     },
     {
@@ -76,7 +76,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen>
       "title": "Moderately Active",
       "desc": "Moderate workout, gym sessions, or sports 3-5 days per week.",
       "multiplier": 1.55,
-      "image": "assets/new_images/modrate_active.png",
+      "image": "assets/new_images/modrate_active.webp",
       "color": const Color(0xffC026D3),
     },
     {
@@ -85,7 +85,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen>
       "desc":
           "Hard exercise, high-intensity training, or sports 6-7 days per week.",
       "multiplier": 1.725,
-      "image": "assets/new_images/very_active.png",
+      "image": "assets/new_images/very_active.webp",
       "color": const Color(0xff7B61FF),
     },
     {
@@ -94,7 +94,7 @@ class _ActivityLevelScreenState extends State<ActivityLevelScreen>
       "desc":
           "Extremely hard daily training/sports & physical job (e.g. athlete, construction).",
       "multiplier": 1.9,
-      "image": "assets/new_images/extra_active.png",
+      "image": "assets/new_images/extra_active.webp",
       "color": const Color(0xff00E5FF),
     },
   ];

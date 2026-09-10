@@ -33,7 +33,7 @@ class RegisterView extends GetView<RegisterController> {
             right: -90, // Proportional offset to shift the image right
             height: screenHeight * 0.58,
             child: Image.asset(
-              'assets/images/register_girl.png',
+              'assets/images/register_girl.webp',
               fit: BoxFit.cover,
               alignment: const Alignment(
                 0.70,

@@ -241,7 +241,7 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
                         children: [
                           _buildHabitSection(
                             title: "Smoking & Tobacco",
-                            imagePath: "assets/new_images/smoking.png",
+                            imagePath: "assets/new_images/smoking.webp",
                             options: [
                               {"label": "No, Never", "value": "No, never"},
                               {
@@ -263,7 +263,7 @@ class _LifestyleHabitsScreenState extends State<LifestyleHabitsScreen> {
                           const SizedBox(height: 20),
                           _buildHabitSection(
                             title: "Alcohol Consumption",
-                            imagePath: "assets/new_images/alcohol.png",
+                            imagePath: "assets/new_images/alcohol.webp",
                             options: [
                               {"label": "No, Never", "value": "No, never"},
                               {

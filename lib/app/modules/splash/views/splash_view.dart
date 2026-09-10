@@ -127,7 +127,7 @@ class _SplashViewState extends State<SplashView>
               },
               blendMode: BlendMode.dstIn,
               child: Image.asset(
-                'assets/images/athlete.png',
+                'assets/images/athlete.webp',
                 fit: BoxFit.cover,
                 alignment: const Alignment(0, -0.45),
               ),

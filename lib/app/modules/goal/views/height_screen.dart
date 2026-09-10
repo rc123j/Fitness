@@ -138,8 +138,8 @@ class _HeightScreenState extends State<HeightScreen> {
                           Alignment.bottomCenter, // anchor scaling to bottom
                       child: Image.asset(
                         widget.gender == "Male"
-                            ? "assets/new_images/man_height.png"
-                            : "assets/new_images/female_height.png",
+                            ? "assets/new_images/man_height.webp"
+                            : "assets/new_images/female_height.webp",
                         height: 540, // taller image
                         fit: BoxFit.contain,
                         alignment: Alignment.bottomCenter,

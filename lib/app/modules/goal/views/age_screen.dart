@@ -52,11 +52,11 @@ class _AgeScreenState extends State<AgeScreen> {
   String _getAgeImage() {
     final isMale = widget.gender == "Male";
     if (selectedAge <= 18) {
-      return isMale ? "assets/new_images/boy_age.png" : "assets/new_images/girl_age.png";
+      return isMale ? "assets/new_images/boy_age.webp" : "assets/new_images/girl_age.webp";
     } else if (selectedAge <= 45) {
-      return isMale ? "assets/new_images/boy_young_age.png" : "assets/new_images/girl_young_age.png";
+      return isMale ? "assets/new_images/boy_young_age.webp" : "assets/new_images/girl_young_age.webp";
     } else {
-      return isMale ? "assets/new_images/boy_old_age.png" : "assets/new_images/girl_old_age.png";
+      return isMale ? "assets/new_images/boy_old_age.webp" : "assets/new_images/girl_old_age.webp";
     }
   }
 

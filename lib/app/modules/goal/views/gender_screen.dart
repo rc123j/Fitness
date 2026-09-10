@@ -149,8 +149,8 @@ class _GenderScreenState extends State<GenderScreen> {
                       scale: 1.22,
                       child: Image.asset(
                         selectedGender == "Male"
-                            ? "assets/new_images/male_gender.png"
-                            : "assets/new_images/female_gender.png",
+                            ? "assets/new_images/male_gender.webp"
+                            : "assets/new_images/female_gender.webp",
                         key: ValueKey<String>(selectedGender),
                         width: double.infinity,
                         fit: BoxFit.fitWidth,
@@ -313,7 +313,7 @@ class _GenderScreenState extends State<GenderScreen> {
                           Expanded(
                             child: _buildGenderButton(
                               gender: "Male",
-                              imagePath: "assets/new_images/male_icon.png",
+                              imagePath: "assets/new_images/male_icon.webp",
                               color: const Color(0xff7B61FF),
                             ),
                           ),
@@ -321,7 +321,7 @@ class _GenderScreenState extends State<GenderScreen> {
                           Expanded(
                             child: _buildGenderButton(
                               gender: "Female",
-                              imagePath: "assets/new_images/female_icon.png",
+                              imagePath: "assets/new_images/female_icon.webp",
                               color: const Color(0xffFF00E5),
                             ),
                           ),
