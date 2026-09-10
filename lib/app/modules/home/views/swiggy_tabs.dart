@@ -186,7 +186,7 @@ class SwiggyTabsHeader extends GetView<HomeController> {
                           child: SizedBox(
                             height: 43,
                             child: Image.asset(
-                              "assets/home/meal_card.png",
+                              "assets/home/meal_card.webp",
                               fit: BoxFit.contain,
                             ),
                           ),
@@ -208,7 +208,7 @@ class SwiggyTabsHeader extends GetView<HomeController> {
                           child: SizedBox(
                             height: 45,
                             child: Image.asset(
-                              "assets/home/workout_card.png",
+                              "assets/home/workout_card.webp",
                               fit: BoxFit.contain,
                             ),
                           ),

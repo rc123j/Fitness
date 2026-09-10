@@ -113,7 +113,7 @@ class ProgressView extends GetView<ProgressController> {
                                     top: -152,
                                     right: 8,
                                     child: Image.asset(
-                                      'assets/progress/boyontop.png',
+                                      'assets/progress/boyontop.webp',
                                       height: 155,
                                       fit: BoxFit.contain,
                                       errorBuilder:
@@ -315,7 +315,7 @@ class ProgressView extends GetView<ProgressController> {
           borderRadius: BorderRadius.circular(23),
           color: const Color(0xff151520),
           image: const DecorationImage(
-            image: AssetImage('assets/progress/cardbg.png'),
+            image: AssetImage('assets/progress/cardbg.webp'),
             fit: BoxFit.cover,
           ),
         ),
@@ -595,7 +595,7 @@ class ProgressView extends GetView<ProgressController> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: Image.asset(
-                        'assets/progress/progress_images.png',
+                        'assets/progress/progress_images.webp',
                         width: double.infinity,
                         fit: BoxFit.fitWidth,
                         errorBuilder: (context, error, stackTrace) {
@@ -1743,7 +1743,7 @@ class ProgressView extends GetView<ProgressController> {
                   desc: "Devine Formula (IBW)",
                   icon: Icons.monitor_weight_outlined,
                   color: const Color(0xff7B61FF),
-                  bgImage: "assets/new_images1/ideal_weight.png",
+                  bgImage: "assets/new_images1/ideal_weight.webp",
                 ),
               ),
             ],
@@ -1762,7 +1762,7 @@ class ProgressView extends GetView<ProgressController> {
                   desc: "Total Daily Energy\nExpenditure",
                   icon: Icons.bolt_rounded,
                   color: const Color(0xff00E5FF),
-                  bgImage: "assets/new_images1/daily_tdeee.png",
+                  bgImage: "assets/new_images1/daily_tdeee.webp",
                 ),
               ),
               const SizedBox(width: 12),
@@ -1775,7 +1775,7 @@ class ProgressView extends GetView<ProgressController> {
                   desc: "Current / Ideal Weight",
                   icon: Icons.show_chart_rounded,
                   color: const Color(0xffFF7A00),
-                  bgImage: "assets/new_images1/weight ratio.png",
+                  bgImage: "assets/new_images1/weight ratio.webp",
                 ),
               ),
             ],

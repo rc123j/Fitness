@@ -196,7 +196,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                             ),
                             color: Colors.transparent,
                             child: Image.asset(
-                              'assets/home/coming_soon.png',
+                              'assets/home/coming_soon.webp',
                               height: 630,
                               fit: BoxFit.contain,
                             ),
@@ -262,7 +262,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(24),
                                       child: Image.asset(
-                                        'assets/home/home1.png',
+                                        'assets/home/home1.webp',
                                         width: double.infinity,
                                         height: 140,
                                         fit: BoxFit.cover,
@@ -1013,7 +1013,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildOfferItem(
-                imagePath: 'assets/home/offer1.png',
+                imagePath: 'assets/home/offer1.webp',
                 onTap: () => _showPremiumOfferBottomSheet(
                   context,
                   "Premium Access",
@@ -1025,7 +1025,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                 fallbackColor: const Color(0xffFFD166),
               ),
               _buildOfferItem(
-                imagePath: 'assets/home/offer2.png',
+                imagePath: 'assets/home/offer2.webp',
                 onTap: () => _showTalkToExpertBottomSheet(context),
                 fallbackTitle: "Talk to Diet Expert",
                 fallbackSubtitle: "Get 1-on-1 personalized guidance",
@@ -1403,7 +1403,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: Image.asset(
-                      'assets/home/bottom_sheet1.png',
+                      'assets/home/bottom_sheet1.webp',
                       width: double.infinity,
                       height: 200, // Reverted to slightly larger size
                       fit: BoxFit.cover,
@@ -1582,7 +1582,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Image.asset(
-                  'assets/home/botoom_sheet2.png',
+                  'assets/home/botoom_sheet2.webp',
                   width: double.infinity,
                   height: 200,
                   fit: BoxFit.cover,
@@ -2199,13 +2199,13 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
       physics: const BouncingScrollPhysics(),
       child: Row(
         children: [
-          _buildBannerImage('assets/home/banner1.png'),
+          _buildBannerImage('assets/home/banner1.webp'),
           const SizedBox(width: 12),
-          _buildBannerImage('assets/home/banner2.png'),
+          _buildBannerImage('assets/home/banner2.webp'),
           const SizedBox(width: 12),
-          _buildBannerImage('assets/home/banner3.png'),
+          _buildBannerImage('assets/home/banner3.webp'),
           const SizedBox(width: 12),
-          _buildBannerImage('assets/home/banner4.png'),
+          _buildBannerImage('assets/home/banner4.webp'),
         ],
       ),
     );
@@ -3837,7 +3837,7 @@ class SwiggyPromoCards extends StatelessWidget {
             title: "Protein",
             current: controller.currentProtein,
             target: controller.targetProtein,
-            image: "assets/home/protien_meal_section.png",
+            image: "assets/home/protien_meal_section.webp",
           ),
         ),
         const SizedBox(width: gap),
@@ -3846,7 +3846,7 @@ class SwiggyPromoCards extends StatelessWidget {
             title: "Carbs",
             current: controller.currentCarbs,
             target: controller.targetCarbs,
-            image: "assets/home/carbs_meal_section.png",
+            image: "assets/home/carbs_meal_section.webp",
           ),
         ),
         const SizedBox(width: gap),
@@ -3855,7 +3855,7 @@ class SwiggyPromoCards extends StatelessWidget {
             title: "Fats",
             current: controller.currentFat,
             target: controller.targetFat,
-            image: "assets/home/fats_meal_section.png",
+            image: "assets/home/fats_meal_section.webp",
           ),
         ),
       ],

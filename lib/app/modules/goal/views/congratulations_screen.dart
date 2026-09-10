@@ -105,7 +105,7 @@ class _CongratulationsScreenState extends State<CongratulationsScreen> {
               },
               blendMode: BlendMode.dstIn,
               child: Image.asset(
-                'assets/new_images1/congratulation_screen.png',
+                'assets/new_images1/congratulation_screen.webp',
                 fit: BoxFit.cover,
                 alignment: Alignment.topCenter,
                 errorBuilder: (context, error, stackTrace) {

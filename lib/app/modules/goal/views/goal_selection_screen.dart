@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/onboarding_draft_service.dart';
 import 'gender_screen.dart';
+import '../../../widgets/modern_confirm_dialog.dart';
 
 class GoalSelectionScreen extends StatefulWidget {
   const GoalSelectionScreen({super.key});
@@ -166,7 +167,14 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen>
                       // Logout Button
                       GestureDetector(
                         onTap: () {
-                          Get.find<AuthService>().logout();
+                          showModernConfirmDialog(
+                            title: "Log Out",
+                            message: "Are you sure you want to log out?",
+                            confirmText: "Log Out",
+                            confirmColor: const Color(0xffFF7A00),
+                            icon: Icons.logout_rounded,
+                            onConfirm: () => Get.find<AuthService>().logout(),
+                          );
                         },
                         child: Container(
                           padding: const EdgeInsets.all(8),

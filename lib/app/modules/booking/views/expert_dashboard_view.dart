@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../controllers/booking_controller.dart';
 import '../../../services/auth_service.dart' as import_auth;
+import '../../../widgets/modern_confirm_dialog.dart';
 
 class ExpertDashboardView extends GetView<BookingController> {
   const ExpertDashboardView({super.key});
@@ -49,16 +50,13 @@ class ExpertDashboardView extends GetView<BookingController> {
           IconButton(
             icon: const Icon(Icons.logout_rounded, color: Colors.white70),
             onPressed: () {
-              Get.defaultDialog(
-                title: "Logout",
-                middleText: "Are you sure you want to log out?",
-                textConfirm: "Logout",
-                textCancel: "Cancel",
-                confirmTextColor: Colors.white,
-                buttonColor: const Color(0xffFF00E5),
-                onConfirm: () {
-                  Get.find<import_auth.AuthService>().logout();
-                },
+              showModernConfirmDialog(
+                title: "Log Out",
+                message: "Are you sure you want to log out?",
+                confirmText: "Log Out",
+                confirmColor: const Color(0xffFF7A00),
+                icon: Icons.logout_rounded,
+                onConfirm: () => Get.find<import_auth.AuthService>().logout(),
               );
             },
           ),

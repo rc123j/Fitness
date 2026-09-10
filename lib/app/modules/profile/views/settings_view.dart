@@ -7,6 +7,7 @@ import '../../goal/views/congratulations_screen.dart';
 import 'edit_profile_view.dart';
 import 'change_password_view.dart';
 import 'coming_soon_view.dart';
+import '../../../widgets/modern_confirm_dialog.dart';
 
 class SettingsView extends GetView<ProfileController> {
   const SettingsView({super.key});
@@ -377,25 +378,14 @@ class SettingsView extends GetView<ProfileController> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            Get.defaultDialog(
+            showModernConfirmDialog(
               title: "Delete Account",
-              titleStyle: GoogleFonts.outfit(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-              middleText:
-                  "Are you sure you want to delete your account? This action cannot be undone.",
-              middleTextStyle: GoogleFonts.inter(color: Colors.white70),
-              backgroundColor: const Color(0xff120D23),
-              textConfirm: "Delete",
-              textCancel: "Cancel",
-              confirmTextColor: Colors.white,
-              cancelTextColor: Colors.white,
-              buttonColor: Colors.red,
-              onConfirm: () {
-                Get.back();
-                controller.deleteAccount();
-              },
+              message:
+                  "Are you sure you want to delete your account? All your progress, fitness metrics, and membership data will be permanently erased. This action cannot be undone.",
+              confirmText: "Delete Account",
+              confirmColor: const Color(0xffFF3B30),
+              icon: Icons.delete_forever_rounded,
+              onConfirm: () => controller.deleteAccount(),
             );
           },
           borderRadius: BorderRadius.circular(20),
@@ -436,7 +426,16 @@ class SettingsView extends GetView<ProfileController> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => controller.logout(),
+          onTap: () {
+            showModernConfirmDialog(
+              title: "Log Out",
+              message: "Are you sure you want to log out of your Nutri Shape account?",
+              confirmText: "Log Out",
+              confirmColor: const Color(0xffFF7A00),
+              icon: Icons.logout_rounded,
+              onConfirm: () => controller.logout(),
+            );
+          },
           borderRadius: BorderRadius.circular(20),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),

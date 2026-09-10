@@ -62,7 +62,7 @@ class NewWidgetsHelper extends GetView<ProgressController> {
             height: 120,
             width: 120,
             child: Image.asset(
-              'assets/home/ChatGPT Image Aug 12, 2026, 12_42_22 PM.png',
+              'assets/home/ChatGPT Image Aug 12, 2026, 12_42_22 PM.webp',
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
                 return Image.asset(
