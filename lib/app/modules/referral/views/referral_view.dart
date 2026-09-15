@@ -81,7 +81,7 @@ class ReferralView extends GetView<ReferralController> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Invite Friends & Get 50 FitPoints!',
+                        'Invite Friends & Get 20 FitPoints!',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.outfit(
                           color: Colors.white,
@@ -91,7 +91,7 @@ class ReferralView extends GetView<ReferralController> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Earn 50 FitPoints for every friend who signs up using your referral code. They get 50 bonus points too!',
+                        'Earn 20 FitPoints for every friend who signs up using your referral code. They get 20 bonus points too!',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           color: Colors.white.withOpacity(0.85),
@@ -244,7 +244,7 @@ class ReferralView extends GetView<ReferralController> {
                 const SizedBox(height: 12),
                 _buildStepItem('1', 'Share your unique referral code with friends.'),
                 _buildStepItem('2', 'Friend enters your code on the Sign Up screen.'),
-                _buildStepItem('3', 'Both of you instantly get 50 FitPoints credited to your wallet!'),
+                _buildStepItem('3', 'Both of you instantly get 20 FitPoints credited to your wallet!'),
 
                 const SizedBox(height: 24),
 
@@ -269,7 +269,7 @@ class ReferralView extends GetView<ReferralController> {
                       border: Border.all(color: Colors.white.withOpacity(0.08)),
                     ),
                     child: Text(
-                      'No referrals yet. Share your code to earn your first 50 FitPoints!',
+                      'No referrals yet. Share your code to earn your first 20 FitPoints!',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(color: Colors.white54, fontSize: 13),
                     ),

@@ -58,7 +58,7 @@ class RegisterController extends GetxController {
       );
       if (res.statusCode == 200 && res.data != null && res.data['valid'] == true) {
         isReferralCodeValid.value = true;
-        referralStatusMessage.value = '✓ ${res.data['message']} (+50 FitPoints)';
+        referralStatusMessage.value = '✓ ${res.data['message']} (+20 FitPoints)';
       } else {
         isReferralCodeValid.value = false;
         referralStatusMessage.value = res.data?['message'] ?? 'Invalid referral code.';

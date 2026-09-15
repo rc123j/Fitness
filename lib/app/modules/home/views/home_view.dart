@@ -10,6 +10,7 @@ import 'swiggy_tabs.dart';
 import '../../../services/iap_service.dart';
 import '../../../widgets/app_shimmer.dart';
 import '../../main_navigation/controllers/main_navigation_controller.dart';
+import 'welcome_celebration_sheet.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -702,6 +703,68 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   /// ----------------------------------------------------
   Widget buildActivePlanCard() {
     return Obx(() {
+      final isPremium = Get.find<IapService>().isPremium.value;
+      
+      if (!isPremium && controller.planDayNumber.value > 1) {
+        return GestureDetector(
+          onTap: () => Get.toNamed('/membership'),
+          child: Container(
+            height: 154,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: const Color(0xff120D23).withOpacity(0.8),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.1),
+                width: 1.5,
+              ),
+            ),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: CustomPaint(painter: ActivePlanBgPainter()),
+                ),
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                      child: Container(
+                        color: Colors.black.withOpacity(0.4),
+                      ),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.lock_outline_rounded, color: Colors.white70, size: 32),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Premium Plan Locked",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Start your 30-Day Free Trial",
+                        style: GoogleFonts.inter(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
       final double progress = (controller.planDayNumber.value / 30.0).clamp(
         0.0,
         1.0,
@@ -737,14 +800,36 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          "ACTIVE PLAN",
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2.0,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              "ACTIVE PLAN",
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 2.0,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xff00FF87).withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: const Color(0xff00FF87).withOpacity(0.4), width: 1),
+                              ),
+                              child: Text(
+                                "FREE TRIAL",
+                                style: GoogleFonts.outfit(
+                                  color: const Color(0xff00FF87),
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
 
                         Column(
@@ -770,14 +855,22 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                               ),
                             ),
                             const SizedBox(height: 2),
-                            Text(
-                              "Keep up the great pace! ⚡",
-                              style: GoogleFonts.inter(
-                                color: Colors.white.withOpacity(0.85),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                            Obx(() {
+                              final expiry = Get.find<IapService>().premiumExpiry.value;
+                              final daysLeft = expiry != null
+                                  ? expiry.difference(DateTime.now()).inDays + 1
+                                  : null;
+                              return Text(
+                                daysLeft != null
+                                    ? "$daysLeft days left in free trial ⏳"
+                                    : "Keep up the great pace! ⚡",
+                                style: GoogleFonts.inter(
+                                  color: Colors.white.withOpacity(0.85),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              );
+                            }),
                           ],
                         ),
 
@@ -1407,42 +1500,100 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                   ),
 
                   const SizedBox(height: 16),
-                  // Plan Selection Cards
-                  Row(
-                    children: [
-                      // Monthly Plan
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => selectedPlanIndex = 0),
-                          child: _buildPlanCard(
-                            title: "Monthly Plan",
-                            price: "₹499",
-                            duration: "/month",
-                            billing: "Billed monthly",
-                            isSelected: selectedPlanIndex == 0,
+                  // Single Centered Premium Plan Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 18,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: const Color(0xffE98C00).withOpacity(0.12),
+                      border: Border.all(
+                        color: const Color(0xffE98C00),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Premium Monthly Plan",
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xffFFB800),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                "50% OFF",
+                                style: GoogleFonts.outfit(
+                                  color: Colors.black,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              "₹230",
+                              style: GoogleFonts.outfit(
+                                color: const Color(0xffFFB800),
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              " /month",
+                              style: GoogleFonts.inter(
+                                color: Colors.white.withOpacity(0.6),
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              "₹460",
+                              style: GoogleFonts.inter(
+                                color: Colors.white.withOpacity(0.4),
+                                fontSize: 14,
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "30-Day Free Trial • Cancel Anytime",
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      // Annual Plan
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => selectedPlanIndex = 1),
-                          child: _buildPlanCard(
-                            title: "Annual Plan",
-                            price: "₹2,999",
-                            duration: "",
-                            oldPrice: "₹5,999",
-                            billing: "Billed yearly • Save 50%",
-                            isSelected: selectedPlanIndex == 1,
-                            isBestValue: true,
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
 
                   // CTA Button
                   GestureDetector(
@@ -1470,9 +1621,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            selectedPlanIndex == 1
-                                ? "Get 50% Off Now"
-                                : "Start Monthly Plan",
+                            "Start 30-Day Free Trial  🚀",
                             style: GoogleFonts.outfit(
                               color: const Color(0xff3E2000),
                               fontSize: 18,
@@ -3137,9 +3286,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                                         Text(
                                           act["subtitle"] as String,
                                           style: GoogleFonts.inter(
-                                            color: Colors.white.withOpacity(
-                                              0.40,
-                                            ),
+                                            color: Colors.white.withOpacity(0.40),
                                             fontSize: 9.5,
                                           ),
                                         ),

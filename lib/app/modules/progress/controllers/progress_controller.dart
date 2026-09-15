@@ -371,8 +371,8 @@ class ProgressController extends GetxController {
 
         if (!hasManualLogs && tempEstimatedWeightHistory.isNotEmpty) {
           weightHistory.value = tempEstimatedWeightHistory;
-          currentWeight.value = tempEstimatedWeightHistory.last['weight'] as double;
-          weightDifferenceKg.value = startingWeight.value - currentWeight.value;
+          currentWeight.value = startingWeight.value;
+          weightDifferenceKg.value = 0.0;
         }
       }
     } catch (e) {

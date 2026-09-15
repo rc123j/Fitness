@@ -7,6 +7,8 @@ import '../../progress/controllers/progress_controller.dart';
 import '../../main_navigation/controllers/main_navigation_controller.dart';
 import '../../../widgets/app_shimmer.dart';
 import '../../../widgets/scroll_nav_bar_binder.dart';
+import 'dart:ui';
+import '../../../services/iap_service.dart';
 
 class _InsightTab {
   final String label;
@@ -842,11 +844,11 @@ class MealView extends GetView<MealController> {
                   height: 1.1,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                "of $target",
-                style: GoogleFonts.outfit(color: Colors.white38, fontSize: 10),
-              ),
+              if (label != "Calories")
+                Text(
+                  "of $target",
+                  style: GoogleFonts.outfit(color: Colors.white38, fontSize: 10),
+                ),
               const SizedBox(height: 6),
               Text(
                 label,
@@ -857,7 +859,7 @@ class MealView extends GetView<MealController> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              if (delta != 0)
+              if (label != "Calories" && delta != 0)
                 Text(
                   "${delta > 0 ? '+' : ''}$delta $unit",
                   style: GoogleFonts.outfit(color: Colors.white38, fontSize: 9),
@@ -1774,6 +1776,9 @@ class MealView extends GetView<MealController> {
 
             final String mealImageUrl = _getMealImageUrl(mealTitle);
 
+            final bool isPremium = Get.find<IapService>().isPremium.value;
+            final bool isLocked = !isPremium && controller.currentDay.value > 1;
+
             return AnimatedSize(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
@@ -1789,10 +1794,12 @@ class MealView extends GetView<MealController> {
                     width: 1.0,
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Stack(
                   children: [
-                    // --- HEADER ROW (ALWAYS VISIBLE) ---
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // --- HEADER ROW (ALWAYS VISIBLE) ---
                     GestureDetector(
                       onTap: () {
                         if (isExpanded) {
@@ -1995,6 +2002,41 @@ class MealView extends GetView<MealController> {
                         ),
                       ),
                     ],
+                      ],
+                    ),
+                    if (isLocked)
+                      Positioned.fill(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(22),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                            child: Container(
+                              color: Colors.black.withOpacity(0.4),
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.lock_outline_rounded, color: Colors.white70, size: 28),
+                                    const SizedBox(height: 8),
+                                    ElevatedButton(
+                                      onPressed: () => Get.toNamed('/membership'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xffFF00E5),
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                      ),
+                                      child: Text(
+                                        "Unlock Full Plan",
+                                        style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),

@@ -51,6 +51,7 @@ class AuthService extends GetxService {
     await _storage.remove(_userEmailKey);
     await _storage.remove(_userRoleKey);
     await _storage.remove(_onboardingDoneKey);
+    await _storage.remove('_reg_success_msg');
   }
 
   Future<void> logout() async {

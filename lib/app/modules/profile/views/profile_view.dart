@@ -483,7 +483,7 @@ class ProfileView extends GetView<ProfileController> {
           buildOptionRowItem(
             icon: Icons.card_giftcard_rounded,
             title: "Refer & Earn",
-            subtitle: "Invite friends & earn 50 FitPoints",
+            subtitle: "Invite friends & earn 20 FitPoints",
             onTap: () => Get.toNamed('/referral'),
           ),
           buildDivider(),

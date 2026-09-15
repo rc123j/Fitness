@@ -23,6 +23,7 @@ class MembershipController extends GetxController {
 
   // Get dynamic plans and loading status from billing service
   List<Map<String, dynamic>> get plans => _iapService.availablePlans;
+  RxBool get isLoadingRx => _iapService.isLoading;
   bool get isLoading => _iapService.isLoading.value;
 
   @override
@@ -34,6 +35,9 @@ class MembershipController extends GetxController {
     pageController.addListener(() {
       pageOffset.value = pageController.page ?? 0.0;
     });
+
+    // Always re-check premium status when this screen opens
+    _iapService.checkPremiumStatus();
 
     _startCountdown();
   }
@@ -98,4 +102,10 @@ class MembershipController extends GetxController {
   Future<void> refreshPlans() async {
     await _iapService.fetchAvailablePlans();
   }
+
+  // Trigger restore purchases flow
+  Future<void> restorePurchases() async {
+    await _iapService.restorePurchases();
+  }
 }
+

@@ -723,7 +723,7 @@ class ProgressView extends GetView<ProgressController> {
                             ),
                           ),
                           child: Text(
-                            "$currentCalories/$targetCalories kcal",
+                            "$currentCalories kcal",
                             style: GoogleFonts.inter(
                               color: Colors.white.withOpacity(0.65),
                               fontSize: 11,
@@ -764,7 +764,7 @@ class ProgressView extends GetView<ProgressController> {
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    "of $targetCalories kcal",
+                                    "kcal logged",
                                     style: GoogleFonts.inter(
                                       color: Colors.white.withOpacity(0.4),
                                       fontSize: 9,
@@ -1141,43 +1141,7 @@ class ProgressView extends GetView<ProgressController> {
                     ),
                   ],
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      "Goal",
-                      style: GoogleFonts.inter(
-                        color: const Color(0xffFF7A00).withOpacity(0.7),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          formatNum(target),
-                          style: GoogleFonts.outfit(
-                            color: const Color(0xffFF7A00),
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          "kcal",
-                          style: GoogleFonts.inter(
-                            color: const Color(0xffFF7A00).withOpacity(0.7),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+
                 GestureDetector(
                   onTap: () => Get.to(() => const AllTimeProgressView()),
                   child: Container(
@@ -1218,33 +1182,46 @@ class ProgressView extends GetView<ProgressController> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 10,
-                  height: 10,
+                  width: 8,
+                  height: 8,
                   decoration: const BoxDecoration(
                     color: Color(0xffB100FF),
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
                 Text(
-                  "Calories Consumed",
+                  "Past Days",
                   style: GoogleFonts.inter(
                     color: Colors.white.withOpacity(0.7),
                     fontSize: 11,
                   ),
                 ),
-                const SizedBox(width: 24),
+                const SizedBox(width: 20),
                 Container(
-                  width: 24,
-                  height: 2,
-                  color: Colors.transparent,
-                  child: CustomPaint(
-                    painter: DashedLinePainter(color: const Color(0xffFF7A00)),
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Color(0xffFF7A00),
+                    shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
                 Text(
-                  "Target",
+                  "Today",
+                  style: GoogleFonts.inter(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(width: 20),
+                CustomPaint(
+                  size: const Size(16, 2),
+                  painter: DashedLinePainter(color: const Color(0xff00E5FF)),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  "Intake Trend",
                   style: GoogleFonts.inter(
                     color: Colors.white.withOpacity(0.7),
                     fontSize: 11,
@@ -1412,38 +1389,77 @@ class ProgressView extends GetView<ProgressController> {
                       ],
                     ),
                   ),
-                  if (diff != 0)
+                  if (diff.abs() >= 0.1)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Row(
-                          children: [
-                            Icon(
-                              hasLost
-                                  ? Icons.arrow_downward_rounded
-                                  : Icons.arrow_upward_rounded,
-                              color: diffColor,
-                              size: 16,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: diffColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: diffColor.withOpacity(0.3),
+                              width: 1,
                             ),
-                            const SizedBox(width: 2),
-                            Text(
-                              '${diff.abs().toStringAsFixed(1)} kg',
-                              style: GoogleFonts.outfit(
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                hasLost
+                                    ? Icons.arrow_downward_rounded
+                                    : Icons.arrow_upward_rounded,
                                 color: diffColor,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                                size: 14,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 4),
+                              Text(
+                                '${diff.abs().toStringAsFixed(1)} kg',
+                                style: GoogleFonts.outfit(
+                                  color: diffColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+                        const SizedBox(height: 4),
                         Text(
                           'vs start weight',
                           style: GoogleFonts.inter(
-                            color: Colors.white38,
-                            fontSize: 11,
+                            color: Colors.white.withOpacity(0.4),
+                            fontSize: 10,
                           ),
                         ),
                       ],
+                    )
+                  else
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.1),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        'Starting Weight',
+                        style: GoogleFonts.inter(
+                          color: Colors.white.withOpacity(0.6),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -1561,15 +1577,22 @@ class ProgressView extends GetView<ProgressController> {
             // ── Weight Insights ─────────────────────────────────────────────
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.03),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withOpacity(0.04),
+                    Colors.white.withOpacity(0.02),
+                  ],
+                ),
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(24),
                   bottomRight: Radius.circular(24),
                 ),
                 border: Border(
-                  top: BorderSide(color: Colors.white.withOpacity(0.06)),
+                  top: BorderSide(color: Colors.white.withOpacity(0.08)),
                 ),
               ),
               child: Column(
@@ -1577,10 +1600,17 @@ class ProgressView extends GetView<ProgressController> {
                 children: [
                   Row(
                     children: [
-                      const Icon(
-                        Icons.auto_awesome_rounded,
-                        color: Color(0xffB100FF),
-                        size: 16,
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xffB100FF).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.auto_awesome_rounded,
+                          color: Color(0xffB100FF),
+                          size: 14,
+                        ),
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -1588,24 +1618,33 @@ class ProgressView extends GetView<ProgressController> {
                         style: GoogleFonts.outfit(
                           color: Colors.white,
                           fontSize: 13,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.bold,
                           letterSpacing: 0.8,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
                   ...insights.map(
-                    (ins) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
+                    (ins) => Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.03),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.05),
+                          width: 0.8,
+                        ),
+                      ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: (ins['color'] as Color).withOpacity(0.12),
-                              shape: BoxShape.circle,
+                              color: (ins['color'] as Color).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(
                               ins['icon'] as IconData,
@@ -1626,11 +1665,11 @@ class ProgressView extends GetView<ProgressController> {
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                const SizedBox(height: 2),
+                                const SizedBox(height: 3),
                                 Text(
                                   ins['sub'] as String,
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.white54,
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white.withOpacity(0.65),
                                     fontSize: 11,
                                     height: 1.4,
                                   ),
@@ -2712,48 +2751,7 @@ class AllTimeProgressView extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  "Goal",
-                                  style: GoogleFonts.inter(
-                                    color: const Color(
-                                      0xffFF7A00,
-                                    ).withOpacity(0.7),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.baseline,
-                                  textBaseline: TextBaseline.alphabetic,
-                                  children: [
-                                    Text(
-                                      formatNum(target),
-                                      style: GoogleFonts.outfit(
-                                        color: const Color(0xffFF7A00),
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      "kcal",
-                                      style: GoogleFonts.inter(
-                                        color: const Color(
-                                          0xffFF7A00,
-                                        ).withOpacity(0.7),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+
                           ],
                         ),
                         const SizedBox(height: 32),
@@ -2780,35 +2778,33 @@ class AllTimeProgressView extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
-                              width: 10,
-                              height: 10,
+                              width: 8,
+                              height: 8,
                               decoration: const BoxDecoration(
                                 color: Color(0xffB100FF),
                                 shape: BoxShape.circle,
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 6),
                             Text(
-                              "Calories Consumed",
+                              "Past Days",
                               style: GoogleFonts.inter(
                                 color: Colors.white.withOpacity(0.7),
                                 fontSize: 11,
                               ),
                             ),
-                            const SizedBox(width: 24),
+                            const SizedBox(width: 20),
                             Container(
-                              width: 24,
-                              height: 2,
-                              color: Colors.transparent,
-                              child: CustomPaint(
-                                painter: DashedLinePainter(
-                                  color: const Color(0xffFF7A00),
-                                ),
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Color(0xffFF7A00),
+                                shape: BoxShape.circle,
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 6),
                             Text(
-                              "Target",
+                              "Today",
                               style: GoogleFonts.inter(
                                 color: Colors.white.withOpacity(0.7),
                                 fontSize: 11,

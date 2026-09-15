@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../controllers/membership_controller.dart';
+import '../../../services/iap_service.dart';
 
 class MembershipView extends GetView<MembershipController> {
   const MembershipView({super.key});
@@ -46,9 +47,112 @@ class MembershipView extends GetView<MembershipController> {
                 buildHeaderTitles(),
                 const Spacer(),
                 buildStackedCarousel(),
-                const SizedBox(height: 24),
-                // buildCountdownTimerCard(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+                // ── GLOBAL CTA BUTTON ──────────────────────────────────────
+                Obx(() {
+                  final isPremium = Get.find<IapService>().isPremium.value;
+                  final isLoading = controller.isLoadingRx.value;
+                  final expiry = Get.find<IapService>().premiumExpiry.value;
+
+                  if (isPremium) {
+                    // ── ALREADY ON TRIAL / PREMIUM ────────────────────────
+                    final daysLeft = expiry != null
+                        ? expiry.difference(DateTime.now()).inDays + 1
+                        : null;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: const Color(0xff00FF87).withOpacity(0.1),
+                          border: Border.all(
+                            color: const Color(0xff00FF87).withOpacity(0.5),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.verified_rounded,
+                              color: Color(0xff00FF87),
+                              size: 24,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              daysLeft != null
+                                  ? "Free Trial Active ($daysLeft days left) ✓"
+                                  : "Premium Active ✓",
+                              style: GoogleFonts.outfit(
+                                color: const Color(0xff00FF87),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  // ── START FREE TRIAL BUTTON (NOT PREMIUM) ────────────────
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: GestureDetector(
+                      onTap: isLoading ? null : () => controller.purchaseSelectedPlan(),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xffB100FF), Color(0xffFF00E5)],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xffFF00E5).withOpacity(0.4),
+                              blurRadius: 20,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: isLoading
+                              ? const SizedBox(
+                                  height: 22,
+                                  width: 22,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : Text(
+                                  "Start 30-Day Free Trial  🚀",
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+                const SizedBox(height: 12),
+                Text(
+                  "Cancel anytime. No charges during trial.",
+                  style: GoogleFonts.inter(
+                    color: Colors.white.withOpacity(0.4),
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -92,7 +196,7 @@ class MembershipView extends GetView<MembershipController> {
               letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(width: 48), // Balance spacing
+          const SizedBox(width: 40),
         ],
       ),
     );
@@ -186,34 +290,44 @@ class MembershipView extends GetView<MembershipController> {
     switch (duration) {
       case 'WEEKLY':
         return [
-          'Full Access to Workouts',
-          'Basic Meal Suggestions',
-          'Progress Tracking',
+          'Personalized AI Meal Plans',
+          'Calorie & Macro Tracking',
+          'Progress & Body Metrics',
+          'FitPoints Rewards',
+          'Daily Water & Goal Reminders',
         ];
       case 'MONTHLY':
       case 'QUARTERLY':
         return [
-          'Full Access to Workouts',
-          'Custom Meal Plans',
-          'Progress Tracking',
-          'Expert Support',
+          'Personalized AI Meal Plans',
+          'Calorie & Macro Tracking',
+          'Progress & Body Metrics',
+          'FitPoints Rewards & Streaks',
+          'Expert Nutrition Insights',
         ];
       case 'ANNUAL':
       case 'LIFETIME':
         return [
-          'Full Access to Workouts',
-          'Custom Meal Plans',
-          'Progress Tracking',
-          'Expert Support',
-          'Priority Coach Access',
-          'Nutrition Guidance',
+          'Personalized AI Meal Plans',
+          'Calorie & Macro Tracking',
+          'Progress & Body Metrics',
+          'FitPoints Rewards & Streaks',
+          'AI Recipe Generator',
+          'Priority Expert Support',
         ];
       default:
-        return ['Premium Workouts', 'Custom Meal Plans', 'Progress Tracking'];
+        return [
+          'Personalized AI Meal Plans',
+          'Calorie & Macro Tracking',
+          'Progress & Body Metrics',
+          'FitPoints Rewards & Streaks',
+          'Expert Nutrition Insights',
+        ];
     }
   }
 
   String? getBadge(String duration) {
+    if (duration == 'MONTHLY') return '30 DAYS FREE TRIAL';
     if (duration == 'ANNUAL') return 'BEST VALUE';
     if (duration == 'QUARTERLY') return 'POPULAR';
     if (duration == 'LIFETIME') return 'BEST DEAL';
@@ -229,7 +343,7 @@ class MembershipView extends GetView<MembershipController> {
   /// Stacked Carousel Layout
   Widget buildStackedCarousel() {
     return SizedBox(
-      height: 460,
+      height: 380,
       child: Obx(() {
         if (controller.isLoading) {
           return const Center(
@@ -486,7 +600,7 @@ class MembershipView extends GetView<MembershipController> {
                     itemBuilder: (context, idx) {
                       final bullet = bullets[idx];
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
+                        padding: const EdgeInsets.only(bottom: 16.0),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -502,7 +616,7 @@ class MembershipView extends GetView<MembershipController> {
                                 style: GoogleFonts.inter(
                                   color: Colors.white,
                                   fontSize: 12,
-                                  height: 1.2,
+                                  height: 1.3,
                                 ),
                               ),
                             ),
@@ -512,44 +626,7 @@ class MembershipView extends GetView<MembershipController> {
                     },
                   ),
                 ),
-                const SizedBox(height: 12),
 
-                /// Button inside card
-                GestureDetector(
-                  onTap: () {
-                    if (isSelected) {
-                      controller.purchaseSelectedPlan();
-                    } else {
-                      controller.selectPlan(index);
-                    }
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: isSelected
-                          ? Colors.white
-                          : Colors.white.withOpacity(0.04),
-                      border: isSelected
-                          ? null
-                          : Border.all(
-                              color: Colors.white.withOpacity(0.12),
-                              width: 1.0,
-                            ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        isSelected ? "Proceed with Plan" : "Select Plan",
-                        style: GoogleFonts.outfit(
-                          color: isSelected ? Colors.black : Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),

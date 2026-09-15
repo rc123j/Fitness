@@ -2,9 +2,12 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
 import '../../main_navigation/controllers/main_navigation_controller.dart';
+import '../views/weight_checkin_dialog.dart';
+import '../views/welcome_celebration_sheet.dart';
 
 // Index of the Home tab inside MainNavigationView's IndexedStack.
 const int _kHomeTabIndex = 0;
@@ -327,6 +330,32 @@ class HomeController extends GetxController {
       // Keep defaults
     } finally {
       isLoading.value = false;
+      _checkAndShowWelcomeCelebration();
+    }
+  }
+
+  // Check and trigger Welcome Celebration Bottom Sheet for new users
+  void _checkAndShowWelcomeCelebration() {
+    try {
+      final storage = GetStorage();
+      final String userKey = memberCode.value.isNotEmpty ? memberCode.value : 'new_user';
+      final String storageKey = 'has_seen_welcome_$userKey';
+      final bool hasSeen = storage.read(storageKey) ?? false;
+
+      if (!hasSeen) {
+        storage.write(storageKey, true);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (Get.context != null) {
+            WelcomeCelebrationSheet.show(
+              Get.context!,
+              fitPoints: fitPoints.value > 0 ? fitPoints.value : 20,
+              onExplorePressed: () => Get.find<MainNavigationController>().changeTab(1),
+            );
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('Welcome celebration trigger error: $e');
     }
   }
 
@@ -348,4 +377,26 @@ class HomeController extends GetxController {
 
     // Note: A real app would make a POST request to an API here
   }
+
+  // Trigger Weight Check-In Dialog when 30-Day plan cycle ends
+  void promptWeightCheckinIfCompleted(BuildContext context, Map<String, dynamic>? profileData) {
+    if (planDaysRemaining.value <= 0 && currentWeight.value > 0) {
+      final double heightCm = double.tryParse(profileData?['height_cm']?.toString() ?? '170') ?? 170.0;
+      final String gender = profileData?['gender'] ?? 'Male';
+      final int age = profileData?['age'] ?? 25;
+
+      WeightCheckinDialog.show(
+        context,
+        currentWeight: currentWeight.value,
+        heightCm: heightCm,
+        gender: gender,
+        age: age,
+        onCompleted: (newWeight) {
+          currentWeight.value = newWeight;
+          fetchProfile();
+        },
+      );
+    }
+  }
 }
+

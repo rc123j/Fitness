@@ -2,7 +2,7 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   // Set to true to connect to production server, false for local development
-  static const bool isProduction = true;
+  static const bool isProduction = false;
 
   static const String baseUrl = isProduction
       ? 'https://api.fitwithdeveloper.com'
@@ -20,6 +20,7 @@ class ApiEndpoints {
 
   // Diet & Meal logs
   static const String currentDietPlan = '/api/diet-plans/current';
+  static const String generateDietPlan = '/api/diet-plans/generate';
   static const String logMeal = '/api/diet-plans/logs';
   static const String todayNutritionLog = '/api/diet-plans/logs/today';
   static const String markMealComplete = '/api/diet-plans/meal-complete';

@@ -339,7 +339,7 @@ class NewWidgetsHelper extends GetView<ProgressController> {
               icon: Icons.local_fire_department_rounded,
               iconColor: const Color(0xffFF7A00),
               title: "Calories",
-              value: "${controller.todayConsumedCalories.value.toInt()}/${controller.targetCalories.value.toInt()}",
+              value: "${controller.todayConsumedCalories.value.toInt()}",
               unit: "kcal",
               progress: controller.targetCalories.value > 0
                   ? (controller.todayConsumedCalories.value / controller.targetCalories.value).clamp(0.0, 1.0)

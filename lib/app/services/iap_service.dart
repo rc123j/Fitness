@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -57,7 +58,7 @@ class IapService extends GetxService {
       if (response.statusCode == 200) {
         final isPrem = response.data['is_premium'] as bool;
         isPremium.value = isPrem;
-        
+
         if (isPrem && response.data['subscription'] != null) {
           final sub = response.data['subscription'];
           activePlanName.value = sub['plan_name'] ?? '';
@@ -94,10 +95,13 @@ class IapService extends GetxService {
         availablePlans.value = backendPlans.map((bp) {
           return {
             'db_id': bp['id'],
-            'product_id': Platform.isIOS ? bp['apple_product_id'] : bp['google_product_id'],
+            'product_id': Platform.isIOS
+                ? bp['apple_product_id']
+                : bp['google_product_id'],
             'title': bp['name'],
             'description': '${bp['duration']} subscription plan',
-            'price': '₹${bp['price'].toString().replaceAll(RegExp(r'\.00$'), '')}',
+            'price':
+                '₹${bp['price'].toString().replaceAll(RegExp(r'\.00$'), '')}',
             'rawPrice': double.tryParse(bp['price'].toString()) ?? 0.0,
             'duration': bp['duration'],
             'is_recurring': bp['is_recurring'],
@@ -109,32 +113,50 @@ class IapService extends GetxService {
 
       // Query native prices from App Store / Google Play Console
       final Set<String> productIds = backendPlans
-          .map((bp) => (Platform.isIOS ? bp['apple_product_id'] : bp['google_product_id']).toString())
+          .map(
+            (bp) =>
+                (Platform.isIOS
+                        ? bp['apple_product_id']
+                        : bp['google_product_id'])
+                    .toString(),
+          )
           .toSet();
 
-      final ProductDetailsResponse productResponse = await _iap.queryProductDetails(productIds);
-      
+      final ProductDetailsResponse productResponse = await _iap
+          .queryProductDetails(productIds);
+
       // Merge Store localized prices with database metadata
       final List<Map<String, dynamic>> plans = [];
       for (var bp in backendPlans) {
-        final String pid = Platform.isIOS ? bp['apple_product_id'] : bp['google_product_id'];
-        
+        final String pid = Platform.isIOS
+            ? bp['apple_product_id']
+            : bp['google_product_id'];
+
         // Find matching Store Details
         ProductDetails? storeDetails;
         try {
-          storeDetails = productResponse.productDetails.firstWhere((element) => element.id == pid);
+          storeDetails = productResponse.productDetails.firstWhere(
+            (element) => element.id == pid,
+          );
         } catch (_) {}
 
         plans.add({
           'db_id': bp['id'],
           'product_id': pid,
           'title': bp['name'],
-          'description': storeDetails?.description ?? '${bp['duration']} subscription plan',
-          'price': storeDetails?.price ?? '₹${bp['price'].toString().replaceAll(RegExp(r'\.00$'), '')}',
-          'rawPrice': storeDetails?.rawPrice ?? (double.tryParse(bp['price'].toString()) ?? 0.0),
+          'description':
+              storeDetails?.description ??
+              '${bp['duration']} subscription plan',
+          'price':
+              storeDetails?.price ??
+              '₹${bp['price'].toString().replaceAll(RegExp(r'\.00$'), '')}',
+          'rawPrice':
+              storeDetails?.rawPrice ??
+              (double.tryParse(bp['price'].toString()) ?? 0.0),
           'duration': bp['duration'],
           'is_recurring': bp['is_recurring'],
-          'store_product': storeDetails, // Store product details used for purchasing
+          'store_product':
+              storeDetails, // Store product details used for purchasing
         });
       }
 
@@ -150,17 +172,20 @@ class IapService extends GetxService {
   Future<void> buyPlan(Map<String, dynamic> plan) async {
     try {
       isLoading.value = true;
-      final ProductDetails? productDetails = plan['store_product'] as ProductDetails?;
+      final ProductDetails? productDetails =
+          plan['store_product'] as ProductDetails?;
 
       if (productDetails == null) {
-        // Developer sandbox fallback: If running on an emulator with no native billing connection, 
+        // Developer sandbox fallback: If running on an emulator with no native billing connection,
         // simulate the purchase validation directly with a mock receipt token
         await _mockVerifyWithBackend(plan);
         return;
       }
 
-      final PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetails);
-      
+      final PurchaseParam purchaseParam = PurchaseParam(
+        productDetails: productDetails,
+      );
+
       if (plan['is_recurring'] == true) {
         await _iap.buyNonConsumable(purchaseParam: purchaseParam);
       } else {
@@ -177,14 +202,30 @@ class IapService extends GetxService {
     try {
       isLoading.value = true;
       await _iap.restorePurchases();
+      await Future.delayed(const Duration(seconds: 1));
+      await checkPremiumStatus();
+      if (isPremium.value) {
+        Get.snackbar(
+          'Restored',
+          'Your subscription was successfully restored!',
+        );
+      } else {
+        Get.snackbar(
+          'Restore Result',
+          'No active subscription found for this account.',
+        );
+      }
     } catch (e) {
       Get.snackbar('Restore Error', 'Failed to restore purchases: $e');
+    } finally {
       isLoading.value = false;
     }
   }
 
   // Private listener for purchase stream updates
-  Future<void> _onPurchaseUpdate(List<PurchaseDetails> purchaseDetailsList) async {
+  Future<void> _onPurchaseUpdate(
+    List<PurchaseDetails> purchaseDetailsList,
+  ) async {
     for (var purchase in purchaseDetailsList) {
       if (purchase.status == PurchaseStatus.pending) {
         // Show loading indicator
@@ -194,15 +235,17 @@ class IapService extends GetxService {
         if (purchase.pendingCompletePurchase) {
           await _iap.completePurchase(purchase);
         }
-      } else if (purchase.status == PurchaseStatus.purchased || purchase.status == PurchaseStatus.restored) {
+      } else if (purchase.status == PurchaseStatus.purchased ||
+          purchase.status == PurchaseStatus.restored) {
         // Send receipt to Backend verification endpoint
         final bool verified = await _verifyReceiptWithBackend(purchase);
         if (verified) {
           isPremium.value = true;
           await checkPremiumStatus();
+          Get.back(); // Automatically close the membership screen
           Get.snackbar('Success', 'Premium subscription activated!');
         } else {
-          Get.snackbar('Verification Failed', 'Unable to verify payment with the server. Please contact support.');
+          // If it failed, don't show the generic message if _verifyReceiptWithBackend already showed one
         }
         isLoading.value = false;
 
@@ -229,8 +272,13 @@ class IapService extends GetxService {
       if (response.statusCode == 200 && response.data['success'] == true) {
         return true;
       }
+    } on DioException catch (e) {
+      print('Backend receipt validation error: $e');
+      final msg = e.response?.data?['message'] ?? e.message;
+      Get.snackbar('Verification Failed', msg, snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
       print('Backend receipt validation error: $e');
+      Get.snackbar('Verification Failed', e.toString(), snackPosition: SnackPosition.BOTTOM);
     }
     return false;
   }
@@ -242,22 +290,43 @@ class IapService extends GetxService {
         ApiEndpoints.verifyPurchase,
         data: {
           'productId': plan['product_id'],
-          'purchaseToken': 'mock_sandbox_token_${DateTime.now().millisecondsSinceEpoch}',
+          'purchaseToken':
+              'mock_sandbox_token_${DateTime.now().millisecondsSinceEpoch}',
           'platform': Platform.isIOS ? 'IOS' : 'ANDROID',
-          'originalTransactionId': 'mock_tx_${DateTime.now().millisecondsSinceEpoch}',
+          'originalTransactionId':
+              'mock_tx_${DateTime.now().millisecondsSinceEpoch}',
         },
       );
 
       if (response.statusCode == 200 && response.data['success'] == true) {
         isPremium.value = true;
         await checkPremiumStatus();
-        Get.snackbar('Mock Success', 'Premium subscription activated via developer mock verification!');
+        Get.back(); // Automatically close the membership screen
+        Get.snackbar(
+          'Mock Success',
+          'Premium subscription activated via developer mock verification!',
+        );
       } else {
-        Get.snackbar('Verification Failed', 'Mock purchase validation failed on backend.');
+        Get.snackbar(
+          'Verification Failed',
+          'Mock purchase validation failed on backend.',
+        );
       }
+    } on DioException catch (e) {
+      print('Mock validation error: $e');
+      final msg = e.response?.data?['message'] ?? e.message;
+      Get.snackbar(
+        'Error',
+        'Mock validation failed: $msg',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (e) {
       print('Mock validation error: $e');
-      Get.snackbar('Connection Error', 'Failed to reach validation server.');
+      Get.snackbar(
+        'Error',
+        'Failed to reach validation server: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       isLoading.value = false;
     }

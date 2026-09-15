@@ -67,10 +67,10 @@ class ReferralController extends GetxController {
     if (referralCode.value.isEmpty) return;
     final msg = shareText.value.isNotEmpty
         ? shareText.value
-        : "Join me on NutriFit for healthy living! Use my code ${referralCode.value} on signup to get a 50 FitPoints bonus! ${shareLink.value}";
+        : "Join me on NutriFit for healthy living! Use my code ${referralCode.value} on signup to get a 20 FitPoints bonus! ${shareLink.value}";
     
     try {
-      Share.share(msg, subject: "Join me on NutriFit & Get 50 FitPoints!");
+      Share.share(msg, subject: "Join me on NutriFit & Get 20 FitPoints!");
     } catch (e) {
       copyReferralCode();
     }
