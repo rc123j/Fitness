@@ -152,10 +152,10 @@ class WelcomeCelebrationSheet extends StatelessWidget {
                 elevation: 4,
               ),
               child: Text(
-                "Explore My Day 1 Meal Plan 🚀",
+                "Activate Free Trial 🚀",
                 style: GoogleFonts.outfit(
                   color: Colors.black,
-                  fontSize: 15,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),

@@ -77,8 +77,6 @@ class ProfileView extends GetView<ProfileController> {
                                   const SizedBox(height: 10),
                                   buildUserInfoCard(),
                                   const SizedBox(height: 20),
-                                  buildStatsGridBox(),
-                                  const SizedBox(height: 20),
                                   buildPremiumCard(),
                                   const SizedBox(height: 20),
                                   buildOptionsList(),
@@ -222,131 +220,41 @@ class ProfileView extends GetView<ProfileController> {
           const SizedBox(height: 10),
 
           /// Streak Container Badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xffFF7A00).withOpacity(0.08),
-              borderRadius: BorderRadius.circular(100),
-              border: Border.all(
-                color: const Color(0xffFF7A00).withOpacity(0.30),
-                width: 0.8,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text("🔥", style: TextStyle(fontSize: 12)),
-                const SizedBox(width: 6),
-                Text(
-                  "${controller.streakCount.value} Days Streak",
-                  style: GoogleFonts.inter(
-                    color: const Color(0xffFF7A00),
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
+          GestureDetector(
+            onTap: () => Get.toNamed('/streak-details'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xffFF7A00).withOpacity(0.08),
+                borderRadius: BorderRadius.circular(100),
+                border: Border.all(
+                  color: const Color(0xffFF7A00).withOpacity(0.30),
+                  width: 0.8,
                 ),
-              ],
-            ),
-          ),
-        ],
-      );
-    });
-  }
-
-  /// ----------------------------------------------------
-  /// 2. STATS GRID BOX
-  /// ----------------------------------------------------
-  Widget buildStatsGridBox() {
-    return Obx(() {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: const Color(0xff0B0817).withOpacity(0.55),
-          border: Border.all(color: Colors.white.withOpacity(0.04), width: 1.0),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            buildSingleStatItem(
-              icon: Icons.fitness_center_rounded,
-              value: "${controller.workoutsCount.value}",
-              label: "Workouts",
-              color: const Color(0xffB100FF),
-            ),
-            buildStatDivider(),
-            buildSingleStatItem(
-              icon: Icons.restaurant_rounded,
-              value: "${controller.mealsLogged.value}",
-              label: "Meals Logged",
-              color: const Color(0xffFF00E5),
-            ),
-            buildStatDivider(),
-            buildSingleStatItem(
-              icon: Icons.scale_rounded,
-              value: "${controller.weightChange.value.toStringAsFixed(1)} kg",
-              label: "Weight Lost",
-              color: const Color(0xffFF7A00),
-            ),
-            buildStatDivider(),
-            buildSingleStatItem(
-              icon: Icons.emoji_events_rounded,
-              value: controller.fitPoints.value.toString().replaceAllMapped(
-                RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                (Match m) => '${m[1]},',
               ),
-              label: "FitPoints",
-              color: const Color(0xff00FF87),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text("🔥", style: TextStyle(fontSize: 12)),
+                  const SizedBox(width: 6),
+                  Text(
+                    "${controller.streakCount.value} Days Streak",
+                    style: GoogleFonts.inter(
+                      color: const Color(0xffFF7A00),
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       );
     });
   }
 
-  Widget buildStatDivider() {
-    return Container(
-      height: 35,
-      width: 0.8,
-      color: Colors.white.withOpacity(0.06),
-    );
-  }
 
-  Widget buildSingleStatItem({
-    required IconData icon,
-    required String value,
-    required String label,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color, size: 14),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              color: Colors.white.withOpacity(0.40),
-              fontSize: 8,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   /// ----------------------------------------------------
   /// 3. PREMIUM CARD

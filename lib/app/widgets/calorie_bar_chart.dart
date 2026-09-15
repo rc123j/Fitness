@@ -98,8 +98,7 @@ class CalorieBarChartPainter extends CustomPainter {
         Paint glowPaint = Paint()
           ..color =
               (isToday ? const Color(0xffFF7A00) : const Color(0xffB100FF))
-                  .withOpacity(0.3)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8.0);
+                  .withOpacity(0.15); // Reduced opacity since blur is removed
 
         canvas.drawRRect(
           RRect.fromRectAndRadius(barRect, const Radius.circular(6)),
@@ -131,56 +130,7 @@ class CalorieBarChartPainter extends CustomPainter {
       );
     }
 
-    // Draw glowing daily intake smooth curved trendline overlay
-    if (loggedPoints.length >= 2) {
-      Path linePath = Path();
-      Offset firstPt = loggedPoints.first['offset'] as Offset;
-      linePath.moveTo(firstPt.dx, firstPt.dy);
-
-      for (int i = 0; i < loggedPoints.length - 1; i++) {
-        Offset p1 = loggedPoints[i]['offset'] as Offset;
-        Offset p2 = loggedPoints[i + 1]['offset'] as Offset;
-
-        double midX = (p1.dx + p2.dx) / 2;
-        linePath.cubicTo(midX, p1.dy, midX, p2.dy, p2.dx, p2.dy);
-      }
-
-      Paint lineGlow = Paint()
-        ..color = const Color(0xff00E5FF).withOpacity(0.35)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 4.0
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
-
-      Paint linePaint = Paint()
-        ..shader = const LinearGradient(
-          colors: [Color(0xff00E5FF), Color(0xffFFD166)],
-        ).createShader(Rect.fromLTWH(0, 0, w, h))
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round;
-
-      canvas.drawPath(linePath, lineGlow);
-      canvas.drawPath(linePath, linePaint);
-    }
-
-    // Draw glowing node dots at each logged point
-    for (int i = 0; i < loggedPoints.length; i++) {
-      Offset pt = loggedPoints[i]['offset'] as Offset;
-      bool isToday = loggedPoints[i]['isToday'] == true;
-
-      Paint nodeGlow = Paint()
-        ..color = (isToday ? const Color(0xffFFD166) : const Color(0xff00E5FF)).withOpacity(0.6)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
-
-      Paint nodeDot = Paint()
-        ..color = isToday ? const Color(0xffFFD166) : Colors.white;
-
-      canvas.drawCircle(pt, 5.0, nodeGlow);
-      canvas.drawCircle(pt, 3.0, nodeDot);
-    }
+    // Removed glowing daily intake smooth curved trendline overlay as requested
   }
 
   @override

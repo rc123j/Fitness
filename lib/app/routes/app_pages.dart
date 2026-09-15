@@ -49,6 +49,8 @@ import '../modules/chat/bindings/chat_binding.dart';
 import '../modules/chat/views/chat_view.dart';
 import '../modules/referral/bindings/referral_binding.dart';
 import '../modules/referral/views/referral_view.dart';
+import '../modules/streak/bindings/streak_binding.dart';
+import '../modules/streak/views/streak_details_view.dart';
 
 part 'app_routes.dart';
 
@@ -192,6 +194,11 @@ class AppPages {
       name: _Paths.REFERRAL,
       page: () => const ReferralView(),
       binding: ReferralBinding(),
+    ),
+    GetPage(
+      name: _Paths.STREAK_DETAILS,
+      page: () => const StreakDetailsView(),
+      binding: StreakBinding(),
     ),
   ];
 }

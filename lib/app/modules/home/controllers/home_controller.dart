@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../services/api_client.dart';
 import '../../../services/api_endpoints.dart';
+import '../../../services/auth_service.dart';
 import '../../main_navigation/controllers/main_navigation_controller.dart';
 import '../views/weight_checkin_dialog.dart';
 import '../views/welcome_celebration_sheet.dart';
@@ -67,6 +68,12 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    // Immediately pre-populate name from cache so the greeting never shows
+    // "Hey, Member!" while the network call is in flight.
+    final cached = Get.find<AuthService>().cachedUserName;
+    if (cached.isNotEmpty) userName.value = cached;
+
     fetchProfile();
 
     // Home is kept alive inside an IndexedStack, so it never rebuilds/
@@ -115,6 +122,9 @@ class HomeController extends GetxController {
       final nutRes = results[2] as Response?;
       final progRes = results[3] as Response?;
 
+      // If controller was disposed during await (logout / account delete), bail.
+      if (isClosed) return;
+
       // 1. Process member profile
       if (profileRes?.data != null && profileRes!.data is Map) {
         final data = profileRes.data;
@@ -123,7 +133,10 @@ class HomeController extends GetxController {
 
         if (profile != null && profile['user'] != null) {
           final user = profile['user'];
-          userName.value = '${user['first_name']} ${user['last_name']}';
+          final fullName = '${user['first_name']} ${user['last_name']}';
+          userName.value = fullName;
+          // Persist so next launch shows it immediately without a network round-trip.
+          Get.find<AuthService>().setCachedUserName(fullName);
           memberCode.value = profile['member_code'] ?? '';
           goalName.value = profile['goal']?['goal_name'] ?? '';
           final rawGoal = goalName.value;
@@ -258,6 +271,7 @@ class HomeController extends GetxController {
         final bOrder = mealDisplayOrder[b['meal_id'] as int] ?? 99;
         return aOrder.compareTo(bOrder);
       });
+      if (isClosed) return;
       homeMeals.value = tempHomeMeals;
 
       // 4. Process progress logs history
@@ -329,27 +343,35 @@ class HomeController extends GetxController {
     } catch (_) {
       // Keep defaults
     } finally {
-      isLoading.value = false;
-      _checkAndShowWelcomeCelebration();
+      if (!isClosed) isLoading.value = false;
+      if (!isClosed) _checkAndShowWelcomeCelebration();
     }
   }
 
   // Check and trigger Welcome Celebration Bottom Sheet for new users
-  void _checkAndShowWelcomeCelebration() {
+  void _checkAndShowWelcomeCelebration() async {
     try {
       final storage = GetStorage();
       final String userKey = memberCode.value.isNotEmpty ? memberCode.value : 'new_user';
-      final String storageKey = 'has_seen_welcome_$userKey';
-      final bool hasSeen = storage.read(storageKey) ?? false;
+      final String todayDate = DateTime.now().toIso8601String().split('T')[0];
+      final String storageKey = 'has_seen_welcome_${userKey}_$todayDate';
+      final bool hasSeenToday = storage.read(storageKey) ?? false;
 
-      if (!hasSeen) {
+      if (!hasSeenToday) {
+        // Check subscription status before showing
+        try {
+          final subRes = await Get.find<ApiClient>().get(ApiEndpoints.subscriptionStatus);
+          final isPremium = subRes.data['is_premium'] ?? false;
+          if (isPremium) return; // Do not show if they already activated trial/premium
+        } catch (_) {}
+
         storage.write(storageKey, true);
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (Get.context != null) {
             WelcomeCelebrationSheet.show(
               Get.context!,
               fitPoints: fitPoints.value > 0 ? fitPoints.value : 20,
-              onExplorePressed: () => Get.find<MainNavigationController>().changeTab(1),
+              onExplorePressed: () => Get.toNamed('/membership'),
             );
           }
         });

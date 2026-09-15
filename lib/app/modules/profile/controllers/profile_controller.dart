@@ -19,11 +19,7 @@ class ProfileController extends GetxController {
   final fitPoints = 0.obs;
   final currentLevel = ''.obs;
   final streakCount = 0.obs;
-
-  // Stats
-  final workoutsCount = 0.obs;
-  final mealsLogged = 0.obs;
-  final weightChange = 0.0.obs;
+  final longestStreak = 0.obs;
 
   // Preferences
   final isMetric = true.obs;
@@ -51,6 +47,8 @@ class ProfileController extends GetxController {
       goalName.value = profile['goal']?['goal_name'] ?? '';
       currentLevel.value = profile['wallet']?['current_level'] ?? 'Bronze';
       fitPoints.value = profile['wallet']?['fit_points'] ?? 0;
+      streakCount.value = profile['wallet']?['current_streak'] ?? 0;
+      longestStreak.value = profile['wallet']?['longest_streak'] ?? 0;
     } on DioException catch (_) {
       // Keep defaults
     } catch (_) {

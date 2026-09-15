@@ -11,6 +11,7 @@ class AuthService extends GetxService {
   static const _userEmailKey = 'user_email';
   static const _userRoleKey = 'user_role';
   static const _onboardingDoneKey = 'onboarding_done';
+  static const _cachedUserNameKey = 'cached_user_name';
 
   String? get accessToken => _storage.read(_accessTokenKey);
   String? get refreshToken => _storage.read(_refreshTokenKey);
@@ -19,6 +20,8 @@ class AuthService extends GetxService {
   String? get userRole => _storage.read(_userRoleKey);
   bool get isLoggedIn => accessToken != null;
   bool get isOnboardingDone => _storage.read(_onboardingDoneKey) ?? false;
+  String get cachedUserName => _storage.read(_cachedUserNameKey) ?? '';
+  void setCachedUserName(String name) => _storage.write(_cachedUserNameKey, name);
 
   void saveSession({
     required String accessToken,
@@ -51,6 +54,7 @@ class AuthService extends GetxService {
     await _storage.remove(_userEmailKey);
     await _storage.remove(_userRoleKey);
     await _storage.remove(_onboardingDoneKey);
+    await _storage.remove(_cachedUserNameKey);
     await _storage.remove('_reg_success_msg');
   }
 

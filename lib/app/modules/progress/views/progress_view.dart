@@ -7,6 +7,7 @@ import '../controllers/progress_controller.dart';
 import '../../main_navigation/controllers/main_navigation_controller.dart';
 import '../../meal/views/nutrition_history_view.dart';
 import '../../meal/bindings/meal_binding.dart';
+import '../../../services/iap_service.dart';
 import '../../../widgets/app_shimmer.dart';
 import '../../../widgets/scroll_nav_bar_binder.dart';
 import '../../../widgets/calorie_bar_chart.dart';
@@ -132,7 +133,15 @@ class ProgressView extends GetView<ProgressController> {
                                     const SizedBox(height: 24),
                                     _buildAnalyticsTabs(),
                                     const SizedBox(height: 24),
-                                    _buildStartingSnapshot(),
+                                    Obx(() {
+                                      final isPremium = Get.find<IapService>().isPremium.value;
+                                      final day = controller.currentDay.value;
+                                      final isLocked = !isPremium && day > 1;
+                                      return _buildLockedSection(
+                                        isLocked: isLocked,
+                                        child: _buildStartingSnapshot(),
+                                      );
+                                    }),
                                     // const SizedBox(height: 32),
                                     // _buildTransformationGallery(),
                                   ],
@@ -154,65 +163,82 @@ class ProgressView extends GetView<ProgressController> {
     );
   }
 
-  Widget _buildLockedState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.lock_outline_rounded,
-              color: Color(0xffB100FF),
-              size: 64,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              "Journey Locked",
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              "Activate your personalized 30-day diet plan to unlock your transformation dashboard.",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 16,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xffB100FF),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
+  /// Wraps a progress section with a lock overlay when the user is
+  /// on Day 2+ without a premium subscription.
+  Widget _buildLockedSection({required bool isLocked, required Widget child}) {
+    return Stack(
+      children: [
+        child,
+        if (isLocked)
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xff0D091B).withOpacity(0.92),
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: const Color(0xffB100FF).withOpacity(0.35),
+                    width: 1.5,
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              onPressed: () {
-                // Navigate to home or plan purchase
-                Get.offAllNamed('/home');
-              },
-              child: Text(
-                "Activate Plan",
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xffB100FF).withOpacity(0.15),
+                        ),
+                        child: const Icon(
+                          Icons.lock_outline_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: () => Get.toNamed('/membership'),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 22,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xffB100FF),
+                                Color(0xffFF00E5),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(50),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xffB100FF).withOpacity(0.4),
+                                blurRadius: 14,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            "Unlock Full Plan 🔓",
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+      ],
     );
   }
 
@@ -569,56 +595,69 @@ class ProgressView extends GetView<ProgressController> {
         const SizedBox(height: 20),
         // ── Tab content ───────────────────────────────────────────────────
         Obx(() {
+          final isPremium = Get.find<IapService>().isPremium.value;
+          final day = controller.currentDay.value;
+          final isLocked = !isPremium && day > 1;
+
           switch (controller.selectedTab.value) {
             case 0:
-              return Column(
-                children: [
-                  _buildTodayNutritionCard(),
-                  const SizedBox(height: 16),
-                  _buildStreakAndTipCards(),
-                ],
+              return _buildLockedSection(
+                isLocked: isLocked,
+                child: Column(
+                  children: [
+                    _buildTodayNutritionCard(),
+                    const SizedBox(height: 16),
+                    _buildStreakAndTipCards(),
+                  ],
+                ),
               );
             case 1:
-              return Column(
-                children: [
-                  _buildWeeklyCalorieChart(),
-                  const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () => Get.toNamed('/progress-photos'),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
-                        'assets/progress/progress_images.webp',
-                        width: double.infinity,
-                        fit: BoxFit.fitWidth,
-                        errorBuilder: (context, error, stackTrace) {
-                          return AspectRatio(
-                            aspectRatio: 1.5,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.04),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.08),
+              return _buildLockedSection(
+                isLocked: isLocked,
+                child: Column(
+                  children: [
+                    _buildWeeklyCalorieChart(),
+                    const SizedBox(height: 16),
+                    GestureDetector(
+                      onTap: () => Get.toNamed('/progress-photos'),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset(
+                          'assets/progress/progress_images.webp',
+                          width: double.infinity,
+                          fit: BoxFit.fitWidth,
+                          errorBuilder: (context, error, stackTrace) {
+                            return AspectRatio(
+                              aspectRatio: 1.5,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.04),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.08),
+                                  ),
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.broken_image_outlined,
+                                    color: Colors.white30,
+                                    size: 28,
+                                  ),
                                 ),
                               ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.broken_image_outlined,
-                                  color: Colors.white30,
-                                  size: 28,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               );
             case 2:
-              return _buildWeightTracker();
+              return _buildLockedSection(
+                isLocked: isLocked,
+                child: _buildWeightTracker(),
+              );
             default:
               return const SizedBox.shrink();
           }
@@ -667,10 +706,8 @@ class ProgressView extends GetView<ProgressController> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Stack(
-            children: [
+        child: Stack(
+          children: [
               Positioned.fill(
                 child: CustomPaint(painter: TodayNutritionBgPainter()),
               ),
@@ -814,8 +851,7 @@ class ProgressView extends GetView<ProgressController> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildMacroLegendItem(

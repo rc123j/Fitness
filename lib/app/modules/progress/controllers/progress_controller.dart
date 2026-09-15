@@ -229,9 +229,9 @@ class ProgressController extends GetxController {
               if (cal >= minimumRequiredCalories && cal <= maximumAllowedCalories) {
                 adherent = true;
                 daysAdherent++;
-                if (!streakBroken) streakCounter++;
+                streakCounter++;
               } else {
-                streakBroken = true;
+                streakCounter = 0;
               }
               evaluatedDays++;
             }
