@@ -131,7 +131,9 @@ class MembershipView extends GetView<MembershipController> {
                                   ),
                                 )
                               : Text(
-                                  "Start 30-Day Free Trial  🚀",
+                                  Get.find<IapService>().hasPastSubscription.value 
+                                      ? "Unlock Premium Plan  🚀"
+                                      : "Start 30-Day Free Trial  🚀",
                                   style: GoogleFonts.outfit(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -327,7 +329,11 @@ class MembershipView extends GetView<MembershipController> {
   }
 
   String? getBadge(String duration) {
-    if (duration == 'MONTHLY') return '30 DAYS FREE TRIAL';
+    if (duration == 'MONTHLY') {
+      return Get.find<IapService>().hasPastSubscription.value
+          ? 'PREMIUM ACCESS'
+          : '30 DAYS FREE TRIAL';
+    }
     if (duration == 'ANNUAL') return 'BEST VALUE';
     if (duration == 'QUARTERLY') return 'POPULAR';
     if (duration == 'LIFETIME') return 'BEST DEAL';

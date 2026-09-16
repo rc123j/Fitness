@@ -21,6 +21,7 @@ class IapService extends GetxService {
   final activePlanName = ''.obs;
   final availablePlans = <Map<String, dynamic>>[].obs;
   final isLoading = false.obs;
+  final hasPastSubscription = false.obs; // Tracks if user ever had a subscription (even if expired)
 
   Future<IapService> init() async {
     // 1. Listen to native purchase update stream
@@ -58,6 +59,7 @@ class IapService extends GetxService {
       if (response.statusCode == 200) {
         final isPrem = response.data['is_premium'] as bool;
         isPremium.value = isPrem;
+        hasPastSubscription.value = response.data['has_past_subscription'] ?? false;
 
         if (isPrem && response.data['subscription'] != null) {
           final sub = response.data['subscription'];
@@ -176,9 +178,15 @@ class IapService extends GetxService {
           plan['store_product'] as ProductDetails?;
 
       if (productDetails == null) {
-        // Developer sandbox fallback: If running on an emulator with no native billing connection,
-        // simulate the purchase validation directly with a mock receipt token
-        await _mockVerifyWithBackend(plan);
+        // Store billing is not available on this device (e.g. emulator, no Play Store account).
+        // NEVER auto-activate in this case — real users must go through the App Store / Google Play.
+        isLoading.value = false;
+        Get.snackbar(
+          'Store Unavailable',
+          'Google Play / App Store billing is not available on this device. Please use a real device with a store account to subscribe.',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 4),
+        );
         return;
       }
 

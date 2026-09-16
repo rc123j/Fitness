@@ -258,7 +258,7 @@ class _BookingDateTimeViewState extends State<BookingDateTimeView> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Confirm Booking",
@@ -266,14 +266,6 @@ class _BookingDateTimeViewState extends State<BookingDateTimeView> {
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        "₹$price • $duration",
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],

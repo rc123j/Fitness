@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../controllers/booking_controller.dart';
 import '../../../widgets/premium_layout_components.dart';
+import '../../../services/iap_service.dart';
+import '../../home/controllers/home_controller.dart';
 import 'booking_date_time_view.dart';
 import 'my_sessions_view.dart';
 
@@ -18,8 +20,67 @@ class BookingView extends GetView<BookingController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xff06010F),
-      bottomNavigationBar: _buildBottomBookButton(),
+      bottomNavigationBar: Obx(() {
+        final isPremium = Get.find<IapService>().isPremium.value;
+        final currentDay = Get.find<HomeController>().planDayNumber.value;
+        final isLocked = !isPremium && currentDay > 1;
+        if (isLocked) return const SizedBox.shrink();
+
+        return _buildBottomBookButton();
+      }),
       body: Obx(() {
+        final isPremium = Get.find<IapService>().isPremium.value;
+        final currentDay = Get.find<HomeController>().planDayNumber.value;
+        final isLocked = !isPremium && currentDay > 1;
+
+        if (isLocked) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.lock_rounded, color: Colors.white70, size: 64),
+                const SizedBox(height: 16),
+                Text(
+                  "Expert Booking Locked",
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Start your free trial to unlock 1-on-1 expert coaching.",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(color: Colors.white70, fontSize: 14),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () => Get.toNamed('/membership'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffFF00E5),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 14,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    "Unlock Now",
+                    style: GoogleFonts.outfit(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
         final expert = controller.currentExpert;
         if (expert.isEmpty) {
           return const Center(
@@ -267,26 +328,6 @@ class BookingView extends GetView<BookingController> {
               ),
             ),
 
-            /// 2. FLOATING FIXED BACK BUTTON
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 10,
-              left: 16,
-              child: GestureDetector(
-                onTap: () => Get.back(),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back,
-                    color: Colors.black,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ),
           ],
         );
       }),
@@ -733,7 +774,7 @@ class BookingView extends GetView<BookingController> {
                 "About Me",
                 style: GoogleFonts.outfit(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -742,7 +783,7 @@ class BookingView extends GetView<BookingController> {
                 expert["aboutText"]!,
                 style: GoogleFonts.inter(
                   color: Colors.white.withOpacity(0.55),
-                  fontSize: 10,
+                  fontSize: 13,
                   height: 1.4,
                 ),
               ),
@@ -1221,16 +1262,30 @@ class BookingView extends GetView<BookingController> {
                   : 'N/A';
               final status = apt['status'] as String? ?? 'PENDING';
 
-              final resolvedEndTime = endTime ?? (startTime != null ? startTime.add(const Duration(minutes: 45)) : null);
-              final bool isExpired = resolvedEndTime != null && DateTime.now().isAfter(resolvedEndTime);
-              final displayStatus = isExpired && (status == 'PENDING' || status == 'APPROVED') ? 'TIME OVER' : status;
+              final resolvedEndTime =
+                  endTime ??
+                  (startTime != null
+                      ? startTime.add(const Duration(minutes: 45))
+                      : null);
+              final bool isExpired =
+                  resolvedEndTime != null &&
+                  DateTime.now().isAfter(resolvedEndTime);
+              final displayStatus =
+                  isExpired && (status == 'PENDING' || status == 'APPROVED')
+                  ? 'TIME OVER'
+                  : status;
               final statusColor = displayStatus == 'TIME OVER'
                   ? Colors.white38
-                  : (displayStatus == 'APPROVED' ? const Color(0xff00FF87) : Colors.amber);
+                  : (displayStatus == 'APPROVED'
+                        ? const Color(0xff00FF87)
+                        : Colors.amber);
 
-              final bool canJoinCall = !isExpired &&
+              final bool canJoinCall =
+                  !isExpired &&
                   startTime != null &&
-                  DateTime.now().isAfter(startTime.subtract(const Duration(minutes: 10)));
+                  DateTime.now().isAfter(
+                    startTime.subtract(const Duration(minutes: 10)),
+                  );
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -1304,7 +1359,9 @@ class BookingView extends GetView<BookingController> {
                             child: ElevatedButton(
                               onPressed: () {
                                 final consultantId = consultant['id'];
-                                final idx = controller.experts.indexWhere((e) => e['id'] == consultantId);
+                                final idx = controller.experts.indexWhere(
+                                  (e) => e['id'] == consultantId,
+                                );
                                 if (idx != -1) {
                                   controller.selectedExpertIndex.value = idx;
                                   Get.to(() => const BookingDateTimeView());
@@ -1318,12 +1375,17 @@ class BookingView extends GetView<BookingController> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                ),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.event_available_rounded, size: 14),
+                                  const Icon(
+                                    Icons.event_available_rounded,
+                                    size: 14,
+                                  ),
                                   const SizedBox(width: 6),
                                   Text(
                                     "Book Again",
@@ -1343,11 +1405,15 @@ class BookingView extends GetView<BookingController> {
                                   _showRescheduleDialog(context, apt),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: const Color(0xffFF00E5),
-                                side: const BorderSide(color: Color(0xffFF00E5)),
+                                side: const BorderSide(
+                                  color: Color(0xffFF00E5),
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
                               ),
                               child: Text(
                                 "Reschedule",
@@ -1363,13 +1429,17 @@ class BookingView extends GetView<BookingController> {
                             Expanded(
                               child: ElevatedButton(
                                 onPressed: canJoinCall
-                                    ? () => Get.toNamed('/video-call', arguments: apt)
+                                    ? () => Get.toNamed(
+                                        '/video-call',
+                                        arguments: apt,
+                                      )
                                     : null,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: canJoinCall
                                       ? const Color(0xff00FF87)
                                       : Colors.white.withOpacity(0.06),
-                                  disabledBackgroundColor: Colors.white.withOpacity(0.06),
+                                  disabledBackgroundColor: Colors.white
+                                      .withOpacity(0.06),
                                   foregroundColor: canJoinCall
                                       ? Colors.black
                                       : Colors.white38,
@@ -1377,7 +1447,9 @@ class BookingView extends GetView<BookingController> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,

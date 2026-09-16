@@ -750,7 +750,9 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "Start your 30-Day Free Trial",
+                        Get.find<IapService>().hasPastSubscription.value
+                            ? "Unlock Premium Plan"
+                            : "Start your 30-Day Free Trial",
                         style: GoogleFonts.inter(
                           color: Colors.white70,
                           fontSize: 12,
@@ -812,23 +814,27 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: const Color(0xff00FF87).withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: const Color(0xff00FF87).withOpacity(0.4), width: 1),
-                              ),
-                              child: Text(
-                                "FREE TRIAL",
-                                style: GoogleFonts.outfit(
-                                  color: const Color(0xff00FF87),
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.5,
+                            Obx(() {
+                              final isPremium = Get.find<IapService>().isPremium.value;
+                              if (!isPremium) return const SizedBox.shrink();
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xff00FF87).withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: const Color(0xff00FF87).withOpacity(0.4), width: 1),
                                 ),
-                              ),
-                            ),
+                                child: Text(
+                                  "FREE TRIAL",
+                                  style: GoogleFonts.outfit(
+                                    color: const Color(0xff00FF87),
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                              );
+                            }),
                           ],
                         ),
 
@@ -856,21 +862,22 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                             ),
                             const SizedBox(height: 2),
                             Obx(() {
-                              final expiry = Get.find<IapService>().premiumExpiry.value;
-                              final daysLeft = expiry != null
-                                  ? expiry.difference(DateTime.now()).inDays + 1
-                                  : null;
-                              return Text(
-                                daysLeft != null
-                                    ? "$daysLeft days left in free trial ⏳"
-                                    : "Keep up the great pace! ⚡",
-                                style: GoogleFonts.inter(
-                                  color: Colors.white.withOpacity(0.85),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              );
-                            }),
+                               final isPremium = Get.find<IapService>().isPremium.value;
+                               final expiry = Get.find<IapService>().premiumExpiry.value;
+                               final daysLeft = expiry != null
+                                   ? expiry.difference(DateTime.now()).inDays + 1
+                                   : null;
+                               return Text(
+                                 isPremium && daysLeft != null
+                                     ? "$daysLeft days left in free trial ⏳"
+                                     : "Keep up the great pace! ⚡",
+                                 style: GoogleFonts.inter(
+                                   color: Colors.white.withOpacity(0.85),
+                                   fontSize: 11,
+                                   fontWeight: FontWeight.w500,
+                                 ),
+                               );
+                             }),
                           ],
                         ),
 
@@ -1582,7 +1589,9 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          "30-Day Free Trial • Cancel Anytime",
+                          Get.find<IapService>().hasPastSubscription.value
+                              ? "Full Access • Cancel Anytime"
+                              : "30-Day Free Trial • Cancel Anytime",
                           style: GoogleFonts.inter(
                             color: Colors.white.withOpacity(0.8),
                             fontSize: 12,
@@ -1621,7 +1630,9 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Start 30-Day Free Trial  🚀",
+                            Get.find<IapService>().hasPastSubscription.value
+                                ? "Unlock Premium Plan  🚀"
+                                : "Start 30-Day Free Trial  🚀",
                             style: GoogleFonts.outfit(
                               color: const Color(0xff3E2000),
                               fontSize: 18,
